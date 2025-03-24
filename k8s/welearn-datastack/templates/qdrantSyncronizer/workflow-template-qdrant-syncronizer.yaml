@@ -1,0 +1,110 @@
+{{- with .Values.qdrantSyncronizer }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}-run-node
+spec:
+  entrypoint: all
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  {{- if $.Values.common.runOnGpu }}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: gpu-node
+            operator: In
+            values:
+            - "true"
+  tolerations:
+  - key: "Gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+  {{- end }}
+  templates:
+    - name: document-syncronize-batch
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: qdrant_grpc_port
+            default: {{ $.Values.common.config.qdrant_grpc_port }}
+          - name: qdrant_http_port
+            default: {{ $.Values.common.config.qdrant_http_port }}
+          - name: qdrant_url
+            default: {{ $.Values.common.config.qdrant_url }}
+          - name: qdrant_prefers_grpc
+            default: "True"
+          - name: qdrant_wait
+            default: "False"
+          - name: qdrant_chunk_size
+            default: 1000
+          - name: log_level
+            default: "INFO"
+          - name: urls_input_filename
+          - name: urls_directory
+            default: urls
+          - name: memory
+            default: {{ .workflowTemplates.runNode.requests.memory }}
+          - name: qdrant_timeout
+            default: 60
+
+        artifacts:
+          - name: batch_ids_csv
+            path: >-
+              {{ printf "%s/%s/{{inputs.parameters.urls_directory}}" $.Values.common.artifactRoot $.Values.common.artifactInputFolder }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: ARTIFACT_ROOT
+            value: {{ $.Values.common.artifactRoot }}
+          - name: IS_LOCAL
+            value: "0"
+          - name: LOG_LEVEL
+            value: >-
+              {{ print "{{inputs.parameters.log_level}}" }}
+          - name: ARTIFACT_ID_URL_CSV_NAME
+            value: >-
+              {{ print "{{inputs.parameters.urls_directory}}/{{inputs.parameters.urls_input_filename}}" }}
+          - name: QDRANT_URL
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_url}}" }}
+          - name: QDRANT_GRPC_PORT
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_grpc_port}}" }}
+          - name: QDRANT_HTTP_PORT
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+          - name: QDRANT_PREFERS_GRPC
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_prefers_grpc}}" }}
+          - name: QDRANT_WAIT
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_wait}}" }}
+          - name: QDRANT_CHUNK_SIZE
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_chunk_size}}" }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.QdrantSyncronizer.qdrant_syncronizer
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+
+{{- end }}

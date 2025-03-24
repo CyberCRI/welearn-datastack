@@ -1,0 +1,89 @@
+{{- with .Values.documentCollectorHub }}
+{{- if and (.cronWorkflowTemplate.wikipedia.enabled) ($.Values.cronWorkflows.enabled) }}
+kind: CronWorkflow
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: {{ printf "%s-wikipedia" .name }}
+spec:
+  workflowSpec:
+    {{- if $.Values.common.runOnGpu }}
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+            - key: gpu-node
+              operator: In
+              values:
+              - "true"
+    tolerations:
+    - key: "Gpu"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+    {{- end }}
+    securityContext:
+      {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
+    templates:
+      - name: all
+        inputs:
+          parameters:
+          - name: csv_path
+            value: /etc/welearndatastack/collectors
+          - name: scraping_service_address
+            value: https://scraper.k8s.lp-i.dev/api/v1/scraper/run
+          - name: parallelism_treshold
+            value: '10000'
+          - name: parallelism_url_max
+            value: '2'
+          - name: retrieval_mode
+            enum: ["NEW_MODE", "UPDATE_MODE"]
+            value: "UPDATE_MODE"
+          - name: pick_corpus_name
+            value: 'wikipedia'
+          - name: pick_qty_max
+            value: '3000'
+        steps:
+          - - name: generate-batch-urls
+              templateRef:
+                name: {{ .name }}
+                template: generate-batch-urls
+              arguments:
+                parameters:
+                  - name: parallelism_treshold
+                    value: {{ print "{{inputs.parameters.parallelism_treshold}}" | quote }}
+                  - name: parallelism_url_max
+                    value: {{ print "{{inputs.parameters.parallelism_url_max}}" | quote }}
+                  - name: retrieval_mode
+                    value: {{ print "{{inputs.parameters.retrieval_mode}}" | quote }}
+                  - name: pick_corpus_name
+                    value: {{ print "{{inputs.parameters.pick_corpus_name}}" | quote }}
+                  - name: pick_qty_max
+                    value: {{ print "{{inputs.parameters.pick_qty_max}}" | quote }}
+          - - name: data-process
+              templateRef:
+                name: {{ .name }}
+                template: process-data
+              arguments:
+                parameters:
+                  - name: scraping_service_address
+                    value: {{ print "{{inputs.parameters.scraping_service_address}}" | quote }}
+                  - name: csv_path
+                    value: {{ print "{{inputs.parameters.csv_path}}" | quote }}
+                  - name: urls_input_filename
+                    value: {{ print "{{item}}_batch_urls.json" | quote }}
+                  - name: load_data_memory
+                    value: {{ .workflowTemplates.runNode.requests.memory | quote }}
+                artifacts:
+                  - name: batch_url_list
+                    from: {{ print "{{steps.generate-batch-urls.outputs.artifacts.url_list}}" | quote }}
+              withSequence:
+                count: >-
+                  {{ print "{{steps.generate-batch-urls.outputs.parameters.url_batches_count}}" }}
+
+    entrypoint: all
+    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  schedules:  [{{ .cronWorkflowTemplate.wikipedia.schedule }}]
+{{- end }}
+{{- end }}

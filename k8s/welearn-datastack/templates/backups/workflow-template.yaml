@@ -1,0 +1,47 @@
+{{- with .Values.backups }}
+{{- if .enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}
+spec:
+  entrypoint: backup-postgres
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  templates:
+    - name: backup-postgres
+      steps:
+      - - name: backup
+          templateRef:
+            clusterScope: true
+            name: {{ .workflowTemplate.postgresqlBackup.clusterWorkflowTemplate.name }}
+            template: {{ .workflowTemplate.postgresqlBackup.clusterWorkflowTemplate.template }}
+          arguments:
+            parameters:
+            - name: database
+              value: {{ $.Values.common.config.nonSensitive.PG_DATABASE }}
+            - name: storage_container_name
+              value: {{ printf "%s-%s" $.Values.common.environment $.Values.common.config.nonSensitive.PG_DATABASE | replace "_" "-" }}
+            - name: storage_account_name
+              value: {{ .storageAccountName }}
+---
+{{- if and (.cronWorkflowTemplate.postgresqlBackup.enabled) ($.Values.cronWorkflows.enabled) }}
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: {{ .name }}
+spec:
+  schedules: [{{  .cronWorkflowTemplate.postgresqlBackup.schedule }}]
+  workflowSpec:
+    entrypoint: backup-postgres
+    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+    workflowTemplateRef:
+      name: {{ .name }}
+    ttlStrategy:
+      secondsAfterCompletion: 300
+    podGC:
+      strategy: OnPodCompletion
+{{- end }}
+{{- end }}
+{{- end }}

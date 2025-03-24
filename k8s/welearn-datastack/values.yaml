@@ -1,0 +1,289 @@
+image:
+  repository: criprodprod.azurecr.io
+  path: welearn-datastack
+  tag: "{{ .Values.application.revision }}"
+
+cronWorkflows:
+  enabled: false
+
+common:
+  config:
+    nonSensitive:
+      IS_LOCAL: "false"
+      LOG_LEVEL: INFO
+      PG_USER: welearn_datastack
+      PG_DATABASE: welearn_datastack
+      PG_PORT: '5432'
+      PG_DRIVER: postgresql+psycopg2
+      URL_DATASTORE_TABLE_NAME: url_datastore
+      MODELS_PATH_ROOT: '{{ .Values.common.modelsPathRoot }}'
+      EMBEDDING_MODEL_EN: '{{ .Values.common.embeddingModelEn }}'
+      EMBEDDING_MODEL_FR: '{{ .Values.common.embeddingModelFr }}'
+      ARTIFACT_INPUT_FOLDER_NAME: '{{ .Values.common.artifactInputFolder }}'
+      ARTIFACT_OUTPUT_FOLDER_NAME: '{{ .Values.common.artifactOutputFolder }}'
+      ARTIFACT_ROOT: '{{ .Values.common.artifactRoot }}'
+      INSTANCE: main
+      RCLONE_DESTINATION_NAME: dest
+      RCLONE_CONFIG_DEST_ENV_AUTH: true
+      RCLONE_CONFIG_DEST_TYPE: azureblob
+      TEAM_EMAIL: welearn@learningplanetinstitute.org
+  embeddingModelFr: sentence-camembert-base
+  embeddingModelEn: all-minilm-l6-v2
+  modelsPathRoot: /models
+  artifactInputFolder: input
+  artifactOutputFolder: output
+  artifactRoot: /tmp
+  workflowRbac:
+    serviceAccountName: workflow
+    executorClusterRoleName: executor
+  runOnGpu: false
+  azureShare:
+    name: samples
+    storageAccountName: criparisprodprodwlbkp
+    mountPath: /etc/welearndatastack/collectors
+    secret:
+      name: azure-share
+  mlModelAzureShare:
+    name: ml-models
+    storageAccountName: criparisprodprodwlbkp
+    mountPath: '{{ .Values.common.modelsPathRoot }}'
+    secret:
+      name: ml-models
+  commonLabels:
+    app.kubernetes.io/part-of: welearn
+    app.kubernetes.io/name: welearn-datastack
+    app.kubernetes.io/managed-by: helm
+    app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
+
+  user: 10000
+  csvDefaultPath: /etc/welearndatastack/collectors/toto.csv
+
+urlCollectors:
+  name: url-collectors
+  config:
+    nonSensitive: {}
+    sensitive: {}
+  resourcesPrefix: url-collectors
+
+  collectorSemaphore:
+    configmapName: collector-semaphore
+    standard:
+      keyName: standard-tokens
+      tokensCount: 3
+    wikipedia:
+      keyName: wikipedia-tokens
+      tokensCount: 1
+
+  commonLabels:
+    app.kubernetes.io/component: url-collectors
+
+  workflowTemplates:
+    collectWikipedia:
+      resources:
+        limits:
+          memory: 400M
+        requests:
+          cpu: 50m
+          memory: 400M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 0 */1 * * *
+    wikipedia:
+      enabled: true
+      schedule: 0 1 * * *
+
+documentCollectorHub:
+  name: document-collector-hub
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: document-collector-hub
+
+  commonLabels:
+    app.kubernetes.io/component: document-collector-hub
+
+  pluginsFolderRoot: /etc/dch/collectors
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 360M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 10 */1 * * *
+    wikipedia:
+      enabled: true
+      schedule: 0 3 * * 1
+
+
+documentVectorizer:
+  name: document-vectorizer
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: document-vectorizer
+
+  commonLabels:
+    app.kubernetes.io/component: document-vectorizer
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 1.35G
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 20 */1 * * *
+    wikipedia:
+      enabled: true
+      schedule: 0 3 * * 1
+
+
+documentClassifier:
+  name: document-classifier
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: document-classifier
+
+  commonLabels:
+    app.kubernetes.io/component: document-classifier
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 20M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 40 */1 * * *
+
+
+keywordExtractor:
+  name: keyword-extractor
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: keyword-extractor
+
+  commonLabels:
+    app.kubernetes.io/component: keyword-extractor
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 20M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 40 */1 * * *
+
+
+qdrantSyncronizer:
+  name: qdrant-synchronizer
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: qdrant-synchronizer
+
+  commonLabels:
+    app.kubernetes.io/component: qdrant-synchronizer
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 170M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 50 */1 * * *
+    wikipedia:
+      enabled: true
+      schedule: 0 3 * * 1
+
+backups:
+  enabled: true
+  name: backups
+  rbac:
+    executorClusterRoleName: executor
+  storageAccountName: criparisprodprodwlbkp
+  cronWorkflowTemplate:
+    postgresqlBackup:
+      enabled: true
+      schedule: "0 0 * * *" # every day at midnight
+  workflowTemplate:
+    postgresqlBackup:
+      clusterWorkflowTemplate:
+        name: postgres-backuper
+        template: all
+
+
+restore:
+  enabled: false
+  name: restore
+  rbac:
+    executorClusterRoleName: executor
+  storageAccountName: criparisprodprodwlbkp
+  collectorSemaphore:
+    configmapName: collector-semaphore
+    standard:
+      keyName: standard-tokens
+      tokensCount: 3
+    wikipedia:
+      keyName: wikipedia-tokens
+      tokensCount: 1
+  clusterWorkflowTemplates:
+    common:
+      destination_path: /qdrant/snapshots
+      shareName: qdrant-snapshots
+    postgresqlCreate:
+      name: database
+      template: create-db
+    cleanBeforeDownload:
+      name: download-from-blob-storage
+      template: cleanup-before-download
+      parameters:
+        destination_path: "{{ .Values.restore.clusterWorkflowTemplates.common.destination_path }}"
+        shareName: "{{ .Values.restore.clusterWorkflowTemplates.common.shareName }}"
+    downloadFromBlobStorage:
+      name: download-from-blob-storage
+      template: download-from-blob-storage
+      parameters:
+        destination_path: "{{ .Values.restore.clusterWorkflowTemplates.common.destination_path }}"
+        extractedEntityName: collection
+        perlRegexForEntityName: 'collection_[^\/]+'
+        shareName: "{{ .Values.restore.clusterWorkflowTemplates.common.shareName }}"
+    restoreQdrant:
+      name: restore-qdrant
+      template: restore-qdrant
+  config:
+    sensitive: {}
+    nonSensitive: {}

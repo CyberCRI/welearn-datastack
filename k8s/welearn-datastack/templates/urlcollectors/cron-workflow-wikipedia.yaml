@@ -1,0 +1,51 @@
+{{- with .Values.urlCollectors }}
+{{- if and (.cronWorkflowTemplate.wikipedia.enabled) ($.Values.cronWorkflows.enabled) }}
+kind: CronWorkflow
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: {{ printf "%s-wikipedia" .name}}
+spec:
+  schedules: [{{ .cronWorkflowTemplate.wikipedia.schedule }}]
+  workflowSpec:
+    {{- if $.Values.common.runOnGpu }}
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+            - key: gpu-node
+              operator: In
+              values:
+              - "true"
+    tolerations:
+    - key: "Gpu"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+    {{- end }}
+    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+    securityContext:
+      {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
+    entrypoint: all
+    templates:
+      - name: all
+        inputs:
+          parameters:
+            - name: batches_count
+              value: "10"
+        steps:
+          - - name: collect-wikipedia
+              withSequence:
+                count: {{ print "{{inputs.parameters.batches_count}}" | quote }}
+              templateRef:
+                name: {{ .name }}
+                template: collect-wikipedia
+              arguments:
+                  parameters:
+                  - name: batch_id
+                    value: {{ print "{{item}}" | quote }}
+                  - name: nb_batches
+                    value: {{ print "{{inputs.parameters.batches_count}}" | quote }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="https://www.w3.org/2005/Atom">
+  <title>Example Atom Feed</title>
+  <link href="https://www.example.com" rel="self"/>
+  <link rel="alternate" href="https://www.example.com"/>
+  <id>urn:uuid:12345678-1234-5678-1234-567812345678</id>
+  <updated>2023-09-12T00:00:00Z</updated>
+  <author>
+    <name>Your Name</name>
+    <email>your-email@example.com</email>
+  </author>
+
+  <entry>
+    <title>First Entry</title>
+    <link rel="alternate" href="https://www.example.com/entry1"/>
+    <id>urn:uuid:11111111-1111-1111-1111-111111111111</id>
+    <published>2023-09-12T12:00:00Z</published>
+    <updated>2023-09-12T12:00:00Z</updated>
+    <summary>This is the summary of the first entry.</summary>
+    <content type="html">&lt;p&gt;This is the content of the first entry.&lt;/p&gt;</content>
+  </entry>
+
+  <entry>
+    <title>Second Entry</title>
+    <link rel="alternate" href="https://www.example.com/entry2"/>
+    <id>urn:uuid:22222222-2222-2222-2222-222222222222</id>
+    <published>2023-09-13T09:30:00Z</published>
+    <updated>2023-09-13T09:30:00Z</updated>
+    <summary>This is the summary of the second entry.</summary>
+    <content type="html">&lt;p&gt;This is the content of the second entry.&lt;/p&gt;</content>
+  </entry>
+
+  <entry>
+    <title>Third Entry</title>
+    <link rel="alternate"  href="https://www.example.com/entry3"/>
+    <id>urn:uuid:33333333-3333-3333-3333-333333333333</id>
+    <published>2023-09-14T15:45:00Z</published>
+    <updated>2023-09-14T15:45:00Z</updated>
+    <summary>This is the summary of the third entry.</summary>
+    <content type="html">&lt;p&gt;This is the content of the third entry.&lt;/p&gt;</content>
+  </entry>
+
+</feed>

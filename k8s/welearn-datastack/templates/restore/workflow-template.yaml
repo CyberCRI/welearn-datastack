@@ -1,0 +1,91 @@
+{{- with .Values.restore }}
+{{- if .enabled }}
+---
+{{- $workflowConfig := dict }}
+{{- $workflowConfig = merge $workflowConfig .config}}
+{{- $workflowConfig = merge $workflowConfig $.Values.common.config }}
+{{- $configGenerator := dict
+"config" $workflowConfig
+"root" $
+"commonLabels" dict
+"name" .name}}
+
+{{- include "common.config.resources" $configGenerator}}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}
+spec:
+  entrypoint: all
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  templates:
+    - name: restore-postgres
+      steps:
+      - - name: create-db
+          templateRef:
+            clusterScope: true
+            name: {{ .clusterWorkflowTemplates.postgresqlCreate.name }}
+            template: {{ .clusterWorkflowTemplates.postgresqlCreate.template }}
+          arguments:
+            parameters:
+            - name: environmentSecretName
+              value: {{ .name }}
+            - name: environmentConfigmapName
+              value: {{ .name }}
+    - name: restore-qdrant
+      inputs:
+        parameters:
+        - name: files_string_to_download
+
+      steps:
+#      - - name: clean-before-download
+#          templateRef:
+#            clusterScope: true
+#            name: {{ .clusterWorkflowTemplates.cleanBeforeDownload.name }}
+#            template: {{ .clusterWorkflowTemplates.cleanBeforeDownload.template }}
+#          arguments:
+#            parameters:
+#            - name: destination_path
+#              value: {{ tpl .clusterWorkflowTemplates.cleanBeforeDownload.parameters.destination_path $ }}
+#            - name: share_name
+#              value: {{ tpl .clusterWorkflowTemplates.downloadFromBlobStorage.parameters.shareName $ }}
+      - - name: download-from-blob-storage
+          templateRef:
+            clusterScope: true
+            name: {{ .clusterWorkflowTemplates.downloadFromBlobStorage.name }}
+            template: {{ .clusterWorkflowTemplates.downloadFromBlobStorage.template }}
+          arguments:
+            parameters:
+            - name: destination_path
+              value: {{ tpl .clusterWorkflowTemplates.downloadFromBlobStorage.parameters.destination_path $ }}
+            - name: blob_storage_account_name
+              value: {{ .storageAccountName }}
+            - name: files_string_to_download
+              value: >-
+                {{ print "{{inputs.parameters.files_string_to_download}}" }}
+            - name: extracted_entity_name
+              value: {{ .clusterWorkflowTemplates.downloadFromBlobStorage.parameters.extractedEntityName }}
+            - name: perl_regex_for_entity_name
+              value: {{ .clusterWorkflowTemplates.downloadFromBlobStorage.parameters.perlRegexForEntityName }}
+            - name: share_name
+              value: {{ tpl .clusterWorkflowTemplates.downloadFromBlobStorage.parameters.shareName $ }}
+
+    - name: all
+      inputs:
+        parameters:
+        - name: qdrant_files_string_to_download
+      steps:
+      - - name: restore-postgres
+          template: restore-postgres
+        - name: restore-qdrant
+          template: restore-qdrant
+          arguments:
+              parameters:
+              - name: files_string_to_download
+                value: >-
+                  {{ print "{{inputs.parameters.qdrant_files_string_to_download}}" }}
+{{- end }}
+{{- end }}

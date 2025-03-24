@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="xsl/oai2.xsl"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>2024-11-12T16:10:40Z</responseDate>
+  <request verb="GetRecord" identifier="oai:books.openedition.org:examplepub0/0" metadataPrefix="mets">https://oai.openedition.org/</request>
+  <GetRecord xmlns:mets="http://www.loc.gov/METS/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <record>
+      <header>
+        <identifier>oai:books.openedition.org:examplepub0/0</identifier>
+        <datestamp>2021-05-05T17:00:58Z</datestamp>
+        <setSpec>books</setSpec>
+        <setSpec>books:examplepub0</setSpec>
+        <setSpec>openaire</setSpec>
+      </header>
+      <metadata>
+        <mets:mets xmlns:mets="http://www.loc.gov/METS/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/METS/ https://www.loc.gov/standards/mets/mets.xsd http://www.w3.org/1999/xlink https://www.loc.gov/standards/mets/xlink.xsd http://purl.org/dc/terms/ https://dublincore.org/schemas/xmls/qdc/2006/01/06/dcterms.xsd">
+          <mets:dmdSec ID="MD_OB_examplepub0_0">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/0</dcterms:identifier>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>book</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>A Southern Perspective on Development Studies</dcterms:title>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:extent>257</dcterms:extent>
+                <dcterms:source>This digital publication is the result of automatic optical character recognition.</dcterms:source>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:subject xml:lang="en" scheme="keywords">Latin America</dcterms:subject>
+                <dcterms:subject xml:lang="en" scheme="keywords">Social Sciences</dcterms:subject>
+                <dcterms:subject xml:lang="en" scheme="keywords">thought</dcterms:subject>
+                <dcterms:subject xml:lang="en" scheme="keywords">sociology of development</dcterms:subject>
+                <dcterms:subject scheme="ISI">Political Science Public Admin. &amp; Development</dcterms:subject>
+                <dcterms:subject scheme="BISAC">POL028000</dcterms:subject>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:dmdSec ID="MD_OB_examplepub0_8078">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/8078</dcterms:identifier>
+                <dcterms:hasFormat scheme="BASICTEI">https://books.openedition.org/examplepub0/basictei/8078</dcterms:hasFormat>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:hasFormat scheme="TEI">https://books.openedition.org/examplepub0/tei/8078</dcterms:hasFormat>
+                <dcterms:extent>53-97</dcterms:extent>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>chapter</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>Chapter 2. The Unfamiliar Raúl Prebisch 1943-1949</dcterms:title>
+                <dcterms:description> Time precedes existence Prigogine (1990: 183)Time is the substance of which I am made Jorge Luis Borges (1996: 148) Introduction This Introduction is followed by three sections, A Crucifixion on a ‘Cross of Gold’?, which examines Prebisch’s first steps to explain the role of the “gold standard” aiming to generate alternative policies for the Periphery while the “White-Keynes” project for a new financial organization at Bretton Woods is in process, which is continued with the description of t...</dcterms:description>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:dmdSec ID="MD_OB_examplepub0_8068">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/8068</dcterms:identifier>
+                <dcterms:hasFormat scheme="BASICTEI">https://books.openedition.org/examplepub0/basictei/8068</dcterms:hasFormat>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:hasFormat scheme="TEI">https://books.openedition.org/examplepub0/tei/8068</dcterms:hasFormat>
+                <dcterms:extent>5-19</dcterms:extent>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>chapter</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>Introduction</dcterms:title>
+                <dcterms:description> Question everything and everyone. Be subversive, constantly questioning reality and the status quo. Be a poet, not a huckster. Don’t cater, don’t pander, especially not to possible audiences, readers, editors, or publishers. Come out of your closet. It’s dark in there. Raise the blinds, throw open your shuttered windows, raise the roof, unscrew the locks from the doors, but don’t throw away the screws. Be committed to something outside yourself. Be militant about it. Or ecstatic. Challenges ...</dcterms:description>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:dmdSec ID="MD_OB_examplepub0_8083">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/8083</dcterms:identifier>
+                <dcterms:hasFormat scheme="BASICTEI">https://books.openedition.org/examplepub0/basictei/8083</dcterms:hasFormat>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:hasFormat scheme="TEI">https://books.openedition.org/examplepub0/tei/8083</dcterms:hasFormat>
+                <dcterms:extent>99-122</dcterms:extent>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>chapter</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>Chapter 3. Celso Furtado and Development: A Brief Outline (1950-2004)</dcterms:title>
+                <dcterms:description> The main purpose of this chapter is to attempt to give a brief review or outline of the works and ideas of Celso Furtado in relation to development. In order to limit the work to a reasonable length, I have sought to emphasize only those moments I believe were crucial in his thought process, in the hope that Western-centric readers will appreciate the importance of his ideas related to the “development” of Latin America during the 1960s and 1970s. His exile after 1964 limited much the diffus...</dcterms:description>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:dmdSec ID="MD_OB_examplepub0_8103">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/8103</dcterms:identifier>
+                <dcterms:hasFormat scheme="BASICTEI">https://books.openedition.org/examplepub0/basictei/8103</dcterms:hasFormat>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:hasFormat scheme="TEI">https://books.openedition.org/examplepub0/tei/8103</dcterms:hasFormat>
+                <dcterms:extent>235-256</dcterms:extent>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>bibliography</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>References</dcterms:title>
+                <dcterms:description> Ackerman, F; Nadal, A; Benetti, C; Gallagher, K.P; Salas, C. (2004). Flawed foundations of general equilibrium. Critical essays on economic theory. Routledge Frontiers of Political Economy.Agarwala, A.N; Singh, S.P. (1973). La economía del subdesarrollo. Editorial Técnos.Alacevich, M; Boianovsky, M. (2018). The political economy of development economics: a historical perspective. Duke University Press.Althusser, L; Balibar, E. (2004). Para leer el capital. Siglo XXI Editores.Andrade, R; Maga...</dcterms:description>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:dmdSec ID="MD_OB_examplepub0_8098">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/8098</dcterms:identifier>
+                <dcterms:hasFormat scheme="BASICTEI">https://books.openedition.org/examplepub0/basictei/8098</dcterms:hasFormat>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:hasFormat scheme="TEI">https://books.openedition.org/examplepub0/tei/8098</dcterms:hasFormat>
+                <dcterms:extent>181-234</dcterms:extent>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>chapter</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>Chapter 6. All that is Solid does not necessarily Melt into Air</dcterms:title>
+                <dcterms:description> Introduction Scholars looking for a new vision to rethink economics and its evolutionary story may find no better service than Colin Danby’s text The Known Economy: Romantics, Rationalists, and the Making of a World Scale. It personifies perhaps one of those rare, unique unprovincial theoretical moments, which disrupts “Western-centrism” social science by acknowledging and describing the appearance of “alternative” discourses beyond its traditional language and geography. The angle from whic...</dcterms:description>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:dmdSec ID="MD_OB_examplepub0_8073">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/8073</dcterms:identifier>
+                <dcterms:hasFormat scheme="BASICTEI">https://books.openedition.org/examplepub0/basictei/8073</dcterms:hasFormat>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:hasFormat scheme="TEI">https://books.openedition.org/examplepub0/tei/8073</dcterms:hasFormat>
+                <dcterms:extent>21-51</dcterms:extent>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>chapter</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>Chapter 1. A Southern Perspective on Development Studies: Contributions from Latin America</dcterms:title>
+                <dcterms:description> Economic science is universal, like mathematics. Economic science is not Pampa, Guaraní or Tehuelche. If its applicable in Europe, in America too (quoted in Jimena Caravaca 2011: 35).As the epigraph goes, in the last decade of the 19th Century, the national congress in Argentina witnessed the then Minister of the Economy defending the idea that the government applied policies sustained by principles of universal validity. The political confrontation brought to light the notion that perhaps t...</dcterms:description>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:dmdSec ID="MD_OB_examplepub0_8093">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/8093</dcterms:identifier>
+                <dcterms:hasFormat scheme="BASICTEI">https://books.openedition.org/examplepub0/basictei/8093</dcterms:hasFormat>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:hasFormat scheme="TEI">https://books.openedition.org/examplepub0/tei/8093</dcterms:hasFormat>
+                <dcterms:extent>149-180</dcterms:extent>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>chapter</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>Chapter 5. How Economics Forgot Power</dcterms:title>
+                <dcterms:description> That much economic theory is based on ridiculously narrow assumptions and unrealistic a priori premises should, at this stage, be obvious. But it is worth being clear how the types of people that espouse this sort of thing can be used by political forces that they do not understand and cannot comprehend. I have always been averse to the idea that economics as it is currently taught is some sort of organic outgrowth of the ideology of the ruling class. I do not find the Marxist story convinci...</dcterms:description>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:dmdSec ID="MD_OB_examplepub0_8088">
+            <mets:mdWrap MDTYPE="DC" LABEL="Dublin Core Descriptive Metadata" MIMETYPE="text/xml">
+              <mets:xmlData>
+                <dcterms:identifier scheme="URI">https://books.openedition.org/examplepub0/8088</dcterms:identifier>
+                <dcterms:hasFormat scheme="BASICTEI">https://books.openedition.org/examplepub0/basictei/8088</dcterms:hasFormat>
+                <dcterms:language xsi:type="dcterms:RFC1766">en</dcterms:language>
+                <dcterms:created xsi:type="dcterms:W3CDTF">2021</dcterms:created>
+                <dcterms:hasFormat scheme="TEI">https://books.openedition.org/examplepub0/tei/8088</dcterms:hasFormat>
+                <dcterms:extent>123-148</dcterms:extent>
+                <dcterms:issued xsi:type="dcterms:W3CDTF">2021-05-05T00:00:00Z</dcterms:issued>
+                <dcterms:accessRights>info:eu-repo/semantics/openAccess</dcterms:accessRights>
+                <dcterms:type>chapter</dcterms:type>
+                <dcterms:rights>https://creativecommons.org/licenses/by/4.0/</dcterms:rights>
+                <dcterms:title>Chapter 4. Theoretical Misrecognitions as the Source of Development Theory Déjà vu</dcterms:title>
+                <dcterms:description> Ah, what happened to you, written and painted thoughts! Not long ago you were so colorful, young and malicious, so full of thorns and secret spices that you made me sneeze and laugh –and now? Already you have doffed your novelty, and some of you, I fear, are about to become truths: so immortal do they already look, so distressingly honorable, so boring! Nietzsche Introduction This chapter describes an episode in economic theorizing in Latin-America during the 1950s. After a brief glimpse at ...</dcterms:description>
+                <dcterms:publisher>Ariadna Ediciones</dcterms:publisher>
+                <dcterms:isPartOf xsi:type="dcterms:URI">https://books.openedition.org/examplepub0</dcterms:isPartOf>
+                <dcterms:creator>Mallorquin, Carlos</dcterms:creator>
+                <dcterms:identifier scheme="URN">urn:isbn:978-956-6095-09-5</dcterms:identifier>
+                <dcterms:identifier scheme="URN">urn:eisbn:979-10-365-6945-6</dcterms:identifier>
+              </mets:xmlData>
+            </mets:mdWrap>
+          </mets:dmdSec>
+          <mets:fileSec>
+            <mets:fileGrp ID="FG_OB_examplepub0_0">
+              <mets:file ID="F_OB_examplepub0_xhtml_0" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/0"/>
+              </mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp ID="FG_OB_examplepub0_8078">
+              <mets:file ID="F_OB_examplepub0_xhtml_8078" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/8078"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_pdf_8078" MIMETYPE="application/pdf">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/pdf/8078"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_tei_8078" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/tei/8078"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_basictei_8078" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/basictei/8078"/>
+              </mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp ID="FG_OB_examplepub0_8068">
+              <mets:file ID="F_OB_examplepub0_xhtml_8068" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/8068"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_pdf_8068" MIMETYPE="application/pdf">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/pdf/8068"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_tei_8068" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/tei/8068"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_basictei_8068" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/basictei/8068"/>
+              </mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp ID="FG_OB_examplepub0_8083">
+              <mets:file ID="F_OB_examplepub0_xhtml_8083" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/8083"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_pdf_8083" MIMETYPE="application/pdf">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/pdf/8083"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_tei_8083" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/tei/8083"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_basictei_8083" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/basictei/8083"/>
+              </mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp ID="FG_OB_examplepub0_8103">
+              <mets:file ID="F_OB_examplepub0_xhtml_8103" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/8103"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_pdf_8103" MIMETYPE="application/pdf">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/pdf/8103"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_tei_8103" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/tei/8103"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_basictei_8103" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/basictei/8103"/>
+              </mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp ID="FG_OB_examplepub0_8098">
+              <mets:file ID="F_OB_examplepub0_xhtml_8098" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/8098"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_pdf_8098" MIMETYPE="application/pdf">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/pdf/8098"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_tei_8098" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/tei/8098"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_basictei_8098" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/basictei/8098"/>
+              </mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp ID="FG_OB_examplepub0_8073">
+              <mets:file ID="F_OB_examplepub0_xhtml_8073" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/8073"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_pdf_8073" MIMETYPE="application/pdf">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/pdf/8073"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_tei_8073" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/tei/8073"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_basictei_8073" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/basictei/8073"/>
+              </mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp ID="FG_OB_examplepub0_8093">
+              <mets:file ID="F_OB_examplepub0_xhtml_8093" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/8093"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_pdf_8093" MIMETYPE="application/pdf">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/pdf/8093"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_tei_8093" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/tei/8093"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_basictei_8093" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/basictei/8093"/>
+              </mets:file>
+            </mets:fileGrp>
+            <mets:fileGrp ID="FG_OB_examplepub0_8088">
+              <mets:file ID="F_OB_examplepub0_xhtml_8088" MIMETYPE="text/html">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/8088"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_pdf_8088" MIMETYPE="application/pdf">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/pdf/8088"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_tei_8088" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/tei/8088"/>
+              </mets:file>
+              <mets:file ID="F_OB_examplepub0_basictei_8088" MIMETYPE="text/xml">
+                <mets:FLocat LOCTYPE="URL" xlink:href="https://books.openedition.org/examplepub0/basictei/8088"/>
+              </mets:file>
+            </mets:fileGrp>
+          </mets:fileSec>
+          <mets:structMap>
+            <mets:div LABEL="A Southern Perspective on Development Studies" TYPE="book" DMDID="MD_OB_examplepub0_0" ID="SM_OB_examplepub0_0">
+              <mets:div LABEL="Introduction" TYPE="chapter" DMDID="MD_OB_examplepub0_8068" ID="SM_OB_examplepub0_8068">
+                <mets:fptr FILEID="F_OB_examplepub0_basictei_8068"/>
+                <mets:fptr FILEID="F_OB_examplepub0_tei_8068"/>
+                <mets:fptr FILEID="F_OB_examplepub0_xhtml_8068"/>
+                <mets:fptr FILEID="F_OB_examplepub0_pdf_8068"/>
+              </mets:div>
+              <mets:div LABEL="Chapter 1. A Southern Perspective on Development Studies: Contributions from Latin America" TYPE="chapter" DMDID="MD_OB_examplepub0_8073" ID="SM_OB_examplepub0_8073" ORDER="1">
+                <mets:fptr FILEID="F_OB_examplepub0_basictei_8073"/>
+                <mets:fptr FILEID="F_OB_examplepub0_tei_8073"/>
+                <mets:fptr FILEID="F_OB_examplepub0_xhtml_8073"/>
+                <mets:fptr FILEID="F_OB_examplepub0_pdf_8073"/>
+              </mets:div>
+              <mets:div LABEL="Chapter 2. The Unfamiliar Raúl Prebisch 1943-1949" TYPE="chapter" DMDID="MD_OB_examplepub0_8078" ID="SM_OB_examplepub0_8078" ORDER="2">
+                <mets:fptr FILEID="F_OB_examplepub0_basictei_8078"/>
+                <mets:fptr FILEID="F_OB_examplepub0_tei_8078"/>
+                <mets:fptr FILEID="F_OB_examplepub0_xhtml_8078"/>
+                <mets:fptr FILEID="F_OB_examplepub0_pdf_8078"/>
+              </mets:div>
+              <mets:div LABEL="Chapter 3. Celso Furtado and Development: A Brief Outline (1950-2004)" TYPE="chapter" DMDID="MD_OB_examplepub0_8083" ID="SM_OB_examplepub0_8083" ORDER="3">
+                <mets:fptr FILEID="F_OB_examplepub0_basictei_8083"/>
+                <mets:fptr FILEID="F_OB_examplepub0_tei_8083"/>
+                <mets:fptr FILEID="F_OB_examplepub0_xhtml_8083"/>
+                <mets:fptr FILEID="F_OB_examplepub0_pdf_8083"/>
+              </mets:div>
+              <mets:div LABEL="Chapter 4. Theoretical Misrecognitions as the Source of Development Theory Déjà vu" TYPE="chapter" DMDID="MD_OB_examplepub0_8088" ID="SM_OB_examplepub0_8088" ORDER="4">
+                <mets:fptr FILEID="F_OB_examplepub0_basictei_8088"/>
+                <mets:fptr FILEID="F_OB_examplepub0_tei_8088"/>
+                <mets:fptr FILEID="F_OB_examplepub0_xhtml_8088"/>
+                <mets:fptr FILEID="F_OB_examplepub0_pdf_8088"/>
+              </mets:div>
+              <mets:div LABEL="Chapter 5. How Economics Forgot Power" TYPE="chapter" DMDID="MD_OB_examplepub0_8093" ID="SM_OB_examplepub0_8093" ORDER="5">
+                <mets:fptr FILEID="F_OB_examplepub0_basictei_8093"/>
+                <mets:fptr FILEID="F_OB_examplepub0_tei_8093"/>
+                <mets:fptr FILEID="F_OB_examplepub0_xhtml_8093"/>
+                <mets:fptr FILEID="F_OB_examplepub0_pdf_8093"/>
+              </mets:div>
+              <mets:div LABEL="Chapter 6. All that is Solid does not necessarily Melt into Air" TYPE="chapter" DMDID="MD_OB_examplepub0_8098" ID="SM_OB_examplepub0_8098" ORDER="6">
+                <mets:fptr FILEID="F_OB_examplepub0_basictei_8098"/>
+                <mets:fptr FILEID="F_OB_examplepub0_tei_8098"/>
+                <mets:fptr FILEID="F_OB_examplepub0_xhtml_8098"/>
+                <mets:fptr FILEID="F_OB_examplepub0_pdf_8098"/>
+              </mets:div>
+              <mets:div LABEL="References" TYPE="bibliography" DMDID="MD_OB_examplepub0_8103" ID="SM_OB_examplepub0_8103" ORDER="7">
+                <mets:fptr FILEID="F_OB_examplepub0_basictei_8103"/>
+                <mets:fptr FILEID="F_OB_examplepub0_tei_8103"/>
+                <mets:fptr FILEID="F_OB_examplepub0_xhtml_8103"/>
+                <mets:fptr FILEID="F_OB_examplepub0_pdf_8103"/>
+              </mets:div>
+            </mets:div>
+          </mets:structMap>
+        </mets:mets>
+      </metadata>
+    </record>
+  </GetRecord>
+</OAI-PMH>

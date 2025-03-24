@@ -1,0 +1,8 @@
+title,url,lang,content,desc,corpus,details
+"Example Title 1","https://example.com/1","en","This is an example content for row 1.","This is an example description for row 1.","corpus 1","{'key1': 'value1', 'key2': 2, 'key3': True}"
+"Example Title 2","https://example.com/2","fr","Ceci est un exemple de contenu pour la ligne 2.","Ceci est une description d'exemple pour la ligne 2.","corpus 1","{'key1': 'valeur1', 'key2': 3, 'key3': False}"
+"Example Title 3","https://example.com/3","es","Este es un ejemplo de contenido para la fila 3.","Esta es una descripción de ejemplo para la fila 3.","corpus 2","{'key1': 'valor1', 'key2': 4, 'key3': True}"
+"Example Title 4","https://example.com/4","de","Dies ist ein Beispielinhalt für Zeile 4.","Dies ist eine Beispielbeschreibung für Zeile 4.","corpus 1","{'key1': 'wert1', 'key2': 5, 'key3': False}"
+"Example Title 5","https://example.com/5","it","Questo è un esempio di contenuto per la riga 5.","Questa è una descrizione di esempio per la riga 5.","corpus 2","{'key1': 'valore1', 'key2': 6, 'key3': True}"
+"Example Title 6","https://example.com/6","nl","Dit is een voorbeeldinhoud voor rij 6.","Dit is een voorbeeldbeschrijving voor rij 6.","corpus 3","{'key1': 'waarde1', 'key2': 7, 'key3': False}"
+"Example Title 7","https://example.com/7","pt","Este é um exemplo de conteúdo para a linha 7.","Esta é uma descrição de exemplo para a linha 7.","corpus 1","{'key1': 'valor1', 'key2': 8, 'key3': True}"

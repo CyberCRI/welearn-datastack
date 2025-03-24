@@ -1,0 +1,23 @@
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://purl.org/rss/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">
+        <channel rdf:about="https://books.openedition.org">
+        <title>
+            OpenEdition Books
+        </title>
+        <link>
+            https://books.openedition.org
+        </link>
+        <items>
+            <rdf:Seq>
+                                    <rdf:li resource="https://books.openedition.org/examplepub0/0"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub0/1"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub0/2"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub0/3"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub0/4"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub1/5"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub1/6"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub1/7"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub1/8"/>
+                                    <rdf:li resource="https://books.openedition.org/examplepub1/9"/>
+                            </rdf:Seq>
+        </items>
+    </rdf:RDF>

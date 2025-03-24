@@ -1,0 +1,363 @@
+{{- with .Values.urlCollectors }}
+{{- if and (.cronWorkflowTemplate.standard.enabled) ($.Values.cronWorkflows.enabled) }}
+kind: CronWorkflow
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: {{ .name }}
+spec:
+  schedules: [{{ .cronWorkflowTemplate.standard.schedule }}]
+  workflowSpec:
+    {{- if $.Values.common.runOnGpu }}
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+            - key: gpu-node
+              operator: In
+              values:
+              - "true"
+    tolerations:
+    - key: "Gpu"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+    {{- end }}
+    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+    securityContext:
+      {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
+    entrypoint: all
+    templates:
+      - name: all
+        steps:
+          - - name: conversation-en
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://theconversation.com/articles.atom?language=en
+                  - name: corpus_name
+                    value: conversation
+                  - name: corpus_fix
+                    value: "true"
+            - name: conversation-fr
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://theconversation.com/articles.atom?language=fr
+                  - name: corpus_name
+                    value: conversation
+                  - name: corpus_fix
+                    value: "true"
+            - name: peerj
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://peerj.com/articles/index.atom
+                  - name: corpus_name
+                    value: peerj
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: collect-ted-step
+              templateRef:
+                name: {{ .name }}
+                template: collect-ted
+
+            - name: open-edition-books
+              templateRef:
+                name: {{ .name }}
+                template: collect-open-edition-books
+
+            - name: openalex
+              templateRef:
+                name: {{ .name }}
+                template: collect-openalex
+
+            - name: hal
+              templateRef:
+                name: {{ .name }}
+                template: collect-hal
+            - name: peerj-cs
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://peerj.com/articles/index.atom?journal=cs
+                  - name: corpus_name
+                    value: peerj
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: peerj-pchem
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://peerj.com/articles/index.atom?journal=pchem
+                  - name: corpus_name
+                    value: peerj
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: peerj-matsci
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://peerj.com/articles/index.atom?journal=matsci
+                  - name: corpus_name
+                    value: peerj
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: peerj-achem
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://peerj.com/articles/index.atom?journal=achem
+                  - name: corpus_name
+                    value: peerj
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: peerj-ochem
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://peerj.com/articles/index.atom?journal=ochem
+                  - name: corpus_name
+                    value: peerj
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: peerj-ichem
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://peerj.com/articles/index.atom?journal=ichem
+                  - name: corpus_name
+                    value: peerj
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-biology
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/plosbiology/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-climate
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/climate/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-complexsystem
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/complexsystem/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-ploscompbiol
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/ploscompbiol/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-digitalhealth
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/digitalhealth/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-plosgenetics
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/plosgenetics/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-water
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/water/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-sustainability-transformation
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/sustainabilitytransformation/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-plospathogens
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/plospathogens/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-plosone
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/plosone/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-plosntds
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/plosntds/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-plosmedicine
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/plosmedicine/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-globalpublichealth
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/globalpublichealth/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: plos-mentalhealth
+              templateRef:
+                name: {{ .name }}
+                template: collect-atom
+              arguments:
+                parameters:
+                  - name: atom_url
+                    value: https://journals.plos.org/mentalhealth/feed/atom
+                  - name: corpus_name
+                    value: plos
+                  - name: corpus_fix
+                    value: "true"
+
+            - name: oapen
+              templateRef:
+                name: {{ .name }}
+                template: collect-rss
+              arguments:
+                parameters:
+                  - name: rss_url
+                    value: https://library.oapen.org/feed/rss_2.0/site
+                  - name: corpus_name
+                    value: oapen
+                  - name: corpus_fix
+                    value: "true"
+{{- end }}
+{{- end }}

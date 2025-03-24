@@ -1,0 +1,389 @@
+{{- with .Values.urlCollectors }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}
+spec:
+  entrypoint: collect-csv
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  {{- if $.Values.common.runOnGpu }}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: gpu-node
+            operator: In
+            values:
+            - "true"
+  tolerations:
+  - key: "Gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+  {{- end }}
+  templates:
+    - name: collect-csv
+      inputs:
+        parameters:
+        - name: csv_path
+          default: {{ $.Values.common.csvDefaultPath }}
+        - name: corpus_name
+        - name: corpus_fix
+        - name: url_column
+        - name: csv_delimiter
+          default: ","
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_csv_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: CSV_PATH
+            value: {{ print "{{inputs.parameters.csv_path}}" | quote }}
+          - name: CORPUS_NAME
+            value: {{ print "{{inputs.parameters.corpus_name}}" | quote }}
+          - name: CORPUS_FIX
+            value: {{ print "{{inputs.parameters.corpus_fix}}" | quote }}
+          - name: URL_COLUMN
+            value: {{ print "{{inputs.parameters.url_column}}" | quote }}
+          - name: CSV_DELIMITER
+            value: {{ print "{{inputs.parameters.csv_delimiter}}" | quote }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+    - name: collect-atom
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      inputs:
+        parameters:
+        - name: atom_url
+        - name: corpus_name
+        - name: corpus_fix
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_atom_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: ATOM_URL
+            value: {{ print "{{inputs.parameters.atom_url}}" | quote }}
+          - name: CORPUS_NAME
+            value: {{ print "{{inputs.parameters.corpus_name}}" | quote }}
+          - name: CORPUS_FIX
+            value: {{ print "{{inputs.parameters.corpus_fix}}" | quote }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+    - name: collect-ted
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_ted_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+    - name: collect-wikipedia
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_wikipedia_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+    - name: collect-hal
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_hal_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+    - name: collect-wikipedia
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.wikipedia.keyName }}
+      podSpecPatch: |
+        containers:
+        - name: main
+          resources:
+          {{- .workflowTemplates.collectWikipedia.resources | toYaml | nindent 14 }}
+      inputs:
+        parameters:
+          - name: nb_batches
+            default: '1'
+          - name: batch_id
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_wikipedia_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: NB_BATCHES
+            value: {{ print "{{inputs.parameters.nb_batches}}" | quote }}
+          - name: BATCH_ID
+            value: {{ print "{{inputs.parameters.batch_id}}" | quote }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+    - name: collect-rss
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      inputs:
+        parameters:
+        - name: rss_url
+        - name: corpus_name
+        - name: corpus_fix
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_rss_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: RSS_URL
+            value: {{ print "{{inputs.parameters.rss_url}}" | quote }}
+          - name: CORPUS_NAME
+            value: {{ print "{{inputs.parameters.corpus_name}}" | quote }}
+          - name: CORPUS_FIX
+            value: {{ print "{{inputs.parameters.corpus_fix}}" | quote }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+    - name: collect-open-edition-books
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_oe_books_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+    - name: collect-openalex
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_openalex_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+{{- end }}

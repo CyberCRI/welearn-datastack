@@ -1,0 +1,23 @@
+common:
+  environment: prod
+  config:
+    nonSensitive:
+      PG_HOST: prod-prod-projects-backend.postgres.database.azure.com
+      QDRANT_URL: '{{ .Values.common.qdrant_url }}'
+      QDRANT_GRPC_PORT: '{{ .Values.common.config.qdrant_grpc_port }}'
+      QDRANT_HTTP_PORT: '{{ .Values.common.config.qdrant_http_port }}'
+      ENVIRONMENT: prod
+    qdrant_grpc_port: 6334
+    qdrant_http_port: 6333
+    qdrant_url: http://qdrant-grpc.qdrant
+
+cronWorkflows:
+  enabled: true
+
+restore:
+  config:
+    nonSensitive:
+      ORIGIN_POSTGRES_DB: ""
+      STRATEGY: from_latest_backup
+      RCLONE_CONFIG_DEST_ACCOUNT: criparisprodprodwlbkp
+      STORAGE_CONTAINER_NAME: dev-welearn-datastack

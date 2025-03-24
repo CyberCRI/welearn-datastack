@@ -1,0 +1,105 @@
+{{- with .Values.documentVectorizer }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}-run-node
+spec:
+  entrypoint: all
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  {{- if $.Values.common.runOnGpu }}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: gpu-node
+            operator: In
+            values:
+            - "true"
+  tolerations:
+  - key: "Gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+  {{- end }}
+  templates:
+
+    - name: document-vectorizer
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: log_level
+            default: "INFO"
+          - name: urls_input_filename
+          - name: urls_directory
+            default: urls
+          - name: memory
+            default: {{ .workflowTemplates.runNode.requests.memory }}
+          - name: size_limit
+            default: 10000000000
+          - name: st_device
+            default: "cpu"
+          - name: embedding_model_fr
+            default: {{ $.Values.common.embeddingModelFr }}
+          - name: embedding_model_en
+            default: {{ $.Values.common.embeddingModelEn }}
+        artifacts:
+          - name: batch_ids_csv
+            path: >-
+              {{ printf "%s/%s/{{inputs.parameters.urls_directory}}" $.Values.common.artifactRoot $.Values.common.artifactInputFolder }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: EMBEDDING_MODEL_EN
+            value: >-
+              {{ print "{{inputs.parameters.embedding_model_en}}" }}
+          - name: EMBEDDING_MODEL_FR
+            value: >-
+              {{ print "{{inputs.parameters.embedding_model_fr}}" }}
+          - name: ARTIFACT_ROOT
+            value: {{ $.Values.common.artifactRoot }}
+          - name: IS_LOCAL
+            value: "0"
+          - name: LOG_LEVEL
+            value: >-
+              {{ print "{{inputs.parameters.log_level}}" }}
+          - name: ARTIFACT_ID_URL_CSV_NAME
+            value: >-
+              {{ print "{{inputs.parameters.urls_directory}}/{{inputs.parameters.urls_input_filename}}" }}
+          - name: ST_DEVICE
+            value: >-
+                {{ print "{{inputs.parameters.st_device}}" }}
+          - name: MODELS_PATH_ROOT
+            value: {{ $.Values.common.modelsPathRoot }}
+
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.DocumentVectorizer.document_vectorizer
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: ml-models-azure-share
+          mountPath: {{ $.Values.common.modelsPathRoot }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: ml-models-azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.mlModelAzureShare.name }}
+{{- end }}

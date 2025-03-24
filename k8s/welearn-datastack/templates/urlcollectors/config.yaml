@@ -1,0 +1,17 @@
+{{- with .Values.urlCollectors }}
+{{- $config := dict}}
+{{- $_ := merge $config $.Values.common.config}}
+{{- $_ := merge $config .config}}
+
+{{- $commonLabels := dict }}
+{{- $_ := merge $commonLabels $.Values.common.commonLabels}}
+{{- $_ := merge $commonLabels .commonLabels}}
+
+{{- $configGenerator := dict
+"config" $config
+"root" $
+"commonLabels" $commonLabels
+"name" .name }}
+
+{{- include "common.config.resources" $configGenerator}}
+{{- end }}

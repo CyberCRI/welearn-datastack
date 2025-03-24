@@ -1,0 +1,189 @@
+{
+  "response": {
+    "numFound": 66,
+    "start": 0,
+    "numFoundExact": true,
+    "docs": [
+      {
+        "docid": "4268058",
+        "uri_s": "https://example.org/hal-04268058",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04268058"
+      },
+      {
+        "docid": "3905725",
+        "uri_s": "https://ens.example.org/hal-03905725",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-03905725"
+      },
+      {
+        "docid": "4275783",
+        "uri_s": "https://example.org/hal-04275783",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04275783"
+      },
+      {
+        "docid": "4349073",
+        "uri_s": "https://example.org/hal-04349073",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04349073"
+      },
+      {
+        "docid": "4265765",
+        "uri_s": "https://hal.example.org/hal-04265765",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04265765"
+      },
+      {
+        "docid": "4350426",
+        "uri_s": "https://example.org/hal-04350426",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04350426"
+      },
+      {
+        "docid": "4349691",
+        "uri_s": "https://hal.example.org/hal-04349691",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04349691"
+      },
+      {
+        "docid": "4349362",
+        "uri_s": "https://example.org/hal-04349362",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04349362"
+      },
+      {
+        "docid": "4349079",
+        "uri_s": "https://hal.example.org/hal-04349079",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04349079"
+      },
+      {
+        "docid": "4349020",
+        "uri_s": "https://example.org/hal-04349020",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04349020"
+      },
+      {
+        "docid": "4187539",
+        "uri_s": "https://example.org/hal-04187539",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04187539"
+      },
+      {
+        "docid": "4337434",
+        "uri_s": "https://universite-paris-saclay.example.org/hal-04337434",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04337434"
+      },
+      {
+        "docid": "4348962",
+        "uri_s": "https://example.org/hal-04348962",
+        "producedDate_tdate": "2023-12-17T00:00:00Z",
+        "halId_s": "hal-04348962"
+      },
+      {
+        "docid": "4268579",
+        "uri_s": "https://example.org/hal-04268579",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04268579"
+      },
+      {
+        "docid": "4264675",
+        "uri_s": "https://example.org/hal-04264675",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04264675"
+      },
+      {
+        "docid": "4344346",
+        "uri_s": "https://example.org/hal-04344346",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04344346"
+      },
+      {
+        "docid": "4347237",
+        "uri_s": "https://shs.example.org/halshs-04347237",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "halshs-04347237"
+      },
+      {
+        "docid": "4280462",
+        "uri_s": "https://example.org/hal-04280462",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04280462"
+      },
+      {
+        "docid": "4349705",
+        "uri_s": "https://example.org/hal-04349705",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04349705"
+      },
+      {
+        "docid": "4344427",
+        "uri_s": "https://example.org/hal-04344427",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04344427"
+      },
+      {
+        "docid": "4349621",
+        "uri_s": "https://example.org/hal-04349621",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04349621"
+      },
+      {
+        "docid": "4344408",
+        "uri_s": "https://example.org/hal-04344408",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04344408"
+      },
+      {
+        "docid": "4350435",
+        "uri_s": "https://shs.example.org/halshs-04350435",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "halshs-04350435"
+      },
+      {
+        "docid": "4350258",
+        "uri_s": "https://hal.example.org/hal-04350258",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04350258"
+      },
+      {
+        "docid": "4350551",
+        "uri_s": "https://example.org/hal-04350551",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04350551"
+      },
+      {
+        "docid": "4350783",
+        "uri_s": "https://example.org/hal-04350783",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04350783"
+      },
+      {
+        "docid": "4309918",
+        "uri_s": "https://univ-eiffel.example.org/hal-04309918",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04309918"
+      },
+      {
+        "docid": "4344439",
+        "uri_s": "https://example.org/hal-04344439",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04344439"
+      },
+      {
+        "docid": "4349976",
+        "uri_s": "https://example.org/hal-04349976",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-04349976"
+      },
+      {
+        "docid": "4349741",
+        "uri_s": "https://example.org/hal-03908252v3",
+        "producedDate_tdate": "2023-12-18T00:00:00Z",
+        "halId_s": "hal-03908252"
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{{- with .Values.urlCollectors.collectorSemaphore }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .configmapName }}
+data:
+  {{ .standard.keyName }}: {{ .standard.tokensCount | quote }}
+  {{ .wikipedia.keyName }}: {{ .wikipedia.tokensCount | quote }}
+{{- end }}

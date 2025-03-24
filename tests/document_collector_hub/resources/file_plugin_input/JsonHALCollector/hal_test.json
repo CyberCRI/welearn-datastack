@@ -1,0 +1,39 @@
+{
+  "response": {
+    "numFound": 3537254,
+    "start": 0,
+    "numFoundExact": true,
+    "docs": [
+        {
+            "docid":"1057493",
+            "title_s":["Évolutions de la linguistique outillée : méfaits et bienfaits du TAL"],
+            "abstract_s":["Cet article examine l'impact des technologies du traitement automatique des langues (TAL) sur les pratiques de la linguistique outillée, au sens de (Habert 2004). Cette linguistique qui s'est dotée de nouveaux instruments d'observation et de calcul est largement alimentée par les méthodes définies dans le champ du TAL, héritant ainsi des évolutions de cette discipline pour le meilleur et pour le pire. En effet, si la linguistique a l'opportunité d'intégrer dans son outillage des instruments plus sophistiqués basés sur des approches quantitatives et des données plus diverses et plus nombreuses, elle a néanmoins des difficultés à se les approprier et à contribuer en retour aux avancées du TAL. Nous rendons compte dans cet article de ce bilan contrasté. Nous présentons tout d'abord un rapide panorama des évolutions récentes, en évoquant notamment la façon dont le développement des méthodes quantitatives du TAL a modifié la place dévolue à la linguistique dans cette discipline. Nous exposons les problèmes que nous percevons actuellement~: un TAL à l'outillage trop complexe et opaque pour être appréhendé pleinement par des linguistes, des linguistes dont le rôle se cantonne à l'annotation de données d'entraînement ou d'évaluation, des applications qui simplifient la définition des objets langagiers en misant sur la massification des données pour les traiter. La deuxième partie s'intéresse à l'impact, cette fois plus positif, qu'ont eu ces évolutions majeures du TAL sur la méthodologie des recherches en linguistique. Elles se traduisent par la possibilité de faire appel à de nouvelles méthodes d'expérimentation et de reconsidérer les phénomènes langagiers à la lumière de données à grande échelle, assorties de méthodes d'observation plus efficaces. La dernière partie suggère une voie permettant à la linguistique ainsi outillée de jouer pleinement son rôle face à de nouvelles demandes exprimées par des acteurs externes (autres disciplines, entreprises, institutions, etc.). Ces demandes, de natures diverses, ne semblent en effet pas adaptées aux exigences du TAL quantitatif qui s'est concentré sur quelques applications centrales. La linguistique outillée garde alors sa spécificité et son avantage dans des situations qui requièrent des connaissances linguistiques et un traitement plus riche du matériau langagier. Dans ce genre de situation, parce qu'elle a bénéficié des avancées récentes du TAL, la linguistique est aujourd'hui à même d'intervenir efficacement sur de grandes quantités de données et de dialoguer avec d'autres disciplines et acteurs de terrain. Elle a alors l'opportunité de faire émerger des problématiques linguistiques sur des données souvent très riches, et de traiter des questions nouvelles, dont nous donnons plusieurs exemples."],
+            "authFullName_s":["Ludovic Tanguy",
+            "Cécile Fabre"],
+            "language_s":["fr"],
+            "uri_s":"https://example.org/halshs-01057493",
+            "docType_s":"ART",
+            "producedDate_tdate":"2014-01-01T00:00:00Z",
+            "publicationDate_tdate":"2014-01-01T00:00:00Z",
+            "halId_s":"halshs-01057493"
+        },
+        {
+            "docid":"1057494",
+            "title_s":["The role of citizen science in monitoring biodiversity in Ireland."],
+            "abstract_s":["Citizen science is proving to be an effective tool in tracking the rapid pace at which our environment is changing over large geographic areas. It is becoming increasingly popular, in places such as North America and some European countries, to engage members of the general public and school pupils in the collection of scientific data to support long-term environmental monitoring. Participants in such schemes are generally volunteers and are referred to as citizen scientists. The Christmas bird count in the US is one of the worlds longest running citizen science projects whereby volunteers have been collecting data on birds on a specific day since 1900. Similar volunteer networks in Ireland have been in existence since the 1960s and were established to monitor the number and diversity of birds throughout the country. More recently, initiatives such as Greenwave (2006) and Nature Watch (2009) invite school children and members of the general public respectively, to record phenology data from a range of common species of plant, insect and bird. In addition, the Irish butterfly and bumblebee monitoring schemes engage volunteers to record data on sightings of these species. The primary purpose of all of these networks is to collect data by which to monitor changes in wildlife development and diversity, and in the case of Greenwave to involve children in hands-on, inquiry-based science. Together these various networks help raise awareness of key environmental issues, such as climate change and loss of biodiversity, while at the same time promote development of scientific skills among the general population. In addition, they provide valuable scientific data by which to track environmental change. Here we examine the role of citizen science in monitoring biodiversity in Ireland and conclude that some of the data collected in these networks can be used to fulfil Ireland's statutory obligations for nature conservation. In addition, a bee thought previously to be extinct has been rediscovered and a range expansion of a different bee has been confirmed. However, it also became apparent that some of the networks play more of an educational than a scientific role. Furthermore, we draw on experience from a range of citizen science projects to make recommendations on how best to establish new citizen science projects in Ireland and strengthen existing ones."],
+            "authFullName_s":["Alison Donnelly",
+            "Olivia Crowe",
+            "Eugenie Regan",
+            "Sinead Begley",
+            "Amelia Caffarra"],
+            "language_s":["en"],
+            "uri_s":"https://example.org/hal-01057494",
+            "docType_s":"ART",
+            "producedDate_tdate":"2014-08-01T00:00:00Z",
+            "publicationDate_tdate":"2014-08-01T00:00:00Z",
+            "halId_s":"hal-01057494"
+        }
+    ]
+  },
+  "nextCursorMark": "AoEnMTAwMDAzNQ=="
+}
