@@ -161,3 +161,4 @@ cython_debug/
 
 charts/
 test.yaml
+/locustfiles/
