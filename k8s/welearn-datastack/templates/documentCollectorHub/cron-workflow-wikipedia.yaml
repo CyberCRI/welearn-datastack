@@ -3,7 +3,7 @@
 kind: CronWorkflow
 apiVersion: argoproj.io/v1alpha1
 metadata:
-  name: {{ .name }}
+  name: {{ .name }}-wikipedia
 spec:
   workflowSpec:
     {{- if $.Values.common.runOnGpu }}
