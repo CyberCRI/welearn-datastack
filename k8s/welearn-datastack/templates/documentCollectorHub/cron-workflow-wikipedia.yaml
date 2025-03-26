@@ -1,9 +1,9 @@
 {{- with .Values.documentCollectorHub }}
-{{- if and (.cronWorkflowTemplate.wikipedia.enabled) ($.Values.cronWorkflows.enabled) }}
+{{- if and (.cronWorkflowTemplate.standard.enabled) ($.Values.cronWorkflows.enabled) }}
 kind: CronWorkflow
 apiVersion: argoproj.io/v1alpha1
 metadata:
-  name: {{ printf "%s-wikipedia" .name }}
+  name: {{ .name }}
 spec:
   workflowSpec:
     {{- if $.Values.common.runOnGpu }}
@@ -25,65 +25,109 @@ spec:
     {{- end }}
     securityContext:
       {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
+    parallelism: 3
     templates:
       - name: all
         inputs:
           parameters:
           - name: csv_path
-            value: /etc/welearndatastack/collectors
-          - name: scraping_service_address
-            value: https://scraper.k8s.lp-i.dev/api/v1/scraper/run
+            default: /etc/welearndatastack/collectors
           - name: parallelism_treshold
-            value: '10000'
-          - name: parallelism_url_max
-            value: '2'
+            default: '2000'
+          - name: parallelism_max
+            default: '15'
           - name: retrieval_mode
             enum: ["NEW_MODE", "UPDATE_MODE"]
-            value: "UPDATE_MODE"
+            default: "NEW_MODE"
           - name: pick_corpus_name
-            value: 'wikipedia'
+            default: 'wikipedia'
           - name: pick_qty_max
-            value: '3000'
+            default: '1000'
+          - name: log_level
+            default: "INFO"
+          - name: batch_urls_directory
+            default: batch_urls
+          - name: memory_batch_urls
+            default: {{ .workflowTemplates.prepareBatches.requests.memory }}
+          - name: batch_urls_ids_file_name
+            default: "batch_ids.csv"
+          - name: memory_collect_docs
+            default: {{ .workflowTemplates.runNode.requests.memory }}
+          - name: pdf_size_page_limit
+            default: "1000000"
+          - name: pdf_size_file_limit
+            default: "5000000"
         steps:
-          - - name: generate-batch-urls
+          - - name: generate-to-collect-batch-wikipedia
               templateRef:
-                name: {{ .name }}
-                template: generate-batch-urls
+                name: {{ .name }}-generate-to-collect-batch
+                template: generate-to-collect-batch
               arguments:
                 parameters:
+                  - name: log_level
+                    value: >-
+                      {{ print "{{inputs.parameters.log_level}}" }}
                   - name: parallelism_treshold
-                    value: {{ print "{{inputs.parameters.parallelism_treshold}}" | quote }}
-                  - name: parallelism_url_max
-                    value: {{ print "{{inputs.parameters.parallelism_url_max}}" | quote }}
+                    value: >-
+                      {{ print "{{inputs.parameters.parallelism_treshold}}" }}
+                  - name: parallelism_max
+                    value: >-
+                      {{ print "{{inputs.parameters.parallelism_max}}" }}
+                  - name: batch_urls_directory
+                    value: >-
+                      {{ print "{{inputs.parameters.batch_urls_directory}}" }}
                   - name: retrieval_mode
-                    value: {{ print "{{inputs.parameters.retrieval_mode}}" | quote }}
+                    value: >-
+                      {{ print "{{inputs.parameters.retrieval_mode}}" }}
                   - name: pick_corpus_name
-                    value: {{ print "{{inputs.parameters.pick_corpus_name}}" | quote }}
+                    value: >-
+                      {{ print "{{inputs.parameters.pick_corpus_name}}" }}
+                  - name: memory
+                    value: >-
+                      {{ print "{{inputs.parameters.memory_batch_urls}}" }}
+                  - name: batch_urls_count_file_name
+                    value: "quantity.txt"
                   - name: pick_qty_max
-                    value: {{ print "{{inputs.parameters.pick_qty_max}}" | quote }}
-          - - name: data-process
+                    value: >-
+                      {{ print "{{inputs.parameters.pick_qty_max}}" }}
+                  - name: output_filename
+                    value: >-
+                      {{ print "{{inputs.parameters.batch_urls_ids_file_name}}" }}
+          - - name: document-collector-hub-wikipedia
               templateRef:
-                name: {{ .name }}
-                template: process-data
+                name: {{ .name }}-document-collector-hub
+                template: document-collector-hub
               arguments:
                 parameters:
-                  - name: scraping_service_address
-                    value: {{ print "{{inputs.parameters.scraping_service_address}}" | quote }}
-                  - name: csv_path
-                    value: {{ print "{{inputs.parameters.csv_path}}" | quote }}
+                  - name: log_level
+                    value: >-
+                      {{ print "{{inputs.parameters.log_level}}" }}
                   - name: urls_input_filename
-                    value: {{ print "{{item}}_batch_urls.json" | quote }}
-                  - name: load_data_memory
-                    value: {{ .workflowTemplates.runNode.requests.memory | quote }}
+                    value: >-
+                      {{ print "{{item}}_{{inputs.parameters.batch_urls_ids_file_name}}" }}
+                  - name: urls_directory
+                    value: >-
+                      {{ print "{{inputs.parameters.batch_urls_directory}}" }}
+                    default: urls
+                  - name: memory
+                    value: >-
+                      {{ print "{{inputs.parameters.memory_collect_docs}}" }}
+                  - name: pdf_size_page_limit
+                    value: >-
+                      {{ print "{{inputs.parameters.pdf_size_page_limit}}" }}
+                  - name: pdf_size_file_limit
+                    value: >-
+                      {{ print "{{inputs.parameters.pdf_size_file_limit}}" }}
                 artifacts:
-                  - name: batch_url_list
-                    from: {{ print "{{steps.generate-batch-urls.outputs.artifacts.url_list}}" | quote }}
+                  - name: batch_ids_csv
+                    from: >-
+                      {{ print "{{steps.generate-to-collect-batch.outputs.artifacts.batch_ids_csv}}" }}
               withSequence:
                 count: >-
-                  {{ print "{{steps.generate-batch-urls.outputs.parameters.url_batches_count}}" }}
+                  {{ print "{{steps.generate-to-collect-batch.outputs.parameters.url_batches_count}}" }}
 
     entrypoint: all
     serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
-  schedules:  [{{ .cronWorkflowTemplate.wikipedia.schedule }}]
+  schedules: [{{ .cronWorkflowTemplate.wikipedia.schedule }}]
 {{- end }}
 {{- end }}
