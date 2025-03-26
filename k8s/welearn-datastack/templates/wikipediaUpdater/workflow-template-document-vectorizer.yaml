@@ -1,0 +1,79 @@
+{{- with .Values.wikipediaUpdater }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}-run-node
+spec:
+  entrypoint: all
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  {{- if $.Values.common.runOnGpu }}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: gpu-node
+            operator: In
+            values:
+            - "true"
+  tolerations:
+  - key: "Gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+  {{- end }}
+  templates:
+
+    - name: wikipedia-updater
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: log_level
+            default: "INFO"
+          - name: urls_input_filename
+          - name: urls_directory
+            default: urls
+          - name: memory
+            default: {{ .workflowTemplates.runNode.requests.memory }}
+          - name: size_limit
+            default: 10000000000
+        artifacts:
+          - name: batch_ids_csv
+            path: >-
+              {{ printf "%s/%s/{{inputs.parameters.urls_directory}}" $.Values.common.artifactRoot $.Values.common.artifactInputFolder }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: ARTIFACT_ROOT
+            value: {{ $.Values.common.artifactRoot }}
+          - name: IS_LOCAL
+            value: "0"
+          - name: LOG_LEVEL
+            value: >-
+              {{ print "{{inputs.parameters.log_level}}" }}
+          - name: ARTIFACT_ID_URL_CSV_NAME
+            value: >-
+              {{ print "{{inputs.parameters.urls_directory}}/{{inputs.parameters.urls_input_filename}}" }}
+
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.WikipediaUpdater.wikipedia_updater
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+{{- end }}
