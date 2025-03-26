@@ -95,7 +95,7 @@ spec:
                       {{ print "{{inputs.parameters.batch_urls_ids_file_name}}" }}
           - - name: document-collector-hub-wikipedia
               templateRef:
-                name: {{ .name }}-document-collector-hub-wikipedia
+                name: {{ .name }}-document-collector-hub
                 template: document-collector-hub
               arguments:
                 parameters:
