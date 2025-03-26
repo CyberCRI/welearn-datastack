@@ -37,15 +37,18 @@ spec:
         steps:
           - - name: collect-wikipedia
               withSequence:
-                count: {{ print "{{inputs.parameters.batches_count}}" | quote }}
+                count: >-
+                  {{ print "{{inputs.parameters.batches_count}}" }}
               templateRef:
                 name: {{ .name }}
                 template: collect-wikipedia
               arguments:
                   parameters:
                   - name: batch_id
-                    value: {{ print "{{item}}" | quote }}
+                    value: >-
+                      {{ print "{{item}}" }}
                   - name: nb_batches
-                    value: {{ print "{{inputs.parameters.batches_count}}" | quote }}
+                    value: >-
+                      {{ print "{{inputs.parameters.batches_count}}" }}
 {{- end }}
 {{- end }}
