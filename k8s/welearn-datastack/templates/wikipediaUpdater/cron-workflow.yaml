@@ -56,7 +56,7 @@ spec:
           - - name: generate-wikipedia-batch
               templateRef:
                 name: {{ .name }}-prepare-batches
-                template: generate-to-extract-batch
+                template: generate-wikipedia-batch
               arguments:
                 parameters:
                   - name: log_level
