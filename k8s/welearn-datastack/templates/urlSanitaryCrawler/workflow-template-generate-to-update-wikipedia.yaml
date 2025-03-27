@@ -1,0 +1,122 @@
+{{- with .Values.urlSanitaryCrawler }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}-prepare-batches
+spec:
+  entrypoint: all
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  {{- if $.Values.common.runOnGpu }}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: gpu-node
+            operator: In
+            values:
+            - "true"
+  tolerations:
+  - key: "Gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+  {{- end }}
+  templates:
+    - name: generate-to-sanitize-batch
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"limits\": {\"memory\": \"{{inputs.parameters.memory}}\"}, \"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: parallelism_treshold
+            default: 100000
+          - name: parallelism_max
+            default: 15
+          - name: batch_urls_directory
+            default: batch_urls
+          - name: retrieval_mode
+            enum: ["NEW_MODE", "UPDATE_MODE"]
+            default: "NEW_MODE"
+          - name: pick_qty_max
+            default: 100000
+          - name: memory
+            default: {{ .workflowTemplates.prepareBatches.requests.memory }}
+          - name: batch_urls_count_file_name
+            default: "quantity.txt"
+          - name: output_filename
+            default: "batch_ids.csv"
+          - name: log_level
+            default: "INFO"
+          - name: size_limit
+            default: 10000000000
+      outputs:
+        artifacts:
+          - name: batch_ids_csv
+            path: >-
+              {{ printf "%s/%s/{{inputs.parameters.batch_urls_directory}}" $.Values.common.artifactRoot $.Values.common.artifactOutputFolder }}
+        parameters:
+          - name: url_batches_count
+            valueFrom:
+              path: >-
+                {{ printf "%s/%s/{{inputs.parameters.batch_urls_directory}}/{{inputs.parameters.batch_urls_count_file_name}}" $.Values.common.artifactRoot $.Values.common.artifactOutputFolder }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: ARTIFACT_ROOT
+            value: {{ $.Values.common.artifactRoot }}
+          - name: IS_LOCAL
+            value: "0"
+          - name: PARALLELISM_THRESHOLD
+            value: >-
+              {{ print "{{inputs.parameters.parallelism_treshold}}" }}
+          - name: PARALLELISM_URL_MAX
+            value: >-
+               {{ print "{{inputs.parameters.parallelism_max}}" }}
+          - name: BATCH_URLS_DIRECTORY
+            value: >-
+               {{ print "{{inputs.parameters.batch_urls_directory}}" }}
+          - name: RETRIEVAL_MODE
+            value: >-
+               {{ print "{{inputs.parameters.retrieval_mode }}" }}
+          - name: PICK_QTY_MAX
+            value: >-
+               {{ print "{{inputs.parameters.pick_qty_max }}" }}
+          - name: LOG_LEVEL
+            value: >-
+              {{ print "{{inputs.parameters.log_level}}" }}
+          - name: OUTPUT_FILE_NAME
+            value: >-
+              {{ print "{{inputs.parameters.output_filename}}" }}
+          - name: SIZE_TOTAL_LIMIT
+            value: >-
+              {{ print "{{inputs.parameters.size_limit}}" }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLSanitaryCrawler.generate_to_sanitize_batch
+
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+{{- end }}
