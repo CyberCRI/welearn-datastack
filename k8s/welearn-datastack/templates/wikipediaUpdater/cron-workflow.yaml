@@ -110,10 +110,10 @@ spec:
                 artifacts:
                   - name: batch_ids_csv
                     from: >-
-                      {{ print "{{steps.generate-to-extract-batch.outputs.artifacts.batch_ids_csv}}" }}
+                      {{ print "{{steps.generate-wikipedia-batch.outputs.artifacts.batch_ids_csv}}" }}
               withSequence:
                 count: >-
-                  {{ print "{{steps.generate-to-extract-batch.outputs.parameters.url_batches_count}}" }}
+                  {{ print "{{steps.generate-wikipedia-batch.outputs.parameters.url_batches_count}}" }}
 
     entrypoint: all
     serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
