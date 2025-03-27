@@ -202,6 +202,31 @@ keywordExtractor:
       schedule: 40 */1 * * *
 
 
+wikipediaUpdater:
+  name: wikipedia-updater
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: wikipedia-updater
+
+  commonLabels:
+    app.kubernetes.io/component: wikipedia-updater
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 20M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 40 */1 * * *
+
+
 qdrantSyncronizer:
   name: qdrant-synchronizer
   config:
