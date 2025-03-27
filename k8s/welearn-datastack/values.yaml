@@ -227,6 +227,32 @@ wikipediaUpdater:
       schedule: 40 */1 * * *
 
 
+urlSanitaryCrawler:
+  name: url-sanitary-crawler
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: url-sanitary-crawler
+
+  commonLabels:
+    app.kubernetes.io/component: url-sanitary-crawler
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 20M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 40 */1 * * *
+
+
+
 qdrantSyncronizer:
   name: qdrant-synchronizer
   config:
