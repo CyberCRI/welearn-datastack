@@ -59,9 +59,6 @@ def main() -> None:
     )
     logger.info("'%s' WeLearnDocuments were retrieved", len(welearn_documents))
 
-    wlds_ids_to_update: List[Tuple[UUID, int]] = []
-    wlds_ids_to_delete: List[Tuple[UUID, int]] = []
-
     # Check url
     logger.info("Check URL state")
 
