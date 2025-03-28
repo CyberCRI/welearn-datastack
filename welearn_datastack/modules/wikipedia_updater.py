@@ -81,6 +81,9 @@ def compare_with_current_version(document: WeLearnDocument) -> bool:
     }
 
     resp = session.get(url=url, params=params)
-    data = resp.json()["compare"]
+    try:
+        data = resp.json()["compare"]
+    except KeyError as e:
+        raise KeyError("Unexpected response from Wikipedia API") from e
 
     return data["diffsize"] > 0.05 * data["fromsize"]  # 5% threshold

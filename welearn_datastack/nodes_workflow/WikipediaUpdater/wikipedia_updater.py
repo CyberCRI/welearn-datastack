@@ -64,7 +64,7 @@ def main() -> None:
                         title=Step.URL_RETRIEVED.value,
                     )
                 )
-        except ValueError as e:
+        except (ValueError, KeyError) as e:
             logger.error("Error while comparing document '%s': %s", wld.title, e)
             continue
 
