@@ -70,8 +70,10 @@ def main() -> None:
             logger.info(f"Checked {i}/{len(welearn_documents)} URLs")
 
         info_error_ret = ""
+        flag = False
         match check_ret[0]:
             case URLStatus.UPDATE:
+                flag = True
                 info_error_ret = f"{wld.url} gonna be updated soon"
                 db_session.add(
                     ProcessState(
@@ -81,6 +83,7 @@ def main() -> None:
                     )
                 )
             case URLStatus.DELETE:
+                flag = True
                 info_error_ret = f"{wld.url} gonna be deleted soon"
                 db_session.add(
                     ProcessState(
@@ -89,14 +92,16 @@ def main() -> None:
                         title=Step.DOCUMENT_IS_IRRETRIEVABLE.value,
                     )
                 )
-        db_session.add(
-            ErrorRetrieval(
-                id=uuid.uuid4(),
-                document_id=wld.id,
-                http_error_code=check_ret[1],
-                error_info=info_error_ret,
+
+        if flag:
+            db_session.add(
+                ErrorRetrieval(
+                    id=uuid.uuid4(),
+                    document_id=wld.id,
+                    http_error_code=check_ret[1],
+                    error_info=info_error_ret,
+                )
             )
-        )
 
     db_session.commit()
     db_session.close()
