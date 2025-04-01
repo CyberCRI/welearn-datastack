@@ -3,7 +3,7 @@ import os
 import uuid
 from itertools import groupby
 from typing import List, Set
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Session
 
@@ -72,9 +72,10 @@ def main() -> None:
     sdg_docs_ids: List[UUID] = []
     specific_sdgs: List[Sdg] = []
     logger.info("Starting bi-classification")
+    key_external_sdg = "external_sdg"
     slices_per_docs = sorted(slices, key=lambda x: x.document_id)  # type: ignore
     for k, g in groupby(slices_per_docs, lambda x: x.document_id):
-        doc_slices = list(g)
+        doc_slices: List[DocumentSlice] = list(g)  # type: ignore
         lang = doc_slices[0].document.lang
         bi_model = bi_model_by_lang.get(lang)
         if not bi_model:
@@ -85,8 +86,22 @@ def main() -> None:
             # No SDG found, process it later
             non_sdg_docs_ids.add(k)
             continue
-
-        doc_sdgs = n_classify_slices(doc_slices, n_model_by_lang.get(lang))  # type: ignore
+        if key_external_sdg in doc_slices[0].document.details:
+            logger.info(f"Document {doc_slices[0].document_id} was externally classified")
+            doc_sdgs: List[Sdg] = []
+            for sdg_number in doc_slices[0].document.details[key_external_sdg]:
+                for local_slice in doc_slices:
+                    doc_sdgs.append(
+                        Sdg(
+                            slice_id=local_slice.id,
+                            sdg_number=sdg_number,
+                            id=uuid4(),
+                            bi_classifier_model_id=uuid4(),
+                            n_classifier_model_id=uuid4()
+                        )
+                    )
+        else:
+            doc_sdgs = n_classify_slices(doc_slices, n_model_by_lang.get(lang))  # type: ignore
         if not doc_sdgs:
             # No SDG found, process it later
             non_sdg_docs_ids.add(k)
