@@ -87,7 +87,9 @@ def main() -> None:
             non_sdg_docs_ids.add(k)
             continue
         if key_external_sdg in doc_slices[0].document.details:
-            logger.info(f"Document {doc_slices[0].document_id} was externally classified")
+            logger.info(
+                f"Document {doc_slices[0].document_id} was externally classified"
+            )
             doc_sdgs: List[Sdg] = []
             for sdg_number in doc_slices[0].document.details[key_external_sdg]:
                 for local_slice in doc_slices:
@@ -97,7 +99,7 @@ def main() -> None:
                             sdg_number=sdg_number,
                             id=uuid4(),
                             bi_classifier_model_id=uuid4(),
-                            n_classifier_model_id=uuid4()
+                            n_classifier_model_id=uuid4(),
                         )
                     )
         else:

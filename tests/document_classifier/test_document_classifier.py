@@ -213,7 +213,6 @@ class TestDocumentClassifier(unittest.TestCase):
         # There is only one state by doc because the rest of steps were mocked
         self.assertEqual(state_in_db[0].title, Step.DOCUMENT_CLASSIFIED_NON_SDG.value)
 
-
     @patch(
         "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slices"
     )
@@ -249,12 +248,10 @@ class TestDocumentClassifier(unittest.TestCase):
         test_session = s_maker()
         Base.metadata.create_all(test_session.get_bind())
 
-
         mock_retrieve_ids.return_value = [doc_test_id]
         session = test_session
         mock_create_session.return_value = session
         mock_retrieve_models.return_value = [Mock(lang="en", title="model_name")]
-
 
         corpus_source_name = "test_corpus"
 
