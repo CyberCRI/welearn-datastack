@@ -212,3 +212,89 @@ class TestDocumentClassifier(unittest.TestCase):
 
         # There is only one state by doc because the rest of steps were mocked
         self.assertEqual(state_in_db[0].title, Step.DOCUMENT_CLASSIFIED_NON_SDG.value)
+
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slices"
+    )
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slices"
+    )
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.retrieve_models"
+    )
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.create_db_session"
+    )
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.retrieve_ids_from_csv"
+    )
+    def test_main_externally_classified(
+        self,
+        mock_retrieve_ids,
+        mock_create_session,
+        mock_retrieve_models,
+        mock_bi_classify,
+        mock_n_classify,
+    ):
+        mock_bi_classify.return_value = True
+        mock_n_classify.return_value = []
+
+        doc_test_id = uuid.uuid4()
+
+        local_engine = create_engine("sqlite://")
+        s_maker = sessionmaker(local_engine)
+        handle_schema_with_sqlite(local_engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        mock_retrieve_ids.return_value = [doc_test_id]
+        session = test_session
+        mock_create_session.return_value = session
+        mock_retrieve_models.return_value = [Mock(lang="en", title="model_name")]
+
+        corpus_source_name = "test_corpus"
+
+        corpus_test = Corpus(
+            id=uuid.uuid4(),
+            source_name=corpus_source_name,
+            is_fix=True,
+            is_active=True,
+        )
+        doc_test = WeLearnDocument(
+            id=doc_test_id,
+            url="https://example.org",
+            corpus_id=corpus_test.id,
+            title="test",
+            lang="en",
+            full_content="test",
+            description="test",
+            details={"test": "test", "external_sdg": [10]},
+            trace=1,
+        )
+
+        slice_test_id = uuid.uuid4()
+        slice_test = DocumentSlice(
+            id=slice_test_id,
+            document_id=doc_test.id,
+            embedding=numpy.array([1, 2, 3]),
+            body="test",
+            order_sequence=0,
+            embedding_model_name="test",
+            embedding_model_id=uuid.uuid4(),
+        )
+
+        test_session.add(corpus_test)
+        test_session.add(doc_test)
+        test_session.add(slice_test)
+        test_session.commit()
+
+        document_classifier.main()
+
+        state_in_db = session.query(ProcessState).all()
+
+        # There is only one state by doc because the rest of steps were mocked
+        self.assertEqual(state_in_db[0].title, Step.DOCUMENT_CLASSIFIED_SDG.value)
+
+        sdg_in_db = session.query(Sdg).all()
+        self.assertEqual(sdg_in_db[0].sdg_number, 10)
