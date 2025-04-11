@@ -11,8 +11,6 @@ from welearn_datastack.data.db_models import DocumentSlice
 from welearn_datastack.exceptions import NoPreviousCollectionError, VersionNumberError
 from welearn_datastack.modules.qdrant_handler import (  # get_collections_names,
     classify_documents_per_collection,
-    extract_version_number,
-    get_last_collection_version,
 )
 
 
@@ -58,33 +56,17 @@ class FakeSlice:
 
 class TestQdrantHandler(unittest.TestCase):
     def setUp(self):
-        get_last_collection_version.cache_clear()
-
         self.client = QdrantClient(":memory:")
 
         self.client.create_collection(
-            collection_name="collection_corpus_en_embmodel_v0",
+            collection_name="collection_en_embmodel",
             vectors_config=models.VectorParams(
                 size=50, distance=models.Distance.COSINE
             ),
         )
 
         self.client.create_collection(
-            collection_name="collection_corpus_en_embmodel_v1",
-            vectors_config=models.VectorParams(
-                size=50, distance=models.Distance.COSINE
-            ),
-        )
-
-        self.client.create_collection(
-            collection_name="collection_corpus_fr_embmodel_v1",
-            vectors_config=models.VectorParams(
-                size=50, distance=models.Distance.COSINE
-            ),
-        )
-
-        self.client.create_collection(
-            collection_name="collection_corpus_en_embmodel_v2",
+            collection_name="collection_fr_embmodel",
             vectors_config=models.VectorParams(
                 size=50, distance=models.Distance.COSINE
             ),
@@ -93,37 +75,15 @@ class TestQdrantHandler(unittest.TestCase):
     def tearDown(self):
         self.client.close()
 
-    def test_should_extract_valid_version_number(self):
-        collection_name = "collection_corpus_en_embmodel_v0"
-        version_number = extract_version_number(collection_name)
-        self.assertEqual(version_number, 0)
-
-    def test_should_raise_error_for_invalid_version_number(self):
-        collection_name = "collection_corpus_en_embmodel_vX"
-        with self.assertRaises(VersionNumberError):
-            extract_version_number(collection_name)
-
-    def test_should_return_last_collection_version(self):
-        qdrant_connector = self.client
-        version_number = get_last_collection_version(
-            "collection_corpus_en_embmodel", qdrant_connector
-        )
-        self.assertEqual(version_number, 2)
-
-    def test_should_raise_error_when_no_previous_collection_found(self):
-        qdrant_connector = self.client
-        with self.assertRaises(NoPreviousCollectionError):
-            get_last_collection_version(
-                "collection_corpus_en_embmodel2", qdrant_connector
-            )
-
     def test_should_get_collections_names_for_given_slices(self):
         doc_id = uuid.uuid4()
         qdrant_connector = self.client
         fake_slice = FakeSlice(doc_id)
+        fake_slice.id = uuid.uuid4()
         slices = [fake_slice]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
-        expected = {"collection_corpus_en_embmodel_v2": {fake_slice.document_id}}
+
+        expected = {"collection_en_embmodel": {fake_slice.document_id}}
         self.assertEqual(collections_names, expected)
 
     def test_should_handle_multiple_slices_for_same_collection(self):
@@ -141,7 +101,7 @@ class TestQdrantHandler(unittest.TestCase):
         slices = [fake_slice0, fake_slice1, fake_slice2]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
         expected = {
-            "collection_corpus_en_embmodel_v2": {doc_id0},
-            "collection_corpus_fr_embmodel_v1": {doc_id1},
+            "collection_en_embmodel": {doc_id0},
+            "collection_fr_embmodel": {doc_id1},
         }
         self.assertEqual(collections_names, expected)
