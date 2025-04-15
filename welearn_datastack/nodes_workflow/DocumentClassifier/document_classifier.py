@@ -93,7 +93,7 @@ def main() -> None:
             raise ValueError(f"Details is not a dict in slice {doc_slices[0].id}")
 
         external_sdgs = doc_slices[0].document.details.get(key_external_sdg, [])
-        if external_sdgs and len(external_sdgs) > 0:
+        if external_sdgs:
             logger.info(
                 f"Document {doc_slices[0].document_id} was externally classified"
             )

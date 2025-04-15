@@ -1,7 +1,5 @@
 # Welearn Datastack
 
-![https://welearn-demo.learningplanetinstitute.org](https://welearn-demo.learningplanetinstitute.org/assets/logo-fdaefaa7.png)
-
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ## Introduction
 This repository contains the datastack for the Welearn project. 
