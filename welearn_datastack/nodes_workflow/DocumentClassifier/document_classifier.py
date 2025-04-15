@@ -77,6 +77,8 @@ def main() -> None:
     for k, g in groupby(slices_per_docs, lambda x: x.document_id):
         doc_slices: List[DocumentSlice] = list(g)  # type: ignore
         lang = doc_slices[0].document.lang
+        if not isinstance(lang, str):
+            raise ValueError(f"Lang is not a string in slice {doc_slices[0].id}")
         bi_model = bi_model_by_lang.get(lang)
         if not bi_model:
             logger.warning("No bi-classifier model found for document %s", k)
@@ -86,7 +88,12 @@ def main() -> None:
             # No SDG found, process it later
             non_sdg_docs_ids.add(k)
             continue
-        if key_external_sdg in doc_slices[0].document.details:
+
+        if not isinstance(doc_slices[0].document.details, dict):
+            raise ValueError(f"Details is not a dict in slice {doc_slices[0].id}")
+
+        external_sdgs = doc_slices[0].document.details.get(key_external_sdg, [])
+        if external_sdgs and len(external_sdgs) > 0:
             logger.info(
                 f"Document {doc_slices[0].document_id} was externally classified"
             )

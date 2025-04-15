@@ -12,8 +12,10 @@ from sqlalchemy.orm import sessionmaker
 from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.db_models import (
     Base,
+    BiClassifierModel,
     Corpus,
     DocumentSlice,
+    NClassifierModel,
     ProcessState,
     Sdg,
     WeLearnDocument,
@@ -322,8 +324,9 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_bi_classify,
         mock_n_classify,
     ):
+        sdg_number = 1
         mock_bi_classify.return_value = True
-        mock_n_classify.return_value = [self.test_sdg]
+        mock_n_classify.return_value = [sdg_number]
 
         doc_test_id = uuid.uuid4()
 
@@ -369,10 +372,26 @@ class TestDocumentClassifier(unittest.TestCase):
             embedding_model_name="test",
             embedding_model_id=uuid.uuid4(),
         )
+        biclassif_test_id = uuid4()
+        biclassif_test = BiClassifierModel(
+            title="test_bi", lang="en", id=biclassif_test_id
+        )
+        nclassif_test_id = uuid4()
+        nclassif_test = NClassifierModel(title="test_n", lang="en", id=nclassif_test_id)
+
+        sdg_test = Sdg(
+            slice_id=slice_test_id,
+            sdg_number=sdg_number,
+            bi_classifier_model_id=biclassif_test_id,
+            n_classifier_model_id=nclassif_test_id,
+        )
 
         test_session.add(corpus_test)
+        test_session.add(biclassif_test)
+        test_session.add(nclassif_test)
         test_session.add(doc_test)
         test_session.add(slice_test)
+        test_session.add(sdg_test)
         test_session.commit()
 
         document_classifier.main()
@@ -383,4 +402,4 @@ class TestDocumentClassifier(unittest.TestCase):
         self.assertEqual(state_in_db[0].title, Step.DOCUMENT_CLASSIFIED_SDG.value)
 
         sdg_in_db = session.query(Sdg).all()
-        self.assertEqual(sdg_in_db[0].sdg_number, [self.test_sdg])
+        self.assertEqual(sdg_in_db[0].sdg_number, [self.test_sdg.sdg_number])

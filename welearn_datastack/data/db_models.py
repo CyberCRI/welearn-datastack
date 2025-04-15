@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import StrEnum, auto
+from enum import StrEnum, auto  # type: ignore
 from typing import Any
 from uuid import UUID
 
