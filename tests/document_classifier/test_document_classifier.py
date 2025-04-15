@@ -332,6 +332,7 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_bi_classify.return_value = True
         mock_n_classify.return_value = [
             Sdg(
+                id=uuid4(),
                 sdg_number=sdg_number,
                 slice_id=slice_test_id,
                 bi_classifier_model_id=bi_id,
@@ -386,7 +387,6 @@ class TestDocumentClassifier(unittest.TestCase):
         )
 
         biclassif_test = BiClassifierModel(title="test_bi", lang="en", id=bi_id)
-        print("biclassif_test.id =", biclassif_test.id, type(biclassif_test.id))
         nclassif_test = NClassifierModel(title="test_n", lang="en", id=n_id)
 
         test_session.add(nclassif_test)
