@@ -27,7 +27,7 @@ def bi_classify_slices(slices: List[DocumentSlice], classifier_model_name: str) 
     for _slice in slices:
         # ML
         embedding: numpy.ndarray = numpy.frombuffer(
-            bytes(_slice.embedding), dtype=numpy.float32
+            bytes(_slice.embedding), dtype=numpy.float32  # type: ignore
         )
         ds_sdg = bool(classifier_model.predict(embedding.reshape(1, -1)))
         if ds_sdg:
@@ -53,9 +53,14 @@ def n_classify_slices(
     )
     classifier_model = joblib.load(classifier_path)
     for _slice in slices:
+        binary_slice_emb = _slice.embedding
+        if not isinstance(binary_slice_emb, bytes):
+            raise ValueError(
+                f"Embedding must be of type bytes, received type: {type(binary_slice_emb).__name__}"
+            )
         # ML
         embedding: numpy.ndarray = numpy.frombuffer(
-            bytes(_slice.embedding), dtype=numpy.float32
+            bytes(binary_slice_emb), dtype=numpy.float32
         )
         ds_sdg = classifier_model.predict(embedding.reshape(1, -1))[0]
         logger.debug("Slice classified as SDG: %s", ds_sdg)
