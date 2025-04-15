@@ -433,7 +433,6 @@ class Sdg(Base):
         primary_key=True,
         nullable=False,
         server_default="gen_random_uuid()",
-        default=uuid4(),
     )
     slice_id = mapped_column(
         types.Uuid,
