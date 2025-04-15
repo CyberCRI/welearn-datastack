@@ -1,7 +1,8 @@
 from datetime import datetime
+from email.policy import default
 from enum import StrEnum, auto  # type: ignore
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import ForeignKey, LargeBinary, UniqueConstraint, func, types
 from sqlalchemy.dialects.postgresql import ENUM, TIMESTAMP
@@ -428,7 +429,11 @@ class Sdg(Base):
     __table_args__ = {"schema": DbSchemaEnum.DOCUMENT_RELATED.value}
 
     id: Mapped[UUID] = mapped_column(
-        types.Uuid, primary_key=True, nullable=False, server_default="gen_random_uuid()"
+        types.Uuid,
+        primary_key=True,
+        nullable=False,
+        server_default="gen_random_uuid()",
+        default=uuid4(),
     )
     slice_id = mapped_column(
         types.Uuid,
