@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import List
 
 import joblib  # type: ignore
@@ -66,7 +67,9 @@ def n_classify_slices(
             ret = ds_sdg.argmax() + 1
             try:
                 ret = int(ret)
-                doc_sdgs.append(Sdg(slice_id=_slice.id, sdg_number=ret))
+                doc_sdgs.append(
+                    Sdg(slice_id=_slice.id, sdg_number=ret, id=uuid.uuid4())
+                )
             except ValueError:
                 logger.error("SDG is not an integer: %s", ret)
 

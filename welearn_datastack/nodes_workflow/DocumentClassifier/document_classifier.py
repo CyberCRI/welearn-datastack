@@ -103,10 +103,8 @@ def main() -> None:
                     doc_sdgs.append(
                         Sdg(
                             slice_id=local_slice.id,
+                            id=uuid.uuid4(),
                             sdg_number=sdg_number,
-                            id=uuid4(),
-                            bi_classifier_model_id=uuid4(),
-                            n_classifier_model_id=uuid4(),
                         )
                     )
         else:
@@ -130,7 +128,7 @@ def main() -> None:
     logger.info("Updating SDGs")
     db_session.add_all(specific_sdgs)
 
-    # Create process states
+    # Create process states 0
     logger.info("Creating process states")
     # Create process state for Non sdg docs
     for doc_id in non_sdg_docs_ids:
