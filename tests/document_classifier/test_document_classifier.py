@@ -325,8 +325,19 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_n_classify,
     ):
         sdg_number = 1
+        bi_id = uuid4()
+        n_id = uuid4()
+        slice_test_id = uuid.uuid4()
+
         mock_bi_classify.return_value = True
-        mock_n_classify.return_value = [sdg_number]
+        mock_n_classify.return_value = [
+            Sdg(
+                sdg_number=sdg_number,
+                slice_id=slice_test_id,
+                bi_classifier_model_id=bi_id,
+                n_classifier_model_id=n_id,
+            )
+        ]
 
         doc_test_id = uuid.uuid4()
 
@@ -340,7 +351,9 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_retrieve_ids.return_value = [doc_test_id]
         session = test_session
         mock_create_session.return_value = session
-        mock_retrieve_models.return_value = [Mock(lang="en", title="model_name")]
+        mock_retrieve_models.return_value = [
+            Mock(lang="en", title="model_name", id=uuid4())
+        ]
 
         corpus_source_name = "test_corpus"
 
@@ -362,7 +375,6 @@ class TestDocumentClassifier(unittest.TestCase):
             trace=1,
         )
 
-        slice_test_id = uuid.uuid4()
         slice_test = DocumentSlice(
             id=slice_test_id,
             document_id=doc_test.id,
@@ -372,26 +384,18 @@ class TestDocumentClassifier(unittest.TestCase):
             embedding_model_name="test",
             embedding_model_id=uuid.uuid4(),
         )
-        biclassif_test_id = uuid4()
-        biclassif_test = BiClassifierModel(
-            title="test_bi", lang="en", id=biclassif_test_id
-        )
-        nclassif_test_id = uuid4()
-        nclassif_test = NClassifierModel(title="test_n", lang="en", id=nclassif_test_id)
 
-        sdg_test = Sdg(
-            slice_id=slice_test_id,
-            sdg_number=sdg_number,
-            bi_classifier_model_id=biclassif_test_id,
-            n_classifier_model_id=nclassif_test_id,
-        )
+        biclassif_test = BiClassifierModel(title="test_bi", lang="en", id=bi_id)
+        print("biclassif_test.id =", biclassif_test.id, type(biclassif_test.id))
+        nclassif_test = NClassifierModel(title="test_n", lang="en", id=n_id)
+
+        test_session.add(nclassif_test)
+        test_session.add(biclassif_test)
+        test_session.commit()
 
         test_session.add(corpus_test)
-        test_session.add(biclassif_test)
-        test_session.add(nclassif_test)
         test_session.add(doc_test)
         test_session.add(slice_test)
-        test_session.add(sdg_test)
         test_session.commit()
 
         document_classifier.main()
@@ -402,4 +406,4 @@ class TestDocumentClassifier(unittest.TestCase):
         self.assertEqual(state_in_db[0].title, Step.DOCUMENT_CLASSIFIED_SDG.value)
 
         sdg_in_db = session.query(Sdg).all()
-        self.assertEqual(sdg_in_db[0].sdg_number, [self.test_sdg.sdg_number])
+        self.assertEqual(sdg_in_db[0].sdg_number, self.test_sdg.sdg_number)
