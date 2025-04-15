@@ -55,7 +55,9 @@ def n_classify_slices(
     for _slice in slices:
         binary_slice_emb = _slice.embedding
         if not isinstance(binary_slice_emb, bytes):
-            raise ValueError()
+            raise ValueError(
+                f"Embedding must be of type bytes, received type: {type(binary_slice_emb).__name__}"
+            )
         # ML
         embedding: numpy.ndarray = numpy.frombuffer(
             bytes(binary_slice_emb), dtype=numpy.float32
