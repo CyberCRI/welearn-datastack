@@ -84,13 +84,16 @@ def main() -> None:
             logger.warning("No bi-classifier model found for document %s", k)
             continue
         logger.info("Bi-classifying document %s with model %s", k, bi_model)
-        if not bi_classify_slices(doc_slices, bi_model):  # type: ignore
-            # No SDG found, process it later
-            non_sdg_docs_ids.add(k)
-            continue
 
         if not isinstance(doc_slices[0].document.details, dict):
             raise ValueError(f"Details is not a dict in slice {doc_slices[0].id}")
+
+        externaly_classified_flag = key_external_sdg in doc_slices[0].document.details
+
+        if not externaly_classified_flag and not bi_classify_slices(doc_slices, bi_model):  # type: ignore
+            # No SDG found, process it later
+            non_sdg_docs_ids.add(k)
+            continue
 
         external_sdgs = doc_slices[0].document.details.get(key_external_sdg, [])
         if external_sdgs:
@@ -108,7 +111,7 @@ def main() -> None:
                         )
                     )
         else:
-            doc_sdgs = n_classify_slices(doc_slices, n_model_by_lang.get(lang))  # type: ignore
+            doc_sdgs = n_classify_slices(doc_slices, n_model_by_lang.get(lang), force_pass=externaly_classified_flag)  # type: ignore
         if not doc_sdgs:
             # No SDG found, process it later
             non_sdg_docs_ids.add(k)

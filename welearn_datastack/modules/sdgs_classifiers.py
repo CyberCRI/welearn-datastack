@@ -37,12 +37,13 @@ def bi_classify_slices(slices: List[DocumentSlice], classifier_model_name: str) 
 
 
 def n_classify_slices(
-    slices: List[DocumentSlice], classifier_model_name: str
+    slices: List[DocumentSlice], classifier_model_name: str, force_pass: bool = False
 ) -> List[Sdg]:
     """
     Classify a list of slices of a document
     :param slices: Slices of a document
     :param classifier_model_name: Name of the classifier to use to classify the slices
+    :param force_pass: If this parameters is set on True every slices are identified with the most representative SDGs
     :return: List of DocumentSlice with SDGs they belong to updated
     """
     # Load model
@@ -63,9 +64,20 @@ def n_classify_slices(
         embedding: numpy.ndarray = numpy.frombuffer(
             bytes(binary_slice_emb), dtype=numpy.float32
         )
-        ds_sdg = classifier_model.predict(embedding.reshape(1, -1))[0]
+        tmp_ds_sdg = classifier_model.predict(embedding.reshape(1, -1))
+        ds_sdg = tmp_ds_sdg[0]
         logger.debug("Slice classified as SDG: %s", ds_sdg)
         if ds_sdg.sum() == 1:
+            ret = ds_sdg.argmax() + 1
+            try:
+                ret = int(ret)
+                doc_sdgs.append(
+                    Sdg(slice_id=_slice.id, sdg_number=ret, id=uuid.uuid4())
+                )
+            except ValueError:
+                logger.error("SDG is not an integer: %s", ret)
+        elif force_pass:
+            ds_sdg = classifier_model.predict_proba(embedding.reshape(1, -1))
             ret = ds_sdg.argmax() + 1
             try:
                 ret = int(ret)
