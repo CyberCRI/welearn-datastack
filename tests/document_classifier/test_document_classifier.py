@@ -99,10 +99,10 @@ class TestDocumentClassifier(unittest.TestCase):
         del self.test_session
 
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slice"
     )
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slice"
     )
     @patch(
         "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.retrieve_models"
@@ -122,7 +122,7 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_n_classify,
     ):
         mock_bi_classify.return_value = True
-        mock_n_classify.return_value = [self.test_sdg]
+        mock_n_classify.return_value = self.test_sdg
 
         mock_retrieve_ids.return_value = [self.doc_test_id]
         session = self.test_session
@@ -139,10 +139,10 @@ class TestDocumentClassifier(unittest.TestCase):
         self.assertEqual(sdg_in_db[0].sdg_number, self.test_sdg_number)
 
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slice"
     )
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slice"
     )
     @patch(
         "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.retrieve_models"
@@ -179,10 +179,10 @@ class TestDocumentClassifier(unittest.TestCase):
         self.assertEqual(state_in_db[0].title, Step.DOCUMENT_CLASSIFIED_NON_SDG.value)
 
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slice"
     )
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slice"
     )
     @patch(
         "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.retrieve_models"
@@ -216,10 +216,10 @@ class TestDocumentClassifier(unittest.TestCase):
         self.assertEqual(state_in_db[0].title, Step.DOCUMENT_CLASSIFIED_NON_SDG.value)
 
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slice"
     )
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slice"
     )
     @patch(
         "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.retrieve_models"
@@ -302,10 +302,10 @@ class TestDocumentClassifier(unittest.TestCase):
         self.assertEqual(sdg_in_db[0].sdg_number, 10)
 
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.n_classify_slice"
     )
     @patch(
-        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slices"
+        "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.bi_classify_slice"
     )
     @patch(
         "welearn_datastack.nodes_workflow.DocumentClassifier.document_classifier.retrieve_models"

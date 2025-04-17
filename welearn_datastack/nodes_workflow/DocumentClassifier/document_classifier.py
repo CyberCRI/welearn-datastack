@@ -12,7 +12,9 @@ from welearn_datastack.data.enumerations import MLModelsType, Step
 from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.modules.sdgs_classifiers import (
+    bi_classify_slice,
     bi_classify_slices,
+    n_classify_slice,
     n_classify_slices,
 )
 from welearn_datastack.utils_.database_utils import create_db_session
@@ -68,8 +70,8 @@ def main() -> None:
     logger.info("'%s' N-classifier models were retrieved", len(n_models))
 
     # Classify slices
-    non_sdg_docs_ids: Set = set()
-    sdg_docs_ids: List[UUID] = []
+    non_sdg_docs_ids: set[UUID] = set()
+    sdg_docs_ids: set[UUID] = set()
     specific_sdgs: List[Sdg] = []
     logger.info("Starting bi-classification")
     key_external_sdg = "external_sdg"
@@ -85,40 +87,23 @@ def main() -> None:
             continue
         logger.info("Bi-classifying document %s with model %s", k, bi_model)
 
-        if not isinstance(doc_slices[0].document.details, dict):
-            raise ValueError(f"Details is not a dict in slice {doc_slices[0].id}")
-
-        externaly_classified_flag = key_external_sdg in doc_slices[0].document.details
-
-        if not externaly_classified_flag and not bi_classify_slices(doc_slices, bi_model):  # type: ignore
-            # No SDG found, process it later
-            non_sdg_docs_ids.add(k)
+        n_model = n_model_by_lang.get(lang)
+        if not n_model:
+            logger.warning("No n-classifier model found for document %s", k)
             continue
+        logger.info("n-classifying document %s with model %s", k, n_model)
 
-        external_sdgs = doc_slices[0].document.details.get(key_external_sdg, [])
-        if external_sdgs:
-            logger.info(
-                f"Document {doc_slices[0].document_id} was externally classified"
-            )
-            doc_sdgs: List[Sdg] = []
-            for sdg_number in doc_slices[0].document.details[key_external_sdg]:
-                for local_slice in doc_slices:
-                    doc_sdgs.append(
-                        Sdg(
-                            slice_id=local_slice.id,
-                            id=uuid.uuid4(),
-                            sdg_number=sdg_number,
-                        )
-                    )
-        else:
-            doc_sdgs = n_classify_slices(doc_slices, n_model_by_lang.get(lang), force_pass=externaly_classified_flag)  # type: ignore
-        if not doc_sdgs:
-            # No SDG found, process it later
-            non_sdg_docs_ids.add(k)
-            continue
-
-        sdg_docs_ids.append(k)
-        specific_sdgs.extend(doc_sdgs)
+        for s in doc_slices:
+            externaly_classified_flag = key_external_sdg in s.document.details
+            if bi_classify_slice(slice_=s, classifier_model_name=bi_model):
+                specific_sdg = n_classify_slice(_slice=s, classifier_model_name=n_model)
+                if not specific_sdg:
+                    non_sdg_docs_ids.add(k)
+                    continue
+                specific_sdgs.append(specific_sdg)
+                sdg_docs_ids.add(k)
+            else:
+                non_sdg_docs_ids.add(k)
 
     # Delete old slices
     logger.info("Delete old SDGs")
