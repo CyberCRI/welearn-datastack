@@ -94,14 +94,27 @@ def main() -> None:
         logger.info("n-classifying document %s with model %s", k, n_model)
 
         for s in doc_slices:
+            if not isinstance(s.document.details, dict):
+                logger.error(f"Details is not a dict in this slice :{s.id}")
+                raise ValueError(f"Details is not a dict in this slice :{s.id}")
+
             externaly_classified_flag = key_external_sdg in s.document.details
             if bi_classify_slice(slice_=s, classifier_model_name=bi_model):
-                specific_sdg = n_classify_slice(_slice=s, classifier_model_name=n_model)
-                if not specific_sdg:
-                    non_sdg_docs_ids.add(k)
-                    continue
-                specific_sdgs.append(specific_sdg)
-                sdg_docs_ids.add(k)
+                if externaly_classified_flag:
+                    sdg_docs_ids.add(k)
+                    for ext_sdg in s.document.details.get(key_external_sdg, []):
+                        specific_sdgs.append(
+                            Sdg(slice_id=s.id, sdg_number=ext_sdg, id=uuid4())
+                        )
+                else:
+                    specific_sdg = n_classify_slice(
+                        _slice=s, classifier_model_name=n_model
+                    )
+                    if not specific_sdg:
+                        non_sdg_docs_ids.add(k)
+                        continue
+                    specific_sdgs.append(specific_sdg)
+                    sdg_docs_ids.add(k)
             else:
                 non_sdg_docs_ids.add(k)
 
