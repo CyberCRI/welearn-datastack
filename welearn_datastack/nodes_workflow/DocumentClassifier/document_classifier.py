@@ -132,7 +132,7 @@ def main() -> None:
     logger.info("Updating SDGs")
     db_session.add_all(specific_sdgs)
 
-    # Create process states 0
+    # Create process states
     logger.info("Creating process states")
     # Create process state for Non sdg docs
     for doc_id in non_sdg_docs_ids:
