@@ -453,12 +453,10 @@ class Sdg(Base):
     bi_classifier_model_id = mapped_column(
         types.Uuid,
         ForeignKey(f"{DbSchemaEnum.CORPUS_RELATED.value}.bi_classifier_model.id"),
-        nullable=False,
     )
     n_classifier_model_id = mapped_column(
         types.Uuid,
         ForeignKey(f"{DbSchemaEnum.CORPUS_RELATED.value}.n_classifier_model.id"),
-        nullable=False,
     )
     bi_classifier_model: Mapped["BiClassifierModel"] = relationship()
     n_classifier_model: Mapped["NClassifierModel"] = relationship()
