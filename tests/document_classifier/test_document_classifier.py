@@ -330,15 +330,13 @@ class TestDocumentClassifier(unittest.TestCase):
         slice_test_id = uuid.uuid4()
 
         mock_bi_classify.return_value = True
-        mock_n_classify.return_value = [
-            Sdg(
-                id=uuid4(),
-                sdg_number=sdg_number,
-                slice_id=slice_test_id,
-                bi_classifier_model_id=bi_id,
-                n_classifier_model_id=n_id,
-            )
-        ]
+        mock_n_classify.return_value = Sdg(
+            id=uuid4(),
+            sdg_number=sdg_number,
+            slice_id=slice_test_id,
+            bi_classifier_model_id=bi_id,
+            n_classifier_model_id=n_id,
+        )
 
         doc_test_id = uuid.uuid4()
 
