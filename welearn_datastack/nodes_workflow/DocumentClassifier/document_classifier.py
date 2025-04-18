@@ -98,7 +98,10 @@ def main() -> None:
                 logger.error(f"Details is not a dict in this slice :{s.id}")
                 raise ValueError(f"Details is not a dict in this slice :{s.id}")
 
-            externaly_classified_flag = key_external_sdg in s.document.details
+            externaly_classified_flag = (
+                key_external_sdg in s.document.details
+                and s.document.details[key_external_sdg]
+            )
             if bi_classify_slice(slice_=s, classifier_model_name=bi_model):
                 if externaly_classified_flag:
                     sdg_docs_ids.add(k)
