@@ -2,20 +2,23 @@ import logging
 import os
 import uuid
 from itertools import groupby
-from typing import List, Set
+from typing import List
 from uuid import UUID, uuid4
 
 from sqlalchemy.orm import Session
 
-from welearn_datastack.data.db_models import DocumentSlice, ProcessState, Sdg
+from welearn_datastack.data.db_models import (
+    DocumentSlice,
+    ProcessState,
+    Sdg,
+    WeLearnDocument,
+)
 from welearn_datastack.data.enumerations import MLModelsType, Step
 from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.modules.sdgs_classifiers import (
     bi_classify_slice,
-    bi_classify_slices,
     n_classify_slice,
-    n_classify_slices,
 )
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
@@ -75,7 +78,7 @@ def main() -> None:
     specific_sdgs: List[Sdg] = []
     logger.info("Starting bi-classification")
     key_external_sdg = "external_sdg"
-    slices_per_docs = sorted(slices, key=lambda x: x.document_id)  # type: ignore
+    slices_per_docs: list[DocumentSlice] = sorted(slices, key=lambda x: x.document_id)  # type: ignore
     for k, g in groupby(slices_per_docs, lambda x: x.document_id):
         doc_slices: List[DocumentSlice] = list(g)  # type: ignore
         lang = doc_slices[0].document.lang
@@ -114,12 +117,13 @@ def main() -> None:
                         _slice=s, classifier_model_name=n_model
                     )
                     if not specific_sdg:
-                        non_sdg_docs_ids.add(k)
                         continue
                     specific_sdgs.append(specific_sdg)
                     sdg_docs_ids.add(k)
-            else:
-                non_sdg_docs_ids.add(k)
+
+    non_sdg_docs_ids = {
+        k.document_id for k in slices_per_docs if k.document_id not in sdg_docs_ids
+    }
 
     # Delete old slices
     logger.info("Delete old SDGs")
