@@ -121,16 +121,35 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_bi_classify,
         mock_n_classify,
     ):
-        mock_bi_classify.return_value = True
+        mock_bi_classify.side_effect = [True, False]
         mock_n_classify.return_value = self.test_sdg
 
         mock_retrieve_ids.return_value = [self.doc_test_id]
         session = self.test_session
+
+        session.add(
+            DocumentSlice(
+                id=uuid4(),
+                document_id=self.doc_test.id,
+                embedding=numpy.array([5, 5, 53]),
+                body="test but not sdg",
+                order_sequence=1,
+                embedding_model_name="test",
+                embedding_model_id=uuid.uuid4(),
+            )
+        )
+
+        session.commit()
+
         mock_create_session.return_value = session
         mock_retrieve_models.return_value = [Mock(lang="en", title="model_name")]
         document_classifier.main()
 
         state_in_db = session.query(ProcessState).all()
+
+        # Check if there is only one process state, because as there is only one document
+        # it must have only one process state
+        self.assertEqual(len(state_in_db), 1)
 
         # There is only one state by doc because the rest of steps were mocked
         self.assertEqual(state_in_db[0].title, Step.DOCUMENT_CLASSIFIED_SDG.value)
