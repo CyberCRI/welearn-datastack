@@ -153,9 +153,7 @@ def delete_points_related_to_document(
 
 
 def convert_slice_in_qdrant_point(
-    slice_to_convert: Type[DocumentSlice],
-    document_sdgs: List[int],
-    slice_sdg: list[int],
+    slice_to_convert: Type[DocumentSlice], document_sdgs: List[int], slice_sdg: int
 ) -> models.PointStruct:
     vector = numpy.frombuffer(
         bytes(slice_to_convert.embedding), dtype=numpy.float32

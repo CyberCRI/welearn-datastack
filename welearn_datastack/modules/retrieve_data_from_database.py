@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Collection, Dict, List, Type
 from uuid import UUID
@@ -357,7 +356,7 @@ def check_process_state_for_documents(
 
 def retrieve_slices_sdgs(
     db_session, slices: Collection[Type[DocumentSlice]]
-) -> Dict[UUID | Column["UUID"], List[int]]:
+) -> Dict[UUID | Column["UUID"], int]:
     """
     Retrieve slices sdgs from a list of slices
 
@@ -371,10 +370,11 @@ def retrieve_slices_sdgs(
         .all()
     )
 
+    if len(slices_sdgs) > len(slices):
+        raise ValueError("There is too much SDGs for the slices")
+
     logger.info(
         "'%s' Slices SDGs were retrieved on '%s' slices", len(slices_sdgs), len(slices)
     )
-    ret = defaultdict(list)
-    for s in slices_sdgs:
-        ret[s[0]].append(s[1])
-    return ret
+
+    return {s[0]: s[1] for s in slices_sdgs}
