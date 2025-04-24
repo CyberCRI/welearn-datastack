@@ -4,6 +4,7 @@ from typing import List
 
 import joblib  # type: ignore
 import numpy
+from sklearn.pipeline import Pipeline
 
 from welearn_datastack.data.db_models import DocumentSlice, Sdg
 from welearn_datastack.data.enumerations import MLModelsType
@@ -71,7 +72,7 @@ def n_classify_slice(_slice: DocumentSlice, classifier_model_name: str) -> Sdg |
     classifier_path = generate_ml_models_path(
         model_type=MLModelsType.N_CLASSIFIER, model_name=classifier_model_name
     )
-    classifier_model = joblib.load(classifier_path)
+    classifier_model: Pipeline = joblib.load(classifier_path)
     binary_slice_emb = _slice.embedding
     if not isinstance(binary_slice_emb, bytes):
         raise ValueError(
