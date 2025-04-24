@@ -97,7 +97,7 @@ def n_classify_slice(
     proba_lst.sort(key=lambda x: x[1], reverse=True)
 
     # If the score is superior to 0
-    sdg_number = proba_lst[0][0] if proba_lst[0][1] > 0 else None
+    sdg_number = proba_lst[0][0] if proba_lst[0][1] > 0.5 else None
     if sdg_number:
         logger.debug(
             f"Slice {_slice.id} is labelized with SDG {proba_lst[0][0]} with {proba_lst[0][1]} score"
