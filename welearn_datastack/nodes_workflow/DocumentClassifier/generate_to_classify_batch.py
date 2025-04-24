@@ -33,6 +33,7 @@ def main() -> None:
     parallelism_threshold: int = int(os.getenv("PARALLELISM_THRESHOLD", 100))
     parallelism_max: int = int(os.getenv("PARALLELISM_URL_MAX", 15))
     batch_urls_directory: str = os.getenv("BATCH_URLS_DIRECTORY", "batch_urls")
+    corpus_name: str = os.getenv("PICK_CORPUS_NAME", "*")
     qty_max_str: str | None = os.getenv("PICK_QTY_MAX", None)
 
     qty_max: int | None = None
@@ -61,6 +62,7 @@ def main() -> None:
             qty_max=qty_max,
             process_titles=[Step.DOCUMENT_VECTORIZED],
             weighed_scope=WeighedScope.DOCUMENT,
+            corpus_name=corpus_name,
         )
     )
     logger.info("'%s' Docsids were retrieved", len(ids_to_batch))
