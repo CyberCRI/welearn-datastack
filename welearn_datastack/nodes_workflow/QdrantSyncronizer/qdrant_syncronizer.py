@@ -94,7 +94,7 @@ def main() -> None:
     for i, chunk in enumerate(qdrant_chunk):
         logger.info("Processing chunk: #%s", i)
         slices: Sequence[Type[DocumentSlice]] = (
-            db_session.query(DocumentSlice)
+            db_session.query(DocumentSlice)  # type: ignore
             .filter(DocumentSlice.document_id.in_(chunk))
             .all()
         )
@@ -144,7 +144,7 @@ def main() -> None:
                     document_slices = slices_per_doc[docid]
                     slices_sdgs = retrieve_slices_sdgs(db_session, document_slices)
                     all_document_sdgs = [
-                        slices_sdgs[s.id]
+                        slices_sdgs[s.id]  # type: ignore
                         for s in document_slices
                         if s.id in slices_sdgs
                     ]
@@ -158,7 +158,7 @@ def main() -> None:
                                 convert_slice_in_qdrant_point(
                                     slice_to_convert=doc_slice,
                                     document_sdgs=accurate_sdgs,
-                                    slice_sdg=slices_sdgs[doc_slice.id],
+                                    slice_sdg=slices_sdgs[doc_slice.id],  # type: ignore
                                 )
                             )
 

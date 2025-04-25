@@ -38,7 +38,7 @@ def classify_documents_per_collection(
     for dslice in slices:
         lang = dslice.document.lang
         model = dslice.embedding_model_name
-        collection_name = f"collection_{lang}_{model.lower()}"
+        collection_name = f"collection_welearn_{lang}_{model.lower()}"
 
         if collection_name not in collections_names_in_qdrant:
             logger.error(

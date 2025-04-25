@@ -59,14 +59,14 @@ class TestQdrantHandler(unittest.TestCase):
         self.client = QdrantClient(":memory:")
 
         self.client.create_collection(
-            collection_name="collection_en_embmodel",
+            collection_name="collection_welearn_en_embmodel",
             vectors_config=models.VectorParams(
                 size=50, distance=models.Distance.COSINE
             ),
         )
 
         self.client.create_collection(
-            collection_name="collection_fr_embmodel",
+            collection_name="collection_welearn_fr_embmodel",
             vectors_config=models.VectorParams(
                 size=50, distance=models.Distance.COSINE
             ),
@@ -83,7 +83,7 @@ class TestQdrantHandler(unittest.TestCase):
         slices = [fake_slice]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
 
-        expected = {"collection_en_embmodel": {fake_slice.document_id}}
+        expected = {"collection_welearn_en_embmodel": {fake_slice.document_id}}
         self.assertEqual(collections_names, expected)
 
     def test_should_handle_multiple_slices_for_same_collection(self):
@@ -101,7 +101,7 @@ class TestQdrantHandler(unittest.TestCase):
         slices = [fake_slice0, fake_slice1, fake_slice2]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
         expected = {
-            "collection_en_embmodel": {doc_id0},
-            "collection_fr_embmodel": {doc_id1},
+            "collection_welearn_en_embmodel": {doc_id0},
+            "collection_welearn_fr_embmodel": {doc_id1},
         }
         self.assertEqual(collections_names, expected)
