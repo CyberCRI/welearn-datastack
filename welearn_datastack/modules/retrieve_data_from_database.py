@@ -311,7 +311,7 @@ def retrieve_models(
         .filter(
             and_(
                 DocumentSlice.document_id.in_(documents_ids),
-                model_table.lang == WeLearnDocument.lang,
+                model_table.lang == WeLearnDocument.lang,  # type: ignore
             )
         )
         .group_by(model_table.title, model_table.lang)

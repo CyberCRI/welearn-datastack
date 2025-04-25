@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import List
 
 import joblib  # type: ignore
@@ -18,20 +19,28 @@ def bi_classify_slices(slices: List[DocumentSlice], classifier_model_name: str) 
     :param slices: Input of welearn sliced containers
     :return: True if SDG, False otherwise
     """
+    for _slice in slices:
+        if bi_classify_slice(
+            slice_=_slice, classifier_model_name=classifier_model_name
+        ):
+            return True
+    return False
+
+
+def bi_classify_slice(slice_: DocumentSlice, classifier_model_name: str) -> bool:
     # Load model
     logger.debug("Loading classifier model %s", classifier_model_name)
     classifier_path = generate_ml_models_path(
         model_type=MLModelsType.BI_CLASSIFIER, model_name=classifier_model_name
     )
     classifier_model = joblib.load(classifier_path)
-    for _slice in slices:
-        # ML
-        embedding: numpy.ndarray = numpy.frombuffer(
-            bytes(_slice.embedding), dtype=numpy.float32
-        )
-        ds_sdg = bool(classifier_model.predict(embedding.reshape(1, -1)))
-        if ds_sdg:
-            return True
+    # ML
+    embedding: numpy.ndarray = numpy.frombuffer(
+        bytes(slice_.embedding), dtype=numpy.float32  # type: ignore
+    )
+    ds_sdg = bool(classifier_model.predict(embedding.reshape(1, -1)))
+    if ds_sdg:
+        return True
     return False
 
 
@@ -47,24 +56,39 @@ def n_classify_slices(
     # Load model
     doc_sdgs = []
 
+    for _slice in slices:
+        ret_sdg = n_classify_slice(
+            _slice=_slice, classifier_model_name=classifier_model_name
+        )
+        if ret_sdg:
+            doc_sdgs.append(ret_sdg)
+
+    return doc_sdgs
+
+
+def n_classify_slice(_slice: DocumentSlice, classifier_model_name: str) -> Sdg | None:
     logger.debug("Loading multiclass classifier model %s", classifier_model_name)
     classifier_path = generate_ml_models_path(
         model_type=MLModelsType.N_CLASSIFIER, model_name=classifier_model_name
     )
     classifier_model = joblib.load(classifier_path)
-    for _slice in slices:
-        # ML
-        embedding: numpy.ndarray = numpy.frombuffer(
-            bytes(_slice.embedding), dtype=numpy.float32
+    binary_slice_emb = _slice.embedding
+    if not isinstance(binary_slice_emb, bytes):
+        raise ValueError(
+            f"Embedding must be of type bytes, received type: {type(binary_slice_emb).__name__}"
         )
-        ds_sdg = classifier_model.predict(embedding.reshape(1, -1))[0]
-        logger.debug("Slice classified as SDG: %s", ds_sdg)
-        if ds_sdg.sum() == 1:
-            ret = ds_sdg.argmax() + 1
-            try:
-                ret = int(ret)
-                doc_sdgs.append(Sdg(slice_id=_slice.id, sdg_number=ret))
-            except ValueError:
-                logger.error("SDG is not an integer: %s", ret)
-
-    return doc_sdgs
+    # ML
+    embedding: numpy.ndarray = numpy.frombuffer(
+        bytes(binary_slice_emb), dtype=numpy.float32
+    )
+    tmp_ds_sdg = classifier_model.predict(embedding.reshape(1, -1))
+    ds_sdg = tmp_ds_sdg[0]
+    logger.debug("Slice classified as SDG: %s", ds_sdg)
+    if ds_sdg.sum() == 1:
+        ret = ds_sdg.argmax() + 1
+        try:
+            ret = int(ret)
+            return Sdg(slice_id=_slice.id, sdg_number=ret, id=uuid.uuid4())
+        except ValueError:
+            logger.error("SDG is not an integer: %s", ret)
+    return None

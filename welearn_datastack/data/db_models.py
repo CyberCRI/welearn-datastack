@@ -1,7 +1,8 @@
 from datetime import datetime
-from enum import StrEnum, auto
+from email.policy import default
+from enum import StrEnum, auto  # type: ignore
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import ForeignKey, LargeBinary, UniqueConstraint, func, types
 from sqlalchemy.dialects.postgresql import ENUM, TIMESTAMP
@@ -428,7 +429,10 @@ class Sdg(Base):
     __table_args__ = {"schema": DbSchemaEnum.DOCUMENT_RELATED.value}
 
     id: Mapped[UUID] = mapped_column(
-        types.Uuid, primary_key=True, nullable=False, server_default="gen_random_uuid()"
+        types.Uuid,
+        primary_key=True,
+        nullable=False,
+        server_default="gen_random_uuid()",
     )
     slice_id = mapped_column(
         types.Uuid,
@@ -449,12 +453,10 @@ class Sdg(Base):
     bi_classifier_model_id = mapped_column(
         types.Uuid,
         ForeignKey(f"{DbSchemaEnum.CORPUS_RELATED.value}.bi_classifier_model.id"),
-        nullable=False,
     )
     n_classifier_model_id = mapped_column(
         types.Uuid,
         ForeignKey(f"{DbSchemaEnum.CORPUS_RELATED.value}.n_classifier_model.id"),
-        nullable=False,
     )
     bi_classifier_model: Mapped["BiClassifierModel"] = relationship()
     n_classifier_model: Mapped["NClassifierModel"] = relationship()

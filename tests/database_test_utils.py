@@ -13,5 +13,5 @@ def handle_schema_with_sqlite(db_engine: Engine):
     :return:
     """
     with db_engine.begin() as conn:
-        for schema_name in DbSchemaEnum:
+        for schema_name in DbSchemaEnum:  # type: ignore
             conn.execute(sqlalchemy.text(f"ATTACH ':memory:' AS {schema_name.value}"))
