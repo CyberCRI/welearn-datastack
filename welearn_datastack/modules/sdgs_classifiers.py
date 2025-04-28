@@ -4,6 +4,7 @@ from typing import List
 
 import joblib  # type: ignore
 import numpy
+from sklearn.pipeline import Pipeline
 
 from welearn_datastack.data.db_models import DocumentSlice, Sdg
 from welearn_datastack.data.enumerations import MLModelsType
@@ -66,12 +67,17 @@ def n_classify_slices(
     return doc_sdgs
 
 
-def n_classify_slice(_slice: DocumentSlice, classifier_model_name: str) -> Sdg | None:
+def n_classify_slice(
+    _slice: DocumentSlice, classifier_model_name: str, forced_sdg: None | list = None
+) -> Sdg | None:
+    if not forced_sdg:
+        forced_sdg = [sdg_n + 1 for sdg_n in range(0, 17)]
+
     logger.debug("Loading multiclass classifier model %s", classifier_model_name)
     classifier_path = generate_ml_models_path(
         model_type=MLModelsType.N_CLASSIFIER, model_name=classifier_model_name
     )
-    classifier_model = joblib.load(classifier_path)
+    classifier_model: Pipeline = joblib.load(classifier_path)
     binary_slice_emb = _slice.embedding
     if not isinstance(binary_slice_emb, bytes):
         raise ValueError(
@@ -81,14 +87,20 @@ def n_classify_slice(_slice: DocumentSlice, classifier_model_name: str) -> Sdg |
     embedding: numpy.ndarray = numpy.frombuffer(
         bytes(binary_slice_emb), dtype=numpy.float32
     )
-    tmp_ds_sdg = classifier_model.predict(embedding.reshape(1, -1))
+    tmp_ds_sdg = classifier_model.predict_proba(embedding.reshape(1, -1))
     ds_sdg = tmp_ds_sdg[0]
-    logger.debug("Slice classified as SDG: %s", ds_sdg)
-    if ds_sdg.sum() == 1:
-        ret = ds_sdg.argmax() + 1
-        try:
-            ret = int(ret)
-            return Sdg(slice_id=_slice.id, sdg_number=ret, id=uuid.uuid4())
-        except ValueError:
-            logger.error("SDG is not an integer: %s", ret)
+
+    # Prepare probability list for score sort
+    proba_lst: list[tuple[int, float]] = [
+        (i + 1, proba) for i, proba in enumerate(ds_sdg) if i + 1 in forced_sdg
+    ]
+    proba_lst.sort(key=lambda x: x[1], reverse=True)
+
+    # If the score is superior to 0.5
+    sdg_number = proba_lst[0][0] if proba_lst[0][1] > 0.5 else None
+    if sdg_number:
+        logger.debug(
+            f"Slice {_slice.id} is labelized with SDG {proba_lst[0][0]} with {proba_lst[0][1]} score"
+        )
+        return Sdg(slice_id=_slice.id, sdg_number=sdg_number, id=uuid.uuid4())
     return None

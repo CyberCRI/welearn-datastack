@@ -106,20 +106,19 @@ def main() -> None:
                 and s.document.details[key_external_sdg]
             )
             if bi_classify_slice(slice_=s, classifier_model_name=bi_model):
-                if externaly_classified_flag:
-                    sdg_docs_ids.add(k)
-                    for ext_sdg in s.document.details.get(key_external_sdg, []):
-                        specific_sdgs.append(
-                            Sdg(slice_id=s.id, sdg_number=ext_sdg, id=uuid4())
-                        )
-                else:
-                    specific_sdg = n_classify_slice(
-                        _slice=s, classifier_model_name=n_model
-                    )
-                    if not specific_sdg:
-                        continue
-                    specific_sdgs.append(specific_sdg)
-                    sdg_docs_ids.add(k)
+                specific_sdg = n_classify_slice(
+                    _slice=s,
+                    classifier_model_name=n_model,
+                    forced_sdg=(
+                        s.document.details[key_external_sdg]
+                        if externaly_classified_flag
+                        else None
+                    ),
+                )
+                if not specific_sdg:
+                    continue
+                specific_sdgs.append(specific_sdg)
+                sdg_docs_ids.add(k)
 
     non_sdg_docs_ids = {
         k.document_id for k in slices_per_docs if k.document_id not in sdg_docs_ids

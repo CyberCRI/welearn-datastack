@@ -257,8 +257,12 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_bi_classify,
         mock_n_classify,
     ):
+        slice_test_id = uuid.uuid4()
+
         mock_bi_classify.return_value = True
-        mock_n_classify.return_value = []
+        mock_n_classify.return_value = Sdg(
+            slice_id=slice_test_id, sdg_number=10, id=uuid4()
+        )
 
         doc_test_id = uuid.uuid4()
 
@@ -294,7 +298,6 @@ class TestDocumentClassifier(unittest.TestCase):
             trace=1,
         )
 
-        slice_test_id = uuid.uuid4()
         slice_test = DocumentSlice(
             id=slice_test_id,
             document_id=doc_test.id,
