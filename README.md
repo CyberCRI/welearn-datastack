@@ -101,9 +101,10 @@ alembic upgrade head
 Assuming you want to ingest corpus "wikipedia" and "PLOS" in english and french for the first one and only in english for the second one.
 You're using **all-minilm-l6-v2** vectorizer for english and **sentence-camembert-base** for the french.
 You need to create the following collections in qdrant:
-- collection_wikipedia_en_all-minilm-l6-v2_v0
-- collection_wikipedia_fr_sentence-camembert-base_v0
-- collection_plos_en_all-minilm-l6-v2_v0
+- collection_welearn_en_all-minilm-l6-v2_v0
+- collection_welearn_fr_sentence-camembert-base_v0
+
+And for retrieving data from specific corpus you must use the `document_corpus` in payload field as it's written in [qdrant documentation](https://qdrant.tech/documentation/guides/multiple-partitions/).
 
 Command for [create collection](https://qdrant.tech/documentation/concepts/collections/#create-a-collection) :
 ```

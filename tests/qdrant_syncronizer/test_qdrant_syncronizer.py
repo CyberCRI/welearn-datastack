@@ -34,22 +34,12 @@ class TestQdrantSyncronizer(unittest.TestCase):
         self.client = QdrantClient(":memory:")
 
         self.client.create_collection(
-            collection_name="collection_corpus_en_embmodel_v0",
+            collection_name="collection_welearn_en_embmodel",
             vectors_config=models.VectorParams(size=5, distance=models.Distance.COSINE),
         )
 
         self.client.create_collection(
-            collection_name="collection_corpus_en_embmodel_v1",
-            vectors_config=models.VectorParams(size=5, distance=models.Distance.COSINE),
-        )
-
-        self.client.create_collection(
-            collection_name="collection_corpus_fr_embmodel_v1",
-            vectors_config=models.VectorParams(size=5, distance=models.Distance.COSINE),
-        )
-
-        self.client.create_collection(
-            collection_name="collection_corpus_en_embmodel_v2",
+            collection_name="collection_welearn_fr_embmodel",
             vectors_config=models.VectorParams(size=5, distance=models.Distance.COSINE),
         )
 
@@ -205,15 +195,8 @@ class TestQdrantSyncronizer(unittest.TestCase):
 
         self.assertEqual(Step.DOCUMENT_IN_QDRANT.value, most_recent_state.title)
 
-        for i in range(0, 2):
-            ret_values_from_qdrant = self.client.scroll(
-                collection_name=f"collection_corpus_en_embmodel_v{i}", limit=100
-            )
-
-            self.assertEqual(0, len(ret_values_from_qdrant[0]))
-
         ret_values_from_qdrant = self.client.scroll(
-            collection_name=f"collection_corpus_en_embmodel_v2",
+            collection_name=f"collection_welearn_en_embmodel",
             limit=100,
             with_vectors=True,
         )
