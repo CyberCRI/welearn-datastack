@@ -5,6 +5,7 @@ from datetime import datetime
 from itertools import batched
 from typing import Any, Dict, List, Tuple
 
+from langdetect import detect
 from pypdf import PdfReader
 
 from welearn_datastack.constants import (
@@ -205,7 +206,6 @@ class OpenAlexCollector(IPluginRESTCollector):
     ) -> ScrapedWeLearnDocument:
         document_title = to_convert_json["title"]
         document_url = to_convert_json["ids"]["openalex"]
-        document_lang = to_convert_json["language"]
         document_desc = self._remove_useless_first_word(
             string_to_clear=self._invert_abstract(
                 to_convert_json["abstract_inverted_index"]
@@ -227,6 +227,7 @@ class OpenAlexCollector(IPluginRESTCollector):
                     f"PDF retrievement error, use description as content: {e}"
                 )
                 pdf_flag = False
+        document_lang = detect(document_content)
 
         document_corpus = self.related_corpus
         publication_date = int(

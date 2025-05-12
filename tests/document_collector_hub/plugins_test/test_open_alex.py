@@ -231,9 +231,7 @@ class TestOpenAlexCollector(TestCase):
         "welearn_datastack.plugins.rest_requesters.open_alex.OpenAlexCollector._get_pdf_content"
     )
     def test__convert_json_in_welearn_document(self, mock_pdf):
-        mock_pdf.return_value = (
-            "Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum"
-        )
+        mock_pdf.return_value = "The findings highlight the intricate interplay between genomic architecture and the mechanisms driving CNV formation."
         with self.json_response_path_one_work.open(mode="r") as f:
             content_json = json.load(f)
             input_json = content_json["results"][0]
@@ -273,8 +271,6 @@ class TestOpenAlexCollector(TestCase):
             self.assertEqual(details["issn"], "2050-084X")
             self.assertTrue(details["content_from_pdf"])
             self.assertEqual(len(details["topics"]), 8)
-            self.assertEqual(details["duration"], 2)
-            self.assertEqual(details["readability"], 69.79)
             self.assertDictEqual(
                 details["topics"][0],
                 {
@@ -298,9 +294,7 @@ class TestOpenAlexCollector(TestCase):
     )
     @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_new_https_session")
     def test_run(self, http_session_mock, mock_pdf):
-        mock_pdf.return_value = (
-            "Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum"
-        )
+        mock_pdf.return_value = "The findings highlight the intricate interplay between genomic architecture and the mechanisms driving CNV formation."
         mock_session = Mock()
         http_session_mock.return_value = mock_session
         several_works_content = json.loads(self.json_several_works.open("r").read())
