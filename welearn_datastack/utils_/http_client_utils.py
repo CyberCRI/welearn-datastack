@@ -23,5 +23,5 @@ def get_new_https_session(retry_total: int = 10):
     # Create a new session object
     session = requests.Session()
     session.mount("https://", adapter)
-    session.headers = HEADERS
+    session.headers = HEADERS  # type: ignore
     return session

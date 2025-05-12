@@ -9,14 +9,11 @@ from pypdf import PdfReader
 from urllib3 import Retry
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HAL_URL_BASE
-from welearn_datastack.data.enumerations import DeletePart
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.exceptions import NoContent, PDFPagesSizeExceedLimit
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
-    delete_pages,
-    delete_redundant_content,
     extract_txt_from_pdf,
     large_pages_size_flag,
     remove_hyphens,
@@ -271,24 +268,13 @@ class HALCollector(IPluginRESTCollector):
                 f"Limit is {self.pdf_size_page_limit} and pages are {sizes}"
             )
 
-        pdf_content, ref_content = extract_txt_from_pdf(reader=reader)
+        pdf_content = extract_txt_from_pdf(reader=reader)
 
         # Delete non printable characters
         pdf_content = [
             [delete_non_printable_character(word) for word in page]
             for page in pdf_content
         ]
-
-        # Delete before the introduction
-        delete_pages(pdf_content, DeletePart.before, "introduction", ref_content)
-
-        # Delete after the references
-        synonym = ["references", "bibliography", "bibliographie", "références"]
-        for word in synonym:
-            delete_pages(pdf_content, DeletePart.after, word, ref_content)
-
-        # Delete redondant content
-        delete_redundant_content(pdf_content)
 
         pages = []
         for content in pdf_content:

@@ -90,7 +90,7 @@ class OAPenCollector(IPluginRESTCollector):
 
         if size_flag:
             raise PDFPagesSizeExceedLimit()
-        pdf_content, ref_content = extract_txt_from_pdf(reader=reader)
+        pdf_content = extract_txt_from_pdf(reader=reader)
 
         # Delete non printable characters
         pdf_content = [
