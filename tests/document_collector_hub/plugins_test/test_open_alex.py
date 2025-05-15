@@ -33,7 +33,8 @@ class TestOpenAlexCollector(TestCase):
             / "resources/open_alex_response_several_works_1.json"
         )
         self.pdf: Path = (
-            Path(__file__).parent.parent / "resources/file_plugin_input/hal_pdf.pdf"
+            Path(__file__).parent.parent
+            / "resources/file_plugin_input/pages_with_headers_and_footers_pdf.pdf"
         )
 
     def test__invert_abstract(self):
@@ -83,11 +84,14 @@ class TestOpenAlexCollector(TestCase):
         tested_result = self.openalexColector._get_pdf_content("https://example.org/1")
         self.assertTrue(
             tested_result.startswith(
-                "Arbovirus-Derived piRNAs Exhibit a Ping-Pong Signature in Mosquito Cells"
+                "2.2. Measurements of Fiber Parameters Small pieces were extracted from various positions on the strip."
             )
         )
-        print(tested_result)
-        self.assertTrue(tested_result.endswith("Volume 7 | Issue 1 | e30861"))
+        self.assertTrue(
+            tested_result.endswith(
+                "and mechanical properties to provide additional information regarding these areas of study and growth conditions."
+            )
+        )
 
     @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_new_https_session")
     def test_get_pdf_content_size_limit_error(self, http_session_mock):

@@ -1,11 +1,10 @@
 import logging
-from copy import deepcopy
+from difflib import SequenceMatcher
+from statistics import mean
 from typing import List, Tuple
 
 from pypdf import PdfReader
-
-from welearn_datastack.data.enumerations import DeletePart
-from welearn_datastack.data.pdf_body_info import PDFBodyInfo
+from refinedoc.refined_document import RefinedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -32,162 +31,36 @@ def large_pages_size_flag(reader: PdfReader, limit: int) -> Tuple[List[int], boo
     return ret, flag
 
 
-def extract_txt_from_pdf(reader: PdfReader) -> Tuple[List[List[str]], List[List[str]]]:
+def extract_txt_from_pdf(
+    reader: PdfReader, remove_headers: bool = True, remove_footers: bool = True
+) -> List[List[str]]:
     """
     Extract the text from a PDF document and return it as a list of strings for each page of the document and a list of
     strings for each page for a filtered document and the reference document (extracted with PyPDF)
 
     :param reader: the PDF reader object
-    :return: a tuple containing the extracted & filtered text and the reference text
+    :return: a tuple containing the extracted & filtered text
     """
-    pdf_content = []
-    ref_content = []
-    number_of_pages = len(reader.pages)
-    body_info = PDFBodyInfo(pdf_reader=reader)
+    pdf_content: List[List[str]] = []
+    for page in reader.pages:
+        text = page.extract_text().split("\n")
+        page_content = [t.strip() for t in text if t.strip()]
+        pdf_content.append(page_content)
 
-    for i in range(number_of_pages):
-        page = reader.pages[i]
-        parts: List[str] = []
+    refined_pdf_content = RefinedDocument(content=pdf_content)
 
-        def get_text(text, cm, tm, font_dict, font_size):
-            """
-            Helper method used by visitor text to get the text according a set of filter
-
-            Parameters
-            ----------
-            text : str
-                the text of the character
-            cm : List[float]
-                the character matrix
-            tm : List[float]
-                the text matrix
-            font_dict : Dict
-                the font dictionary
-            font_size : float
-                the font size
-            """
-
-            character_height = round(font_size, 0)
-            min_height = min(body_info.body_range)
-
-            # x and y can be found in these two matrix without any logic
-            x = round(max([cm[4], tm[4]]), 0)
-            y = round(max([cm[5], tm[5]]), 0)
-
-            # Filters :
-            # Check if the character height is in the body range
-            # Check if the text is not empty
-            # Check if the text is in the body position
-            if (
-                character_height >= min_height
-                and text != ""
-                and x >= body_info.most_used_x
-                and body_info.margin_top_y(page_number=i)
-                >= y
-                >= body_info.margin_bottom_y(page_number=i)
-            ):
-                parts.append(text)
-
-        reference_text = page.extract_text(
-            orientations=0,
-            visitor_text=get_text,
-            space_width=200,
-            layout_mode_space_vertically=False,
-        )
-
-        extracted_text = " ".join(parts)
-        extracted_text.replace("- ", "")
-        pdf_content.append(extracted_text.split("\n"))
-        ref_content.append(reference_text.split("\n"))
-
-    return pdf_content, ref_content
-
-
-def delete_pages(
-    pdf_content: List[List[str]],
-    indication: DeletePart,
-    key: str,
-    ref_content: List[List[str]] | None = None,
-):
-    """
-    Delete pages from a PDF document according to a key and an indication
-
-    :param pdf_content: the content of the PDF document
-    :param indication: the indication to delete
-    :param key: the key to delete
-    :param ref_content: the reference content of the PDF document
-
-    :return: The pointer is directly modified
-    """
-    if not ref_content:
-        ref_content = pdf_content
-
-    for page_number in range(len(ref_content)):
-        messy_content = deepcopy(ref_content[page_number])
-        content = [word.lower().strip() for word in messy_content]
-
-        key = key.lower().strip()
-        if key in content:
-            if indication == DeletePart.before:
-                # Delete even in the current page
-                key_index = content.index(key)
-                del pdf_content[page_number][: key_index + 1]
-                del ref_content[page_number][: key_index + 1]
-
-                # Delete useless pages
-                for i in range(page_number):
-                    del pdf_content[0]
-                    del ref_content[0]
-
-            elif indication == DeletePart.after:
-                # Delete even in the current page
-                key_index = content.index(key)
-                del pdf_content[page_number][key_index:]
-                del ref_content[page_number][key_index:]
-
-                # Delete useless pages
-                del pdf_content[page_number + 1 :]
-                del ref_content[page_number + 1 :]
-            break
+    return refined_pdf_content.body
 
 
 def delete_non_printable_character(text: str) -> str:
     """
-    Delete non printable characters from a text
+    Delete non-printable characters from a text
 
     :param text: the text to clean
 
     :return: the cleaned text
     """
     return "".join([c for c in text if c.isprintable()])
-
-
-def delete_redundant_content(pdf_content: List[List[str]]) -> List[List[str]]:
-    """
-    Delete redundant content from a PDF document and try to identify dynamic content wich is in great part redundant
-
-    :param pdf_content: the content of the PDF document
-    :return: the filtered content
-    """
-    first_page = pdf_content[0]
-    delete_anchor: List[Tuple[int, int]] = []
-    for line in first_page:
-        for page in pdf_content[1:]:
-            if first_page.index(line) == len(first_page) - 1:
-                current_line = line.replace(" 1 ", f" {pdf_content.index(page) + 1} ")
-            else:
-                current_line = line
-            if current_line in page:
-                delete_anchor.append(
-                    (pdf_content.index(page), page.index(current_line))
-                )
-            else:
-                break
-
-    for page_number, line_index in delete_anchor:
-        del pdf_content[page_number][line_index]
-
-    return pdf_content
 
 
 def replace_ligatures(text: str) -> str:

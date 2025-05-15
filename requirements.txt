@@ -93,6 +93,7 @@ weasel==0.4.1
 Wikipedia-API==0.6.0
 wrapt==1.16.0
 langdetect==1.0.9
+refinedoc==0.0.3
 
 # Tools
 locust

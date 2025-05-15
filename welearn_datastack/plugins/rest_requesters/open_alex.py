@@ -103,7 +103,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             if size_flag:
                 raise PDFPagesSizeExceedLimit(f"PDF page is too heavy {sizes}")
 
-            pdf_content, ref_content = extract_txt_from_pdf(reader=reader)
+            pdf_content = extract_txt_from_pdf(reader=reader)
 
             # Delete non printable characters
             pdf_content = [
@@ -333,7 +333,7 @@ class OpenAlexCollector(IPluginRESTCollector):
                         collected_docs.append(doc)
                     except Exception as e:
                         logger.exception(
-                            f"Error while trying to get contents this url : {result["ids"]["openalex"]}",
+                            f"Error while trying to get contents this url : {result['ids']['openalex']}",
                             e,
                         )
                         error_docs.append(result["ids"]["openalex"])
