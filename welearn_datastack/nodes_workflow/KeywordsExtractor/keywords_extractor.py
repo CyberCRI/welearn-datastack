@@ -12,6 +12,9 @@ from welearn_datastack.data.db_models import (
     WeLearnDocumentKeyword,
 )
 from welearn_datastack.data.enumerations import Step
+from welearn_datastack.modules.embedding_model_helpers import (
+    get_document_embedding_model_name_from_corpus_name,
+)
 from welearn_datastack.modules.keywords_extractor import extract_keywords
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.utils_.database_utils import create_db_session
@@ -63,7 +66,10 @@ def main() -> None:
         db_session.query(WeLearnDocumentKeyword).filter(
             WeLearnDocumentKeyword.welearn_document_id == wld.id
         ).delete()
-        kwds = extract_keywords(wld)
+        embedding_model_from_db = get_document_embedding_model_name_from_corpus_name(
+            session=db_session, corpus_id=wld.corpus_id
+        )
+        kwds = extract_keywords(wld, embedding_model_from_db=embedding_model_from_db)
         for kw in kwds:
             existing_keyword = db_session.query(Keyword).filter_by(keyword=kw).first()
             if not existing_keyword:

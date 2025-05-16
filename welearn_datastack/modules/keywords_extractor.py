@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer  # type: ignore
 from spacy.lang.en import English
 from spacy.lang.fr import French
 
-from welearn_datastack.data.db_models import WeLearnDocument
+from welearn_datastack.data.db_models import EmbeddingModel, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.modules.embedding_model_helpers import (
     get_document_embedding_model_name_from_lang,
@@ -31,13 +31,15 @@ def _get_nlp_model(language: str):
         raise ValueError(f"Unsupported language: {language}")
 
 
-def extract_keywords(document: WeLearnDocument) -> List[str]:
+def extract_keywords(
+    document: WeLearnDocument, embedding_model_from_db: EmbeddingModel
+) -> List[str]:
     """
     Extract keywords from a document description
     """
     ml_path = generate_ml_models_path(
         model_type=MLModelsType.EMBEDDING,
-        model_name=get_document_embedding_model_name_from_lang(lang=document.lang),  # type: ignore
+        model_name=embedding_model_from_db.title,
         extension="",
     )
     embedding_model = load_embedding_model(ml_path.as_posix())

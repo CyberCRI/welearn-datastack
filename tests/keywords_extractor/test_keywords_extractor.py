@@ -1,7 +1,8 @@
 import unittest
+import uuid
 from unittest.mock import MagicMock, patch
 
-from welearn_datastack.data.db_models import WeLearnDocument
+from welearn_datastack.data.db_models import EmbeddingModel, WeLearnDocument
 from welearn_datastack.modules.keywords_extractor import extract_keywords
 
 
@@ -48,8 +49,14 @@ class TestKeywordsExtractor(unittest.TestCase):
             trace=1,
         )
 
+        embedding_model_from_db = EmbeddingModel(
+            id=uuid.uuid4(),
+            title="test_en_model",
+            lang="en",
+        )
+
         # Call the function
-        keywords = extract_keywords(mock_document)
+        keywords = extract_keywords(mock_document, embedding_model_from_db)
 
         # Assertions
         mock_generate_ml_models_path.assert_called_once()
