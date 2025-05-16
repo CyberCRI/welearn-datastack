@@ -3,12 +3,20 @@ import math
 import os
 import re
 from typing import List
+from uuid import UUID
 
 from sentence_transformers import SentenceTransformer  # type: ignore
 from spacy.lang.en import English
 from spacy.lang.fr import French
+from sqlalchemy.orm import Session
 
-from welearn_datastack.data.db_models import DocumentSlice, WeLearnDocument
+from welearn_datastack.data.db_models import (
+    Corpus,
+    CorpusEmbeddingModel,
+    DocumentSlice,
+    EmbeddingModel,
+    WeLearnDocument,
+)
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.exceptions import NoContent, NoModelFoundError
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
@@ -37,14 +45,16 @@ def _get_nlp_model(language: str):
         raise ValueError(f"Unsupported language: {language}")
 
 
-def create_content_slices(document: WeLearnDocument) -> List[DocumentSlice]:
+def create_content_slices(
+    document: WeLearnDocument, embedding_model_from_db: EmbeddingModel
+) -> List[DocumentSlice]:
     """
     Creates slices of the document content and embeds them.
     :return: A list of DocumentSlice objects
     """
     ml_path = generate_ml_models_path(
         model_type=MLModelsType.EMBEDDING,
-        model_name=get_document_embedding_model_name_from_lang(lang=document.lang),  # type: ignore
+        model_name=embedding_model_from_db.title,  # type: ignore
         extension="",
     )
 
@@ -78,10 +88,9 @@ def create_content_slices(document: WeLearnDocument) -> List[DocumentSlice]:
                 embedding=embedding.tobytes(),
                 body=text,
                 order_sequence=i,
-                embedding_model_name=get_document_embedding_model_name_from_lang(
-                    lang=document.lang  # type: ignore
-                ),
+                embedding_model_name=embedding_model_from_db.title,
                 document_id=document.id,
+                embedding_model_id=embedding_model_from_db.id,
             )
         )
     return slices
@@ -105,6 +114,25 @@ def get_document_embedding_model_name_from_lang(lang: str) -> str:
     if embed_model_name_key not in models_name_dict:
         raise NoModelFoundError("No model found for language %s" % lang)
     return models_name_dict.get(embed_model_name_key, "")
+
+
+def get_document_embedding_model_name_from_corpus_name(
+    session: Session, corpus_id: UUID
+) -> EmbeddingModel:
+    """
+    Get the embedding model name for the document according to the corpus name
+    :param session: The database session
+    :param corpus_id: The ID of the corpus to get the embedding model for
+    :return: The embedding model name for the document
+    """
+    cem: CorpusEmbeddingModel | None = (
+        session.query(CorpusEmbeddingModel).filter(Corpus.id == corpus_id).first()
+    )
+
+    if not cem:
+        raise NoModelFoundError(f"No model found for corpus {corpus_id}")
+
+    return cem.embedding_model
 
 
 def load_embedding_model(str_path: str) -> SentenceTransformer:
