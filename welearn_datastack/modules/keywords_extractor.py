@@ -8,10 +8,7 @@ from spacy.lang.fr import French
 
 from welearn_datastack.data.db_models import EmbeddingModel, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
-from welearn_datastack.modules.embedding_model_helpers import (
-    get_document_embedding_model_name_from_lang,
-    load_embedding_model,
-)
+from welearn_datastack.modules.embedding_model_helpers import load_embedding_model
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
 
 logger = logging.getLogger(__name__)
