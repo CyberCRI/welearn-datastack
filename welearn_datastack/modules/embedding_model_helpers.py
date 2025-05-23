@@ -46,7 +46,7 @@ def _get_nlp_model(language: str):
 
 
 def create_content_slices(
-    document: WeLearnDocument, embedding_model_from_db: EmbeddingModel
+    document: WeLearnDocument, embedding_model_name: str, embedding_model_id: UUID
 ) -> List[DocumentSlice]:
     """
     Creates slices of the document content and embeds them.
@@ -54,7 +54,7 @@ def create_content_slices(
     """
     ml_path = generate_ml_models_path(
         model_type=MLModelsType.EMBEDDING,
-        model_name=embedding_model_from_db.title,  # type: ignore
+        model_name=embedding_model_name,  # type: ignore
         extension="",
     )
 
@@ -88,9 +88,9 @@ def create_content_slices(
                 embedding=embedding.tobytes(),
                 body=text,
                 order_sequence=i,
-                embedding_model_name=embedding_model_from_db.title,
+                embedding_model_name=embedding_model_name.title,
                 document_id=document.id,
-                embedding_model_id=embedding_model_from_db.id,
+                embedding_model_id=embedding_model_id,
             )
         )
     return slices
@@ -126,7 +126,9 @@ def get_document_embedding_model_name_from_corpus_name(
     :return: The embedding model name for the document
     """
     cem: CorpusEmbeddingModel | None = (
-        session.query(CorpusEmbeddingModel).filter(CorpusEmbeddingModel.corpus_id == corpus_id).first()
+        session.query(CorpusEmbeddingModel)
+        .filter(CorpusEmbeddingModel.corpus_id == corpus_id)
+        .first()
     )
 
     if not cem:

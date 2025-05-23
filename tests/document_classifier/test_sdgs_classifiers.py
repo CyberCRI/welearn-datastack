@@ -1,13 +1,12 @@
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import numpy
 
-from welearn_datastack.data.db_models import DocumentSlice, Sdg
+from welearn_datastack.data.db_models import DocumentSlice
 from welearn_datastack.modules.sdgs_classifiers import (
     bi_classify_slices,
     n_classify_slice,
-    n_classify_slices,
 )
 
 

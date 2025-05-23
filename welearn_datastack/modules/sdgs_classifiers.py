@@ -45,28 +45,6 @@ def bi_classify_slice(slice_: DocumentSlice, classifier_model_name: str) -> bool
     return False
 
 
-def n_classify_slices(
-    slices: List[DocumentSlice], classifier_model_name: str
-) -> List[Sdg]:
-    """
-    Classify a list of slices of a document
-    :param slices: Slices of a document
-    :param classifier_model_name: Name of the classifier to use to classify the slices
-    :return: List of DocumentSlice with SDGs they belong to updated
-    """
-    # Load model
-    doc_sdgs = []
-
-    for _slice in slices:
-        ret_sdg = n_classify_slice(
-            _slice=_slice, classifier_model_name=classifier_model_name
-        )
-        if ret_sdg:
-            doc_sdgs.append(ret_sdg)
-
-    return doc_sdgs
-
-
 def n_classify_slice(
     _slice: DocumentSlice,
     classifier_model_name: str,

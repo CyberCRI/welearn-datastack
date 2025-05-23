@@ -61,7 +61,7 @@ class TestEmbeddingHelper(TestCase):
             lang="en",
         )
 
-        slices = create_content_slices(test_document, embedding_model_from_db=emb_model)
+        slices = create_content_slices(test_document, embedding_model_name=emb_model)
 
         ret_emb0 = numpy.frombuffer(slices[0].embedding).all()
         ret_emb1 = numpy.frombuffer(slices[1].embedding).all()
