@@ -68,7 +68,11 @@ def n_classify_slices(
 
 
 def n_classify_slice(
-    _slice: DocumentSlice, classifier_model_name: str, forced_sdg: None | list = None
+    _slice: DocumentSlice,
+    classifier_model_name: str,
+    bi_classifier_id: uuid.UUID,
+    n_classifier_id: uuid.UUID,
+    forced_sdg: None | list = None,
 ) -> Sdg | None:
     if not forced_sdg:
         forced_sdg = [sdg_n + 1 for sdg_n in range(0, 17)]
@@ -102,5 +106,11 @@ def n_classify_slice(
         logger.debug(
             f"Slice {_slice.id} is labelized with SDG {proba_lst[0][0]} with {proba_lst[0][1]} score"
         )
-        return Sdg(slice_id=_slice.id, sdg_number=sdg_number, id=uuid.uuid4())
+        return Sdg(
+            slice_id=_slice.id,
+            sdg_number=sdg_number,
+            id=uuid.uuid4(),
+            bi_classifier_model_id=bi_classifier_id,
+            n_classifier_model_id=n_classifier_id,
+        )
     return None

@@ -89,17 +89,29 @@ def main() -> None:
     ):
         doc_slices: List[DocumentSlice] = list(group_doc_slices)  # type: ignore
 
-        bi_model = bi_model_by_docid.get(key_doc_id)
-        if not bi_model:
+        bi_model_name: str = bi_model_by_docid.get(key_doc_id, dict()).get("model_name")
+        bi_model_id: UUID = bi_model_by_docid.get(key_doc_id, dict()).get("model_id")
+        if not bi_model_name:
             logger.warning("No bi-classifier model found for document %s", key_doc_id)
             continue
-        logger.info("Bi-classifying document %s with model %s", key_doc_id, bi_model)
+        if not bi_model_id:
+            logger.warning(
+                "No bi-classifier model id found for document %s", key_doc_id
+            )
+            continue
+        logger.info(
+            "Bi-classifying document %s with model %s", key_doc_id, bi_model_name
+        )
 
-        n_model = n_model_by_docid.get(key_doc_id)
-        if not n_model:
+        n_model_name: str = n_model_by_docid.get(key_doc_id, dict()).get("model_name")
+        n_model_id: UUID = n_model_by_docid.get(key_doc_id, dict()).get("model_id")
+        if not n_model_name:
             logger.warning("No n-classifier model found for document %s", key_doc_id)
             continue
-        logger.info("n-classifying document %s with model %s", key_doc_id, n_model)
+        if not n_model_id:
+            logger.warning("No n-classifier model id found for document %s", key_doc_id)
+            continue
+        logger.info("n-classifying document %s with model %s", key_doc_id, n_model_name)
 
         for s in doc_slices:
             if not isinstance(s.document.details, dict):
@@ -110,10 +122,10 @@ def main() -> None:
                 key_external_sdg in s.document.details
                 and s.document.details[key_external_sdg]
             )
-            if bi_classify_slice(slice_=s, classifier_model_name=bi_model):
+            if bi_classify_slice(slice_=s, classifier_model_name=bi_model_name):
                 specific_sdg = n_classify_slice(
                     _slice=s,
-                    classifier_model_name=n_model,
+                    classifier_model_name=n_model_name,
                     forced_sdg=(
                         s.document.details[key_external_sdg]
                         if externaly_classified_flag
