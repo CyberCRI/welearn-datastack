@@ -285,13 +285,13 @@ def retrieve_models(
     :return: Dict with UUID in key and model name in value
     """
     if ml_type == MLModelsType.BI_CLASSIFIER:
-        model_table = BiClassifierModel
-        join_table = CorpusBiClassifierModel
-        relation_field = join_table.bi_classifier_model_id
+        model_table = BiClassifierModel  # type: ignore
+        join_table = CorpusBiClassifierModel  # type: ignore
+        relation_field = join_table.bi_classifier_model_id  # type: ignore
     elif ml_type == MLModelsType.N_CLASSIFIER:
-        model_table = NClassifierModel
-        join_table = CorpusNClassifierModel
-        relation_field = join_table.n_classifier_model_id
+        model_table = NClassifierModel  # type: ignore
+        join_table = CorpusNClassifierModel  # type: ignore
+        relation_field = join_table.n_classifier_model_id  # type: ignore
     else:
         raise ValueError("ML type not recognized")
 
