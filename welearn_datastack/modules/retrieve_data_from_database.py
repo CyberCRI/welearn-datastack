@@ -12,8 +12,10 @@ from welearn_datastack.data.db_models import (
     BiClassifierModel,
     Corpus,
     CorpusBiClassifierModel,
+    CorpusEmbeddingModel,
     CorpusNClassifierModel,
     DocumentSlice,
+    EmbeddingModel,
     NClassifierModel,
     ProcessState,
     Sdg,
@@ -292,6 +294,10 @@ def retrieve_models(
         model_table = NClassifierModel  # type: ignore
         join_table = CorpusNClassifierModel  # type: ignore
         relation_field = join_table.n_classifier_model_id  # type: ignore
+    elif ml_type == MLModelsType.EMBEDDING:
+        model_table = EmbeddingModel  # type: ignore
+        join_table = CorpusEmbeddingModel  # type: ignore
+        relation_field = join_table.embedding_model_id  # type: ignore
     else:
         raise ValueError("ML type not recognized")
 

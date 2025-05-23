@@ -29,14 +29,14 @@ def _get_nlp_model(language: str):
 
 
 def extract_keywords(
-    document: WeLearnDocument, embedding_model_from_db: EmbeddingModel
+    document: WeLearnDocument, embedding_model_name_from_db: str
 ) -> List[str]:
     """
     Extract keywords from a document description
     """
     ml_path = generate_ml_models_path(
         model_type=MLModelsType.EMBEDDING,
-        model_name=embedding_model_from_db.title,
+        model_name=embedding_model_name_from_db,
         extension="",
     )
     embedding_model = load_embedding_model(ml_path.as_posix())

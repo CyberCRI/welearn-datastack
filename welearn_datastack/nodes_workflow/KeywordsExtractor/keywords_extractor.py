@@ -11,11 +11,12 @@ from welearn_datastack.data.db_models import (
     WeLearnDocument,
     WeLearnDocumentKeyword,
 )
-from welearn_datastack.data.enumerations import Step
+from welearn_datastack.data.enumerations import MLModelsType, Step
 from welearn_datastack.modules.embedding_model_helpers import (
     get_document_embedding_model_name_from_corpus_name,
 )
 from welearn_datastack.modules.keywords_extractor import extract_keywords
+from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
@@ -59,6 +60,15 @@ def main() -> None:
     )
     logger.info("'%s' WeLearnDocuments were retrieved", len(welearn_documents))
 
+    # Check if welearn_documents is empty
+    if not welearn_documents:
+        logger.warning("No WeLearnDocuments found for the provided IDs.")
+        return
+
+    # Retrieve EmbeddingModel from database
+    logger.info("Retrieve EmbeddingModel from database")
+    emb_model_by_docid = retrieve_models(docids, db_session, MLModelsType.EMBEDDING)
+
     # Extract keywords from descriptions
     logger.info("Starting keywords extraction")
     for wld in welearn_documents:
@@ -66,10 +76,16 @@ def main() -> None:
         db_session.query(WeLearnDocumentKeyword).filter(
             WeLearnDocumentKeyword.welearn_document_id == wld.id
         ).delete()
-        embedding_model_from_db = get_document_embedding_model_name_from_corpus_name(
-            session=db_session, corpus_id=wld.corpus_id
+        embedding_model_name_from_db = emb_model_by_docid.get(wld.id)
+        if not embedding_model_name_from_db:
+            logger.warning(
+                "No embedding model found for document ID '%s'. Skipping keywords extraction.",
+                wld.id,
+            )
+            continue
+        kwds = extract_keywords(
+            wld, embedding_model_name_from_db=embedding_model_name_from_db
         )
-        kwds = extract_keywords(wld, embedding_model_from_db=embedding_model_from_db)
         for kw in kwds:
             existing_keyword = db_session.query(Keyword).filter_by(keyword=kw).first()
             if not existing_keyword:
