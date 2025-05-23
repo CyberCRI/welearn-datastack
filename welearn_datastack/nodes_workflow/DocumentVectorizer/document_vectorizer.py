@@ -11,9 +11,7 @@ from welearn_datastack.data.db_models import (
 )
 from welearn_datastack.data.enumerations import MLModelsType, Step
 from welearn_datastack.exceptions import NoModelFoundError
-from welearn_datastack.modules.embedding_model_helpers import (
-    create_content_slices,
-)
+from welearn_datastack.modules.embedding_model_helpers import create_content_slices
 from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.utils_.database_utils import create_db_session
