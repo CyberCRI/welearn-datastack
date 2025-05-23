@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer  # type: ignore
 from spacy.lang.en import English
 from spacy.lang.fr import French
 
-from welearn_datastack.data.db_models import EmbeddingModel, WeLearnDocument
+from welearn_datastack.data.db_models import WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.modules.embedding_model_helpers import load_embedding_model
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
