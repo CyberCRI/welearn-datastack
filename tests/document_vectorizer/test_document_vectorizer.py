@@ -14,7 +14,9 @@ from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.db_models import (
     Base,
     Corpus,
+    CorpusEmbeddingModel,
     DocumentSlice,
+    EmbeddingModel,
     ProcessState,
     WeLearnDocument,
 )
@@ -48,6 +50,14 @@ class TestDocumentVecto(unittest.TestCase):
 
         corpus_source_name = "test_corpus"
 
+        self.embedding_model = EmbeddingModel(
+            id=uuid.uuid4(),
+            title="test_en",
+            lang="en",
+        )
+
+        self.test_session.add(self.embedding_model)
+
         self.corpus_test = Corpus(
             id=uuid.uuid4(),
             source_name=corpus_source_name,
@@ -56,6 +66,15 @@ class TestDocumentVecto(unittest.TestCase):
         )
 
         self.test_session.add(self.corpus_test)
+
+        self.corpus_embedding_model_id = uuid.uuid4()
+        self.embedding_model_corpus = CorpusEmbeddingModel(
+            corpus_id=self.corpus_test.id,
+            embedding_model_id=self.embedding_model.id,
+        )
+
+        self.test_session.add(self.embedding_model_corpus)
+
         self.test_session.commit()
 
         self.path_test_input = Path(__file__).parent.parent / "resources" / "input"
