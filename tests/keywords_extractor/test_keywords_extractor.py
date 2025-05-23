@@ -14,8 +14,10 @@ class TestKeywordsExtractor(unittest.TestCase):
     @patch(
         "welearn_datastack.modules.keywords_extractor.get_document_embedding_model_name_from_lang"
     )
+    @patch("welearn_datastack.modules.keywords_extractor._get_sparse_model")
     def test_extract_keywords(
         self,
+        mock_get_sparse_model,
         mock_get_model_name,
         mock_KeyBERT,
         mock_get_nlp_model,
@@ -34,6 +36,13 @@ class TestKeywordsExtractor(unittest.TestCase):
             ("keyword2", 0.4),
         ]
         mock_get_model_name.return_value = "test_en_model"
+
+        # Mock sparse model and its embed method
+        mock_sparse_model = MagicMock()
+        mock_sparse_embedding = MagicMock()
+        mock_sparse_embedding.as_dict.return_value = {0: 1.0, 1: 2.0}
+        mock_sparse_model.embed.return_value = [mock_sparse_embedding]
+        mock_get_sparse_model.return_value = mock_sparse_model
 
         # Create a mock document
         mock_document = WeLearnDocument(
@@ -56,4 +65,10 @@ class TestKeywordsExtractor(unittest.TestCase):
         mock_load_embedding_model.assert_called_once_with("mock_path")
         mock_get_nlp_model.assert_called_once_with("en")
         mock_kw_model.extract_keywords.assert_called_once()
-        self.assertEqual(keywords, ["keyword1"])
+        mock_get_sparse_model.assert_called_once_with("en")
+        mock_sparse_model.embed.assert_called_once_with(["keyword1"])
+        self.assertIsInstance(keywords, list)
+        self.assertEqual(len(keywords), 1)
+        self.assertIsInstance(keywords[0], tuple)
+        self.assertEqual(keywords[0][0], "keyword1")
+        self.assertIsInstance(keywords[0][1], bytes)
