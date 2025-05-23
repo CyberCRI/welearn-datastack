@@ -24,7 +24,7 @@ log_format: str = os.getenv(
 )
 
 if not isinstance(log_level, int):
-    raise ValueError("Log level is not recognized : '%s'" % log_level)
+    raise ValueError(f"Log level is not recognized : '{log_level}'")
 
 logging.basicConfig(
     level=logging.getLevelName(log_level),
@@ -64,7 +64,7 @@ def main() -> None:
             WeLearnDocumentKeyword.welearn_document_id == wld.id
         ).delete()
         kwds = extract_keywords(wld)
-        for kw in kwds:
+        for (kw, emb) in kwds:
             existing_keyword = db_session.query(Keyword).filter_by(keyword=kw).first()
             if not existing_keyword:
                 kw_id = uuid.uuid4()
@@ -72,6 +72,7 @@ def main() -> None:
                     Keyword(
                         id=kw_id,
                         keyword=kw,
+                        embedding=emb,
                     )
                 )
             else:

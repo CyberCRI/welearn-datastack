@@ -1,6 +1,8 @@
+import json
 import logging
-from typing import List
+from typing import List, Tuple
 
+from fastembed import SparseTextEmbedding  # type: ignore
 from keybert import KeyBERT  # type: ignore
 from sentence_transformers import SentenceTransformer  # type: ignore
 from spacy.lang.en import English
@@ -21,6 +23,13 @@ loaded_models: dict[str, SentenceTransformer] = {}
 en_nlp = English()
 fr_nlp = French()
 
+en_sparse_model = SparseTextEmbedding(
+    model_name="Qdrant/bm25", language="english", device="cpu"
+)
+fr_sparse_model = SparseTextEmbedding(
+    model_name="Qdrant/bm25", language="french", device="cpu"
+)
+
 
 def _get_nlp_model(language: str):
     if language == "en":
@@ -31,9 +40,18 @@ def _get_nlp_model(language: str):
         raise ValueError(f"Unsupported language: {language}")
 
 
-def extract_keywords(document: WeLearnDocument) -> List[str]:
+def _get_sparse_model(language: str):
+    if language == "en":
+        return en_sparse_model
+    elif language == "fr":
+        return fr_sparse_model
+    else:
+        raise ValueError(f"Unsupported language: {language}")
+
+
+def extract_keywords(document: WeLearnDocument) -> List[Tuple[str, bytes]]:
     """
-    Extract keywords from a document description
+    Extract keywords from a document description and create sparse embeddings
     """
     ml_path = generate_ml_models_path(
         model_type=MLModelsType.EMBEDDING,
@@ -57,4 +75,12 @@ def extract_keywords(document: WeLearnDocument) -> List[str]:
         diversity=0.7,
     )
     keywords = [kw[0] for kw in keywords if kw[1] > 0.5]
-    return keywords
+
+    sparse_model = _get_sparse_model(str(document.lang))
+    embeddings = sparse_model.embed(keywords)
+    emb_bytes = [
+        json.dumps({int(k): float(v) for k, v in se.as_dict().items()}).encode("utf-8")
+        for se in embeddings
+    ]
+
+    return list(zip(keywords, emb_bytes))

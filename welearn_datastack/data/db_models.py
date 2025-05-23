@@ -1,8 +1,7 @@
 from datetime import datetime
-from email.policy import default
 from enum import StrEnum, auto  # type: ignore
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from sqlalchemy import ForeignKey, LargeBinary, UniqueConstraint, func, types
 from sqlalchemy.dialects.postgresql import ENUM, TIMESTAMP
@@ -66,15 +65,15 @@ class WeLearnDocument(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
-        onupdate=func.localtimestamp(),
+        onupdate=func.localtimestamp,
     )
 
     corpus: Mapped["Corpus"] = relationship("Corpus")
@@ -106,7 +105,7 @@ class ProcessState(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
     operation_order = mapped_column(
@@ -128,10 +127,11 @@ class Keyword(Base):
         types.Uuid, primary_key=True, nullable=False, server_default="gen_random_uuid()"
     )
     keyword: Mapped[str]
+    embedding: Mapped[bytes | None] = mapped_column(LargeBinary)
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
 
@@ -191,15 +191,15 @@ class ErrorRetrieval(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
-        onupdate=func.localtimestamp(),
+        onupdate=func.localtimestamp,
     )
     error_info: Mapped[str]
 
@@ -260,7 +260,7 @@ class BiClassifierModel(Base):
     used_since: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
 
@@ -293,7 +293,7 @@ class NClassifierModel(Base):
     used_since: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
 
@@ -320,15 +320,15 @@ class AnalyticCounter(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
-        onupdate=func.localtimestamp(),
+        onupdate=func.localtimestamp,
     )
     document: Mapped["WeLearnDocument"] = relationship()
 
@@ -384,7 +384,7 @@ class CorpusNClassifierModel(Base):
     used_since: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
 
@@ -416,7 +416,7 @@ class CorpusBiClassifierModel(Base):
     used_since: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
 
@@ -446,7 +446,7 @@ class Sdg(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
 
@@ -476,15 +476,15 @@ class UserProfile(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
-        onupdate=func.localtimestamp(),
+        onupdate=func.localtimestamp,
     )
 
 
@@ -514,15 +514,15 @@ class Bookmark(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
-        onupdate=func.localtimestamp(),
+        onupdate=func.localtimestamp,
     )
     user: Mapped["UserProfile"] = relationship()
     welearn_document: Mapped["WeLearnDocument"] = relationship()
@@ -545,15 +545,15 @@ class ChatMessage(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
-        onupdate=func.localtimestamp(),
+        onupdate=func.localtimestamp,
     )
     user: Mapped["UserProfile"] = relationship()
 
@@ -596,13 +596,13 @@ class APIKeyManagement(Base):
     created_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
     )
     updated_at: Mapped[datetime] = mapped_column(
         TIMESTAMP(timezone=False),
         nullable=False,
-        default=func.localtimestamp(),
+        default=func.localtimestamp,
         server_default="NOW()",
-        onupdate=func.localtimestamp(),
+        onupdate=func.localtimestamp,
     )
