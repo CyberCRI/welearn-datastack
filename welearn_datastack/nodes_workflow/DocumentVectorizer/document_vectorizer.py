@@ -3,7 +3,6 @@ import os
 import uuid
 
 from sqlalchemy.orm import Session
-from torch.nn.functional import embedding
 
 from welearn_datastack.data.db_models import (
     DocumentSlice,
