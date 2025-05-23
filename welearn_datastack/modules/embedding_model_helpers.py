@@ -126,7 +126,7 @@ def get_document_embedding_model_name_from_corpus_name(
     :return: The embedding model name for the document
     """
     cem: CorpusEmbeddingModel | None = (
-        session.query(CorpusEmbeddingModel).filter(Corpus.id == corpus_id).first()
+        session.query(CorpusEmbeddingModel).filter(CorpusEmbeddingModel.corpus_id == corpus_id).first()
     )
 
     if not cem:
