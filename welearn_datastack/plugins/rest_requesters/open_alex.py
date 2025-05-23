@@ -212,11 +212,20 @@ class OpenAlexCollector(IPluginRESTCollector):
             ),
             useless_words=["background", "abstract", "introduction"],
         )
+
+        publisher_name = to_convert_json["best_oa_location"]["source"][
+            "host_organization_name"
+        ]
+
         document_content = document_desc
         if to_convert_json["best_oa_location"]["pdf_url"] is None:
             pdf_flag = False
         else:
             try:
+                # Get the content of the PDF
+                logger.info(
+                    f"Getting PDF content from {to_convert_json['best_oa_location']['pdf_url']}"
+                )
                 document_content = self._get_pdf_content(
                     to_convert_json["best_oa_location"]["pdf_url"],
                     file_size_limit=self.pdf_size_file_limit,
@@ -275,9 +284,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             "publication_date": publication_date,
             "type": to_convert_json["type"],
             "doi": to_convert_json["ids"]["doi"],
-            "publisher": to_convert_json["best_oa_location"]["source"][
-                "host_organization_name"
-            ],
+            "publisher": publisher_name,
             "license_url": license_good_format,
             "issn": to_convert_json["best_oa_location"]["source"]["issn_l"],
             "content_from_pdf": pdf_flag,
