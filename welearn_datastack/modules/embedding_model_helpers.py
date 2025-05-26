@@ -8,21 +8,11 @@ from uuid import UUID
 from sentence_transformers import SentenceTransformer  # type: ignore
 from spacy.lang.en import English
 from spacy.lang.fr import French
-from sqlalchemy.orm import Session
 
-from welearn_datastack.data.db_models import (
-    Corpus,
-    CorpusEmbeddingModel,
-    DocumentSlice,
-    EmbeddingModel,
-    WeLearnDocument,
-)
+from welearn_datastack.data.db_models import DocumentSlice, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
-from welearn_datastack.exceptions import NoContent, NoModelFoundError
+from welearn_datastack.exceptions import NoContent
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
-from welearn_datastack.utils_.virtual_environement_utils import (
-    get_sub_environ_according_prefix,
-)
 
 logger = logging.getLogger(__name__)
 

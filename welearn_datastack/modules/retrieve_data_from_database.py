@@ -306,12 +306,12 @@ def retrieve_models(
             WeLearnDocument.id.label("document_id"),
             model_table.id.label("model_id"),
             model_table.title.label("model_title"),
-            model_table.used_since.label("model_used_since"),
+            join_table.used_since.label("model_used_since"),
         )
         .join(join_table, WeLearnDocument.corpus_id == join_table.corpus_id)
         .join(model_table, model_table.id == relation_field)
         .filter(WeLearnDocument.id.in_(documents_ids))
-        .order_by(WeLearnDocument.id, model_table.used_since.desc())
+        .order_by(WeLearnDocument.id, join_table.used_since.desc())
         .subquery()
     )
 

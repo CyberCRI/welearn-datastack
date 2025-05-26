@@ -66,12 +66,12 @@ def main() -> None:
 
     bi_model_by_docid = retrieve_models(docids, db_session, MLModelsType.BI_CLASSIFIER)
     logger.info(
-        f"'{len(set(bi_model_by_docid.values()))}' Bi-classifier models were retrieved",
+        f"'{len({x.get('model_id') for x in bi_model_by_docid.values()})}' distinct bi-classifier models were retrieved",
     )
 
     n_model_by_docid = retrieve_models(docids, db_session, MLModelsType.N_CLASSIFIER)
     logger.info(
-        f"'{len(set(n_model_by_docid.values()))}' N-classifier models were retrieved"
+        f"'{len({x.get('model_id') for x in n_model_by_docid.values()})}' distinct n-classifier models were retrieved"
     )
 
     # Classify slices
@@ -131,6 +131,8 @@ def main() -> None:
                         if externaly_classified_flag
                         else None
                     ),
+                    bi_classifier_id=bi_model_id,
+                    n_classifier_id=n_model_id,
                 )
                 if not specific_sdg:
                     continue

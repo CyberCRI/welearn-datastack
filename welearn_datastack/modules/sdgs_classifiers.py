@@ -89,6 +89,6 @@ def n_classify_slice(
             sdg_number=sdg_number,
             id=uuid.uuid4(),
             bi_classifier_model_id=bi_classifier_id,
-            n_classifier_model_id=n_classifier_id,
+            n_classifier_model_id=n_classifier_id if not forced_sdg else None,
         )
     return None

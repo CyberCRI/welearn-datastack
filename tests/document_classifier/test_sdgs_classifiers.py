@@ -1,4 +1,5 @@
 import unittest
+import uuid
 from unittest.mock import patch
 
 import numpy
@@ -33,7 +34,13 @@ class TestSdgsClassifiers(unittest.TestCase):
             )
         ]
         slice = DocumentSlice(id=1, embedding=b"\x00" * 128)
-        result = n_classify_slice(slice, "model_name", forced_sdg=[4, 5, 10, 11, 12])
+        result = n_classify_slice(
+            slice,
+            "model_name",
+            forced_sdg=[4, 5, 10, 11, 12],
+            n_classifier_id=uuid.uuid4(),
+            bi_classifier_id=uuid.uuid4(),
+        )
         self.assertEqual(result.sdg_number, 4)
 
     @patch("joblib.load")
@@ -44,7 +51,13 @@ class TestSdgsClassifiers(unittest.TestCase):
             )
         ]
         slice = DocumentSlice(id=1, embedding=b"\x00" * 128)
-        result = n_classify_slice(slice, "model_name", forced_sdg=[1, 11, 12])
+        result = n_classify_slice(
+            slice,
+            "model_name",
+            forced_sdg=[1, 11, 12],
+            n_classifier_id=uuid.uuid4(),
+            bi_classifier_id=uuid.uuid4(),
+        )
         self.assertEqual(result, None)
 
     @patch("joblib.load")
@@ -55,12 +68,24 @@ class TestSdgsClassifiers(unittest.TestCase):
             )
         ]
         slice = DocumentSlice(id=1, embedding=b"\x00" * 128)
-        result = n_classify_slice(slice, "model_name")
+        result = n_classify_slice(
+            slice,
+            "model_name",
+            n_classifier_id=uuid.uuid4(),
+            bi_classifier_id=uuid.uuid4(),
+        )
         self.assertEqual(result.sdg_number, 3)
+        self.assertIsNotNone(result.bi_classifier_model_id)
+        self.assertIsNone(result.n_classifier_model_id)
 
     @patch("joblib.load")
     def test_should_not_classify_slices_n(self, mock_load):
         mock_load.return_value.predict_proba.return_value = [numpy.array([0, 0, 0])]
         slice = DocumentSlice(id=1, embedding=b"\x00" * 128)
-        result = n_classify_slice(slice, "model_name")
+        result = n_classify_slice(
+            slice,
+            "model_name",
+            n_classifier_id=uuid.uuid4(),
+            bi_classifier_id=uuid.uuid4(),
+        )
         self.assertEqual(result, None)
