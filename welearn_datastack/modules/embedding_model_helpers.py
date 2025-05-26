@@ -78,7 +78,7 @@ def create_content_slices(
                 embedding=embedding.tobytes(),
                 body=text,
                 order_sequence=i,
-                embedding_model_name=embedding_model_name.title,
+                embedding_model_name=embedding_model_name,
                 document_id=document.id,
                 embedding_model_id=embedding_model_id,
             )
