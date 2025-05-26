@@ -226,7 +226,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             ]
             host_ids.extend(host_organization_lineage)
 
-        avoiding_ids = PUBLISHERS_TO_AVOID.split("|")
+        avoiding_ids = PUBLISHERS_TO_AVOID
         for host_id in host_ids:
             if host_id.upper() in avoiding_ids:
                 raise UnauthorizedPublisher(f"{host_id} is not authorized in welearn")

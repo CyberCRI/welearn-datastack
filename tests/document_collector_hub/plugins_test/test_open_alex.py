@@ -305,7 +305,7 @@ class TestOpenAlexCollector(TestCase):
             content_json = json.load(f)
             input_json = content_json["results"][0]
             input_json["locations"][0]["source"]["host_organization_lineage"].append(
-                "https://example.org/" + constants.PUBLISHERS_TO_AVOID.split("|")[0]
+                "https://example.org/" + constants.PUBLISHERS_TO_AVOID[0]
             )
             best_oa = input_json["best_oa_location"]
 

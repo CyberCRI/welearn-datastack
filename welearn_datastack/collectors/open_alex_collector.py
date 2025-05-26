@@ -89,7 +89,7 @@ class OpenAlexURLCollector(URLCollector, ABC):
         # International Digital Organization for Scientific Information (IDOSI), Blue Eyes Intelligence Engineering & Sciences Publication,
         # Academia Research, Academic Research Publishing Group, Hikari Ltd., Enviro Publishers / Enviro Research Publishers,
         # GRDS Publishing, Internet Scientific Publications, JSciMed Central, International Academy of Business, Remedy Publications, TMR Publishing Group
-        publishers_to_avoid = PUBLISHERS_TO_AVOID
+        publishers_to_avoid = "|".join(PUBLISHERS_TO_AVOID[:100])
         lang = "languages/en|languages/fr"
         type_ = "types/article|types/report|types/book|types/book-chapter"
 
