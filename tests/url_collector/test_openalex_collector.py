@@ -62,6 +62,10 @@ class TestOpenAlexURLCollector(TestCase):
             filter_as_dict["type"],
             "types/article|types/report|types/book|types/book-chapter",
         )
+        self.assertEqual(
+            len(filter_as_dict["primary_location.source.publisher_lineage"].split("|")),
+            100,
+        )
 
     @patch(
         "welearn_datastack.collectors.open_alex_collector.OpenAlexURLCollector._get_oa_json"
