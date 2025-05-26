@@ -355,6 +355,13 @@ class CorpusEmbeddingModel(Base):
         primary_key=True,
     )
 
+    used_since: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=False),
+        nullable=False,
+        default=func.localtimestamp(),
+        server_default="NOW()",
+    )
+
     embedding_model: Mapped["EmbeddingModel"] = relationship()
     corpus: Mapped["Corpus"] = relationship()
 
