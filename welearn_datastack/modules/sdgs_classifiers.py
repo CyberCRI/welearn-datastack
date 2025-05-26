@@ -84,6 +84,8 @@ def n_classify_slice(
         logger.debug(
             f"Slice {_slice.id} is labelized with SDG {proba_lst[0][0]} with {proba_lst[0][1]} score"
         )
+        # Create Sdg object, associating it with the slice and classifiers except if forced_sdg is provided because
+        # in this case we assume classification was done outside the pipeline
         return Sdg(
             slice_id=_slice.id,
             sdg_number=sdg_number,
