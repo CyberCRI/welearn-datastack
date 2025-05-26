@@ -171,3 +171,38 @@ OPEN_ALEX_BASE_URL = "https://api.openalex.org/works"
 YEAR_FIRST_DATE_FORMAT = "%Y-%m-%d"
 
 WIKIPEDIA_BASE_URL = "https://<lang>.wikipedia.org/"
+
+# Open Alex code for the 100 first (open alex API limitation) publishers we don't want to retrieve (According to https://www.predatoryjournals.org/the-list/publishers)
+# In this order :
+# Canadian Center of Science and Education, Academic Journals, Lectito Journals, Pulsus Group, Business Perspectives,
+# Econjournals, Frontiers, Multidisciplinary Digital Publishing Institute (MDPI), WIT Press, Qingres, NobleResearch,
+# TSNS “Interaktiv plus”, LLC, Science and Education Centre of North America, Medical science, AEPress,
+# Scientific Journals, Atlas Publishing, LP, Baishideng Publishing Group, National Association of Scholars,
+# Allied Academies, Smart Science & Technology, Lupine Publishers, Ivy Union Publishing, PiscoMed Publishing,
+# Scientia Socialis, Scientia Socialis, SciPress Ltd, Australian International Academic Centre Pty. Ltd., Eurasian Publications,
+# Access Journals, Open Access Journals, Open Access Library, Applied Science Innovations, AgiAl Publishing House,
+# Tomas Publishing, Herbert Open Access Journals (Herbert Publications), Publishing Press, World Scientific Publishing,
+# Hindawi, Research Publishing Group, Science and Technology Publishing, Lectito, MedCrave, American Journal,
+# New Century Science Press, New Science, International Scientific Publications,
+# ISPACS (International Scientific Publications and Consulting Services),
+# International Foundation for Research and Development, IGI Global, Scientific Research Publishing (SCIRP),
+# Sciedu Press, e-Century Publishing Corporation, American Scientific Publishers, SciTechnol, Virtus Interpress,
+# Oriental Scientific Publishing Company, Center for Promoting Ideas, Excellent Publishers, IGM Publication, OPAST,
+# Medip Academy, Medip Academy, Academic Sciences, Innovare Academic Sciences, Medtext Publications, Globeedu Group,
+# Research Journal, Galore Knowledge Publication Pvt. Ltd., Scientific Education, Gupta Publications,
+# International Information Institute, Innovative Journals, Asian Research Consortium,
+# The International Association for Information, Culture, Human and Industry Technology,
+# Sci Forschen, Horizon Research Publishing, Lawarence Press, AI Publications, Kowsar Publishing, Hilaris, Sadguru Publications,
+# Institute of Advanced Scientific Research, International Educative Research Foundation And Publisher, Research Publisher,
+# Open Access Publishing Group, Advanced Research Publications, Open Science, Society of Education, Elmer Press,
+# Macrothink Institute, Universe Scientific Publishing, IJRCM, Auctores Publishing, LLC, Management Journals,
+# Scholars Research Library, Academy Journals, International Journals of Multidisciplinary Research Academy,
+# Multidisciplinary Journals, Science Publishing Group
+#
+# Not filtered by OpenAlex API but we don't want to retrieve them :
+# WFL Publisher, Open Journal Systems, EnPress Publisher, CARI Journals, Pushpa Publishing House,
+# Global Vision Press, RedFame Publishing, i-manager Publications, Infogain Publication,
+# International Digital Organization for Scientific Information (IDOSI), Blue Eyes Intelligence Engineering & Sciences Publication,
+# Academia Research, Academic Research Publishing Group, Hikari Ltd., Enviro Publishers / Enviro Research Publishers,
+# GRDS Publishing, Internet Scientific Publications, JSciMed Central, International Academy of Business, Remedy Publications, TMR Publishing Group
+PUBLISHERS_TO_AVOID = "P4310322531|P4310321074|P4310320063|P4310313016|P4310321069|P4310318345|P4310320527|P4310310987|P4310311589|P4310311735|P4310311864|P4310312766|P4310312881|P4310313755|P4310314442|P4310315241|P4310315663|P4310315735|P4310315795|P4310315810|P4310315843|P4310316567|P4310316790|P4310317086|P4310317519|P4310317519|P4310317790|P4310318044|P4310318299|P4310318591|P4310318591|P4310318591|P4310318723|P4310318992|P4310319563|P4310319724|P4310319811|P4310319815|P4310319869|P4310319908|P4310319982|P4310320063|P4310320093|P4310320259|P4310320321|P4310320321|P4310320334|P4310320334|P4310320342|P4310320424|P4310320480|P4310320842|P4310320994|P4310321646|P4310321726|P4310322050|P4320800656|P4320800740|P4322614448|P4322632798|P4322696804|P4322697004|P4322697004|P4322697801|P4322697801|P4322699584|P4322764864|P4322764886|P4323237698|P4323237894|P4323253347|P4323283508|P4323430444|P4323432882|P4323971528|P4323972566|P4324001558|P4324004145|P4324004152|P4324113678|P4324147902|P4324262928|P4324341404|P4327874083|P4327874083|P4327874097|P4327876843|P4327876862|P4327986823|P4328135221|P4328141805|P4353105723|P4353107447|P4353108569|P4353108604|P4360969180|P4360969395|P4360969395|P4360969395|P4310319272"
