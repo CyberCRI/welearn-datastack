@@ -94,6 +94,7 @@ Wikipedia-API==0.6.0
 wrapt==1.16.0
 langdetect==1.0.9
 refinedoc==0.0.3
+sentencex==0.6.1
 
 # Tools
 locust

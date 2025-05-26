@@ -5,8 +5,7 @@ import re
 from typing import List
 
 from sentence_transformers import SentenceTransformer  # type: ignore
-from spacy.lang.en import English
-from spacy.lang.fr import French
+from sentencex import segment
 
 from welearn_datastack.data.db_models import DocumentSlice, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
@@ -19,22 +18,6 @@ from welearn_datastack.utils_.virtual_environement_utils import (
 logger = logging.getLogger(__name__)
 
 loaded_models: dict[str, SentenceTransformer] = {}
-
-
-en_nlp = English()
-en_nlp.add_pipe("sentencizer")
-
-fr_nlp = French()
-fr_nlp.add_pipe("sentencizer")
-
-
-def _get_nlp_model(language: str):
-    if language == "en":
-        return en_nlp
-    elif language == "fr":
-        return fr_nlp
-    else:
-        raise ValueError(f"Unsupported language: {language}")
 
 
 def create_content_slices(document: WeLearnDocument) -> List[DocumentSlice]:
@@ -150,15 +133,12 @@ def _split_by_word_respecting_sent_boundary(
     logger.info("Splitting document into slices of %d words", slice_length)
     text = re.sub(" +", " ", re.sub(r"\n+", " ", document_content)).strip()
 
-    nlp_model = _get_nlp_model(document_lang)
-    spacy_doc = nlp_model(text)
-
     word_count_slice = 0
     list_slices = []
     current_slice: List[str] = []
 
-    for span_sentence in spacy_doc.sents:
-        sentence = span_sentence.text.strip()
+    sents_iterator: list[str] = segment(document_lang, text)
+    for sentence in sents_iterator:
         word_count_sen = len(sentence.split())
 
         if word_count_sen > slice_length:
