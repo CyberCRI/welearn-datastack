@@ -29,7 +29,7 @@ bandit-lint:
 .PHONY: mypy-lint
 mypy-lint:
 	echo "== mpypy lint =="
-	python -m mypy --exclude .venv/ --exclude .mypy_cache/ --exclude locustfiles/ --exclude alembic/ --show-error-codes --verbose .
+	python -m mypy --exclude .venv/ --exclude .mypy_cache/ --exclude locustfiles/ --exclude alembic/ --show-error-codes .
 	echo "== end mypy lint =="
 	echo "====================="
 

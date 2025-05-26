@@ -26,7 +26,7 @@ class OpenAlexURLCollector(URLCollector, ABC):
         json_from_oa = resp_from_openalex.json()
         return json_from_oa
 
-    def _generate_api_query_params(self) -> Dict[str, str | bool | int]:
+    def _generate_api_query_params(self) -> Dict[str, str | bool | int | None]:
         """
         Generate the API query to get the OpenAlex works
         :return: the API query to get the OpenAlex works
@@ -58,7 +58,7 @@ class OpenAlexURLCollector(URLCollector, ABC):
         lang = "languages/en|languages/fr"
         type_ = "types/article|types/report|types/book|types/book-chapter"
 
-        params: Dict[str, str | bool | int] = {
+        params: Dict[str, str | bool | int | None] = {
             "filter": f"best_oa_location.license:{licenses},"
             f"is_retracted:{is_retracted},"
             f"open_access.oa_status:{oa_status},"

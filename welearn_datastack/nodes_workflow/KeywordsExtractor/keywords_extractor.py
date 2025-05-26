@@ -73,7 +73,9 @@ def main() -> None:
         db_session.query(WeLearnDocumentKeyword).filter(
             WeLearnDocumentKeyword.welearn_document_id == wld.id
         ).delete()
-        embedding_model_name_from_db = emb_model_by_docid.get(wld.id)
+        embedding_model_name_from_db = emb_model_by_docid.get(wld.id, dict()).get(
+            "model_name"
+        )
         if not embedding_model_name_from_db:
             logger.warning(
                 "No embedding model found for document ID '%s'. Skipping keywords extraction.",
@@ -81,7 +83,8 @@ def main() -> None:
             )
             continue
         kwds = extract_keywords(
-            wld, embedding_model_name_from_db=embedding_model_name_from_db
+            wld,
+            embedding_model_name_from_db=embedding_model_name_from_db,
         )
         for kw in kwds:
             existing_keyword = db_session.query(Keyword).filter_by(keyword=kw).first()

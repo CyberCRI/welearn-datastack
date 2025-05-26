@@ -1,7 +1,6 @@
 import logging
-from collections import defaultdict
 from datetime import datetime, timedelta
-from typing import Collection, Dict, List, Literal, Type
+from typing import Collection, Dict, List, Type, TypedDict
 from uuid import UUID
 
 from sqlalchemy import Column, desc
@@ -30,6 +29,17 @@ from welearn_datastack.data.enumerations import (
 from welearn_datastack.types import QuerySizeLimitDocument, QuerySizeLimitSlice
 
 logger = logging.getLogger(__name__)
+
+
+# Typing
+class ModelInfo(TypedDict):
+    model_id: UUID
+    model_name: str
+
+
+ModelsDict = Dict[UUID, ModelInfo]
+
+# logic
 
 
 def _generate_process_state_sub_query(session):
@@ -277,7 +287,7 @@ def retrieve_random_documents_ids_according_process_title(
 
 def retrieve_models(
     documents_ids: list[UUID], db_session, ml_type: MLModelsType
-) -> dict[UUID, dict[Literal["model_id"] | Literal["model_name"], UUID | str]]:
+) -> ModelsDict:
     """
     Retrieve the most recent model (per document) based on corpus and used_since.
 
@@ -326,9 +336,7 @@ def retrieve_models(
     # List of (document_id, model_title)
     ret_from_db = ranked_query.all()
 
-    ret: dict[UUID, dict[Literal["model_id"] | Literal["model_name"], UUID | str]] = (
-        defaultdict(dict)
-    )
+    ret: ModelsDict = {}
     for i in ret_from_db:
         ret[i[0]] = {
             "model_id": i[2],

@@ -89,12 +89,12 @@ def main() -> None:
     ):
         doc_slices: List[DocumentSlice] = list(group_doc_slices)  # type: ignore
 
-        bi_model_name: str = bi_model_by_docid.get(key_doc_id, dict()).get("model_name")
+        bi_model_name = bi_model_by_docid.get(key_doc_id, dict()).get("model_name")
         bi_model_id: UUID = bi_model_by_docid.get(key_doc_id, dict()).get("model_id")
-        if not bi_model_name:
+        if not bi_model_name and not isinstance(bi_model_name, str):
             logger.warning("No bi-classifier model found for document %s", key_doc_id)
             continue
-        if not bi_model_id:
+        if not bi_model_id and not isinstance(bi_model_id, UUID):
             logger.warning(
                 "No bi-classifier model id found for document %s", key_doc_id
             )
