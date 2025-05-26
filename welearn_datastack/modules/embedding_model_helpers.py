@@ -96,47 +96,6 @@ def create_content_slices(
     return slices
 
 
-def get_document_embedding_model_name_from_lang(lang: str) -> str:
-    """
-    Get the embedding model name for the document language
-
-    :param lang: The language of the document in format 'en', 'fr', 'es', etc.
-    :return: The embedding model name for the document language
-    """
-    prefix_embedding = os.environ.get("EMBEDDING_MODELS_NAME_PREFIX", "EMBEDDING_MODEL")
-
-    embed_model_name_key = f"{prefix_embedding}_{lang.upper()}"
-
-    models_name_dict: dict[str, str] = get_sub_environ_according_prefix(
-        prefix=prefix_embedding
-    )
-    # NoModelFoundError
-    if embed_model_name_key not in models_name_dict:
-        raise NoModelFoundError("No model found for language %s" % lang)
-    return models_name_dict.get(embed_model_name_key, "")
-
-
-def get_document_embedding_model_name_from_corpus_name(
-    session: Session, corpus_id: UUID
-) -> EmbeddingModel:
-    """
-    Get the embedding model name for the document according to the corpus name
-    :param session: The database session
-    :param corpus_id: The ID of the corpus to get the embedding model for
-    :return: The embedding model name for the document
-    """
-    cem: CorpusEmbeddingModel | None = (
-        session.query(CorpusEmbeddingModel)
-        .filter(CorpusEmbeddingModel.corpus_id == corpus_id)
-        .first()
-    )
-
-    if not cem:
-        raise NoModelFoundError(f"No model found for corpus {corpus_id}")
-
-    return cem.embedding_model
-
-
 def load_embedding_model(str_path: str) -> SentenceTransformer:
     """
     Loads the embedding model for the document language

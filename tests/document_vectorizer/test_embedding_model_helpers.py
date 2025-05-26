@@ -1,6 +1,5 @@
 import os
 import uuid
-from io import BytesIO
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -10,7 +9,6 @@ from welearn_datastack.data.db_models import Corpus, EmbeddingModel, WeLearnDocu
 from welearn_datastack.modules.embedding_model_helpers import (
     _split_by_word_respecting_sent_boundary,
     create_content_slices,
-    get_document_embedding_model_name_from_lang,
 )
 from welearn_datastack.utils_.virtual_environement_utils import (
     get_sub_environ_according_prefix,
@@ -61,7 +59,11 @@ class TestEmbeddingHelper(TestCase):
             lang="en",
         )
 
-        slices = create_content_slices(test_document, embedding_model_name=emb_model)
+        slices = create_content_slices(
+            test_document,
+            embedding_model_name=emb_model.title,
+            embedding_model_id=emb_m_id,
+        )
 
         ret_emb0 = numpy.frombuffer(slices[0].embedding).all()
         ret_emb1 = numpy.frombuffer(slices[1].embedding).all()
@@ -73,14 +75,6 @@ class TestEmbeddingHelper(TestCase):
         self.assertEqual("This is another sentence.", slices[1].body)
         self.assertEqual(embedding_2.all(), ret_emb1)
         self.assertEqual(emb_m_id, slices[1].embedding_model_id)
-
-    def test_get_document_embedding_model_name_from_lang(self):
-        """
-        Test that the correct model name is returned
-        """
-        returned_model_name = get_document_embedding_model_name_from_lang("en")
-
-        self.assertEqual("test_en", returned_model_name)
 
     def test__split_by_word_respecting_sent_boundary(self):
         """

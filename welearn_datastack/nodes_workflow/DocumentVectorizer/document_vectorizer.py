@@ -86,7 +86,7 @@ def main() -> None:
                 raise NoModelFoundError(
                     f"No embedding model found for document {document.id}"
                 )
-            slices = create_content_slices(document, embedding_model_name=embedding_model_from_db, embedding_model_id=embedding_model_id)  # type: ignore
+            slices = create_content_slices(document, embedding_model_name=embedding_model_name, embedding_model_id=embedding_model_id)  # type: ignore
             logger.info("Delete old slices")
             db_session.query(DocumentSlice).filter(
                 DocumentSlice.document_id == document.id
