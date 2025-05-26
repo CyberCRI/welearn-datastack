@@ -42,7 +42,7 @@ class TestOpenAlexURLCollector(TestCase):
         self.assertEqual(returned_params["sort"], "publication_date:desc")
 
         returned_filter = returned_params["filter"].split(",")
-        self.assertEqual(len(returned_filter), 8)
+        self.assertEqual(len(returned_filter), 9)
 
         filter_as_dict = {v.split(":")[0]: v.split(":")[1] for v in returned_filter}
         self.assertEqual(
