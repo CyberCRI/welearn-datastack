@@ -42,7 +42,7 @@ class TestOpenAlexURLCollector(TestCase):
         self.assertEqual(returned_params["sort"], "publication_date:desc")
 
         returned_filter = returned_params["filter"].split(",")
-        self.assertEqual(len(returned_filter), 8)
+        self.assertEqual(len(returned_filter), 9)
 
         filter_as_dict = {v.split(":")[0]: v.split(":")[1] for v in returned_filter}
         self.assertEqual(
@@ -61,6 +61,10 @@ class TestOpenAlexURLCollector(TestCase):
         self.assertEqual(
             filter_as_dict["type"],
             "types/article|types/report|types/book|types/book-chapter",
+        )
+        self.assertEqual(
+            len(filter_as_dict["primary_location.source.publisher_lineage"].split("|")),
+            100,
         )
 
     @patch(

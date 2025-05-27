@@ -13,6 +13,7 @@ from welearn_datastack.constants import (
     HEADERS,
     HTTPS_CREATIVE_COMMONS,
     OPEN_ALEX_BASE_URL,
+    PUBLISHERS_TO_AVOID,
     YEAR_FIRST_DATE_FORMAT,
 )
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
@@ -21,6 +22,7 @@ from welearn_datastack.exceptions import (
     PDFFileSizeExceedLimit,
     PDFPagesSizeExceedLimit,
     UnauthorizedLicense,
+    UnauthorizedPublisher,
 )
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -212,11 +214,32 @@ class OpenAlexCollector(IPluginRESTCollector):
             ),
             useless_words=["background", "abstract", "introduction"],
         )
+
+        work_locations: list[dict] = to_convert_json.get("locations", [])
+        host_ids = []
+        for location in work_locations:
+            host_organization_lineage_malformed: list[str] = location.get(
+                "source", dict()
+            ).get("host_organization_lineage", [])
+            host_organization_lineage = [
+                h.split("/")[-1] for h in host_organization_lineage_malformed
+            ]
+            host_ids.extend(host_organization_lineage)
+
+        avoiding_ids = PUBLISHERS_TO_AVOID
+        for host_id in host_ids:
+            if host_id.upper() in avoiding_ids:
+                raise UnauthorizedPublisher(f"{host_id} is not authorized in welearn")
+
         document_content = document_desc
         if to_convert_json["best_oa_location"]["pdf_url"] is None:
             pdf_flag = False
         else:
             try:
+                # Get the content of the PDF
+                logger.info(
+                    f"Getting PDF content from {to_convert_json['best_oa_location']['pdf_url']}"
+                )
                 document_content = self._get_pdf_content(
                     to_convert_json["best_oa_location"]["pdf_url"],
                     file_size_limit=self.pdf_size_file_limit,
