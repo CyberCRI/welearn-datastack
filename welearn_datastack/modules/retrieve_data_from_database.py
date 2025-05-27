@@ -1,17 +1,20 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Collection, Dict, List, Type
+from typing import Collection, Dict, List, Type, TypedDict
 from uuid import UUID
 
-from sqlalchemy import Column, and_, desc, func
-from sqlalchemy.orm import Query
+from sqlalchemy import Column, desc
+from sqlalchemy.orm import Query, aliased
+from sqlalchemy.sql import and_, func
 
 from welearn_datastack.data.db_models import (
     BiClassifierModel,
     Corpus,
     CorpusBiClassifierModel,
+    CorpusEmbeddingModel,
     CorpusNClassifierModel,
     DocumentSlice,
+    EmbeddingModel,
     NClassifierModel,
     ProcessState,
     Sdg,
@@ -26,6 +29,17 @@ from welearn_datastack.data.enumerations import (
 from welearn_datastack.types import QuerySizeLimitDocument, QuerySizeLimitSlice
 
 logger = logging.getLogger(__name__)
+
+
+# Typing
+class ModelInfo(TypedDict):
+    model_id: UUID
+    model_name: str
+
+
+ModelsDict = Dict[UUID, ModelInfo]
+
+# logic
 
 
 def _generate_process_state_sub_query(session):
@@ -272,53 +286,64 @@ def retrieve_random_documents_ids_according_process_title(
 
 
 def retrieve_models(
-    documents_ids: List[UUID], db_session, ml_type: MLModelsType
-) -> List[BiClassifierModel] | List[NClassifierModel]:
+    documents_ids: list[UUID], db_session, ml_type: MLModelsType
+) -> ModelsDict:
     """
-    Retrieve models from DB
-    :param ml_type: Type of ML model to retrieve
-    :param documents_ids: List of document ids
+    Retrieve the most recent model (per document) based on corpus and used_since.
+
+    :param documents_ids: List of document UUIDs
     :param db_session: DB session
-    :return: List of DocumentSlice
+    :param ml_type: Type of model to retrieve (BI_CLASSIFIER or N_CLASSIFIER)
+    :return: Dict with UUID in key and model name in value
     """
-    model_table: type[BiClassifierModel] | type[NClassifierModel]
-    join_table: type[CorpusBiClassifierModel] | type[CorpusNClassifierModel]
     if ml_type == MLModelsType.BI_CLASSIFIER:
-        model_table = BiClassifierModel
-        join_table = CorpusBiClassifierModel
-        relation_name = "bi_classifier_model_id"
+        model_table = BiClassifierModel  # type: ignore
+        join_table = CorpusBiClassifierModel  # type: ignore
+        relation_field = join_table.bi_classifier_model_id  # type: ignore
     elif ml_type == MLModelsType.N_CLASSIFIER:
-        model_table = NClassifierModel
-        join_table = CorpusNClassifierModel
-        relation_name = "n_classifier_model_id"
+        model_table = NClassifierModel  # type: ignore
+        join_table = CorpusNClassifierModel  # type: ignore
+        relation_field = join_table.n_classifier_model_id  # type: ignore
+    elif ml_type == MLModelsType.EMBEDDING:
+        model_table = EmbeddingModel  # type: ignore
+        join_table = CorpusEmbeddingModel  # type: ignore
+        relation_field = join_table.embedding_model_id  # type: ignore
     else:
         raise ValueError("ML type not recognized")
 
-    query = (
-        db_session.query(model_table.title, model_table.lang)
-        .join(
-            join_table,
-            getattr(join_table, relation_name) == model_table.id,
+    subquery = (
+        db_session.query(
+            WeLearnDocument.id.label("document_id"),
+            model_table.id.label("model_id"),
+            model_table.title.label("model_title"),
+            join_table.used_since.label("model_used_since"),
         )
-        .join(
-            WeLearnDocument,
-            WeLearnDocument.corpus_id == join_table.corpus_id,
-        )
-        .join(
-            DocumentSlice,
-            DocumentSlice.document_id == WeLearnDocument.id,
-        )
-        .filter(
-            and_(
-                DocumentSlice.document_id.in_(documents_ids),
-                model_table.lang == WeLearnDocument.lang,  # type: ignore
-            )
-        )
-        .group_by(model_table.title, model_table.lang)
+        .join(join_table, WeLearnDocument.corpus_id == join_table.corpus_id)
+        .join(model_table, model_table.id == relation_field)
+        .filter(WeLearnDocument.id.in_(documents_ids))
+        .order_by(WeLearnDocument.id, join_table.used_since.desc())
+        .subquery()
     )
 
-    models = query.all()
-    return models
+    latest_model_alias = aliased(subquery)
+
+    ranked_query = db_session.query(
+        latest_model_alias.c.document_id,
+        latest_model_alias.c.model_title,
+        latest_model_alias.c.model_id,
+    ).distinct(latest_model_alias.c.document_id)
+
+    # List of (document_id, model_title)
+    ret_from_db = ranked_query.all()
+
+    ret: ModelsDict = {}
+    for i in ret_from_db:
+        ret[i[0]] = {
+            "model_id": i[2],
+            "model_name": i[1],
+        }
+
+    return ret
 
 
 def check_process_state_for_documents(

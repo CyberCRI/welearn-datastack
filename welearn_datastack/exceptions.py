@@ -170,3 +170,9 @@ class PDFFileSizeExceedLimit(Exception):
     """
     Raise when the PDF full file is too big
     """
+
+
+class UnauthorizedPublisher(Exception):
+    """
+    Raised when the publisher is not authorized
+    """

@@ -4,7 +4,8 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
-from welearn_datastack.exceptions import PDFFileSizeExceedLimit
+from welearn_datastack import constants
+from welearn_datastack.exceptions import PDFFileSizeExceedLimit, UnauthorizedPublisher
 from welearn_datastack.plugins.rest_requesters.open_alex import OpenAlexCollector
 
 
@@ -292,6 +293,25 @@ class TestOpenAlexCollector(TestCase):
             )
             self.assertEqual(len(details["related_works"]), 10)
             self.assertIn("https://openalex.org/W4388014327", details["related_works"])
+
+    @patch(
+        "welearn_datastack.plugins.rest_requesters.open_alex.OpenAlexCollector._get_pdf_content"
+    )
+    def test__convert_json_in_welearn_document_from_unauthorized_publisher(
+        self, mock_pdf
+    ):
+        mock_pdf.return_value = "The findings highlight the intricate interplay between genomic architecture and the mechanisms driving CNV formation."
+        with self.json_response_path_one_work.open(mode="r") as f:
+            content_json = json.load(f)
+            input_json = content_json["results"][0]
+            input_json["locations"][0]["source"]["host_organization_lineage"].append(
+                "https://example.org/" + constants.PUBLISHERS_TO_AVOID[0]
+            )
+            best_oa = input_json["best_oa_location"]
+
+            best_oa["pdf_url"] = "https://example.org/openalexdoc"
+            with self.assertRaises(UnauthorizedPublisher):
+                self.openalexColector._convert_json_in_welearn_document(input_json)
 
     @patch(
         "welearn_datastack.plugins.rest_requesters.open_alex.OpenAlexCollector._get_pdf_content"

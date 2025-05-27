@@ -142,7 +142,9 @@ class TestDocumentClassifier(unittest.TestCase):
         session.commit()
 
         mock_create_session.return_value = session
-        mock_retrieve_models.return_value = [Mock(lang="en", title="model_name")]
+        mock_retrieve_models.return_value = {
+            self.doc_test_id: {"model_name": "test_model", "model_id": uuid.uuid4()}
+        }
         document_classifier.main()
 
         state_in_db = session.query(ProcessState).all()
@@ -189,7 +191,9 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_retrieve_ids.return_value = [self.doc_test_id]
         session = self.test_session
         mock_create_session.return_value = session
-        mock_retrieve_models.return_value = [Mock(lang="en", title="model_name")]
+        mock_retrieve_models.return_value = {
+            self.doc_test_id: {"model_name": "test_model", "model_id": uuid.uuid4()}
+        }
         document_classifier.main()
 
         state_in_db = session.query(ProcessState).all()
@@ -226,7 +230,9 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_retrieve_ids.return_value = [self.doc_test_id]
         session = self.test_session
         mock_create_session.return_value = session
-        mock_retrieve_models.return_value = [Mock(lang="en", title="model_name")]
+        mock_retrieve_models.return_value = {
+            self.doc_test_id: {"model_name": "test_model", "model_id": uuid.uuid4()}
+        }
         document_classifier.main()
 
         state_in_db = session.query(ProcessState).all()
@@ -276,7 +282,9 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_retrieve_ids.return_value = [doc_test_id]
         session = test_session
         mock_create_session.return_value = session
-        mock_retrieve_models.return_value = [Mock(lang="en", title="model_name")]
+        mock_retrieve_models.return_value = {
+            doc_test_id: {"model_name": "test_model", "model_id": uuid.uuid4()}
+        }
 
         corpus_source_name = "test_corpus"
 
@@ -372,9 +380,9 @@ class TestDocumentClassifier(unittest.TestCase):
         mock_retrieve_ids.return_value = [doc_test_id]
         session = test_session
         mock_create_session.return_value = session
-        mock_retrieve_models.return_value = [
-            Mock(lang="en", title="model_name", id=uuid4())
-        ]
+        mock_retrieve_models.return_value = {
+            doc_test_id: {"model_name": "test_model", "model_id": uuid.uuid4()}
+        }
 
         corpus_source_name = "test_corpus"
 

@@ -45,30 +45,12 @@ def bi_classify_slice(slice_: DocumentSlice, classifier_model_name: str) -> bool
     return False
 
 
-def n_classify_slices(
-    slices: List[DocumentSlice], classifier_model_name: str
-) -> List[Sdg]:
-    """
-    Classify a list of slices of a document
-    :param slices: Slices of a document
-    :param classifier_model_name: Name of the classifier to use to classify the slices
-    :return: List of DocumentSlice with SDGs they belong to updated
-    """
-    # Load model
-    doc_sdgs = []
-
-    for _slice in slices:
-        ret_sdg = n_classify_slice(
-            _slice=_slice, classifier_model_name=classifier_model_name
-        )
-        if ret_sdg:
-            doc_sdgs.append(ret_sdg)
-
-    return doc_sdgs
-
-
 def n_classify_slice(
-    _slice: DocumentSlice, classifier_model_name: str, forced_sdg: None | list = None
+    _slice: DocumentSlice,
+    classifier_model_name: str,
+    bi_classifier_id: uuid.UUID,
+    n_classifier_id: uuid.UUID,
+    forced_sdg: None | list = None,
 ) -> Sdg | None:
     if not forced_sdg:
         forced_sdg = [sdg_n + 1 for sdg_n in range(0, 17)]
@@ -102,5 +84,13 @@ def n_classify_slice(
         logger.debug(
             f"Slice {_slice.id} is labelized with SDG {proba_lst[0][0]} with {proba_lst[0][1]} score"
         )
-        return Sdg(slice_id=_slice.id, sdg_number=sdg_number, id=uuid.uuid4())
+        # Create Sdg object, associating it with the slice and classifiers except if forced_sdg is provided because
+        # in this case we assume classification was done outside the pipeline
+        return Sdg(
+            slice_id=_slice.id,
+            sdg_number=sdg_number,
+            id=uuid.uuid4(),
+            bi_classifier_model_id=bi_classifier_id,
+            n_classifier_model_id=n_classifier_id if not forced_sdg else None,
+        )
     return None
