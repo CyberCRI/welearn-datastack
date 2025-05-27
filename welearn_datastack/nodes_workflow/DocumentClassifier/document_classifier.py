@@ -62,15 +62,17 @@ def main() -> None:
         .filter(DocumentSlice.document_id.in_(docids))
         .all()
     )
-    logger.info("'%s' Slices were retrieved", len(slices))
+    logger.info(f"'{len(slices)}' Slices were retrieved")
 
-    bi_models = retrieve_models(docids, db_session, MLModelsType.BI_CLASSIFIER)
-    bi_model_by_lang = {x.lang: x.title for x in bi_models}
-    logger.info("'%s' Bi-classifier models were retrieved", len(bi_models))
+    bi_model_by_docid = retrieve_models(docids, db_session, MLModelsType.BI_CLASSIFIER)
+    logger.info(
+        f"'{len({x.get('model_id') for x in bi_model_by_docid.values()})}' distinct bi-classifier models were retrieved",
+    )
 
-    n_models = retrieve_models(docids, db_session, MLModelsType.N_CLASSIFIER)
-    n_model_by_lang = {x.lang: x.title for x in n_models}
-    logger.info("'%s' N-classifier models were retrieved", len(n_models))
+    n_model_by_docid = retrieve_models(docids, db_session, MLModelsType.N_CLASSIFIER)
+    logger.info(
+        f"'{len({x.get('model_id') for x in n_model_by_docid.values()})}' distinct n-classifier models were retrieved"
+    )
 
     # Classify slices
     non_sdg_docs_ids: set[UUID] = set()
@@ -79,22 +81,37 @@ def main() -> None:
     logger.info("Starting bi-classification")
     key_external_sdg = "external_sdg"
     slices_per_docs: list[DocumentSlice] = sorted(slices, key=lambda x: x.document_id)  # type: ignore
-    for k, g in groupby(slices_per_docs, lambda x: x.document_id):
-        doc_slices: List[DocumentSlice] = list(g)  # type: ignore
-        lang = doc_slices[0].document.lang
-        if not isinstance(lang, str):
-            raise ValueError(f"Lang is not a string in slice {doc_slices[0].id}")
-        bi_model = bi_model_by_lang.get(lang)
-        if not bi_model:
-            logger.warning("No bi-classifier model found for document %s", k)
-            continue
-        logger.info("Bi-classifying document %s with model %s", k, bi_model)
 
-        n_model = n_model_by_lang.get(lang)
-        if not n_model:
-            logger.warning("No n-classifier model found for document %s", k)
+    # Group slices by document id
+    key_doc_id: UUID
+    for key_doc_id, group_doc_slices in groupby(
+        slices_per_docs, lambda x: x.document_id
+    ):
+        doc_slices: List[DocumentSlice] = list(group_doc_slices)  # type: ignore
+
+        bi_model_name = bi_model_by_docid.get(key_doc_id, dict()).get("model_name")
+        bi_model_id: UUID = bi_model_by_docid.get(key_doc_id, dict()).get("model_id")
+        if not bi_model_name and not isinstance(bi_model_name, str):
+            logger.warning("No bi-classifier model found for document %s", key_doc_id)
             continue
-        logger.info("n-classifying document %s with model %s", k, n_model)
+        if not bi_model_id and not isinstance(bi_model_id, UUID):
+            logger.warning(
+                "No bi-classifier model id found for document %s", key_doc_id
+            )
+            continue
+        logger.info(
+            "Bi-classifying document %s with model %s", key_doc_id, bi_model_name
+        )
+
+        n_model_name: str = n_model_by_docid.get(key_doc_id, dict()).get("model_name")
+        n_model_id: UUID = n_model_by_docid.get(key_doc_id, dict()).get("model_id")
+        if not n_model_name:
+            logger.warning("No n-classifier model found for document %s", key_doc_id)
+            continue
+        if not n_model_id:
+            logger.warning("No n-classifier model id found for document %s", key_doc_id)
+            continue
+        logger.info("n-classifying document %s with model %s", key_doc_id, n_model_name)
 
         for s in doc_slices:
             if not isinstance(s.document.details, dict):
@@ -105,20 +122,22 @@ def main() -> None:
                 key_external_sdg in s.document.details
                 and s.document.details[key_external_sdg]
             )
-            if bi_classify_slice(slice_=s, classifier_model_name=bi_model):
+            if bi_classify_slice(slice_=s, classifier_model_name=bi_model_name):
                 specific_sdg = n_classify_slice(
                     _slice=s,
-                    classifier_model_name=n_model,
+                    classifier_model_name=n_model_name,
                     forced_sdg=(
                         s.document.details[key_external_sdg]
                         if externaly_classified_flag
                         else None
                     ),
+                    bi_classifier_id=bi_model_id,
+                    n_classifier_id=n_model_id,
                 )
                 if not specific_sdg:
                     continue
                 specific_sdgs.append(specific_sdg)
-                sdg_docs_ids.add(k)
+                sdg_docs_ids.add(key_doc_id)
 
     non_sdg_docs_ids = {
         k.document_id for k in slices_per_docs if k.document_id not in sdg_docs_ids

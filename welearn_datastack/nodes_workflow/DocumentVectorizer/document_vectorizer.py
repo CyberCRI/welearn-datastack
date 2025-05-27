@@ -9,9 +9,10 @@ from welearn_datastack.data.db_models import (
     ProcessState,
     WeLearnDocument,
 )
-from welearn_datastack.data.enumerations import Step
+from welearn_datastack.data.enumerations import MLModelsType, Step
 from welearn_datastack.exceptions import NoModelFoundError
 from welearn_datastack.modules.embedding_model_helpers import create_content_slices
+from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
@@ -49,7 +50,7 @@ def main() -> None:
 
     # Retrieve WeLearnDocument from database
     logger.info("Retrieve WeLearnDocument from database")
-    welearn_documents = (
+    welearn_documents: list[WeLearnDocument] = (  # type: ignore
         db_session.query(WeLearnDocument).filter(WeLearnDocument.id.in_(docids)).all()
     )
 
@@ -65,13 +66,27 @@ def main() -> None:
             len(docids) - len(welearn_documents),
         )
 
+    # Retrieve embeddings models from db
+    logger.info("Retrieve embedding models from database")
+    embedding_models_dict = retrieve_models(docids, db_session, MLModelsType.EMBEDDING)
+
     # Create content slices
     docids_processed = 0
     docsids_not_processed = 0
     for i, document in enumerate(welearn_documents):
         logger.info("Processing document %s/%s", i, len(welearn_documents))
         try:
-            slices = create_content_slices(document)  # type: ignore
+            embedding_model_name = embedding_models_dict.get(document.id, dict()).get(
+                "model_name", None
+            )
+            embedding_model_id = embedding_models_dict.get(document.id, dict()).get(
+                "model_id", None
+            )
+            if not embedding_model_name or not embedding_model_id:
+                raise NoModelFoundError(
+                    f"No embedding model found for document {document.id}"
+                )
+            slices = create_content_slices(document, embedding_model_name=embedding_model_name, embedding_model_id=embedding_model_id)  # type: ignore
             logger.info("Delete old slices")
             db_session.query(DocumentSlice).filter(
                 DocumentSlice.document_id == document.id

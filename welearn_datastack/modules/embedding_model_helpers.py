@@ -3,6 +3,7 @@ import math
 import os
 import re
 from typing import List
+from uuid import UUID
 
 from sentence_transformers import SentenceTransformer  # type: ignore
 from spacy.lang.en import English
@@ -10,11 +11,8 @@ from spacy.lang.fr import French
 
 from welearn_datastack.data.db_models import DocumentSlice, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
-from welearn_datastack.exceptions import NoContent, NoModelFoundError
+from welearn_datastack.exceptions import NoContent
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
-from welearn_datastack.utils_.virtual_environement_utils import (
-    get_sub_environ_according_prefix,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +35,16 @@ def _get_nlp_model(language: str):
         raise ValueError(f"Unsupported language: {language}")
 
 
-def create_content_slices(document: WeLearnDocument) -> List[DocumentSlice]:
+def create_content_slices(
+    document: WeLearnDocument, embedding_model_name: str, embedding_model_id: UUID
+) -> List[DocumentSlice]:
     """
     Creates slices of the document content and embeds them.
     :return: A list of DocumentSlice objects
     """
     ml_path = generate_ml_models_path(
         model_type=MLModelsType.EMBEDDING,
-        model_name=get_document_embedding_model_name_from_lang(lang=document.lang),  # type: ignore
+        model_name=embedding_model_name,  # type: ignore
         extension="",
     )
 
@@ -78,33 +78,12 @@ def create_content_slices(document: WeLearnDocument) -> List[DocumentSlice]:
                 embedding=embedding.tobytes(),
                 body=text,
                 order_sequence=i,
-                embedding_model_name=get_document_embedding_model_name_from_lang(
-                    lang=document.lang  # type: ignore
-                ),
+                embedding_model_name=embedding_model_name,
                 document_id=document.id,
+                embedding_model_id=embedding_model_id,
             )
         )
     return slices
-
-
-def get_document_embedding_model_name_from_lang(lang: str) -> str:
-    """
-    Get the embedding model name for the document language
-
-    :param lang: The language of the document in format 'en', 'fr', 'es', etc.
-    :return: The embedding model name for the document language
-    """
-    prefix_embedding = os.environ.get("EMBEDDING_MODELS_NAME_PREFIX", "EMBEDDING_MODEL")
-
-    embed_model_name_key = f"{prefix_embedding}_{lang.upper()}"
-
-    models_name_dict: dict[str, str] = get_sub_environ_according_prefix(
-        prefix=prefix_embedding
-    )
-    # NoModelFoundError
-    if embed_model_name_key not in models_name_dict:
-        raise NoModelFoundError("No model found for language %s" % lang)
-    return models_name_dict.get(embed_model_name_key, "")
 
 
 def load_embedding_model(str_path: str) -> SentenceTransformer:
