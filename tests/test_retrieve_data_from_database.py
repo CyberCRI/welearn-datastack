@@ -341,7 +341,7 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         )
 
         n_classifier_en_id2 = uuid.uuid4()
-        nclassifier_en_test2 = BiClassifierModel(
+        nclassifier_en_test2 = NClassifierModel(
             title="test_n_classifier2",
             id=n_classifier_en_id2,
             lang="en",

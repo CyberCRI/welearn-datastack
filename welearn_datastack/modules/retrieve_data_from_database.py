@@ -319,7 +319,6 @@ def retrieve_models(
     subquery = (
         db_session.query(
             WeLearnDocument.id.label("document_id"),
-            WeLearnDocument.title.label("document_title"),
             join_table.used_since,
             model_table.id.label("model_id"),
             model_table.title.label("model_title"),
