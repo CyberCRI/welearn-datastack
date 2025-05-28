@@ -311,36 +311,50 @@ def retrieve_models(
     else:
         raise ValueError("ML type not recognized")
 
+    # Subquery to get the most recent model for each document based on used_since
+    # and partition by document id and corpus id
+    # We use row_number to get the most recent model per document
+    # and corpus, ordered by used_since in descending order.
+    # We use a subquery to filter the results later
     subquery = (
         db_session.query(
             WeLearnDocument.id.label("document_id"),
+            WeLearnDocument.title.label("document_title"),
+            join_table.used_since,
             model_table.id.label("model_id"),
             model_table.title.label("model_title"),
-            join_table.used_since.label("model_used_since"),
+            model_table.lang,
+            func.row_number()
+            .over(
+                partition_by=(WeLearnDocument.id, WeLearnDocument.corpus_id),
+                order_by=desc(join_table.used_since),
+            )
+            .label("rn"),
         )
-        .join(join_table, WeLearnDocument.corpus_id == join_table.corpus_id)
+        .join(join_table, join_table.corpus_id == WeLearnDocument.corpus_id)
         .join(model_table, model_table.id == relation_field)
-        .filter(WeLearnDocument.id.in_(documents_ids))
-        .order_by(WeLearnDocument.id, join_table.used_since.desc())
-        .subquery()
-    )
+        .filter(
+            WeLearnDocument.id.in_(documents_ids),
+            model_table.lang == WeLearnDocument.lang,
+        )
+    ).subquery()
 
-    latest_model_alias = aliased(subquery)
-
-    ranked_query = db_session.query(
-        latest_model_alias.c.document_id,
-        latest_model_alias.c.model_title,
-        latest_model_alias.c.model_id,
-    ).distinct(latest_model_alias.c.document_id)
+    # Main query to filter the subquery results where rn = 1
+    # This means we only keep the most recent model for each document
+    query = db_session.query(
+        subquery.c.document_id,
+        subquery.c.model_id,
+        subquery.c.model_title,
+    ).filter(subquery.c.rn == 1)
 
     # List of (document_id, model_title)
-    ret_from_db = ranked_query.all()
+    ret_from_db = query.all()
 
     ret: ModelsDict = {}
     for i in ret_from_db:
         ret[i[0]] = {
-            "model_id": i[2],
-            "model_name": i[1],
+            "model_id": i[1],
+            "model_name": i[2],
         }
 
     return ret
