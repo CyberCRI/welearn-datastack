@@ -70,7 +70,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             "filter": f"ids.openalex:{'|'.join(urls)}",
             "per_page": page_ln,
             "mailto": self.team_email,
-            "select": "title,ids,language,abstract_inverted_index,publication_date,authorships,open_access,best_oa_location,publication_date,type,topics,keywords,referenced_works,related_works",
+            "select": "title,ids,language,abstract_inverted_index,publication_date,authorships,open_access,best_oa_location,publication_date,type,topics,keywords,referenced_works,related_works,locations",
         }
 
     def _get_pdf_content(self, url: str, file_size_limit: int | None = None) -> str:
