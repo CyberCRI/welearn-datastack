@@ -21,18 +21,18 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.drop_constraint(
-        "error_retrieval_document_id_http_error_code_idxx",
+    op.drop_index(
+        "error_retrieval_document_id_http_error_code_idx",
         "error_retrieval",
         schema="document_related",
-        type_="unique",
     )
 
 
 def downgrade() -> None:
-    op.create_unique_constraint(
-        "error_retrieval_document_id_http_error_code_idxx",
+    op.create_index(
+        "error_retrieval_document_id_http_error_code_idx",
         "error_retrieval",
         ["document_id", "http_error_code"],
+        unique=True,
         schema="document_related",
     )
