@@ -346,7 +346,7 @@ def retrieve_models(
         subquery.c.model_title,
     ).filter(subquery.c.rn == 1)
 
-    # List of (document_id, model_title)
+    # List of (document_id, model_id, model_title)
     ret_from_db = query.all()
 
     ret: ModelsDict = {}
