@@ -4,8 +4,6 @@ from asyncio.subprocess import Process
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
-from isort.core import process
-from numpy.core.defchararray import title
 from sqlalchemy import URL, create_engine, event
 from sqlalchemy.orm import sessionmaker
 

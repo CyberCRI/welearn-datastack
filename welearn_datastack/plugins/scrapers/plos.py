@@ -8,7 +8,6 @@ from urllib.parse import urlparse, urlunparse
 import requests  # type: ignore
 from bs4 import BeautifulSoup, Tag  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
-from urllib3 import Retry
 
 from welearn_datastack.constants import ANTI_URL_REGEX, AUTHORIZED_LICENSES
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument

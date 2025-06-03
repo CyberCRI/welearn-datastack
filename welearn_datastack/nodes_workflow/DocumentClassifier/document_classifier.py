@@ -3,16 +3,11 @@ import os
 import uuid
 from itertools import groupby
 from typing import List
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from welearn_datastack.data.db_models import (
-    DocumentSlice,
-    ProcessState,
-    Sdg,
-    WeLearnDocument,
-)
+from welearn_datastack.data.db_models import DocumentSlice, ProcessState, Sdg
 from welearn_datastack.data.enumerations import MLModelsType, Step
 from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
