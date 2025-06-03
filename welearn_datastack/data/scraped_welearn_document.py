@@ -19,7 +19,7 @@ class ScrapedWeLearnDocument:
         self,
         document_title: str,
         document_url: str,
-        document_lang: str,
+        document_lang: str | None,
         document_content: str,
         document_desc: str,
         document_corpus: str,
