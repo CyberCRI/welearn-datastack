@@ -10,7 +10,7 @@ ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
-COPY ./pyproject.toml ./poetry.lock* /tmp/
+COPY ./pyproject.toml ./poetry.lock* ./LICENSE /tmp/
 
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --with dev --without metrics
 
