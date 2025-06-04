@@ -27,9 +27,10 @@ jobs:
       registry-password: ${{ secrets.DOCKER_PROD_PASSWORD }}
   lint-and-test:
     uses: ./.github/workflows/lint-and-test.yml
-  tag-deploy:
     needs:
       - build-docker
+  tag-deploy:
+    needs:
       - lint-and-test
     uses: CyberCRI/github-workflows/.github/workflows/tag-deploy.yaml@main
   tag-deploy-fast:
