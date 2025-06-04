@@ -19,11 +19,11 @@ class ScrapedWeLearnDocument:
         self,
         document_title: str,
         document_url: str,
-        document_lang: str | None,
         document_content: str,
         document_desc: str,
         document_corpus: str,
         document_details: Dict[str, Any],
+        document_lang: str | None = None,
         document_is_sdg: bool | None = None,
         document_scrape_date: datetime.datetime | None = None,
     ):
