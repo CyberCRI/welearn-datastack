@@ -254,7 +254,6 @@ class PlosCollector(IPluginScrapeCollector):
         doc_desc_extract = full_doc_desc_extract.find_all("p")
         doc_desc = " ".join([p.text for p in doc_desc_extract])
 
-
         doc_details = self._get_document_details(soup=soup)
         scraped_document = ScrapedWeLearnDocument(
             document_url=doc_url,
