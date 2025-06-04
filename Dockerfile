@@ -3,6 +3,8 @@ WORKDIR /tmp
 
 RUN pip install poetry==2.1.3
 
+RUN poetry self add poetry-plugin-export
+
 ENV POETRY_NO_INTERACTION=1 \
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
     POETRY_VIRTUALENVS_CREATE=1 \
