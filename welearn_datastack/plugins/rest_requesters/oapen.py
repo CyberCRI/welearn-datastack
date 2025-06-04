@@ -8,6 +8,7 @@ from itertools import batched
 from typing import Dict, Iterable, List, Tuple
 
 from langdetect import detect
+from lingua import Language
 from pypdf import PdfReader
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
@@ -17,6 +18,7 @@ from welearn_datastack.exceptions import (
     PDFPagesSizeExceedLimit,
     TooMuchLanguages,
     UnauthorizedLicense,
+    WrongLangFormat,
 )
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -214,11 +216,6 @@ class OAPenCollector(IPluginRESTCollector):
 
         metadata = self._format_metadata(json_dict["metadata"])
 
-        if isinstance(metadata["dc.language"], str):
-            lang = language_to_iso_2_dict.get(metadata["dc.language"], "00")
-        else:
-            raise TooMuchLanguages("Too much languages in metadata")
-
         abstracts: List[str] = []
         if "dc.description.abstract" in metadata and isinstance(
             metadata.get("dc.description.abstract"), str
@@ -237,7 +234,20 @@ class OAPenCollector(IPluginRESTCollector):
         if len(abstracts) <= 0:
             raise NoDescriptionFoundError("No description found in this document")
 
+        # Identify which abstract to collect
         desc = ""
+        if isinstance(metadata["dc.language"], str):
+            try:
+                lang = Language.from_str(
+                    metadata["dc.language"]
+                ).iso_code_639_1.name.lower()
+            except ValueError:
+                raise WrongLangFormat(
+                    f"This language cannot be handled : {metadata['dc.language']}"
+                )
+        else:
+            raise TooMuchLanguages("Too much languages in metadata")
+
         for abstract in abstracts:
             detected_lang = detect(abstract)
             if detected_lang == lang:
@@ -309,9 +319,6 @@ class OAPenCollector(IPluginRESTCollector):
                 tags = tmp_tags
         else:
             tags = []
-        # Predicted properties
-        duration = predict_duration(text=content, lang=lang)
-        readability = predict_readability(text=content, lang=lang)
 
         document_details = {
             "publisher": publisher,
@@ -326,8 +333,6 @@ class OAPenCollector(IPluginRESTCollector):
             "tags": tags,
             "content_from_pdf": not is_txt,
             "content_from_txt": is_txt,
-            "duration": duration,
-            "readability": readability,
         }
 
         return ScrapedWeLearnDocument(
