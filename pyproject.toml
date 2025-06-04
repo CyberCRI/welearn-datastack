@@ -60,3 +60,6 @@ build-backend = "poetry.core.masonry.api"
 name = "pytorch_cpu"
 url = "https://download.pytorch.org/whl/cpu"
 priority = "explicit"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
