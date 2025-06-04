@@ -24,9 +24,11 @@ class TestScrapeConversationPlugin(unittest.TestCase):
             / "resources/file_plugin_input/page_conversation3.html"
         )
 
-        with req_page1.open(mode="r") as file1, req_page2.open(
-            mode="r"
-        ) as file2, req_page3.open(mode="r") as file3:
+        with (
+            req_page1.open(mode="r") as file1,
+            req_page2.open(mode="r") as file2,
+            req_page3.open(mode="r") as file3,
+        ):
             self.page_1 = file1.read()
             self.page_2 = file2.read()
             self.page_3 = file3.read()

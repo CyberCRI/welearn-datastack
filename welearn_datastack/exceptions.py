@@ -67,7 +67,7 @@ class InvalidPluginType(ManagementExceptions):
     def __init__(
         self,
         msg="This plugin type is not accepted, always inherit from interface",
-        *args
+        *args,
     ):
         super().__init__(msg, *args)
 

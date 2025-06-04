@@ -80,7 +80,7 @@ class TEDCollector(IPluginRESTCollector):
 
     @staticmethod
     def _concat_content_from_json(
-        ted_json_paragraph: List[Dict[str, List[Dict[str, str]]]]
+        ted_json_paragraph: List[Dict[str, List[Dict[str, str]]]],
     ) -> str:
         """
         Concatenate content from JSON
