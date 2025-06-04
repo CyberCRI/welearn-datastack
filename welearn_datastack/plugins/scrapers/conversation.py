@@ -140,31 +140,14 @@ class ConversationCollector(IPluginScrapeCollector):
             error_property_name="content",
         )
 
-        # Get the language of the document
-        scripts = soup.find_all("script", {"type": "application/javascript"})
-        lang = self._retrieve_lang_from_js_script(scripts)
-        if len(lang) != 2:
-            raise ValueError(
-                f"Language not found or malformed in the script, lang: {lang}"
-            )
-
-        # Predicted properties
-        duration = predict_duration(text=content, lang=lang)
-        readability = predict_readability(text=content, lang=lang)
-
         doc_url = url
         doc_title = title
-        doc_lang = lang
         doc_desc = description
         doc_content = content
         doc_details = self._get_document_details(soup)
-        doc_details.update({"readability": readability})
-        doc_details.update({"duration": duration})
-
         scraped_document = ScrapedWeLearnDocument(
             document_url=doc_url,
             document_title=doc_title,
-            document_lang=doc_lang,
             document_desc=doc_desc,
             document_content=doc_content,
             document_details=doc_details,

@@ -11,7 +11,7 @@ from sentence_transformers import SentenceTransformer  # type: ignore
 from welearn_datastack.exceptions import InvalidURLScheme, WrongLangFormat
 from welearn_datastack.utils_.scraping_utils import clean_text
 from welearn_datastack.utils_.text_stat_utils import (
-    _get_language_detector,
+    get_language_detector,
     predict_duration,
     predict_readability,
 )
@@ -64,7 +64,7 @@ class ScrapedWeLearnDocument:
         content_and_description_different_language: bool | None = None
         desc_lang: str | None = None
         if not document_lang:
-            lang_detector = _get_language_detector()
+            lang_detector = get_language_detector()
             confidence_values_content = deque(
                 lang_detector.compute_language_confidence_values(content)
             )

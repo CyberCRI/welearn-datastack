@@ -1,7 +1,9 @@
 import logging
 import math
 import re
+from functools import cache
 
+from lingua import LanguageDetectorBuilder
 from pyphen import Pyphen  # type: ignore
 
 from welearn_datastack.constants import (
@@ -156,3 +158,15 @@ def predict_duration(text: str, lang: str) -> int:
     else:
         speed = DICT_READING_SPEEDS_LANG["en"]  # default reading speed
     return int(n_words / speed * 60)
+
+
+@cache
+def get_language_detector():
+    """
+    Returns a language detector instance.
+    """
+    return (
+        LanguageDetectorBuilder.from_all_languages()
+        .with_preloaded_language_models()
+        .build()
+    )

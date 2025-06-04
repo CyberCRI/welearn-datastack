@@ -152,7 +152,7 @@ class TestHALCollector(TestCase):
         doc = self.hal_collector._convert_json_dict_to_welearndoc(doc0)
         self.assertEqual(doc.document_url, doc0["uri_s"])
         self.assertEqual(doc.document_title, doc0["title_s"][0])
-        self.assertEqual(doc.document_lang, doc0["language_s"][0])
+        self.assertEqual(doc.document_lang, "en")
         self.assertIn(
             "For primary vpiRNAs that are produced from the abundant",
             doc.document_content,

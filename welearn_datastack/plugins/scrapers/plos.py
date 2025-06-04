@@ -236,14 +236,6 @@ class PlosCollector(IPluginScrapeCollector):
             title.decompose()
         messy_content = body.text
         doc_content = re.sub(ANTI_URL_REGEX, "", messy_content).strip()
-        doc_lang_extract = soup.find("article")
-        if not isinstance(doc_lang_extract, Tag):
-            raise ValueError("No lang tag found")
-        doc_lang = doc_lang_extract.get("xml:lang")
-        if isinstance(doc_lang, list):
-            raise ValueError("Multiple lang found")
-        if not doc_lang:
-            raise ValueError("No lang found")
         clean_doc_content = clean_return_to_line(doc_content)
         doc_url = url
 
@@ -262,16 +254,11 @@ class PlosCollector(IPluginScrapeCollector):
         doc_desc_extract = full_doc_desc_extract.find_all("p")
         doc_desc = " ".join([p.text for p in doc_desc_extract])
 
-        # Get readability and duration
-        readability = predict_readability(text=clean_doc_content, lang=doc_lang)
-        duration = predict_duration(text=clean_doc_content, lang=doc_lang)
+
         doc_details = self._get_document_details(soup=soup)
-        doc_details["readability"] = str(readability)
-        doc_details["duration"] = str(duration)
         scraped_document = ScrapedWeLearnDocument(
             document_url=doc_url,
             document_title=clean_return_to_line(doc_title),
-            document_lang=doc_lang,
             document_desc=clean_return_to_line(doc_desc),
             document_content=clean_doc_content,
             document_details=doc_details,
