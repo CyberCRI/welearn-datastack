@@ -1,29 +1,22 @@
 import datetime
 import logging
-from functools import cache
+from collections import deque
 from typing import Any, Dict
 from urllib.parse import urlparse
 from zlib import adler32
 
-from lingua import IsoCode639_1, Language, LanguageDetectorBuilder
+from lingua import IsoCode639_1, Language
 from sentence_transformers import SentenceTransformer  # type: ignore
 
 from welearn_datastack.exceptions import InvalidURLScheme, WrongLangFormat
 from welearn_datastack.utils_.scraping_utils import clean_text
+from welearn_datastack.utils_.text_stat_utils import (
+    _get_language_detector,
+    predict_duration,
+    predict_readability,
+)
 
 logger = logging.getLogger(__name__)
-
-
-@cache
-def _get_language_detector():
-    """
-    Returns a language detector instance.
-    """
-    return (
-        LanguageDetectorBuilder.from_all_languages()
-        .with_preloaded_language_models()
-        .build()
-    )
 
 
 class ScrapedWeLearnDocument:
@@ -68,27 +61,27 @@ class ScrapedWeLearnDocument:
         desc = clean_text(document_desc)
 
         # Detecting language
-        content_and_description_different_language: bool | None = False
+        content_and_description_different_language: bool | None = None
         desc_lang: str | None = None
         if not document_lang:
             lang_detector = _get_language_detector()
-            confidence_values_content = (
+            confidence_values_content = deque(
                 lang_detector.compute_language_confidence_values(content)
             )
-            confidence_values_desc = lang_detector.compute_language_confidence_values(
-                desc
+            confidence_values_desc = deque(
+                lang_detector.compute_language_confidence_values(desc)
             )
             document_lang = (
-                confidence_values_content.pop().language.iso_code_639_1.name.lower()
+                confidence_values_content.popleft().language.iso_code_639_1.name.lower()
             )
             desc_lang = (
-                confidence_values_desc.pop().language.iso_code_639_1.name.lower()
+                confidence_values_desc.popleft().language.iso_code_639_1.name.lower()
             )
-            if document_lang != desc_lang:
+            content_and_description_different_language = document_lang != desc_lang
+            if content_and_description_different_language:
                 logger.warning(
                     f"Content and description languages are different: {document_lang} vs {desc_lang}"
                 )
-                content_and_description_different_language = True
         else:
             logger.warning(
                 f"Be aware, for the document from {document_url} language is from metadata"
@@ -102,11 +95,23 @@ class ScrapedWeLearnDocument:
                     "Lang must be in ISO-639-1 format: %s", document_lang
                 )
 
+        if not document_lang:
+            raise ValueError(f"There is no lang for this document : {document_url}")
+
         document_details["content_and_description_lang"] = {
             "are_different": content_and_description_different_language,
             "description_lang": desc_lang,
             "content_lang": document_lang,
         }
+
+        # Get readability and duration
+        if "readability" not in document_details:
+            readability = predict_readability(text=content, lang=document_lang)
+            document_details["readability"] = str(readability)
+
+        if "duration" not in document_details:
+            duration = predict_duration(text=content, lang=document_lang)
+            document_details["duration"] = str(duration)
 
         self.document_title = clean_text(document_title)
         self.document_url = document_url
