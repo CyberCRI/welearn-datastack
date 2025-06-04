@@ -50,13 +50,13 @@ class TestUtils(unittest.TestCase):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
             welearn_datastack.utils_.text_stat_utils.predict_readability(text, "en"),
-            78.87,
+            "78.87",
         )
 
     def test_predict_duration(self):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.predict_duration(text, "en"), 2
+            welearn_datastack.utils_.text_stat_utils.predict_duration(text, "en"), "2"
         )
 
     def test_clean_text(self):

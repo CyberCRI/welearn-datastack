@@ -106,12 +106,12 @@ class ScrapedWeLearnDocument:
 
         # Get readability and duration
         if "readability" not in document_details:
-            readability = predict_readability(text=content, lang=document_lang)
-            document_details["readability"] = str(readability)
+            readability: str = predict_readability(text=content, lang=document_lang)
+            document_details["readability"] = readability
 
         if "duration" not in document_details:
-            duration = predict_duration(text=content, lang=document_lang)
-            document_details["duration"] = str(duration)
+            duration: str = predict_duration(text=content, lang=document_lang)
+            document_details["duration"] = duration
 
         self.document_title = clean_text(document_title)
         self.document_url = document_url
