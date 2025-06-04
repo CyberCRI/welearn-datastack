@@ -5,6 +5,7 @@ description = "Data stack for WeLearn LPI projects. This pipeline can collect, v
 authors = [
     { name = "Théo Nardin", email = "theo.nardin@learningplanetinstitute.org" },
     { name = "Jean-Marc Sevin", email = "jean-marc.sevin@learningplanetinstitute.org" },
+    { name = "Sandra Guerreiro", email = "sandra.guerreiro@learningplanetinstitute.org " },
 ]
 maintainers = [
     { name = "WeLearn team", email = "welearn@learningplanetinstitute.org" },
