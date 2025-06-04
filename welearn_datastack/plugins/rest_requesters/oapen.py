@@ -3,11 +3,11 @@ import logging
 import math
 import os
 import re
+from collections import deque
 from datetime import datetime
 from itertools import batched
 from typing import Dict, Iterable, List, Tuple
 
-from langdetect import detect
 from lingua import Language
 from pypdf import PdfReader
 
@@ -32,6 +32,7 @@ from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 from welearn_datastack.utils_.text_stat_utils import (
+    get_language_detector,
     predict_duration,
     predict_readability,
 )
@@ -248,8 +249,14 @@ class OAPenCollector(IPluginRESTCollector):
         else:
             raise TooMuchLanguages("Too much languages in metadata")
 
+        lang_detector = get_language_detector()
         for abstract in abstracts:
-            detected_lang = detect(abstract)
+            confidence_values_desc = deque(
+                lang_detector.compute_language_confidence_values(abstract)
+            )
+            detected_lang = (
+                confidence_values_desc.popleft().language.iso_code_639_1.name.lower()
+            )
             if detected_lang == lang:
                 desc = abstract
                 break

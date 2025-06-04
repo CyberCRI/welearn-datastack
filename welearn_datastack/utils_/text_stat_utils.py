@@ -118,7 +118,7 @@ def avg_syllables_per_word(text: str, lang: str) -> float:
         return 0.0
 
 
-def predict_readability(text: str, lang: str) -> str | None:
+def predict_readability(text: str, lang: str) -> str:
     """scores the readability with flesch reading ease (score from 0 to 100)
 
     Args:
