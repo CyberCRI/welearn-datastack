@@ -10,7 +10,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m pip install --no-cache-dir --upgrade -r ./requirements.txt
       - name: Check format
         run: make format-check
       - name: Lint

@@ -26,5 +26,4 @@ COPY secrets-entrypoint.sh /app/secrets-entrypoint.sh
 
 USER 10000
 
-
 ENTRYPOINT [ "/app/secrets-entrypoint.sh" ]
