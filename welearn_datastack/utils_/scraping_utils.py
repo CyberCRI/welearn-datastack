@@ -1,7 +1,6 @@
 import logging
 import re
 from html.parser import HTMLParser
-from typing import Tuple
 
 from bs4 import BeautifulSoup, NavigableString, Tag  # type: ignore
 

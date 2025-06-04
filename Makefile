@@ -1,37 +1,22 @@
 .PHONY: black-check
 black-check:
-	echo "== Black check =="
-	python -m black --diff --check .
-	echo "== end black check =="
-	echo "====================="
+	black --diff --check welearn_datastack/
 
 .PHONY: black-fix
 black-fix:
-	echo "== Black fix =="
-	python -m black .
-	echo "== end black fix =="
-	echo "====================="
+	black .
 
 isort-check:
-	echo "== isort check =="
-	python -m isort --profile black . -c
-	echo "== end isort check =="
-	echo "====================="
+	isort --profile black welearn_datastack/ -c
 
 .PHONY: bandit-lint
 bandit-lint:
-	echo "== bandit lint =="
 	python -m bandit -r welearn_datastack/ tests/ ./main.py
-	echo "== end bandit lint =="
-	echo "====================="
 
 
 .PHONY: mypy-lint
 mypy-lint:
-	echo "== mpypy lint =="
-	python -m mypy --exclude .venv/ --exclude .mypy_cache/ --exclude locustfiles/ --exclude alembic/ --show-error-codes .
-	echo "== end mypy lint =="
-	echo "====================="
+	mypy --exclude .venv/ --exclude .mypy_cache/ --exclude locustfiles/ --exclude alembic/ --show-error-codes welearn_datastack/
 
 .PHONY: format-check
 format-check: isort-check black-check

@@ -1,6 +1,4 @@
 import logging
-from difflib import SequenceMatcher
-from statistics import mean
 from typing import List, Tuple
 
 from pypdf import PdfReader

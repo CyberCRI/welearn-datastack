@@ -1,0 +1,66 @@
+[project]
+name = "welearn-datastack"
+version = "1.1.2"
+description = "Data stack for WeLearn LPI projects. This pipeline can collect, vectorize and store data from various sources."
+authors = [
+    { name = "Théo Nardin", email = "theo.nardin@learningplanetinstitute.org" },
+    { name = "Jean-Marc Sevin", email = "jean-marc.sevin@learningplanetinstitute.org" },
+    { name = "Sandra Guerreiro", email = "sandra.guerreiro@learningplanetinstitute.org " },
+]
+maintainers = [
+    { name = "WeLearn team", email = "welearn@learningplanetinstitute.org" },
+]
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+readme = "README.md"
+dynamic = [
+    "dependencies"
+]
+
+[tool.poetry]
+package-mode = false
+
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+sqlalchemy = "^2.0.41"
+numpy = "^2.2.6"
+requests = "^2.32.3"
+wikipedia-api = "^0.8.1"
+sentence-transformers = "^4.1.0"
+spacy = "^3.8.7"
+pypdf = "^5.6.0"
+refinedoc = "^0.0.3"
+qdrant-client = "^1.14.2"
+python-dotenv = "^1.1.0"
+langdetect = "^1.0.9"
+beautifulsoup4 = "^4.13.4"
+pyphen = "^0.17.2"
+ijson = "^3.4.0"
+keybert = "^0.9.0"
+torch = {version="^2.7.0+cpu", source = "pytorch_cpu"}
+torchvision = {version="^0.22.0+cpu", source = "pytorch_cpu"}
+
+
+[tool.poetry.group.metrics.dependencies]
+alembic = "^1.16.1"
+locust = "^2.37.7"
+
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.16.0"
+bandit = "^1.8.3"
+isort = "^6.0.1"
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[[tool.poetry.source]]
+name = "pytorch_cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"

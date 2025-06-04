@@ -27,9 +27,17 @@ jobs:
       registry-password: ${{ secrets.DOCKER_PROD_PASSWORD }}
   lint-and-test:
     uses: ./.github/workflows/lint-and-test.yml
-  tag-deploy:
+    with:
+      registry-name: ${{ vars.DOCKER_PROD_REGISTRY }}
+      image-name: welearn-datastack
+      image-tag: ${{ github.sha }}
+    secrets:
+      registry-username: ${{ secrets.DOCKER_PROD_USERNAME }}
+      registry-password: ${{ secrets.DOCKER_PROD_PASSWORD }}
     needs:
       - build-docker
+  tag-deploy:
+    needs:
       - lint-and-test
     uses: CyberCRI/github-workflows/.github/workflows/tag-deploy.yaml@main
   tag-deploy-fast:
