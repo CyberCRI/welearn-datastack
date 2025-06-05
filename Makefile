@@ -11,7 +11,7 @@ isort-check:
 
 .PHONY: bandit-lint
 bandit-lint:
-	python -m bandit -r welearn_datastack/ tests/ ./main.py
+	bandit -r welearn_datastack/ tests/ ./main.py
 
 
 .PHONY: mypy-lint
@@ -27,5 +27,5 @@ lint: bandit-lint
 .PHONY: test
 test:
 	echo "Testing..."
-	python -m unittest discover tests/
+	poetry run python -m unittest discover tests/
 	echo "... done testing"
