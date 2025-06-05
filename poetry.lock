@@ -3188,6 +3188,22 @@ openvino = ["optimum-intel[openvino] (>=1.20.0)"]
 train = ["accelerate (>=0.20.3)", "datasets"]
 
 [[package]]
+name = "sentencex"
+version = "0.6.1"
+description = "Sentence segmenter that supports ~300 languages"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "sentencex-0.6.1-py3-none-any.whl", hash = "sha256:e8a1bccda38d47136ce7e857d45098151633d53c95394502109297000d57bfb9"},
+    {file = "sentencex-0.6.1.tar.gz", hash = "sha256:4765ece009760f63d0f8c3c2aef08f573880e5d0dc4a5fce60f62219d1ab42cb"},
+]
+
+[package.extras]
+dev = ["ruff", "tox"]
+tests = ["pytest"]
+
+[[package]]
 name = "setuptools"
 version = "80.9.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -3238,6 +3254,18 @@ wsproto = "*"
 [package.extras]
 dev = ["flake8", "pytest", "pytest-cov", "tox"]
 docs = ["sphinx"]
+
+[[package]]
+name = "six"
+version = "1.17.0"
+description = "Python 2 and 3 compatibility utilities"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+groups = ["main"]
+files = [
+    {file = "six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"},
+    {file = "six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"},
+]
 
 [[package]]
 name = "smart-open"
@@ -4223,4 +4251,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "4fb3dac3f9e7342641e453af0927f539020eea66c843e4e487231e23cdb1c199"
+content-hash = "b3e840870438b1b4c91cac9ee32902cc5c6246689ea3432b2157b6bff7a7fdcb"

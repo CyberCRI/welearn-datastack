@@ -1,4 +1,4 @@
-FROM python:3.12-slim as requirements-stage
+FROM python:3.12-slim AS requirements-stage
 WORKDIR /tmp
 
 RUN pip install poetry==2.1.3
@@ -14,18 +14,21 @@ COPY ./pyproject.toml ./poetry.lock* ./LICENSE /tmp/
 
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --with dev --without metrics
 
-FROM python:3.12-slim as build-stage
+FROM python:3.12-slim AS build-stage
 WORKDIR /app
-RUN apt update && apt install -y --no-install-recommends make
+RUN apt update && \
+    apt install -y --no-install-recommends make
 
-COPY --from=requirements-stage ./tmp/requirements.txt ./requirements.txt
+COPY --from=requirements-stage /tmp/requirements.txt ./requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . .
 
-COPY secrets-entrypoint.sh /app/secrets-entrypoint.sh
+RUN chown -R 10000:10000 /app
+
+COPY --chown=10000:10000 secrets-entrypoint.sh ./secrets-entrypoint.sh
 
 USER 10000
 
-ENTRYPOINT [ "/app/secrets-entrypoint.sh" ]
+ENTRYPOINT [ "./secrets-entrypoint.sh" ]

@@ -11,7 +11,7 @@ isort-check:
 
 .PHONY: bandit-lint
 bandit-lint:
-	python -m bandit -r welearn_datastack/ tests/ ./main.py
+	bandit -r welearn_datastack/ tests/ ./main.py
 
 
 .PHONY: mypy-lint
