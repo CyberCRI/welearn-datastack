@@ -16,16 +16,18 @@ RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 FROM python:3.12-slim as build-stage
 WORKDIR /app
-RUN apt update && apt install -y --no-install-recommends make
+RUN apt update && \
+    apt install -y --no-install-recommends make && \
+    chown -R 10000:10000 /app
 
-COPY --from=requirements-stage ./tmp/requirements.txt ./requirements.txt
+COPY --from=requirements-stage /tmp/requirements.txt ./requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . .
 
-COPY secrets-entrypoint.sh /app/secrets-entrypoint.sh
+COPY secrets-entrypoint.sh ./secrets-entrypoint.sh
 
 USER 10000
 
-ENTRYPOINT [ "/app/secrets-entrypoint.sh" ]
+ENTRYPOINT [ "./secrets-entrypoint.sh" ]
