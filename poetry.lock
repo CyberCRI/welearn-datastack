@@ -3150,6 +3150,22 @@ openvino = ["optimum-intel[openvino] (>=1.20.0)"]
 train = ["accelerate (>=0.20.3)", "datasets"]
 
 [[package]]
+name = "sentencex"
+version = "0.6.1"
+description = "Sentence segmenter that supports ~300 languages"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "sentencex-0.6.1-py3-none-any.whl", hash = "sha256:e8a1bccda38d47136ce7e857d45098151633d53c95394502109297000d57bfb9"},
+    {file = "sentencex-0.6.1.tar.gz", hash = "sha256:4765ece009760f63d0f8c3c2aef08f573880e5d0dc4a5fce60f62219d1ab42cb"},
+]
+
+[package.extras]
+dev = ["ruff", "tox"]
+tests = ["pytest"]
+
+[[package]]
 name = "setuptools"
 version = "80.9.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -4197,4 +4213,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "b3e840870438b1b4c91cac9ee32902cc5c6246689ea3432b2157b6bff7a7fdcb"
+content-hash = "65b72e5746ecc0a0014574b448b1cab5d3597e413cf912c729bb77afa7fdcf5e"
