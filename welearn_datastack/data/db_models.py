@@ -1,8 +1,7 @@
 from datetime import datetime
-from email.policy import default
 from enum import StrEnum, auto  # type: ignore
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from sqlalchemy import ForeignKey, LargeBinary, UniqueConstraint, func, types
 from sqlalchemy.dialects.postgresql import ENUM, TIMESTAMP

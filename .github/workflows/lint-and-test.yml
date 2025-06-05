@@ -1,16 +1,38 @@
 name: Lint & test
 on:
   workflow_call:
-
+    inputs:
+      registry-name:
+        type: string
+        required: true
+        description: 'The name of the registry to pull from'
+      image-name:
+        type: string
+        required: true
+        description: 'The name of the image to pull'
+      image-tag:
+        type: string
+        required: true
+        description: 'The tag of the image to pull'
+    secrets:
+      registry-username:
+        required: true
+        description: 'The username on the docker registry'
+      registry-password:
+        required: true
+        description: 'The password on the docker registry'
 jobs:
   tests:
     runs-on: wlds-lint-and-test-runner
+    defaults:
+      run:
+        working-directory: /app
+    container:
+      image: ${{ inputs.registry-name }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+      credentials:
+        username: ${{ secrets.registry-username }}
+        password: ${{ secrets.registry-password }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python -m pip install --no-cache-dir --upgrade -r ./requirements.txt
       - name: Check format
         run: make format-check
       - name: Lint
