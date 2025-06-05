@@ -1,10 +1,9 @@
 import logging
 from typing import List
 
+import spacy
 from keybert import KeyBERT  # type: ignore
 from sentence_transformers import SentenceTransformer  # type: ignore
-from spacy.lang.en import English
-from spacy.lang.fr import French
 
 from welearn_datastack.data.db_models import WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
@@ -15,17 +14,7 @@ logger = logging.getLogger(__name__)
 
 loaded_models: dict[str, SentenceTransformer] = {}
 
-en_nlp = English()
-fr_nlp = French()
-
-
-def _get_nlp_model(language: str):
-    if language == "en":
-        return en_nlp
-    elif language == "fr":
-        return fr_nlp
-    else:
-        raise ValueError(f"Unsupported language: {language}")
+nlp_model = spacy.load("xx_sent_ud_sm")
 
 
 def extract_keywords(
@@ -41,8 +30,6 @@ def extract_keywords(
     )
     embedding_model = load_embedding_model(ml_path.as_posix())
     kw_model = KeyBERT(model=embedding_model)
-
-    nlp_model = _get_nlp_model(str(document.lang))
 
     doc = nlp_model(str(document.description))
     clean_description = " ".join(

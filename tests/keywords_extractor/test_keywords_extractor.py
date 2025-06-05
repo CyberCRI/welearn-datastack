@@ -10,12 +10,10 @@ class TestKeywordsExtractor(unittest.TestCase):
 
     @patch("welearn_datastack.modules.keywords_extractor.load_embedding_model")
     @patch("welearn_datastack.modules.keywords_extractor.generate_ml_models_path")
-    @patch("welearn_datastack.modules.keywords_extractor._get_nlp_model")
     @patch("welearn_datastack.modules.keywords_extractor.KeyBERT")
     def test_extract_keywords(
         self,
         mock_KeyBERT,
-        mock_get_nlp_model,
         mock_generate_ml_models_path,
         mock_load_embedding_model,
     ):
@@ -24,7 +22,6 @@ class TestKeywordsExtractor(unittest.TestCase):
         mock_load_embedding_model.return_value = "mock_embedding_model"
         mock_nlp_model = MagicMock()
         mock_nlp_model.return_value = MagicMock()
-        mock_get_nlp_model.return_value = mock_nlp_model
         mock_kw_model = mock_KeyBERT.return_value
         mock_kw_model.extract_keywords.return_value = [
             ("keyword1", 0.6),
@@ -56,6 +53,5 @@ class TestKeywordsExtractor(unittest.TestCase):
         # Assertions
         mock_generate_ml_models_path.assert_called_once()
         mock_load_embedding_model.assert_called_once_with("mock_path")
-        mock_get_nlp_model.assert_called_once_with("en")
         mock_kw_model.extract_keywords.assert_called_once()
         self.assertEqual(keywords, ["keyword1"])

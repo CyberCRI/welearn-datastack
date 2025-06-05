@@ -5,9 +5,8 @@ import re
 from typing import List
 from uuid import UUID
 
+import spacy
 from sentence_transformers import SentenceTransformer  # type: ignore
-from spacy.lang.en import English
-from spacy.lang.fr import French
 
 from welearn_datastack.data.db_models import DocumentSlice, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
@@ -18,21 +17,7 @@ logger = logging.getLogger(__name__)
 
 loaded_models: dict[str, SentenceTransformer] = {}
 
-
-en_nlp = English()
-en_nlp.add_pipe("sentencizer")
-
-fr_nlp = French()
-fr_nlp.add_pipe("sentencizer")
-
-
-def _get_nlp_model(language: str):
-    if language == "en":
-        return en_nlp
-    elif language == "fr":
-        return fr_nlp
-    else:
-        raise ValueError(f"Unsupported language: {language}")
+nlp_model = spacy.load("xx_sent_ud_sm")
 
 
 def create_content_slices(
@@ -129,7 +114,6 @@ def _split_by_word_respecting_sent_boundary(
     logger.info("Splitting document into slices of %d words", slice_length)
     text = re.sub(" +", " ", re.sub(r"\n+", " ", document_content)).strip()
 
-    nlp_model = _get_nlp_model(document_lang)
     spacy_doc = nlp_model(text)
 
     word_count_slice = 0
