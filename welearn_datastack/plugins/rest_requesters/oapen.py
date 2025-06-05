@@ -158,7 +158,7 @@ class OAPenCollector(IPluginRESTCollector):
 
     @staticmethod
     def _format_metadata(
-        metadata: List[Dict[str, str | None]]
+        metadata: List[Dict[str, str | None]],
     ) -> Dict[str, str | List[str]]:
         ret: Dict = {}
         for i in metadata:
