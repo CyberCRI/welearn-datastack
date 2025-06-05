@@ -165,14 +165,7 @@ class WeLearnDocumentKeyword(Base):
 
 class ErrorRetrieval(Base):
     __tablename__ = "error_retrieval"
-    __table_args__ = (
-        UniqueConstraint(
-            "document_id",
-            "http_error_code",
-            name="error_retrieval_document_id_http_error_code_idx",
-        ),
-        {"schema": DbSchemaEnum.DOCUMENT_RELATED.value},
-    )
+    __table_args__ = ({"schema": DbSchemaEnum.DOCUMENT_RELATED.value},)
 
     id: Mapped[UUID] = mapped_column(
         types.Uuid, primary_key=True, nullable=False, server_default="gen_random_uuid()"

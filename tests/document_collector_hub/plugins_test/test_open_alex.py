@@ -67,7 +67,7 @@ class TestOpenAlexCollector(TestCase):
                 "filter": f"ids.openalex:{joined_urls}",
                 "mailto": "welearn@learningplanetinstitute.org",
                 "per_page": page_ln,
-                "select": "title,ids,language,abstract_inverted_index,publication_date,authorships,open_access,best_oa_location,publication_date,type,topics,keywords,referenced_works,related_works",
+                "select": "title,ids,language,abstract_inverted_index,publication_date,authorships,open_access,best_oa_location,publication_date,type,topics,keywords,referenced_works,related_works,locations",
             },
             tested_query,
         )
