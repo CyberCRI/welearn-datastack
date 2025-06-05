@@ -3256,18 +3256,6 @@ dev = ["flake8", "pytest", "pytest-cov", "tox"]
 docs = ["sphinx"]
 
 [[package]]
-name = "six"
-version = "1.17.0"
-description = "Python 2 and 3 compatibility utilities"
-optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
-groups = ["main"]
-files = [
-    {file = "six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"},
-    {file = "six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"},
-]
-
-[[package]]
 name = "smart-open"
 version = "7.1.0"
 description = "Utils for streaming large files (S3, HDFS, GCS, Azure Blob Storage, gzip, bz2...)"
@@ -4251,4 +4239,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "b3e840870438b1b4c91cac9ee32902cc5c6246689ea3432b2157b6bff7a7fdcb"
+content-hash = "013803a5c6ee6a9677ed3a6fa42a1c33da5899fb0896a7e4c323070dd7f6efb9"
