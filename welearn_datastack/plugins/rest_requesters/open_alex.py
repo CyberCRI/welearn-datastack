@@ -81,7 +81,9 @@ class OpenAlexCollector(IPluginRESTCollector):
             raise ValueError(f"file_size_limit must be positive : {file_size_limit}")
 
         if file_size_limit:
-            resp_head = client.head(url, headers=HEADERS, allow_redirects=True)
+            resp_head = client.head(
+                url, headers=HEADERS, allow_redirects=True, timeout=30
+            )
             try:
                 content_length = int(resp_head.headers.get("content-length"))
                 logger.info(f"PDF size is {content_length}")
