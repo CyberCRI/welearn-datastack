@@ -4121,6 +4121,21 @@ files = [
 h11 = ">=0.9.0,<1"
 
 [[package]]
+name = "xx_sent_ud_sm"
+version = "3.8.0"
+description = "Multi-language pipeline optimized for CPU. Components: senter."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "xx_sent_ud_sm-3.8.0-py3-none-any.whl", hash = "sha256:1b5fb9321723b395f76458d2a13b7a3673c537eb58c0a9df3778f4e0950180b4"},
+]
+
+[package.source]
+type = "url"
+url = "https://github.com/explosion/spacy-models/releases/download/xx_sent_ud_sm-3.8.0/xx_sent_ud_sm-3.8.0-py3-none-any.whl"
+
+[[package]]
 name = "zope-event"
 version = "5.0"
 description = "Very basic event publishing system"
@@ -4197,4 +4212,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "b3e840870438b1b4c91cac9ee32902cc5c6246689ea3432b2157b6bff7a7fdcb"
+content-hash = "f54e71ee593a859f8487d0aa5859e1d76c1c69f7463820d196d6c3cfec57fade"
