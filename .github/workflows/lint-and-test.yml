@@ -5,22 +5,22 @@ on:
       registry-name:
         type: string
         required: true
-        description: 'The name of the registry to push to'
+        description: 'The name of the registry to pull from'
       image-name:
         type: string
         required: true
-        description: 'The name of the image to push'
+        description: 'The name of the image to pull'
       image-tag:
         type: string
         required: true
-        description: 'The tag of the image to push'
+        description: 'The tag of the image to pull'
     secrets:
       registry-username:
         required: true
-        description: 'The username on the registry'
+        description: 'The username on the docker registry'
       registry-password:
         required: true
-        description: 'The password on the registry'
+        description: 'The password on the docker registry'
 jobs:
   tests:
     runs-on: wlds-lint-and-test-runner

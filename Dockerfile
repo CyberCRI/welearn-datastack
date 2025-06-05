@@ -28,4 +28,6 @@ COPY . .
 
 COPY secrets-entrypoint.sh ./secrets-entrypoint.sh
 
+USER 10000
+
 ENTRYPOINT [ "./secrets-entrypoint.sh" ]
