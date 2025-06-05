@@ -27,5 +27,5 @@ lint: bandit-lint
 .PHONY: test
 test:
 	echo "Testing..."
-	poetry run python -m unittest discover tests/
+	python -m unittest discover tests/
 	echo "... done testing"
