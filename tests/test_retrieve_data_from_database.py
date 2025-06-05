@@ -1,18 +1,33 @@
+import os
 import unittest
 import uuid
-from asyncio.subprocess import Process
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
-from sqlalchemy import URL, create_engine, event
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.db_models import Base, Corpus, ProcessState, WeLearnDocument
-from welearn_datastack.data.enumerations import Step, URLRetrievalType, WeighedScope
+from welearn_datastack.data.db_models import (
+    Base,
+    BiClassifierModel,
+    Corpus,
+    CorpusBiClassifierModel,
+    CorpusEmbeddingModel,
+    CorpusNClassifierModel,
+    EmbeddingModel,
+    NClassifierModel,
+    ProcessState,
+    WeLearnDocument,
+)
+from welearn_datastack.data.enumerations import MLModelsType, Step, URLRetrievalType
 from welearn_datastack.modules.retrieve_data_from_database import (
+    retrieve_models,
     retrieve_random_documents_ids_according_process_title,
     retrieve_urls_ids,
+)
+from welearn_datastack.utils_.virtual_environement_utils import (
+    get_sub_environ_according_prefix,
 )
 
 
@@ -172,3 +187,347 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         res2.sort()
         self.assertEqual(len(res2), 1)
         self.assertListEqual(res2, [str(doc_test_id2)])
+
+    def test_retrieve_bi_models(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        corpus_source_name = "test_corpus"
+
+        corpus_test = Corpus(
+            id=uuid.uuid4(),
+            source_name=corpus_source_name,
+            is_fix=True,
+            is_active=True,
+        )
+        test_session.add(corpus_test)
+        test_session.commit()
+
+        bi_classifier_en_id = uuid.uuid4()
+        biclassifier_en_test = BiClassifierModel(
+            title="test_classifier",
+            id=bi_classifier_en_id,
+            lang="en",
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        corpus_bi_classifier_en_test = CorpusBiClassifierModel(
+            corpus_id=corpus_test.id,
+            bi_classifier_model_id=bi_classifier_en_id,
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        bi_classifier_en_id2 = uuid.uuid4()
+        biclassifier_en_test2 = BiClassifierModel(
+            title="test_classifier2",
+            id=bi_classifier_en_id2,
+            lang="en",
+            used_since=datetime.now() - timedelta(days=10),
+        )
+        corpus_bi_classifier_en_test2 = CorpusBiClassifierModel(
+            corpus_id=corpus_test.id,
+            bi_classifier_model_id=bi_classifier_en_id2,
+            used_since=datetime.now() - timedelta(days=10),
+        )
+
+        bi_classifier_fr_id = uuid.uuid4()
+        biclassifier_fr_test = BiClassifierModel(
+            title="test_classifier_fr",
+            id=bi_classifier_fr_id,
+            lang="fr",
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        corpus_bi_classifier_fr_test = CorpusBiClassifierModel(
+            corpus_id=corpus_test.id,
+            bi_classifier_model_id=bi_classifier_fr_id,
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        doc_test_id = uuid.uuid4()
+        doc_test = WeLearnDocument(
+            id=doc_test_id,
+            url="https://example.org",
+            corpus_id=corpus_test.id,
+            title="test title",
+            lang="en",
+            full_content="test content",
+            description="test description",
+            details={"test key details": "test details"},
+            trace=1,
+        )
+
+        test_session.add(biclassifier_en_test2)
+        test_session.add(corpus_bi_classifier_en_test2)
+        test_session.add(biclassifier_en_test)
+        test_session.add(corpus_bi_classifier_en_test)
+        test_session.add(biclassifier_fr_test)
+        test_session.add(corpus_bi_classifier_fr_test)
+        test_session.add(doc_test)
+        test_session.commit()
+
+        res = retrieve_models(
+            documents_ids=[doc_test_id],
+            db_session=test_session,
+            ml_type=MLModelsType.BI_CLASSIFIER,
+        )
+
+        self.assertEqual(doc_test_id, list(res.keys())[0])
+        self.assertEqual(res[doc_test_id]["model_id"], bi_classifier_en_id)
+        self.assertEqual(res[doc_test_id]["model_name"], biclassifier_en_test.title)
+
+    def test_retrieve_bi_models_no_models(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        doc_test_id = uuid.uuid4()
+
+        res = retrieve_models(
+            documents_ids=[doc_test_id],
+            db_session=test_session,
+            ml_type=MLModelsType.BI_CLASSIFIER,
+        )
+
+        self.assertEqual(len(res), 0)
+
+    def test_retrieve_n_models(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        corpus_source_name = "test_corpus"
+
+        corpus_test = Corpus(
+            id=uuid.uuid4(),
+            source_name=corpus_source_name,
+            is_fix=True,
+            is_active=True,
+        )
+        test_session.add(corpus_test)
+        test_session.commit()
+
+        n_classifier_en_id = uuid.uuid4()
+        nclassifier_en_test = NClassifierModel(
+            title="test_n_classifier",
+            id=n_classifier_en_id,
+            lang="en",
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        corpus_n_classifier_en_test = CorpusNClassifierModel(
+            corpus_id=corpus_test.id,
+            n_classifier_model_id=n_classifier_en_id,
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        n_classifier_en_id2 = uuid.uuid4()
+        nclassifier_en_test2 = NClassifierModel(
+            title="test_n_classifier2",
+            id=n_classifier_en_id2,
+            lang="en",
+            used_since=datetime.now() - timedelta(days=10),
+        )
+        corpus_n_classifier_en_test2 = CorpusNClassifierModel(
+            corpus_id=corpus_test.id,
+            n_classifier_model_id=n_classifier_en_id2,
+            used_since=datetime.now() - timedelta(days=10),
+        )
+
+        n_classifier_fr_id = uuid.uuid4()
+        nclassifier_fr_test = NClassifierModel(
+            title="test_n_classifier_fr",
+            id=n_classifier_fr_id,
+            lang="fr",
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        corpus_n_classifier_fr_test = CorpusNClassifierModel(
+            corpus_id=corpus_test.id,
+            n_classifier_model_id=n_classifier_fr_id,
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        doc_test_id = uuid.uuid4()
+        doc_test = WeLearnDocument(
+            id=doc_test_id,
+            url="https://example.org",
+            corpus_id=corpus_test.id,
+            title="test title",
+            lang="en",
+            full_content="test content",
+            description="test description",
+            details={"test key details": "test details"},
+            trace=1,
+        )
+        test_session.add(nclassifier_en_test2)
+        test_session.add(corpus_n_classifier_en_test2)
+        test_session.add(nclassifier_en_test)
+        test_session.add(corpus_n_classifier_en_test)
+        test_session.add(nclassifier_fr_test)
+        test_session.add(corpus_n_classifier_fr_test)
+        test_session.add(doc_test)
+        test_session.commit()
+
+        res = retrieve_models(
+            documents_ids=[doc_test_id],
+            db_session=test_session,
+            ml_type=MLModelsType.N_CLASSIFIER,
+        )
+
+        self.assertEqual(doc_test_id, list(res.keys())[0])
+        self.assertEqual(res[doc_test_id]["model_id"], n_classifier_en_id)
+        self.assertEqual(res[doc_test_id]["model_name"], nclassifier_en_test.title)
+
+    def test_retrieve_n_models_no_models(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        doc_test_id = uuid.uuid4()
+
+        res = retrieve_models(
+            documents_ids=[doc_test_id],
+            db_session=test_session,
+            ml_type=MLModelsType.N_CLASSIFIER,
+        )
+
+        self.assertEqual(len(res), 0)
+
+    def test_retrieve_embedding_models(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        corpus_source_name = "test_corpus"
+
+        corpus_test = Corpus(
+            id=uuid.uuid4(),
+            source_name=corpus_source_name,
+            is_fix=True,
+            is_active=True,
+        )
+        test_session.add(corpus_test)
+        test_session.commit()
+
+        embedding_model_en_id = uuid.uuid4()
+        embedding_model_en_test = EmbeddingModel(
+            title="test_embedding_model",
+            id=embedding_model_en_id,
+            lang="en",
+        )
+
+        corpus_embedding_model_en_test = CorpusEmbeddingModel(
+            corpus_id=corpus_test.id,
+            embedding_model_id=embedding_model_en_id,
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        embedding_model_en_id2 = uuid.uuid4()
+        embedding_model_en_test2 = EmbeddingModel(
+            title="test_embedding_model2",
+            id=embedding_model_en_id2,
+            lang="en",
+        )
+        corpus_embedding_model_en_test2 = CorpusEmbeddingModel(
+            corpus_id=corpus_test.id,
+            embedding_model_id=embedding_model_en_id2,
+            used_since=datetime.now() - timedelta(days=10),
+        )
+
+        embedding_model_fr_id = uuid.uuid4()
+        embedding_model_fr_test = EmbeddingModel(
+            title="test_embedding_model_fr",
+            id=embedding_model_fr_id,
+            lang="fr",
+        )
+
+        corpus_embedding_model_fr_test = CorpusEmbeddingModel(
+            corpus_id=corpus_test.id,
+            embedding_model_id=embedding_model_fr_id,
+            used_since=datetime.now() - timedelta(days=1),
+        )
+
+        doc_test_id = uuid.uuid4()
+        doc_test = WeLearnDocument(
+            id=doc_test_id,
+            url="https://example.org",
+            corpus_id=corpus_test.id,
+            title="test title",
+            lang="en",
+            full_content="test content",
+            description="test description",
+            details={"test key details": "test details"},
+            trace=1,
+        )
+
+        test_session.add(embedding_model_en_test2)
+        test_session.add(corpus_embedding_model_en_test2)
+        test_session.add(embedding_model_en_test)
+        test_session.add(corpus_embedding_model_en_test)
+        test_session.add(embedding_model_fr_test)
+        test_session.add(corpus_embedding_model_fr_test)
+        test_session.add(doc_test)
+        test_session.commit()
+
+        res = retrieve_models(
+            documents_ids=[doc_test_id],
+            db_session=test_session,
+            ml_type=MLModelsType.EMBEDDING,
+        )
+
+        self.assertEqual(doc_test_id, list(res.keys())[0])
+        self.assertEqual(res[doc_test_id]["model_id"], embedding_model_en_id)
+        self.assertEqual(res[doc_test_id]["model_name"], embedding_model_en_test.title)
+
+    def test_retrieve_embedding_models_no_models(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        doc_test_id = uuid.uuid4()
+
+        res = retrieve_models(
+            documents_ids=[doc_test_id],
+            db_session=test_session,
+            ml_type=MLModelsType.EMBEDDING,
+        )
+
+        self.assertEqual(len(res), 0)

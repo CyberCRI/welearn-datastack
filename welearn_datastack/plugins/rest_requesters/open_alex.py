@@ -70,7 +70,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             "filter": f"ids.openalex:{'|'.join(urls)}",
             "per_page": page_ln,
             "mailto": self.team_email,
-            "select": "title,ids,language,abstract_inverted_index,publication_date,authorships,open_access,best_oa_location,publication_date,type,topics,keywords,referenced_works,related_works",
+            "select": "title,ids,language,abstract_inverted_index,publication_date,authorships,open_access,best_oa_location,publication_date,type,topics,keywords,referenced_works,related_works,locations",
         }
 
     def _get_pdf_content(self, url: str, file_size_limit: int | None = None) -> str:
@@ -81,7 +81,9 @@ class OpenAlexCollector(IPluginRESTCollector):
             raise ValueError(f"file_size_limit must be positive : {file_size_limit}")
 
         if file_size_limit:
-            resp_head = client.head(url, headers=HEADERS, allow_redirects=True)
+            resp_head = client.head(
+                url, headers=HEADERS, allow_redirects=True, timeout=30
+            )
             try:
                 content_length = int(resp_head.headers.get("content-length"))
                 logger.info(f"PDF size is {content_length}")
