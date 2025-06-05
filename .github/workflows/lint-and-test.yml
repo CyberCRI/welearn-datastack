@@ -23,16 +23,12 @@ on:
         description: 'The password on the registry'
 jobs:
   tests:
-    defaults:
-      run:
-        working-directory: /app
     runs-on: wlds-lint-and-test-runner
     container:
       image: ${{ inputs.registry-name }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
       credentials:
         username: ${{ secrets.registry-username }}
         password: ${{ secrets.registry-password }}
-      options: --user 10000
     steps:
       - name: Check format
         run: make format-check
