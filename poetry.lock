@@ -3188,22 +3188,6 @@ openvino = ["optimum-intel[openvino] (>=1.20.0)"]
 train = ["accelerate (>=0.20.3)", "datasets"]
 
 [[package]]
-name = "sentencex"
-version = "0.6.1"
-description = "Sentence segmenter that supports ~300 languages"
-optional = false
-python-versions = ">=3.8"
-groups = ["main"]
-files = [
-    {file = "sentencex-0.6.1-py3-none-any.whl", hash = "sha256:e8a1bccda38d47136ce7e857d45098151633d53c95394502109297000d57bfb9"},
-    {file = "sentencex-0.6.1.tar.gz", hash = "sha256:4765ece009760f63d0f8c3c2aef08f573880e5d0dc4a5fce60f62219d1ab42cb"},
-]
-
-[package.extras]
-dev = ["ruff", "tox"]
-tests = ["pytest"]
-
-[[package]]
 name = "setuptools"
 version = "80.9.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
@@ -4163,6 +4147,21 @@ files = [
 h11 = ">=0.9.0,<1"
 
 [[package]]
+name = "xx_sent_ud_sm"
+version = "3.8.0"
+description = "Multi-language pipeline optimized for CPU. Components: senter."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "xx_sent_ud_sm-3.8.0-py3-none-any.whl", hash = "sha256:1b5fb9321723b395f76458d2a13b7a3673c537eb58c0a9df3778f4e0950180b4"},
+]
+
+[package.source]
+type = "url"
+url = "https://github.com/explosion/spacy-models/releases/download/xx_sent_ud_sm-3.8.0/xx_sent_ud_sm-3.8.0-py3-none-any.whl"
+
+[[package]]
 name = "zope-event"
 version = "5.0"
 description = "Very basic event publishing system"
@@ -4239,4 +4238,5 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
+
 content-hash = "013803a5c6ee6a9677ed3a6fa42a1c33da5899fb0896a7e4c323070dd7f6efb9"

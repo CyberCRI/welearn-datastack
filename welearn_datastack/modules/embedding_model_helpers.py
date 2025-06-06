@@ -5,8 +5,8 @@ import re
 from typing import List
 from uuid import UUID
 
+import spacy
 from sentence_transformers import SentenceTransformer  # type: ignore
-from sentencex import segment
 
 from welearn_datastack.data.db_models import DocumentSlice, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
@@ -16,6 +16,8 @@ from welearn_datastack.utils_.path_utils import generate_ml_models_path
 logger = logging.getLogger(__name__)
 
 loaded_models: dict[str, SentenceTransformer] = {}
+
+nlp_model = spacy.load("xx_sent_ud_sm")
 
 
 def create_content_slices(
@@ -112,12 +114,14 @@ def _split_by_word_respecting_sent_boundary(
     logger.info("Splitting document into slices of %d words", slice_length)
     text = re.sub(" +", " ", re.sub(r"\n+", " ", document_content)).strip()
 
+    spacy_doc = nlp_model(text)
+
     word_count_slice = 0
     list_slices = []
     current_slice: List[str] = []
 
-    sents_iterator: list[str] = segment(document_lang, text)
-    for sentence in sents_iterator:
+    for span_sentence in spacy_doc.sents:
+        sentence = span_sentence.text.strip()
         word_count_sen = len(sentence.split())
 
         if word_count_sen > slice_length:
