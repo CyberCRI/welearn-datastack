@@ -82,6 +82,11 @@ class TestScrapePlosPlugin(unittest.TestCase):
             "publisher": "Public Library of Science, San Francisco, CA USA",
             "readability": "49.66",
             "duration": "1578",
+            "content_and_description_lang": {
+                "are_different": False,
+                "content_lang": "en",
+                "description_lang": "en",
+            },
         }
 
         class MockResponse:

@@ -1,5 +1,3 @@
-import json
-import os
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -98,6 +96,11 @@ class TestScrapePeerJPlugin(unittest.TestCase):
             "readability": "57.8",
             "duration": "8596",
             "license_url": "https://creativecommons.org/licenses/by/4.0/",
+            "content_and_description_lang": {
+                "are_different": False,
+                "description_lang": "en",
+                "content_lang": "en",
+            },
         }
 
         class MockResponse:

@@ -1,5 +1,6 @@
 import os
 import uuid
+from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -21,6 +22,9 @@ class Test(TestCase):
         os.environ["PG_PASSWORD"] = ""  # nosec
         os.environ["PG_HOST"] = ""
         os.environ["PG_DB"] = ":memory:"
+        self.path_test_input = Path(__file__).parent.parent / "resources" / "input"
+        self.path_test_input.mkdir(parents=True, exist_ok=True)
+        os.environ["ARTIFACT_ROOT"] = self.path_test_input.parent.as_posix()
 
         self.engine = create_engine("sqlite://")
         s_maker = sessionmaker(self.engine)
@@ -119,6 +123,7 @@ class Test(TestCase):
     def test_main(
         self, mock_check_url, mock_reyrieve_ids_from_csv, mock_create_db_session
     ):
+
         mock_create_db_session.return_value = self.test_session
         mock_reyrieve_ids_from_csv.return_value = [
             self.doc_test_id0,

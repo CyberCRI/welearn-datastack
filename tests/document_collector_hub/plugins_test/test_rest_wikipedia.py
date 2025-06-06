@@ -19,8 +19,8 @@ class TestRestWikipediaPlugin(unittest.TestCase):
             WikipediaPageSection(wiki=Wikipedia, title="section12", text="content12"),
         ]
         self.page1.content = "summary1 section11 content11 section12 content12"
-        self.page1.readability = 32.56
-        self.page1.duration = 1
+        self.page1.readability = "32.56"
+        self.page1.duration = "1"
 
         self.page2 = MagicMock()
         self.page2.url = "https://fr.example.wiki/title2"
@@ -32,8 +32,8 @@ class TestRestWikipediaPlugin(unittest.TestCase):
             WikipediaPageSection(wiki=Wikipedia, title="section22", text="content22"),
         ]
         self.page2.content = "summary2 section21 content21 section22 content22"
-        self.page2.readability = 69.45
-        self.page2.duration = 1
+        self.page2.readability = "69.45"
+        self.page2.duration = "1"
 
         self.pages_list = [self.page1, self.page2]
 

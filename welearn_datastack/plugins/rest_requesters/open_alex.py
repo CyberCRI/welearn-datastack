@@ -5,7 +5,6 @@ from datetime import datetime
 from itertools import batched
 from typing import Any, Dict, List, Tuple
 
-from langdetect import detect
 from pypdf import PdfReader
 
 from welearn_datastack.constants import (
@@ -252,7 +251,6 @@ class OpenAlexCollector(IPluginRESTCollector):
                     f"PDF retrievement error, use description as content: {e}"
                 )
                 pdf_flag = False
-        document_lang = detect(document_content)
 
         document_corpus = self.related_corpus
         publication_date = int(
@@ -292,10 +290,6 @@ class OpenAlexCollector(IPluginRESTCollector):
 
         logger.info(f"The content {document_url} is legally usable")
 
-        # Predicted properties
-        duration = predict_duration(text=document_content, lang=document_lang)
-        readability = predict_readability(text=document_content, lang=document_lang)
-
         document_details = {
             "publication_date": publication_date,
             "type": to_convert_json["type"],
@@ -310,15 +304,12 @@ class OpenAlexCollector(IPluginRESTCollector):
             "tags": [x.get("display_name") for x in to_convert_json["keywords"]],
             "referenced_works": to_convert_json["referenced_works"],
             "related_works": to_convert_json["related_works"],
-            "duration": duration,
             "authors": authors,
-            "readability": readability,
         }
 
         return ScrapedWeLearnDocument(
             document_title=document_title,
             document_url=document_url,
-            document_lang=document_lang,
             document_content=document_content,
             document_desc=document_desc,
             document_corpus=document_corpus,

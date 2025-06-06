@@ -92,7 +92,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
                     raise ClosedAccessContent("Access rights not open access")
 
                 book_dmd = self._extract_book_dmd_id(root_extractor)
-                lang = book_dmd.extract_content_attribute_filter(
+                desc_lang = book_dmd.extract_content_attribute_filter(
                     tag="dcterms:language",
                     attribute_name="xsi:type",
                     attribute_value="dcterms:RFC1766",
@@ -100,7 +100,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
                 current_license = self._get_current_license(book_dmd)
                 details["license"] = current_license
 
-                desc = self._get_description(book_dmd, lang)
+                desc = self._get_description(book_dmd, desc_lang)
                 content = desc
                 title = book_dmd.extract_content("dcterms:title")[0].content
 
@@ -171,7 +171,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
                 details["authors"] = authors
 
                 # Get language
-                lang = local_dmd.extract_content_attribute_filter(
+                desc_lang = local_dmd.extract_content_attribute_filter(
                     tag="dcterms:language",
                     attribute_name="xsi:type",
                     attribute_value="dcterms:RFC1766",
@@ -189,7 +189,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
                 )
 
                 # Get description
-                desc = self._get_description(local_dmd, lang)
+                desc = self._get_description(local_dmd, desc_lang)
 
                 # Get content
                 is_open_access = access_rights == "openaccess"
@@ -229,7 +229,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
 
         # Tags from tag "citation_keywords"
         tags = root_extractor.extract_content_attribute_filter(
-            "dcterms:subject", "xml:lang", lang
+            "dcterms:subject", "xml:lang", desc_lang
         )
         details["tags"] = [tag.content.lower().strip() for tag in tags]
 
@@ -242,14 +242,6 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
         ).timestamp()
         details["publication_date"] = int(publication_date_ts)
 
-        # Compute duration
-        duration = predict_duration(content, lang=lang)
-        details["duration"] = duration
-
-        # Compute readability
-        readability = predict_readability(content, lang=lang)
-        details["readability"] = readability
-
         # Get publisher name
         publisher = root_extractor.extract_content("dcterms:publisher")[0].content
         details["publisher"] = publisher
@@ -257,7 +249,6 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
         return ScrapedWeLearnDocument(
             document_title=title,
             document_url=url,
-            document_lang=lang,
             document_content=content,
             document_desc=desc,
             document_corpus=self.related_corpus,

@@ -218,13 +218,6 @@ class PeerJCollector(IPluginScrapeCollector):
             self._clean_dom(content_beautifulsoup).text
         )
 
-        # Get lang
-        lang = extract_property_from_html(
-            soup.find("meta", {"name": "citation_language"}),
-            mandatory=True,
-            error_property_name="lang",
-        )
-
         # Get title
         title = extract_property_from_html(
             soup.find("h1", {"class": "article-title"}),
@@ -239,19 +232,12 @@ class PeerJCollector(IPluginScrapeCollector):
             error_property_name="description",
         )
 
-        # Get readability and duration
-        readability = predict_readability(text=content_bs_txt, lang=lang)
-        duration = predict_duration(text=content_bs_txt, lang=lang)
-
         # Get details
         doc_details = self._get_document_details(soup=soup)
-        doc_details["readability"] = str(readability)
-        doc_details["duration"] = str(duration)
 
         scraped_document = ScrapedWeLearnDocument(
             document_url=url,
             document_title=title,
-            document_lang=lang,
             document_desc=description,
             document_content=content_bs_txt,
             document_details=doc_details,
