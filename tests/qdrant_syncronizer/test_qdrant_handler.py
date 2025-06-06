@@ -1,14 +1,11 @@
 import unittest
 import uuid
 from datetime import datetime
-from unittest.mock import MagicMock, patch
 
 import numpy
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import models
 
-from welearn_datastack.data.db_models import DocumentSlice
-from welearn_datastack.exceptions import NoPreviousCollectionError, VersionNumberError
 from welearn_datastack.modules.qdrant_handler import (  # get_collections_names,
     classify_documents_per_collection,
 )

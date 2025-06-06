@@ -181,19 +181,6 @@ class HALCollector(IPluginRESTCollector):
         except KeyError:
             raise KeyError("This line : '%s' cannot be scraped, no url", str(json_dict))
 
-        lang_list: List[str] | None = json_dict.get("language_s", None)
-        if not lang_list or len(lang_list) == 0:
-            raise KeyError(
-                "This line : '%s' cannot be scraped, no lang", str(json_dict)
-            )
-        lang: str = lang_list[0]
-
-        if lang == "und":
-            raise KeyError(
-                "This line : '%s' cannot be scraped, lang undefined",
-                url,
-            )
-
         titles: List[str] | None = json_dict.get("title_s", None)
         if not titles or len(titles) == 0:
             raise KeyError("This line : '%s' cannot be scraped, no titles", url)
@@ -225,7 +212,6 @@ class HALCollector(IPluginRESTCollector):
         current = ScrapedWeLearnDocument(
             document_title=title,
             document_url=url,
-            document_lang=lang,
             document_content=content,
             document_desc=desc.strip() + "...",
             document_corpus="hal",

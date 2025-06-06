@@ -1,7 +1,9 @@
 import logging
 import math
 import re
+from functools import cache
 
+from lingua import LanguageDetectorBuilder
 from pyphen import Pyphen  # type: ignore
 
 from welearn_datastack.constants import (
@@ -116,7 +118,7 @@ def avg_syllables_per_word(text: str, lang: str) -> float:
         return 0.0
 
 
-def predict_readability(text: str, lang: str) -> float | None:
+def predict_readability(text: str, lang: str) -> str:
     """scores the readability with flesch reading ease (score from 0 to 100)
 
     Args:
@@ -126,6 +128,8 @@ def predict_readability(text: str, lang: str) -> float | None:
     Returns:
         float: flesch reading ease score
     """
+    if lang not in FLESCH_KINCAID_CONSTANTS:
+        return ""
     fre_base = FLESCH_KINCAID_CONSTANTS[lang]["fre_base"]
     fre_sentence_length = FLESCH_KINCAID_CONSTANTS[lang]["fre_sentence_length"]
     fre_syll_per_word = FLESCH_KINCAID_CONSTANTS[lang]["fre_syll_per_word"]
@@ -136,10 +140,11 @@ def predict_readability(text: str, lang: str) -> float | None:
         - fre_syll_per_word * avg_syllables_per_word(text, lang)
     )
     flesch = float(math.floor((flesch * 100) + math.copysign(0.5, flesch))) / 100
-    return min(100.0, max(0.0, flesch))
+    ret = min(100.0, max(0.0, flesch))
+    return str(ret)
 
 
-def predict_duration(text: str, lang: str) -> int:
+def predict_duration(text: str, lang: str) -> str:
     """Estimate the reading time in seconds necessary to read a text
 
     Args:
@@ -155,4 +160,17 @@ def predict_duration(text: str, lang: str) -> int:
         speed = DICT_READING_SPEEDS_LANG[lang]
     else:
         speed = DICT_READING_SPEEDS_LANG["en"]  # default reading speed
-    return int(n_words / speed * 60)
+    ret = int(n_words / speed * 60)
+    return str(ret)
+
+
+@cache
+def get_language_detector():
+    """
+    Returns a language detector instance.
+    """
+    return (
+        LanguageDetectorBuilder.from_all_languages()
+        .with_preloaded_language_models()
+        .build()
+    )

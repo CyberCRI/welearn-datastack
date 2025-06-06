@@ -3,7 +3,7 @@ import re
 from typing import List, Tuple
 
 import requests  # type: ignore
-from wikipediaapi import Wikipedia, WikipediaPageSection  # type: ignore
+from wikipediaapi import Wikipedia, WikipediaPage, WikipediaPageSection  # type: ignore
 
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.plugins.interface import IPluginRESTCollector
@@ -75,6 +75,8 @@ class WikipediaCollector(IPluginRESTCollector):
         lang = re.match(r"https://([a-z]{2})", url)[0][-2:]  # type: ignore
         wiki_wiki = Wikipedia(USER_AGENT, lang)
 
+        page: WikipediaPage | None = None
+        sections: dict | None = None
         for attempt in range(5):
             try:
                 page = wiki_wiki.page(title=url.split("/")[-1])
@@ -86,8 +88,11 @@ class WikipediaCollector(IPluginRESTCollector):
                     str(attempt + 1),
                     url,
                 )
-            else:
-                logger.error("Couldn't get text content for url '%s'", url)
+
+        if not page or not sections:
+            raise ValueError(
+                f"Failed to retrieve page content for URL: {url} after 5 attempts"
+            )
 
         doc_url = url
         doc_title = page.title
@@ -96,18 +101,13 @@ class WikipediaCollector(IPluginRESTCollector):
         doc_content = " ".join(
             [doc_desc] + [" ".join([k, v]) for (k, v) in sections.items()]
         )
-        doc_details = {
-            "readability": predict_readability(doc_content, doc_lang),
-            "duration": predict_duration(doc_content, doc_lang),
-        }
-
         scraped_document = ScrapedWeLearnDocument(
             document_url=doc_url,
             document_title=doc_title,
             document_lang=doc_lang,
             document_desc=doc_desc,
             document_content=doc_content,
-            document_details=doc_details,
+            document_details={},
             document_corpus=self.related_corpus,
         )
 

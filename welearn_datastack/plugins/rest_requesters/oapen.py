@@ -3,11 +3,12 @@ import logging
 import math
 import os
 import re
+from collections import deque
 from datetime import datetime
 from itertools import batched
 from typing import Dict, Iterable, List, Tuple
 
-from langdetect import detect
+from lingua import Language
 from pypdf import PdfReader
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
@@ -17,6 +18,7 @@ from welearn_datastack.exceptions import (
     PDFPagesSizeExceedLimit,
     TooMuchLanguages,
     UnauthorizedLicense,
+    WrongLangFormat,
 )
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -30,6 +32,7 @@ from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 from welearn_datastack.utils_.text_stat_utils import (
+    get_language_detector,
     predict_duration,
     predict_readability,
 )
@@ -214,11 +217,6 @@ class OAPenCollector(IPluginRESTCollector):
 
         metadata = self._format_metadata(json_dict["metadata"])
 
-        if isinstance(metadata["dc.language"], str):
-            lang = language_to_iso_2_dict.get(metadata["dc.language"], "00")
-        else:
-            raise TooMuchLanguages("Too much languages in metadata")
-
         abstracts: List[str] = []
         if "dc.description.abstract" in metadata and isinstance(
             metadata.get("dc.description.abstract"), str
@@ -237,9 +235,28 @@ class OAPenCollector(IPluginRESTCollector):
         if len(abstracts) <= 0:
             raise NoDescriptionFoundError("No description found in this document")
 
+        # Identify which abstract to collect
         desc = ""
+        if isinstance(metadata["dc.language"], str):
+            try:
+                lang = Language.from_str(
+                    metadata["dc.language"]
+                ).iso_code_639_1.name.lower()
+            except ValueError:
+                raise WrongLangFormat(
+                    f"This language cannot be handled : {metadata['dc.language']}"
+                )
+        else:
+            raise TooMuchLanguages("Too much languages in metadata")
+
+        lang_detector = get_language_detector()
         for abstract in abstracts:
-            detected_lang = detect(abstract)
+            confidence_values_desc = deque(
+                lang_detector.compute_language_confidence_values(abstract)
+            )
+            detected_lang = (
+                confidence_values_desc.popleft().language.iso_code_639_1.name.lower()
+            )
             if detected_lang == lang:
                 desc = abstract
                 break
@@ -309,9 +326,6 @@ class OAPenCollector(IPluginRESTCollector):
                 tags = tmp_tags
         else:
             tags = []
-        # Predicted properties
-        duration = predict_duration(text=content, lang=lang)
-        readability = predict_readability(text=content, lang=lang)
 
         document_details = {
             "publisher": publisher,
@@ -326,8 +340,6 @@ class OAPenCollector(IPluginRESTCollector):
             "tags": tags,
             "content_from_pdf": not is_txt,
             "content_from_txt": is_txt,
-            "duration": duration,
-            "readability": readability,
         }
 
         return ScrapedWeLearnDocument(

@@ -73,6 +73,11 @@ class TestPlosPlugin(unittest.TestCase):
             "publisher": "Public Library of Science, San Francisco, CA USA",
             "readability": "49.66",
             "duration": "1578",
+            "content_and_description_lang": {
+                "are_different": False,
+                "description_lang": "en",
+                "content_lang": "en",
+            },
         }
 
         scraped_docs, error_docs = self.xml_plos_collector.run(
