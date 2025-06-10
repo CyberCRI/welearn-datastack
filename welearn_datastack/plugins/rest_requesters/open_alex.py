@@ -209,6 +209,7 @@ class OpenAlexCollector(IPluginRESTCollector):
     ) -> ScrapedWeLearnDocument:
         document_title = to_convert_json["title"]
         document_url = to_convert_json["ids"]["openalex"]
+        logger.info(f"Process {document_url}...")
         document_desc = self._remove_useless_first_word(
             string_to_clear=self._invert_abstract(
                 to_convert_json["abstract_inverted_index"]
