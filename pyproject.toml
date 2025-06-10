@@ -42,6 +42,7 @@ torchvision = {version="^0.22.0+cpu", source = "pytorch_cpu"}
 xx_sent_ud_sm = {url = "https://github.com/explosion/spacy-models/releases/download/xx_sent_ud_sm-3.8.0/xx_sent_ud_sm-3.8.0-py3-none-any.whl"}
 
 lingua-language-detector = "^2.1.1"
+psycopg2-binary = "^2.9.10"
 
 [tool.poetry.group.metrics.dependencies]
 alembic = "^1.16.1"
