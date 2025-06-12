@@ -23,6 +23,8 @@ class OpenAlexURLCollector(URLCollector, ABC):
     @staticmethod
     def _get_oa_json(http_session, params):
         resp_from_openalex = http_session.get(url=OPEN_ALEX_BASE_URL, params=params)
+        logger.info(f"OpenAlex response status code: {resp_from_openalex.status_code}")
+        resp_from_openalex.raise_for_status()
         json_from_oa = resp_from_openalex.json()
         return json_from_oa
 
