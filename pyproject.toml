@@ -25,7 +25,7 @@ package-mode = false
 python = ">=3.12,<3.13"
 sqlalchemy = "^2.0.41"
 numpy = "^2.2.6"
-requests = "^2.32.3"
+requests = "^2.32.4"
 wikipedia-api = "^0.8.1"
 sentence-transformers = "^4.1.0"
 spacy = "^3.8.7"
