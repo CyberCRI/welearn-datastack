@@ -11,7 +11,7 @@ maintainers = [
     { name = "WeLearn team", email = "welearn@learningplanetinstitute.org" },
 ]
 requires-python = ">=3.12"
-license = { file = "LICENSE" }
+#license = { file = "LICENSE" } https://github.com/dependabot/dependabot-core/issues/12052
 readme = "README.md"
 dynamic = [
     "dependencies"
