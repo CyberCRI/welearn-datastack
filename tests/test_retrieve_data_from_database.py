@@ -11,6 +11,7 @@ from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.db_models import (
     Base,
     BiClassifierModel,
+    Category,
     Corpus,
     CorpusBiClassifierModel,
     CorpusEmbeddingModel,
@@ -82,6 +83,11 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
 
         test_session = s_maker()
         Base.metadata.create_all(test_session.get_bind())
+        category_id = uuid.uuid4()
+        category_name = "test"
+        category = Category(id=category_id, title=category_name)
+
+        test_session.add(category)
 
         corpus_source_name0 = "corpus0"
         corpus_source_name1 = "corpus1"
@@ -90,11 +96,13 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             source_name=corpus_source_name0,
             is_fix=True,
             is_active=True,
+            category_id=category_id,
         )
         corpus_test1 = Corpus(
             id=uuid.uuid4(),
             source_name=corpus_source_name1,
             is_fix=True,
+            category_id=category_id,
             is_active=True,
         )
 
@@ -199,6 +207,14 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         test_session = s_maker()
         Base.metadata.create_all(test_session.get_bind())
 
+        self.category_name = "category_test0"
+
+        self.category_id = uuid.uuid4()
+
+        self.category = Category(id=self.category_id, title=self.category_name)
+
+        test_session.add(self.category)
+
         corpus_source_name = "test_corpus"
 
         corpus_test = Corpus(
@@ -206,6 +222,7 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=self.category_id,
         )
         test_session.add(corpus_test)
         test_session.commit()
@@ -316,12 +333,18 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         Base.metadata.create_all(test_session.get_bind())
 
         corpus_source_name = "test_corpus"
+        category_id = uuid.uuid4()
+        category_name = "test"
+        category = Category(id=category_id, title=category_name)
+
+        test_session.add(category)
 
         corpus_test = Corpus(
             id=uuid.uuid4(),
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=category_id,
         )
         test_session.add(corpus_test)
         test_session.commit()
@@ -430,6 +453,12 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         test_session = s_maker()
         Base.metadata.create_all(test_session.get_bind())
 
+        category_id = uuid.uuid4()
+        category_name = "test"
+        category = Category(id=category_id, title=category_name)
+
+        test_session.add(category)
+
         corpus_source_name = "test_corpus"
 
         corpus_test = Corpus(
@@ -437,6 +466,7 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=category_id,
         )
         test_session.add(corpus_test)
         test_session.commit()

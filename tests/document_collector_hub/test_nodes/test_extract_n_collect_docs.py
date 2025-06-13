@@ -12,9 +12,16 @@ from unittest import TestCase, mock
 from sqlalchemy import create_engine
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
+from sympy.integrals.meijerint_doc import category
 
 from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.db_models import Base, Corpus, ProcessState, WeLearnDocument
+from welearn_datastack.data.db_models import (
+    Base,
+    Corpus,
+    ProcessState,
+    WeLearnDocument,
+    Category,
+)
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.modules import collector_selector
 from welearn_datastack.nodes_workflow.DocumentHubCollector import document_collector
@@ -101,12 +108,20 @@ class TestExtractNCollectDocs(TestCase):
         self.path_test_input.mkdir(parents=True, exist_ok=True)
 
         os.environ["ARTIFACT_ROOT"] = self.path_test_input.parent.as_posix()
+        self.category_name = "categroy_test0"
+
+        self.category_id = uuid.uuid4()
+
+        self.category = Category(id=self.category_id, title=self.category_name)
+
+        self.test_session.add(self.category)
 
         self.corpus_test = Corpus(
             id=uuid.uuid4(),
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=self.category_id,
         )
 
         self.test_session.add(self.corpus_test)

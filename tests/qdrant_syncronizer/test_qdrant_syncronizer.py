@@ -16,6 +16,7 @@ from sqlalchemy.orm import sessionmaker
 from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.db_models import (
     Base,
+    Category,
     Corpus,
     DocumentSlice,
     ProcessState,
@@ -61,6 +62,14 @@ class TestQdrantSyncronizer(unittest.TestCase):
         Base.metadata.create_all(self.test_session.get_bind())
         os.environ["ARTIFACT_ROOT"] = self.path_test_input.parent.as_posix()
 
+        self.category_name = "category_test0"
+
+        self.category_id = uuid.uuid4()
+
+        self.category = Category(id=self.category_id, title=self.category_name)
+
+        self.test_session.add(self.category)
+
         corpus_source_name = "corpus"
 
         self.corpus_test = Corpus(
@@ -68,6 +77,7 @@ class TestQdrantSyncronizer(unittest.TestCase):
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=self.category_id,
         )
 
         doc_id = uuid.uuid4()
