@@ -38,6 +38,20 @@ class Corpus(Base):
     is_fix: Mapped[bool]
     binary_treshold: Mapped[float] = mapped_column(nullable=False, default=0.5)
     is_active: Mapped[bool]
+    # category_id: Mapped[UUID] = mapped_column(
+    #     types.Uuid,
+    #     ForeignKey(f"{DbSchemaEnum.CORPUS_RELATED.value}.category.id"),
+    # )
+
+
+class Category(Base):
+    __tablename__ = "category"
+    __table_args__ = {"schema": DbSchemaEnum.CORPUS_RELATED.value}
+
+    id: Mapped[UUID] = mapped_column(
+        types.Uuid, primary_key=True, nullable=False, server_default="gen_random_uuid()"
+    )
+    title: Mapped[str]
 
 
 class WeLearnDocument(Base):
