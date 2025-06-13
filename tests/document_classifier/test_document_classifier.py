@@ -8,11 +8,13 @@ from uuid import uuid4
 import numpy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sympy.integrals.meijerint_doc import category
 
 from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.db_models import (
     Base,
     BiClassifierModel,
+    Category,
     Corpus,
     DocumentSlice,
     NClassifierModel,
@@ -40,6 +42,11 @@ class TestDocumentClassifier(unittest.TestCase):
         self.test_session = s_maker()
         Base.metadata.create_all(self.test_session.get_bind())
 
+        self.category_name = "categroy_test0"
+        self.category_id = uuid4()
+
+        self.category = Category(id=self.category_id, title=self.category_name)
+
         corpus_source_name = "test_corpus"
 
         self.corpus_test = Corpus(
@@ -47,6 +54,7 @@ class TestDocumentClassifier(unittest.TestCase):
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=self.category_id,
         )
 
         self.doc_test_id = uuid.uuid4()
@@ -83,6 +91,7 @@ class TestDocumentClassifier(unittest.TestCase):
             n_classifier_model_id=uuid4(),
         )
 
+        self.test_session.add(self.category)
         self.test_session.add(self.corpus_test)
         self.test_session.add(self.doc_test)
         self.test_session.add(self.slice_test)
@@ -293,6 +302,7 @@ class TestDocumentClassifier(unittest.TestCase):
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=self.category_id,
         )
         doc_test = WeLearnDocument(
             id=doc_test_id,
@@ -391,6 +401,7 @@ class TestDocumentClassifier(unittest.TestCase):
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=self.category_id,
         )
         doc_test = WeLearnDocument(
             id=doc_test_id,

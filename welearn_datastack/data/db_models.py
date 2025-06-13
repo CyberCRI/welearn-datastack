@@ -38,10 +38,10 @@ class Corpus(Base):
     is_fix: Mapped[bool]
     binary_treshold: Mapped[float] = mapped_column(nullable=False, default=0.5)
     is_active: Mapped[bool]
-    # category_id: Mapped[UUID] = mapped_column(
-    #     types.Uuid,
-    #     ForeignKey(f"{DbSchemaEnum.CORPUS_RELATED.value}.category.id"),
-    # )
+    category_id: Mapped[UUID] = mapped_column(
+        types.Uuid,
+        ForeignKey(f"{DbSchemaEnum.CORPUS_RELATED.value}.category.id"),
+    )
 
 
 class Category(Base):

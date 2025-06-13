@@ -13,6 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.db_models import (
     Base,
+    Category,
     Corpus,
     CorpusEmbeddingModel,
     DocumentSlice,
@@ -48,6 +49,14 @@ class TestDocumentVecto(unittest.TestCase):
         self.test_session = s_maker()
         Base.metadata.create_all(self.test_session.get_bind())
 
+        self.category_name = "category_test0"
+
+        self.category_id = uuid.uuid4()
+
+        self.category = Category(id=self.category_id, title=self.category_name)
+
+        self.test_session.add(self.category)
+
         corpus_source_name = "test_corpus"
 
         self.embedding_model = EmbeddingModel(
@@ -63,6 +72,7 @@ class TestDocumentVecto(unittest.TestCase):
             source_name=corpus_source_name,
             is_fix=True,
             is_active=True,
+            category_id=self.category_id,
         )
 
         self.test_session.add(self.corpus_test)
