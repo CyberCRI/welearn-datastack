@@ -8,6 +8,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.grpc import UpdateResult
 from qdrant_client.http.models import models
 
+from welearn_datastack.constants import QDRANT_MULTI_LINGUAL_CODE
 from welearn_datastack.data.db_models import DocumentSlice
 from welearn_datastack.exceptions import (
     ErrorWhileDeletingChunks,
@@ -38,15 +39,22 @@ def classify_documents_per_collection(
     for dslice in slices:
         lang = dslice.document.lang
         model = dslice.embedding_model_name
-        collection_name = f"collection_welearn_{lang}_{model.lower()}"
+        collection_name = (
+            f"collection_welearn_{QDRANT_MULTI_LINGUAL_CODE}_{model.lower()}"
+        )
 
         if collection_name not in collections_names_in_qdrant:
             logger.error(
-                "Collection %s not found in Qdrant, slice %s ignored",
+                "Collection %s not found in Qdrant, attempt with language-specific collection name",
                 collection_name,
                 dslice.id,
             )
-            continue
+            collection_name = f"collection_welearn_{lang}_{model.lower()}"
+            if collection_name not in collections_names_in_qdrant:
+                logger.error(
+                    f"Collection {collection_name} not found in Qdrant, {dslice.id} will be ignored",
+                )
+                continue
 
         if collection_name not in ret:
             ret[collection_name] = set()

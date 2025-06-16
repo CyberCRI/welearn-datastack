@@ -43,12 +43,13 @@ class FakeDocument:
 
 
 class FakeSlice:
-    def __init__(self, document_id):
+    def __init__(self, document_id, embedding_model_name="embmodel"):
         self.document_id = document_id
-        self.embedding_model_name = "embmodel"
+        self.embedding_model_name = embedding_model_name
         self.embedding = numpy.random.uniform(low=-1, high=1, size=(50,))
         self.order_sequence = 0
         self.document = FakeDocument(document_id, uuid.uuid4())
+        self.id = uuid.uuid4()
 
 
 class TestQdrantHandler(unittest.TestCase):
@@ -102,3 +103,32 @@ class TestQdrantHandler(unittest.TestCase):
             "collection_welearn_fr_embmodel": {doc_id1},
         }
         self.assertEqual(collections_names, expected)
+
+    def test_should_handle_multiple_slices_for_same_collection_with_multi_lingual_collection(
+        self,
+    ):
+        self.client.create_collection(
+            collection_name="collection_welearn_mul_mulembmodel",
+            vectors_config=models.VectorParams(
+                size=50, distance=models.Distance.COSINE
+            ),
+        )
+
+        doc_id0 = uuid.uuid4()
+        doc_id1 = uuid.uuid4()
+        qdrant_connector = self.client
+        fake_slice0 = FakeSlice(doc_id0, embedding_model_name="embmodel")
+        fake_slice1 = FakeSlice(doc_id0, embedding_model_name="embmodel")
+
+        fake_slice1.order_sequence = 1
+
+        fake_slice2 = FakeSlice(doc_id1, embedding_model_name="mulembmodel")
+        fake_slice2.document.lang = "pt"
+
+        slices = [fake_slice0, fake_slice1, fake_slice2]
+        collections_names = classify_documents_per_collection(qdrant_connector, slices)
+        expected = {
+            "collection_welearn_en_embmodel": {doc_id0},
+            "collection_welearn_mul_mulembmodel": {doc_id1},
+        }
+        self.assertDictEqual(collections_names, expected)
