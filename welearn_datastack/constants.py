@@ -116,7 +116,15 @@ HAL_SEARCH_URL = "https://api.archives-ouvertes.fr/search/"
 
 DICT_READING_SPEEDS_LANG = {
     "en": 228,
+    "de": 179,
+    "es": 218,
     "fr": 195,
+    "jp": 193,
+    "pt": 181,
+    "ar": 138,
+    "it": 188,
+    "nl": 202,
+    "zh": 158,
 }
 
 FLESCH_KINCAID_CONSTANTS = {
@@ -125,10 +133,30 @@ FLESCH_KINCAID_CONSTANTS = {
         "fre_sentence_length": 1.015,
         "fre_syll_per_word": 84.6,
     },
+    "de": {
+        "fre_base": 180,
+        "fre_sentence_length": 1,
+        "fre_syll_per_word": 58.5,
+    },
+    "es": {
+        "fre_base": 206.84,
+        "fre_sentence_length": 1.02,
+        "fre_syll_per_word": 60.0,
+    },
     "fr": {
         "fre_base": 207,
         "fre_sentence_length": 1.015,
         "fre_syll_per_word": 73.6,
+    },
+    "it": {
+        "fre_base": 217,
+        "fre_sentence_length": 1.3,
+        "fre_syll_per_word": 60.0,
+    },
+    "nl": {
+        "fre_base": 206.835,
+        "fre_sentence_length": 0.93,
+        "fre_syll_per_word": 77,
     },
 }
 
