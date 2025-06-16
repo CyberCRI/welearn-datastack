@@ -156,7 +156,9 @@ def predict_duration(text: str, lang: str) -> str:
     """
     pattern = r"\w+"
     n_words = len(re.findall(pattern, text))
-    speed = DICT_READING_SPEEDS_LANG.get(lang, 184)  # 184 is the average of reading speeds from https://irisreading.com/average-reading-speed-in-various-languages/
+    speed = DICT_READING_SPEEDS_LANG.get(
+        lang, 184
+    )  # 184 is the average of reading speeds from https://irisreading.com/average-reading-speed-in-various-languages/
     ret = int(n_words / speed * 60)
     return str(ret)
 
