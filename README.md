@@ -32,16 +32,16 @@ You need te precreate each collections you gonna need. Their form is :
 
 ## Setup
 ### Requirements
-- Python 3.12
+- **Python** (version >= 3.12)
+- **Poetry** (version >= 2.1)
 - One relationnal database (We use a [PostgreSQL](https://www.postgresql.org/) one)
 - One [qdrant](https://qdrant.tech/) instance
 
+
 ### Setup Environment
-Create a virtual environment and install the requirements
+Install the dependencies using Poetry
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+poetry install
 ```
 
 Then create a file .env

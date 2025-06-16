@@ -123,7 +123,7 @@ def predict_readability(text: str, lang: str) -> str:
 
     Args:
         text (str): text to evaluate
-        lang (str): 'en' or 'fr'
+        lang (str): supported language code, e.g. 'en', 'fr', 'de', 'es', 'it', 'nl'
 
     Returns:
         float: flesch reading ease score
@@ -149,17 +149,16 @@ def predict_duration(text: str, lang: str) -> str:
 
     Args:
         text (str): text for which to evaluate reading time
-        lang (code): 'en', 'fr', 'es'...
+        lang (code): supported language code, e.g. 'en', 'fr', 'de', 'es', 'it', 'nl', 'jp', 'pt', 'ar', 'zh'
 
     Returns:
         int: number of seconds necessary to read text
     """
     pattern = r"\w+"
     n_words = len(re.findall(pattern, text))
-    if lang in DICT_READING_SPEEDS_LANG:
-        speed = DICT_READING_SPEEDS_LANG[lang]
-    else:
-        speed = DICT_READING_SPEEDS_LANG["en"]  # default reading speed
+    speed = DICT_READING_SPEEDS_LANG.get(
+        lang, 184
+    )  # 184 is the average of reading speeds from https://irisreading.com/average-reading-speed-in-various-languages/
     ret = int(n_words / speed * 60)
     return str(ret)
 
