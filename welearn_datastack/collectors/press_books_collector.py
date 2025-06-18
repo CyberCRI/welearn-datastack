@@ -37,7 +37,11 @@ class PressBooksURLCollector(URLCollector):
             "x-algolia-api-key": self.api_key,
             "x-algolia-application-id": self.application_id,
         }
-        body = {"hitsPerPage": self.qty_books, "attributesToRetrieve": ["url"]}
+        body = {
+            "hitsPerPage": self.qty_books,
+            "attributesToRetrieve": ["url"],
+            "filters": "hasInstitutions:true",
+        }
         resp_last_books: Response = client.post(
             url=forged_url, params=params, json=body
         )
