@@ -61,6 +61,14 @@ def format_cc_license(license: str) -> str:
     )
 
 
+def clean_text_keep_punctuation(text):
+    # Remplace les retours à la ligne et autres espaces spéciaux par un espace
+    text = re.sub(r"\s+", " ", text)
+    # Conserve lettres, chiffres, ponctuation de base et espace
+    text = re.sub(r'[^a-zA-Z0-9\s.,!?;:\'"\-()]', "", text)
+    return text.strip()
+
+
 def get_url_license_from_dc_format(soup: BeautifulSoup) -> str:
     """
     Extract the license of the document from the DC.rights meta tag.
