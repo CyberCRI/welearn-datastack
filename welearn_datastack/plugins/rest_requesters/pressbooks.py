@@ -11,12 +11,7 @@ from welearn_datastack.constants import AUTHORIZED_LICENSES
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
-from welearn_datastack.utils_.scraping_utils import (
-    clean_return_to_line,
-    clean_text,
-    clean_text_keep_punctuation,
-    remove_html_tags,
-)
+from welearn_datastack.utils_.scraping_utils import clean_text
 
 logger = logging.getLogger(__name__)
 

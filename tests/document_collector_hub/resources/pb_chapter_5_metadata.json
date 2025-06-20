@@ -1,0 +1,57 @@
+{
+  "@context": "http://schema.org",
+  "@type": "Chapter",
+  "name": "Chapter 1: Introduction to Communication Situations",
+  "inLanguage": "en",
+  "isPartOf": "Oral/Interpersonal Communication",
+  "editor": [
+    {
+      "name": "John Smith",
+      "slug": "John Smith",
+      "@type": "Person"
+    }
+  ],
+  "author": [
+    {
+      "name": "Jane Doe",
+      "slug": "Jane Doe",
+      "@type": "Person"
+    }
+  ],
+  "contributor": [],
+  "translator": [],
+  "reviewedBy": [],
+  "illustrator": [],
+  "publisher": {
+    "@type": "Organization",
+    "name": "WisTech Open"
+  },
+  "datePublished": "2025-06-30",
+  "copyrightYear": "2025",
+  "copyrightHolder": {
+    "@type": "Organization",
+    "name": "WisTech Open"
+  },
+  "license": {
+    "@type": "CreativeWork",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "name": "CC BY (Attribution)"
+  },
+  "_links": {
+    "self": [
+      {
+        "href": "https://wtcs.pressbooks.pub/communications/wp-json/pressbooks/v2/chapters/5/metadata",
+        "targetHints": {
+          "allow": [
+            "GET"
+          ]
+        }
+      }
+    ],
+    "chapter": [
+      {
+        "href": "https://wtcs.pressbooks.pub/communications/wp-json/pressbooks/v2/chapters/5"
+      }
+    ]
+  }
+}
