@@ -62,9 +62,7 @@ def format_cc_license(license: str) -> str:
 
 
 def clean_text_keep_punctuation(text):
-    # Remplace les retours à la ligne et autres espaces spéciaux par un espace
     text = re.sub(r"\s+", " ", text)
-    # Conserve lettres, chiffres, ponctuation de base et espace
     text = re.sub(r'[^a-zA-Z0-9\s.,!?;:\'"\-()]', "", text)
     return text.strip()
 
@@ -148,7 +146,9 @@ def clean_text(content: str) -> str:
     Returns:
         str: the cleaned content
     """
-    return remove_extra_whitespace(remove_html_tags(content)).strip()
+    return clean_text_keep_punctuation(
+        remove_extra_whitespace(remove_html_tags(content))
+    ).strip()
 
 
 def get_url_without_hal_like_versionning(url: str) -> str:
