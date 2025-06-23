@@ -18,9 +18,11 @@ logger = logging.getLogger(__name__)
 
 loaded_models: dict[str, SentenceTransformer] = {}
 
+
 @cache
 def _load_spacy_model():
     return spacy.load("xx_sent_ud_sm")
+
 
 def create_content_slices(
     document: WeLearnDocument, embedding_model_name: str, embedding_model_id: UUID
