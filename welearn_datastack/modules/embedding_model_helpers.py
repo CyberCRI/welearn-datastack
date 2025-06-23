@@ -2,6 +2,7 @@ import logging
 import math
 import os
 import re
+from functools import cache
 from typing import List
 from uuid import UUID
 
@@ -17,8 +18,9 @@ logger = logging.getLogger(__name__)
 
 loaded_models: dict[str, SentenceTransformer] = {}
 
-nlp_model = spacy.load("xx_sent_ud_sm")
-
+@cache
+def _load_spacy_model():
+    return spacy.load("xx_sent_ud_sm")
 
 def create_content_slices(
     document: WeLearnDocument, embedding_model_name: str, embedding_model_id: UUID
@@ -114,6 +116,7 @@ def _split_by_word_respecting_sent_boundary(
     logger.info("Splitting document into slices of %d words", slice_length)
     text = re.sub(" +", " ", re.sub(r"\n+", " ", document_content)).strip()
 
+    nlp_model = _load_spacy_model()
     spacy_doc = nlp_model(text)
 
     word_count_slice = 0

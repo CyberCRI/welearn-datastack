@@ -1,8 +1,7 @@
 import logging
 import os
-from uuid import uuid4
 
-from welearn_datastack.collectors.press_books_coolector import PressBooksURLCollector
+from welearn_datastack.collectors.press_books_collector import PressBooksURLCollector
 from welearn_datastack.data.db_models import Corpus
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,
@@ -34,7 +33,7 @@ if __name__ == "__main__":
     qty_books = 20
 
     corpus: Corpus | None = (
-        session.query(Corpus).filter_by(source_name="conversation").one_or_none()
+        session.query(Corpus).filter_by(source_name="press-books").one_or_none()
     )
 
     pb_collector = PressBooksURLCollector(

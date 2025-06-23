@@ -1,6 +1,7 @@
 import logging
 from collections import defaultdict
 from datetime import datetime
+from functools import cache
 from typing import List, Tuple
 from urllib.parse import urlparse, urlunparse
 
@@ -17,7 +18,10 @@ logger = logging.getLogger(__name__)
 
 CONTAINERS_NAME = ["parts", "chapters", "front-matter", "back-matter"]
 
-nlp_model = spacy.load("xx_sent_ud_sm")
+
+@cache
+def _load_model():
+    return spacy.load("xx_sent_ud_sm")
 
 
 # Collector
@@ -47,6 +51,7 @@ class PressBooksCollector(IPluginRESTCollector):
         :param text: The input text from which to extract sentences.
         :return: A string containing the first three sentences.
         """
+        nlp_model = _load_model()
         doc = nlp_model(text)
         sentences = [sent.text for sent in doc.sents]
         return " ".join(sentences[:3]) if len(sentences) >= 3 else text
@@ -184,14 +189,3 @@ class PressBooksCollector(IPluginRESTCollector):
                         )
                     )
         return collected_docs, error_docs
-
-
-if __name__ == "__main__":
-    # Example usage
-    collector = PressBooksCollector()
-    urls = [
-        "https://wtcs.pressbooks.pub/communications/?p=5",
-    ]
-    scraped_docs, error_docs = collector.run(urls)
-    print(f"Scraped Documents: {len(scraped_docs)}")
-    print(f"Error Documents: {len(error_docs)}")
