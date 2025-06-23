@@ -1,12 +1,10 @@
 import json
-import os
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
 import requests
 
-from welearn_datastack.constants import AUTHORIZED_LICENSES
 from welearn_datastack.data.enumerations import PluginType
 from welearn_datastack.plugins.rest_requesters.pressbooks import PressBooksCollector
 
