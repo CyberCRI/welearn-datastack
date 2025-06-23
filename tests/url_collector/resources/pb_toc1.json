@@ -1,0 +1,2031 @@
+{
+  "front-matter": [
+    {
+      "id": 193,
+      "title": "Introduction: Resource Convenience Store",
+      "slug": "introduction",
+      "author": 16426,
+      "comment_count": 0,
+      "menu_order": 1,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 624,
+      "link": "https://iu.pressbooks.pub/resourceconveniencestore/front-matter/introduction/",
+      "front-matter-type": [],
+      "metadata": {
+        "@context": "http://schema.org",
+        "@type": "Chapter",
+        "name": "Introduction: Resource Convenience Store",
+        "alternateName": "Introduction",
+        "alternativeHeadline": "Resource Convenience Store",
+        "showTitle": "on",
+        "inLanguage": "en",
+        "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+        "editor": [
+          {
+            "contributor_first_name": "Anna",
+            "contributor_last_name": "Comer",
+            "name": "Anna Comer",
+            "slug": "anncomer",
+            "@type": "Person"
+          }
+        ],
+        "author": [
+          {
+            "contributor_first_name": "Rachel",
+            "contributor_last_name": "Wheeler",
+            "name": "Rachel Wheeler",
+            "slug": "wheelerr",
+            "@type": "Person"
+          }
+        ],
+        "contributor": [],
+        "translator": [],
+        "reviewedBy": [],
+        "illustrator": [],
+        "license": {
+          "@type": "CreativeWork",
+          "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "name": "CC0 (Creative Commons Zero)"
+        }
+      }
+    }
+  ],
+  "parts": [
+    {
+      "id": 37,
+      "title": "Gas: Tech How-To's",
+      "slug": "gas-tech-how-tos",
+      "author": 19729,
+      "comment_count": 0,
+      "menu_order": 1,
+      "status": "publish",
+      "export": true,
+      "has_post_content": false,
+      "word_count": 0,
+      "chapters": [
+        {
+          "id": 109,
+          "title": "Canvas Commons: Shared Canvas Resources from IU and Beyond (IUPUI)",
+          "slug": "canvas-commons-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 1,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 115,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/canvas-commons-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Canvas Commons: Shared Canvas Resources from IU and Beyond (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 1,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 101,
+          "title": "Canvas Studio: Design Elements (IUPUI)",
+          "slug": "canvas-studio-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 2,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 122,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/canvas-studio-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Canvas Studio: Design Elements (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 2,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 120,
+          "title": "Course Test Drive: Preview Online Courses (IUPUI)",
+          "slug": "course-test-drive-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 3,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 86,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/course-test-drive-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Course Test Drive: Preview Online Courses (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 3,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 111,
+          "title": "Google at IU: How to Use Google Drive for Your Course (IUPUI)",
+          "slug": "google-at-iu-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 4,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 59,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/google-at-iu-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Google at IU: How to Use Google Drive for Your Course (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 4,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 98,
+          "title": "Quick Check: An Alternative to Pop Quizzes (IUPUI)",
+          "slug": "quick-check-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 5,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 70,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/quick-check-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Quick Check: An Alternative to Pop Quizzes (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 5,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 173,
+          "title": "Tool Finder: A Database of Online Tools (IUPUI)",
+          "slug": "tool-finder-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 6,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 57,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/tool-finder-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Tool Finder: A Database of Online Tools (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 6,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 105,
+          "title": "VoiceThread: Comment on Images and Videos Using Audio (IUPUI)",
+          "slug": "voicethread-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 7,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 61,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/voicethread-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "VoiceThread: Comment on Images and Videos Using Audio (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 7,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 103,
+          "title": "Zotero: Collect and Organize Bibliographies Online (IUPUI)",
+          "slug": "zotero-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 8,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 98,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/zotero-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Zotero: Collect and Organize Bibliographies Online (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 8,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 277,
+          "title": "Zoom: Learn More About Using Zoom (IUPUI)",
+          "slug": "zoom-learn-more-about-using-zoom-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 9,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 14,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/zoom-learn-more-about-using-zoom-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Zoom: Learn More About Using Zoom (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 9,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 183,
+          "title": "Digital Teaching Toolkit: Tools and Approaches to Digital Learning (External)",
+          "slug": "digital-teaching-toolkit-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 10,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 47,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/digital-teaching-toolkit-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Digital Teaching Toolkit: Tools and Approaches to Digital Learning (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 10,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 92,
+          "title": "Group Annotation: Collaborative Annotation through Hypothesis (External)",
+          "slug": "group-annotation-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 11,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 70,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/group-annotation-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Group Annotation: Collaborative Annotation through Hypothesis (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 11,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 75,
+          "title": "Flipgrid: Video Discussion Board (External)",
+          "slug": "flipgrid-video-discussion-board-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 12,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 57,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/flipgrid-video-discussion-board-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Flipgrid: Video Discussion Board (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 12,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 73,
+          "title": "Improving Breakout Room Discussions with Collaborative Documents: Facilitating Discussions (External)",
+          "slug": "improving-breakout-room-discussions-with-collaborative-documents",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 13,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 25,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/improving-breakout-room-discussions-with-collaborative-documents/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Improving Breakout Room Discussions with Collaborative Documents: Facilitating Discussions (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 13,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 82,
+          "title": "Kahoot: A Fun Trivia Study Tool (External)",
+          "slug": "kahoot-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 14,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 52,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/kahoot-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Kahoot: A Fun Trivia Study Tool (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 14,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 175,
+          "title": "Kialo: Learn How to Map Argument Structure (External)",
+          "slug": "kialo-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 15,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 84,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/kialo-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Kialo: Learn How to Map Argument Structure (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 15,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 171,
+          "title": "Netiquette: Teach Students How to Communicate Respectfully (External)",
+          "slug": "netiquette-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 16,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 44,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/netiquette-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Netiquette: Teach Students How to Communicate Respectfully (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 16,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 165,
+          "title": "Online Teaching Techniques and Tips: Using Apps in Your Course (External)",
+          "slug": "online-teaching-techniques-and-tips-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 17,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 41,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/online-teaching-techniques-and-tips-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Online Teaching Techniques and Tips: Using Apps in Your Course (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 17,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 84,
+          "title": "Polling Software: Engage Students with Polls (External)",
+          "slug": "polling-software-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 18,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 29,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/polling-software-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Polling Software: Engage Students with Polls (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 18,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 46,
+          "title": "What Makes a Great Instructional Video (External)",
+          "slug": "what-makes-a-great-instructional-video",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 19,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 21,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/what-makes-a-great-instructional-video/",
+          "chapter-type": [
+            48
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "What Makes a Great Instructional Video (External)",
+            "alternateName": "Instructional Videos (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        }
+      ],
+      "link": "https://iu.pressbooks.pub/resourceconveniencestore/part/gas-tech-how-tos/"
+    },
+    {
+      "id": 39,
+      "title": "Snacks: Small Assignments",
+      "slug": "snacks-small-assignments",
+      "author": 19729,
+      "comment_count": 0,
+      "menu_order": 2,
+      "status": "publish",
+      "export": true,
+      "has_post_content": false,
+      "word_count": 0,
+      "chapters": [
+        {
+          "id": 64,
+          "title": "Active Listening Exercise: Self-Evaluation through Discussion Posts (IUPUI)",
+          "slug": "active-listening-exercise-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 1,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 233,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/active-listening-exercise-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Active Listening Exercise: Self-Evaluation through Discussion Posts (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 19,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by/4.0/",
+              "name": "CC BY (Attribution)"
+            }
+          }
+        },
+        {
+          "id": 113,
+          "title": "Introduce Yourself Discussion w/ Video (IUPUI)",
+          "slug": "introduce-yourself-discussion-w-video-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 2,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 53,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/introduce-yourself-discussion-w-video-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Introduce Yourself Discussion w/ Video (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 20,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 60,
+          "title": "Using Social Media in Assignments: Example (IUPUI)",
+          "slug": "using-social-media-in-assignments-example-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 3,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 51,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/using-social-media-in-assignments-example-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Using Social Media in Assignments: Example (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 21,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/mark/1.0/",
+              "name": "Public Domain"
+            }
+          }
+        },
+        {
+          "id": 179,
+          "title": "4 Lessons from Moving a Face-to-Face Course Online: Exploring Helpful Tools (External)",
+          "slug": "4-lessons-from-moving-a-face-to-face-course-online-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 4,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 59,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/4-lessons-from-moving-a-face-to-face-course-online-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "4 Lessons from Moving a Face-to-Face Course Online: Exploring Helpful Tools (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 22,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 88,
+          "title": "Discussions/Discussion Alternatives for Asynchronous  Courses (External)",
+          "slug": "discussions-discussion-alternatives-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 5,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 1343,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/discussions-discussion-alternatives-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Discussions/Discussion Alternatives for Asynchronous  Courses (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 23,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 187,
+          "title": "Online Group Work: Tips for Promoting Collaboration (External)",
+          "slug": "online-group-work-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 6,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 72,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/online-group-work-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Online Group Work: Tips for Promoting Collaboration (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 24,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 90,
+          "title": "Padlet: A Visual Discussion Board (External)",
+          "slug": "padlet-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 7,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 64,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/padlet-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Padlet: A Visual Discussion Board (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 25,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 48,
+          "title": "Talia Vestri Teaching Tips: Weekly Communication, Asynchronous Courses, and Repurposing Slideshows(External)",
+          "slug": "talia-vestri-teaching-tips",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 8,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 69,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/talia-vestri-teaching-tips/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Talia Vestri Teaching Tips: Weekly Communication, Asynchronous Courses, and Repurposing Slideshows(External)",
+            "alternateName": "Teaching Tips (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 26,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 181,
+          "title": "Teaching American History Online: Examples of Online Class Assignments (External)",
+          "slug": "teaching-american-history-online-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 9,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 31,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/teaching-american-history-online-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Teaching American History Online: Examples of Online Class Assignments (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 27,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 189,
+          "title": "Tips from HASTAC: How to Move an In-Person Class Online (External)",
+          "slug": "tips-from-hastac-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 10,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 49,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/tips-from-hastac-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Tips from HASTAC: How to Move an In-Person Class Online (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 28,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 185,
+          "title": "Zoom: In-Class Activities/Assignments (External)",
+          "slug": "zoom-in-class-activities-assignments-external",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 11,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 38,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/zoom-in-class-activities-assignments-external/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Zoom: In-Class Activities/Assignments (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 29,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        }
+      ],
+      "link": "https://iu.pressbooks.pub/resourceconveniencestore/part/snacks-small-assignments/"
+    },
+    {
+      "id": 41,
+      "title": "Meals: Big Assignments",
+      "slug": "meals-big-assignments",
+      "author": 19729,
+      "comment_count": 0,
+      "menu_order": 3,
+      "status": "publish",
+      "export": true,
+      "has_post_content": false,
+      "word_count": 0,
+      "chapters": [
+        {
+          "id": 50,
+          "title": "Clio: An Alternative to Traditional Research Papers (External)",
+          "slug": "clio-entry",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 1,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 657,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/clio-entry/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Clio: An Alternative to Traditional Research Papers (External)",
+            "alternateName": "Clio (External)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 30,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        },
+        {
+          "id": 239,
+          "title": "Podcasts (IUPUI)",
+          "slug": "podcasts-iupui",
+          "author": 19729,
+          "comment_count": 0,
+          "menu_order": 2,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 200,
+          "link": "https://iu.pressbooks.pub/resourceconveniencestore/chapter/podcasts-iupui/",
+          "chapter-type": [],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Podcasts (IUPUI)",
+            "showTitle": "on",
+            "inLanguage": "en",
+            "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+            "position": 31,
+            "editor": [
+              {
+                "contributor_first_name": "Anna",
+                "contributor_last_name": "Comer",
+                "name": "Anna Comer",
+                "slug": "anncomer",
+                "@type": "Person"
+              }
+            ],
+            "author": [
+              {
+                "contributor_first_name": "Rachel",
+                "contributor_last_name": "Wheeler",
+                "name": "Rachel Wheeler",
+                "slug": "wheelerr",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+              "name": "CC0 (Creative Commons Zero)"
+            }
+          }
+        }
+      ],
+      "link": "https://iu.pressbooks.pub/resourceconveniencestore/part/meals-big-assignments/"
+    }
+  ],
+  "back-matter": [
+    {
+      "id": 6,
+      "title": "Appendix",
+      "slug": "appendix",
+      "author": 19729,
+      "comment_count": 0,
+      "menu_order": 1,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 11,
+      "link": "https://iu.pressbooks.pub/resourceconveniencestore/back-matter/appendix/",
+      "back-matter-type": [
+        27
+      ],
+      "metadata": {
+        "@context": "http://schema.org",
+        "@type": "Chapter",
+        "name": "Appendix",
+        "inLanguage": "en",
+        "isPartOf": "Resources for Teaching: Inspiration and Sources from IUPUI and Beyond",
+        "editor": [
+          {
+            "contributor_first_name": "Anna",
+            "contributor_last_name": "Comer",
+            "name": "Anna Comer",
+            "slug": "anncomer",
+            "@type": "Person"
+          }
+        ],
+        "author": [
+          {
+            "contributor_first_name": "Rachel",
+            "contributor_last_name": "Wheeler",
+            "name": "Rachel Wheeler",
+            "slug": "wheelerr",
+            "@type": "Person"
+          }
+        ],
+        "contributor": [],
+        "translator": [],
+        "reviewedBy": [],
+        "illustrator": [],
+        "license": {
+          "@type": "CreativeWork",
+          "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+          "name": "CC0 (Creative Commons Zero)"
+        }
+      }
+    }
+  ],
+  "clone_token": "594360df9c2adf6e550c2ab90df88573",
+  "_links": {
+    "front-matter": [
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/front-matter/193"
+      }
+    ],
+    "metadata": [
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/front-matter/193/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/109/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/101/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/120/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/111/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/98/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/173/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/105/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/103/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/277/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/183/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/92/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/75/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/73/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/82/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/175/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/171/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/165/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/84/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/46/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/64/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/113/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/60/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/179/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/88/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/187/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/90/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/48/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/181/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/189/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/185/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/50/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/239/metadata"
+      },
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/back-matter/6/metadata"
+      }
+    ],
+    "chapter": [
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/109"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/101"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/120"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/111"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/98"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/173"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/105"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/103"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/277"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/183"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/92"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/75"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/73"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/82"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/175"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/171"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/165"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/84"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/46"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/64"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/113"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/60"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/179"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/88"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/187"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/90"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/48"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/181"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/189"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/185"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/50"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/chapters/239"
+      }
+    ],
+    "part": [
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/parts/37"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/parts/39"
+      },
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/parts/41"
+      }
+    ],
+    "back-matter": [
+      {
+        "embeddable": true,
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/back-matter/6"
+      }
+    ],
+    "self": [
+      {
+        "href": "https://iu.pressbooks.pub/resourceconveniencestore/wp-json/pressbooks/v2/toc",
+        "targetHints": {
+          "allow": [
+            "GET"
+          ]
+        }
+      }
+    ]
+  }
+}

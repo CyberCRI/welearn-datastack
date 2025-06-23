@@ -1,0 +1,22 @@
+{
+  "hits": [
+    {
+      "url": "https://iu.pressbooks.pub/resourceconveniencestore",
+      "datePublished": "2024-05-13",
+      "objectID": "9-84"
+    },
+    {
+      "url": "https://ecampusontario.pressbooks.pub/2023prehealth/",
+      "datePublished": "2023-06-14",
+      "objectID": "18-3406"
+    }
+  ],
+  "nbHits": 8205,
+  "page": 0,
+  "nbPages": 4103,
+  "hitsPerPage": 2,
+  "processingTimeMS": 1,
+  "query": "",
+  "params": "hitsPerPage=2&attributesToRetrieve=%5B%22datePublished%22%2C%22url%22%5D",
+  "cursor": "AkhoaXRzUGVyUGFnZT0yJmF0dHJpYnV0ZXNUb1JldHJpZXZlPSU1QiUyMmRhdGVQdWJsaXNoZWQlMjIlMkMlMjJ1cmwlMjIlNUQBAQcxOC0zNDA2"
+}

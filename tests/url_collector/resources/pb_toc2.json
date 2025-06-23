@@ -1,0 +1,1971 @@
+{
+  "front-matter": [
+    {
+      "id": 17,
+      "title": "WELCOME TO CENTENNIAL COLLEGE",
+      "slug": "introduction",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 1,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 324,
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/front-matter/introduction/",
+      "front-matter-type": [
+        12
+      ],
+      "metadata": {
+        "@context": "http://schema.org",
+        "@type": "Chapter",
+        "name": "WELCOME TO CENTENNIAL COLLEGE",
+        "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/front-matter/introduction/",
+        "inLanguage": "en",
+        "isPartOf": "2023-2024 Pre-Health Program Handbook",
+        "copyrightYear": "2021",
+        "editor": [],
+        "author": [
+          {
+            "contributor_first_name": "Gina",
+            "contributor_last_name": "Marshall",
+            "contributor_institution": "Centennial College",
+            "name": "Gina Marshall",
+            "slug": "gmarsha7",
+            "@type": "Person"
+          },
+          {
+            "name": "Centennial College",
+            "slug": "centennial-college",
+            "@type": "Person"
+          }
+        ],
+        "contributor": [
+          {
+            "contributor_first_name": "Gina",
+            "contributor_last_name": "Marshall",
+            "contributor_institution": "Centennial College",
+            "name": "Gina Marshall",
+            "slug": "gmarsha7",
+            "@type": "Person"
+          },
+          {
+            "contributor_first_name": "Nicole",
+            "contributor_last_name": "Koss",
+            "name": "Nicole Koss",
+            "slug": "nicole-koss",
+            "@type": "Person"
+          }
+        ],
+        "translator": [],
+        "reviewedBy": [],
+        "illustrator": [],
+        "datePublished": "2023-06-14",
+        "copyrightHolder": {
+          "@type": "Organization",
+          "name": "Centennial College"
+        },
+        "license": {
+          "@type": "CreativeWork",
+          "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+          "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+        }
+      }
+    }
+  ],
+  "parts": [
+    {
+      "id": 19,
+      "title": "COVID-19 Update",
+      "slug": "covid-19-update-2",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 1,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 140,
+      "chapters": [],
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/part/covid-19-update-2/"
+    },
+    {
+      "id": 20,
+      "title": "Acknowledgement of Traditional Lands",
+      "slug": "acknowledgement-of-traditional-lands-indigenous-education",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 2,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 130,
+      "chapters": [],
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/part/acknowledgement-of-traditional-lands-indigenous-education/"
+    },
+    {
+      "id": 22,
+      "title": "Indigenous Education at Centennial College",
+      "slug": "indigenous-education-at-centennial-college",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 3,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 98,
+      "chapters": [],
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/part/indigenous-education-at-centennial-college/"
+    },
+    {
+      "id": 23,
+      "title": "School and Department Information",
+      "slug": "main-body",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 4,
+      "status": "publish",
+      "export": true,
+      "has_post_content": false,
+      "word_count": 0,
+      "chapters": [
+        {
+          "id": 24,
+          "title": "Welcome from the Dean",
+          "slug": "chapter-1",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 1,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 232,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/chapter-1/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Welcome from the Dean",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/chapter-1/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 27,
+          "title": "About the School",
+          "slug": "about-the-school",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 2,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 57,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/about-the-school/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "About the School",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/about-the-school/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 30,
+          "title": "Program Team",
+          "slug": "program-team",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 3,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 254,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/program-team/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Program Team",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/program-team/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 32,
+          "title": "School Communications",
+          "slug": "school-communications",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 4,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 249,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/school-communications/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "School Communications",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/school-communications/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 34,
+          "title": "Important Dates",
+          "slug": "important-dates",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 5,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 82,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/important-dates/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Important Dates",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/important-dates/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        }
+      ],
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/part/main-body/"
+    },
+    {
+      "id": 36,
+      "title": "Program Information",
+      "slug": "program-information",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 5,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 81,
+      "chapters": [
+        {
+          "id": 38,
+          "title": "Program Learning Outcomes and Curriculum",
+          "slug": "curriculum",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 1,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 439,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/curriculum/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Program Learning Outcomes and Curriculum",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/curriculum/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 40,
+          "title": "Program Model Route",
+          "slug": "program-model-route",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 2,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 251,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/program-model-route/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Program Model Route",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/program-model-route/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 43,
+          "title": "Program Requirements",
+          "slug": "program-requirements",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 3,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 130,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/program-requirements/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Program Requirements",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/program-requirements/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 46,
+          "title": "Experiential Learning Requirements",
+          "slug": "experiential-learning-requirements",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 4,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 99,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/experiential-learning-requirements/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Experiential Learning Requirements",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/experiential-learning-requirements/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 48,
+          "title": "Progression and Graduation Requirements",
+          "slug": "progression-and-graduation-requirements",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 5,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 275,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/progression-and-graduation-requirements/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Progression and Graduation Requirements",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/progression-and-graduation-requirements/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 51,
+          "title": "Program Modalities and Requirements",
+          "slug": "program-modalities-and-requirements",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 6,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 131,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/program-modalities-and-requirements/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Program Modalities and Requirements",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/program-modalities-and-requirements/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 53,
+          "title": "Program Learning Resources and Facilities",
+          "slug": "program-learning-resources-and-facilities",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 7,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 416,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/program-learning-resources-and-facilities/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Program Learning Resources and Facilities",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/program-learning-resources-and-facilities/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 55,
+          "title": "Program Pathways and Certifications",
+          "slug": "program-pathways-and-certifications",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 8,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 437,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/program-pathways-and-certifications/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Program Pathways and Certifications",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/program-pathways-and-certifications/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        }
+      ],
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/part/program-information/"
+    },
+    {
+      "id": 57,
+      "title": "Policies",
+      "slug": "policies",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 6,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 47,
+      "chapters": [
+        {
+          "id": 58,
+          "title": "School, Department, and Program Policies",
+          "slug": "school-department-and-program-policies",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 1,
+          "status": "publish",
+          "export": true,
+          "has_post_content": false,
+          "word_count": 0,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/school-department-and-program-policies/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "School, Department, and Program Policies",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/school-department-and-program-policies/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 60,
+          "title": "Recognition of Prior Learning",
+          "slug": "recognition-of-prior-learning",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 2,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 343,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/recognition-of-prior-learning/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Recognition of Prior Learning",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/recognition-of-prior-learning/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 63,
+          "title": "Assessment and Grading",
+          "slug": "assessment-and-grading",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 3,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 439,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/assessment-and-grading/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Assessment and Grading",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/assessment-and-grading/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 65,
+          "title": "Academic Integrity",
+          "slug": "academic-integrity",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 4,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 362,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/academic-integrity/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Academic Integrity",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/academic-integrity/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 67,
+          "title": "Conduct and Rights",
+          "slug": "student-conduct",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 5,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 70,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/student-conduct/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Conduct and Rights",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/student-conduct/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        }
+      ],
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/part/policies/"
+    },
+    {
+      "id": 70,
+      "title": "Student Life and Academic Services",
+      "slug": "student-services",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 7,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 78,
+      "chapters": [
+        {
+          "id": 72,
+          "title": "Academic Services",
+          "slug": "academic-services",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 1,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 317,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/academic-services/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Academic Services",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/academic-services/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 75,
+          "title": "Student Services",
+          "slug": "student-services",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 2,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 77,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/student-services/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Student Services",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/student-services/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        },
+        {
+          "id": 78,
+          "title": "Student Leadership Opportunities",
+          "slug": "student-leadership-opportunities",
+          "author": 3460,
+          "comment_count": 0,
+          "menu_order": 3,
+          "status": "publish",
+          "export": true,
+          "has_post_content": true,
+          "word_count": 112,
+          "link": "https://ecampusontario.pressbooks.pub/2023prehealth/chapter/student-leadership-opportunities/",
+          "chapter-type": [
+            49
+          ],
+          "metadata": {
+            "@context": "http://schema.org",
+            "@type": "Chapter",
+            "name": "Student Leadership Opportunities",
+            "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/chapter/student-leadership-opportunities/",
+            "inLanguage": "en",
+            "isPartOf": "2023-2024 Pre-Health Program Handbook",
+            "copyrightYear": "2021",
+            "editor": [],
+            "author": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "name": "Centennial College",
+                "slug": "centennial-college",
+                "@type": "Person"
+              }
+            ],
+            "contributor": [
+              {
+                "contributor_first_name": "Gina",
+                "contributor_last_name": "Marshall",
+                "contributor_institution": "Centennial College",
+                "name": "Gina Marshall",
+                "slug": "gmarsha7",
+                "@type": "Person"
+              },
+              {
+                "contributor_first_name": "Nicole",
+                "contributor_last_name": "Koss",
+                "name": "Nicole Koss",
+                "slug": "nicole-koss",
+                "@type": "Person"
+              }
+            ],
+            "translator": [],
+            "reviewedBy": [],
+            "illustrator": [],
+            "datePublished": "2023-06-14",
+            "copyrightHolder": {
+              "@type": "Organization",
+              "name": "Centennial College"
+            },
+            "license": {
+              "@type": "CreativeWork",
+              "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+              "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+            }
+          }
+        }
+      ],
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/part/student-services/"
+    },
+    {
+      "id": 81,
+      "title": "Record of Changes",
+      "slug": "record-of-changes",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 8,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 29,
+      "chapters": [],
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/part/record-of-changes/"
+    }
+  ],
+  "back-matter": [
+    {
+      "id": 83,
+      "title": "",
+      "slug": "405",
+      "author": 3460,
+      "comment_count": 0,
+      "menu_order": 1,
+      "status": "publish",
+      "export": true,
+      "has_post_content": true,
+      "word_count": 0,
+      "link": "https://ecampusontario.pressbooks.pub/2023prehealth/back-matter/405/",
+      "back-matter-type": [],
+      "metadata": {
+        "@context": "http://schema.org",
+        "@type": "Chapter",
+        "name": "",
+        "isBasedOn": "https://ecampusontario.pressbooks.pub/programhandbook/back-matter/405/",
+        "inLanguage": "en",
+        "isPartOf": "2023-2024 Pre-Health Program Handbook",
+        "copyrightYear": "2021",
+        "editor": [],
+        "author": [
+          {
+            "contributor_first_name": "Gina",
+            "contributor_last_name": "Marshall",
+            "contributor_institution": "Centennial College",
+            "name": "Gina Marshall",
+            "slug": "gmarsha7",
+            "@type": "Person"
+          },
+          {
+            "name": "Centennial College",
+            "slug": "centennial-college",
+            "@type": "Person"
+          }
+        ],
+        "contributor": [
+          {
+            "contributor_first_name": "Gina",
+            "contributor_last_name": "Marshall",
+            "contributor_institution": "Centennial College",
+            "name": "Gina Marshall",
+            "slug": "gmarsha7",
+            "@type": "Person"
+          },
+          {
+            "contributor_first_name": "Nicole",
+            "contributor_last_name": "Koss",
+            "name": "Nicole Koss",
+            "slug": "nicole-koss",
+            "@type": "Person"
+          }
+        ],
+        "translator": [],
+        "reviewedBy": [],
+        "illustrator": [],
+        "datePublished": "2023-06-14",
+        "copyrightHolder": {
+          "@type": "Organization",
+          "name": "Centennial College"
+        },
+        "license": {
+          "@type": "CreativeWork",
+          "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+          "name": "CC BY-NC-SA (Attribution NonCommercial ShareAlike)"
+        }
+      }
+    }
+  ],
+  "clone_token": "0018ab81e43bbefa54d758fe36a3cfcb",
+  "_links": {
+    "front-matter": [
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/front-matter/17"
+      }
+    ],
+    "metadata": [
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/front-matter/17/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/24/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/27/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/30/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/32/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/34/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/38/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/40/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/43/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/46/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/48/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/51/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/53/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/55/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/58/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/60/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/63/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/65/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/67/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/72/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/75/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/78/metadata"
+      },
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/back-matter/83/metadata"
+      }
+    ],
+    "part": [
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/parts/19"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/parts/20"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/parts/22"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/parts/23"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/parts/36"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/parts/57"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/parts/70"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/parts/81"
+      }
+    ],
+    "chapter": [
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/24"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/27"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/30"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/32"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/34"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/38"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/40"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/43"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/46"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/48"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/51"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/53"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/55"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/58"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/60"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/63"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/65"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/67"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/72"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/75"
+      },
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/chapters/78"
+      }
+    ],
+    "back-matter": [
+      {
+        "embeddable": true,
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/back-matter/83"
+      }
+    ],
+    "self": [
+      {
+        "href": "https://ecampusontario.pressbooks.pub/2023prehealth/wp-json/pressbooks/v2/toc",
+        "targetHints": {
+          "allow": [
+            "GET"
+          ]
+        }
+      }
+    ]
+  }
+}
