@@ -74,7 +74,7 @@ class PressBooksURLCollector(URLCollector):
                 logger.warning("Empty TOC, continue")
                 continue
             metadata = links.get("metadata")
-            if not links:
+            if not metadata:
                 logger.warning("Empty TOC, continue")
                 continue
             local_urls: list[str] = [i.get("href") for i in metadata]
