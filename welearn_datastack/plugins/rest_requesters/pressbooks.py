@@ -92,6 +92,8 @@ class PressBooksCollector(IPluginRESTCollector):
                         error_docs.append(url)
                         continue
                     metadata_url = item["_links"]["metadata"][0]["href"]
+                    if not metadata_url.endswith("/"):
+                        metadata_url += "/"
                     metadata_resp = client.get(metadata_url)
                     try:
                         metadata_resp.raise_for_status()
