@@ -142,6 +142,10 @@ documentVectorizer:
     runNode:
       requests:
         memory: 1.35G
+        cpu: 1
+      limits:
+        memory: 1.35G
+        cpu: 1
 
   cronWorkflowTemplate:
     standard:
