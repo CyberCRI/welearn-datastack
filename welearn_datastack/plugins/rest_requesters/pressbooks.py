@@ -84,13 +84,6 @@ class PressBooksCollector(IPluginRESTCollector):
                 for item in container_content:
                     post_id = item["id"]
                     url = self._create_pressbook_id(main_url, post_id)
-                    # if post_id not in main_urls[main_url]:
-                    #     # Retrieve document doesnt exist in previous retrieved url
-                    #     logger.warning(
-                    #         f"Post ID {post_id} not found in main URLs for {main_url}"
-                    #     )
-                    #     error_docs.append(url)
-                    #     continue
                     try:
                         metadata_url = item["_links"]["metadata"][0]["href"]
                     except KeyError:
@@ -118,7 +111,7 @@ class PressBooksCollector(IPluginRESTCollector):
                         )
                         error_docs.append(url)
                         continue
-                    title = metadata["name"]
+                    title = clean_text(metadata["name"])
 
                     # Content stuff
                     not_formatted_content = item["content"]["raw"]
@@ -160,8 +153,8 @@ class PressBooksCollector(IPluginRESTCollector):
                     for author in metadata["author"]:
                         authors.append(
                             {
-                                "name": author["name"],
-                                "misc": author.get("contributor_institution"),
+                                "name": clean_text(author["name"]),
+                                "misc": clean_text(author.get("contributor_institution")),
                             }
                         )
 
@@ -170,11 +163,11 @@ class PressBooksCollector(IPluginRESTCollector):
                     for editor in metadata["editor"]:
                         editors.append(
                             {
-                                "name": editor["name"],
+                                "name": clean_text(editor["name"]),
                             }
                         )
 
-                    publisher = metadata.get("publisher", {}).get("name")
+                    publisher = clean_text(metadata.get("publisher", {}).get("name"))
 
                     details = {
                         "license": license_url,
