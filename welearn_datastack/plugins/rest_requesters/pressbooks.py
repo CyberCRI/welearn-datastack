@@ -193,7 +193,9 @@ class PressBooksCollector(IPluginRESTCollector):
                                 document_url=url,
                                 document_content=content,
                                 document_corpus=self.related_corpus,
-                                document_desc=self._extract_three_first_sentences(content),
+                                document_desc=self._extract_three_first_sentences(
+                                    content
+                                ),
                                 document_details=details,
                             )
                         )
