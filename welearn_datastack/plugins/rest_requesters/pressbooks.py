@@ -84,10 +84,10 @@ class PressBooksCollector(IPluginRESTCollector):
                 for item in container_content:
                     post_id = item["id"]
                     url = self._create_pressbook_id(main_url, post_id)
-                    if post_id not in main_urls[main_url]:
+                    if url not in main_urls[main_url]:
                         # Retrieve document doesnt exist in previous retrieved url
                         logger.warning(
-                            f"Post ID {post_id} not found in main URLs for {main_url}"
+                            f"Post ID {url} not found in main URLs for {main_url}"
                         )
                         error_docs.append(url)
                         continue
