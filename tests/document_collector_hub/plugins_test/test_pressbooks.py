@@ -59,7 +59,7 @@ class TestPressBooksCollector(TestCase):
 
         self.assertEqual(len(collected_docs), 1)
         doc = collected_docs[0]
-        self.assertEqual(doc.document_title, self.mock_metadata["name"])
+        self.assertEqual(doc.document_title, f"{self.mock_metadata["isPartOf"]} - {self.mock_metadata["name"]}")
         self.assertTrue(
             doc.document_content.startswith(
                 "Chapter 1: Introduction to Communication Situations"

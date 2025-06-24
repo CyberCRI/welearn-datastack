@@ -1,5 +1,6 @@
 import logging
 import re
+from html import unescape
 from html.parser import HTMLParser
 
 from bs4 import BeautifulSoup, NavigableString, Tag  # type: ignore
@@ -28,12 +29,14 @@ def remove_extra_whitespace(text: str) -> str:
     Returns:
         str: text without extra whitespace
     """
+    if not isinstance(text, str):
+        return text
     return " ".join(text.split())
 
 
-def remove_html_tags(text: str) -> str:
+def remove_html_stuff(text: str) -> str:
     """
-    removes html tags from text
+    removes html tags and special stuff like &amp; from text
 
     Args:
         text (str): text to evaluate
@@ -41,9 +44,13 @@ def remove_html_tags(text: str) -> str:
     Returns:
         str: text without html tags
     """
+    if not isinstance(text, str):
+        return text
     remover = HTMLTagRemover()
     remover.feed(text + "\n")
-    return remover.get_text()
+    txt = remover.get_text()
+    ret = unescape(txt)
+    return ret
 
 
 def format_cc_license(license: str) -> str:
@@ -52,6 +59,8 @@ def format_cc_license(license: str) -> str:
     :param license: License to format.
     :return: License well formated.
     """
+    if not isinstance(license, str):
+        return license
     splitted_elements = license.split("-")
     version = splitted_elements[-1].strip()
     rights_code = "-".join(splitted_elements[1:-1]).strip().lower()
@@ -126,6 +135,8 @@ def extract_property_from_html(
 
 
 def clean_return_to_line(string: str):
+    if not isinstance(string, str):
+        return string
     ret = re.sub(r"([\n\t\r])", "", string).strip()
     return ret
 
@@ -140,7 +151,9 @@ def clean_text(content: str) -> str:
     Returns:
         str: the cleaned content
     """
-    return remove_extra_whitespace(remove_html_tags(content)).strip()
+    if not isinstance(content, str):
+        return content
+    return remove_extra_whitespace(remove_html_stuff(content)).strip()
 
 
 def get_url_without_hal_like_versionning(url: str) -> str:
@@ -151,5 +164,7 @@ def get_url_without_hal_like_versionning(url: str) -> str:
     :return: URL without versionning
     """
     # Get the URL without the versionning part
+    if not isinstance(url, str):
+        return url
     uri = re.sub(r"v\d+$", "", url)
     return uri.strip()
