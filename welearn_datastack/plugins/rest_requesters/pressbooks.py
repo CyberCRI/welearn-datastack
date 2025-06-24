@@ -111,7 +111,13 @@ class PressBooksCollector(IPluginRESTCollector):
                         )
                         error_docs.append(url)
                         continue
-                    title = clean_text(metadata["name"])
+                    book_title = clean_text(metadata.get("isPartOf"))
+                    element_title = clean_text(metadata["name"])
+
+                    if book_title:
+                        title = f"{book_title} - {element_title}"
+                    else:
+                        title = element_title
 
                     # Content stuff
                     not_formatted_content = item["content"]["raw"]
@@ -154,7 +160,9 @@ class PressBooksCollector(IPluginRESTCollector):
                         authors.append(
                             {
                                 "name": clean_text(author["name"]),
-                                "misc": clean_text(author.get("contributor_institution")),
+                                "misc": clean_text(
+                                    author.get("contributor_institution")
+                                ),
                             }
                         )
 
