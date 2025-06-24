@@ -186,15 +186,23 @@ class PressBooksCollector(IPluginRESTCollector):
                         "type": container_name,
                         "partOf": {"element": main_url, "order": None},
                     }
-
-                    collected_docs.append(
-                        ScrapedWeLearnDocument(
-                            document_title=title,
-                            document_url=url,
-                            document_content=content,
-                            document_corpus=self.related_corpus,
-                            document_desc=self._extract_three_first_sentences(content),
-                            document_details=details,
+                    try:
+                        collected_docs.append(
+                            ScrapedWeLearnDocument(
+                                document_title=title,
+                                document_url=url,
+                                document_content=content,
+                                document_corpus=self.related_corpus,
+                                document_desc=self._extract_three_first_sentences(
+                                    content
+                                ),
+                                document_details=details,
+                            )
                         )
-                    )
+                    except Exception as e:
+                        logger.error(
+                            f"Error while creating ScrapedWeLearnDocument for {url}: {e}"
+                        )
+                        error_docs.append(url)
+                        continue
         return collected_docs, error_docs
