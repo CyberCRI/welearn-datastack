@@ -1,5 +1,6 @@
 import logging
 import re
+from html import unescape
 from html.parser import HTMLParser
 
 from bs4 import BeautifulSoup, NavigableString, Tag  # type: ignore
@@ -31,9 +32,9 @@ def remove_extra_whitespace(text: str) -> str:
     return " ".join(text.split())
 
 
-def remove_html_tags(text: str) -> str:
+def remove_html_stuff(text: str) -> str:
     """
-    removes html tags from text
+    removes html tags and special stuff like &amp; from text
 
     Args:
         text (str): text to evaluate
@@ -43,7 +44,9 @@ def remove_html_tags(text: str) -> str:
     """
     remover = HTMLTagRemover()
     remover.feed(text + "\n")
-    return remover.get_text()
+    txt = remover.get_text()
+    ret = unescape(txt)
+    return ret
 
 
 def format_cc_license(license: str) -> str:
@@ -140,7 +143,7 @@ def clean_text(content: str) -> str:
     Returns:
         str: the cleaned content
     """
-    return remove_extra_whitespace(remove_html_tags(content)).strip()
+    return remove_extra_whitespace(remove_html_stuff(content)).strip()
 
 
 def get_url_without_hal_like_versionning(url: str) -> str:
