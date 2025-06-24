@@ -91,7 +91,14 @@ class PressBooksCollector(IPluginRESTCollector):
                     #     )
                     #     error_docs.append(url)
                     #     continue
-                    metadata_url = item["_links"]["metadata"][0]["href"]
+                    try:
+                        metadata_url = item["_links"]["metadata"][0]["href"]
+                    except KeyError:
+                        logger.error(
+                            f"Metadata link not found for url {url} in {main_url}, we assume there is no content"
+                        )
+                        error_docs.append(url)
+                        continue
                     if not metadata_url.endswith("/"):
                         metadata_url += "/"
                     metadata_resp = client.get(metadata_url)
