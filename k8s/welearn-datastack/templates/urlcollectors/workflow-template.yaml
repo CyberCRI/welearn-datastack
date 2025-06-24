@@ -386,4 +386,45 @@ spec:
           volumeAttributes:
             secretName: {{ $.Values.common.azureShare.secret.name }}
             shareName: {{ $.Values.common.azureShare.name }}
+
+    - name: collect-pressbooks
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      inputs:
+        parameters:
+        - name: pb_app_id
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_press_books_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: PRESSBOOKS_ALGOLIA_APPLICATION_ID
+            value: {{ print "{{inputs.parameters.pb_app_id}}" | quote }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
 {{- end }}

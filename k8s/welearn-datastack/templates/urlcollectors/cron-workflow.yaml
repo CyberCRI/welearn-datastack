@@ -359,5 +359,15 @@ spec:
                     value: oapen
                   - name: corpus_fix
                     value: "true"
+
+            - name: pressbooks
+              templateRef:
+                name: {{ .name }}
+                template: collect-pressbooks
+              arguments:
+                parameters:
+                  - name: pb_app_id
+                    value: K0SNCQLM4A
+
 {{- end }}
 {{- end }}
