@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from functools import cache
 from typing import Collection, Dict, List, Set, Type
 from uuid import UUID
@@ -34,31 +35,23 @@ def classify_documents_per_collection(
     """
     tmp_collections_names_in_qdrant = qdrant_connector.get_collections().collections
     collections_names_in_qdrant = [c.name for c in tmp_collections_names_in_qdrant]
+    model_name_collection_name = {
+        x.split("_")[3]: x for x in collections_names_in_qdrant
+    }
 
-    ret: Dict[str, Set[UUID]] = {}
+    ret: Dict[str, Set[UUID]] = defaultdict(set)
     for dslice in slices:
-        lang = dslice.document.lang
-        model = dslice.embedding_model_name
-        collection_name = (
-            f"collection_welearn_{QDRANT_MULTI_LINGUAL_CODE}_{model.lower()}"
-        )
-
-        if collection_name not in collections_names_in_qdrant:
-            logger.error(
-                "Collection %s not found in Qdrant, attempt with language-specific collection name",
-                collection_name,
-                dslice.id,
+        model_name = dslice.embedding_model.title
+        try:
+            collection_name = model_name_collection_name[model_name]
+            ret[collection_name].add(dslice.document_id)  # type: ignore
+        except KeyError:
+            logger.warning(
+                "No collection found for model %s, document %s",
+                model_name,
+                dslice.document_id,
             )
-            collection_name = f"collection_welearn_{lang}_{model.lower()}"
-            if collection_name not in collections_names_in_qdrant:
-                logger.error(
-                    f"Collection {collection_name} not found in Qdrant, {dslice.id} will be ignored",
-                )
-                continue
-
-        if collection_name not in ret:
-            ret[collection_name] = set()
-        ret[collection_name].add(dslice.document_id)  # type: ignore
+            continue
 
     return ret
 

@@ -1,6 +1,7 @@
 import unittest
 import uuid
 from datetime import datetime
+from unittest.mock import Mock
 
 import numpy
 from qdrant_client import QdrantClient
@@ -50,6 +51,7 @@ class FakeSlice:
         self.order_sequence = 0
         self.document = FakeDocument(document_id, uuid.uuid4())
         self.id = uuid.uuid4()
+        self.embedding_model = Mock(title=embedding_model_name)
 
 
 class TestQdrantHandler(unittest.TestCase):
@@ -57,14 +59,14 @@ class TestQdrantHandler(unittest.TestCase):
         self.client = QdrantClient(":memory:")
 
         self.client.create_collection(
-            collection_name="collection_welearn_en_embmodel",
+            collection_name="collection_welearn_en_english-embmodel",
             vectors_config=models.VectorParams(
                 size=50, distance=models.Distance.COSINE
             ),
         )
 
         self.client.create_collection(
-            collection_name="collection_welearn_fr_embmodel",
+            collection_name="collection_welearn_fr_french-embmodel",
             vectors_config=models.VectorParams(
                 size=50, distance=models.Distance.COSINE
             ),
@@ -76,33 +78,33 @@ class TestQdrantHandler(unittest.TestCase):
     def test_should_get_collections_names_for_given_slices(self):
         doc_id = uuid.uuid4()
         qdrant_connector = self.client
-        fake_slice = FakeSlice(doc_id)
+        fake_slice = FakeSlice(doc_id, embedding_model_name="english-embmodel")
         fake_slice.id = uuid.uuid4()
         slices = [fake_slice]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
 
-        expected = {"collection_welearn_en_embmodel": {fake_slice.document_id}}
-        self.assertEqual(collections_names, expected)
+        expected = {"collection_welearn_en_english-embmodel": {fake_slice.document_id}}
+        self.assertEqual(dict(collections_names), expected)
 
     def test_should_handle_multiple_slices_for_same_collection(self):
         doc_id0 = uuid.uuid4()
         doc_id1 = uuid.uuid4()
         qdrant_connector = self.client
-        fake_slice0 = FakeSlice(doc_id0)
-        fake_slice1 = FakeSlice(doc_id0)
+        fake_slice0 = FakeSlice(doc_id0, embedding_model_name="english-embmodel")
+        fake_slice1 = FakeSlice(doc_id0, embedding_model_name="english-embmodel")
 
         fake_slice1.order_sequence = 1
 
-        fake_slice2 = FakeSlice(doc_id1)
+        fake_slice2 = FakeSlice(doc_id1, embedding_model_name="french-embmodel")
         fake_slice2.document.lang = "fr"
 
         slices = [fake_slice0, fake_slice1, fake_slice2]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
         expected = {
-            "collection_welearn_en_embmodel": {doc_id0},
-            "collection_welearn_fr_embmodel": {doc_id1},
+            "collection_welearn_en_english-embmodel": {doc_id0},
+            "collection_welearn_fr_french-embmodel": {doc_id1},
         }
-        self.assertEqual(collections_names, expected)
+        self.assertEqual(dict(collections_names), expected)
 
     def test_should_handle_multiple_slices_for_same_collection_with_multi_lingual_collection(
         self,
@@ -117,8 +119,8 @@ class TestQdrantHandler(unittest.TestCase):
         doc_id0 = uuid.uuid4()
         doc_id1 = uuid.uuid4()
         qdrant_connector = self.client
-        fake_slice0 = FakeSlice(doc_id0, embedding_model_name="embmodel")
-        fake_slice1 = FakeSlice(doc_id0, embedding_model_name="embmodel")
+        fake_slice0 = FakeSlice(doc_id0, embedding_model_name="english-embmodel")
+        fake_slice1 = FakeSlice(doc_id0, embedding_model_name="english-embmodel")
 
         fake_slice1.order_sequence = 1
 
@@ -128,7 +130,7 @@ class TestQdrantHandler(unittest.TestCase):
         slices = [fake_slice0, fake_slice1, fake_slice2]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
         expected = {
-            "collection_welearn_en_embmodel": {doc_id0},
+            "collection_welearn_en_english-embmodel": {doc_id0},
             "collection_welearn_mul_mulembmodel": {doc_id1},
         }
-        self.assertDictEqual(collections_names, expected)
+        self.assertDictEqual(dict(collections_names), expected)
