@@ -1,6 +1,5 @@
 import logging
 from collections import defaultdict
-from functools import cache
 from typing import Collection, Dict, List, Set, Type
 from uuid import UUID
 
@@ -9,12 +8,9 @@ from qdrant_client import QdrantClient
 from qdrant_client.grpc import UpdateResult
 from qdrant_client.http.models import models
 
-from welearn_datastack.constants import QDRANT_MULTI_LINGUAL_CODE
 from welearn_datastack.data.db_models import DocumentSlice
 from welearn_datastack.exceptions import (
     ErrorWhileDeletingChunks,
-    NoPreviousCollectionError,
-    VersionNumberError,
 )
 
 logger = logging.getLogger(__name__)
@@ -41,7 +37,9 @@ def classify_documents_per_collection(
         if len(parts) >= 4:
             model_name_collection_name[parts[3]] = x
         else:
-            logger.warning("Collection name '%s' does not follow the expected format", x)
+            logger.warning(
+                "Collection name '%s' does not follow the expected format", x
+            )
 
     ret: Dict[str, Set[UUID]] = defaultdict(set)
     for dslice in slices:
