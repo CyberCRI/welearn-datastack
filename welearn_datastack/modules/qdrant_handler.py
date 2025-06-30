@@ -1,5 +1,5 @@
 import logging
-from functools import cache
+from collections import defaultdict
 from typing import Collection, Dict, List, Set, Type
 from uuid import UUID
 
@@ -8,12 +8,9 @@ from qdrant_client import QdrantClient
 from qdrant_client.grpc import UpdateResult
 from qdrant_client.http.models import models
 
-from welearn_datastack.constants import QDRANT_MULTI_LINGUAL_CODE
 from welearn_datastack.data.db_models import DocumentSlice
 from welearn_datastack.exceptions import (
     ErrorWhileDeletingChunks,
-    NoPreviousCollectionError,
-    VersionNumberError,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,31 +31,29 @@ def classify_documents_per_collection(
     """
     tmp_collections_names_in_qdrant = qdrant_connector.get_collections().collections
     collections_names_in_qdrant = [c.name for c in tmp_collections_names_in_qdrant]
-
-    ret: Dict[str, Set[UUID]] = {}
-    for dslice in slices:
-        lang = dslice.document.lang
-        model = dslice.embedding_model_name
-        collection_name = (
-            f"collection_welearn_{QDRANT_MULTI_LINGUAL_CODE}_{model.lower()}"
-        )
-
-        if collection_name not in collections_names_in_qdrant:
-            logger.error(
-                "Collection %s not found in Qdrant, attempt with language-specific collection name",
-                collection_name,
-                dslice.id,
+    model_name_collection_name = {}
+    for x in collections_names_in_qdrant:
+        parts = x.split("_")
+        if len(parts) >= 4:
+            model_name_collection_name[parts[3]] = x
+        else:
+            logger.warning(
+                "Collection name '%s' does not follow the expected format", x
             )
-            collection_name = f"collection_welearn_{lang}_{model.lower()}"
-            if collection_name not in collections_names_in_qdrant:
-                logger.error(
-                    f"Collection {collection_name} not found in Qdrant, {dslice.id} will be ignored",
-                )
-                continue
 
-        if collection_name not in ret:
-            ret[collection_name] = set()
-        ret[collection_name].add(dslice.document_id)  # type: ignore
+    ret: Dict[str, Set[UUID]] = defaultdict(set)
+    for dslice in slices:
+        model_name = dslice.embedding_model.title
+        try:
+            collection_name = model_name_collection_name[model_name]
+            ret[collection_name].add(dslice.document_id)  # type: ignore
+        except KeyError:
+            logger.warning(
+                "No collection found for model %s, document %s",
+                model_name,
+                dslice.document_id,
+            )
+            continue
 
     return ret
 

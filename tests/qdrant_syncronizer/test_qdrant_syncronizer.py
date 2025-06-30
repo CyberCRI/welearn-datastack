@@ -19,6 +19,7 @@ from welearn_datastack.data.db_models import (
     Category,
     Corpus,
     DocumentSlice,
+    EmbeddingModel,
     ProcessState,
     Sdg,
     WeLearnDocument,
@@ -35,12 +36,12 @@ class TestQdrantSyncronizer(unittest.TestCase):
         self.client = QdrantClient(":memory:")
 
         self.client.create_collection(
-            collection_name="collection_welearn_en_embmodel",
+            collection_name="collection_welearn_en_english-embmodel",
             vectors_config=models.VectorParams(size=5, distance=models.Distance.COSINE),
         )
 
         self.client.create_collection(
-            collection_name="collection_welearn_fr_embmodel",
+            collection_name="collection_welearn_fr_french-embmodel",
             vectors_config=models.VectorParams(size=5, distance=models.Distance.COSINE),
         )
 
@@ -70,6 +71,11 @@ class TestQdrantSyncronizer(unittest.TestCase):
 
         self.test_session.add(self.category)
 
+        self.emb_model_id = uuid.uuid4()
+        self.emb_model = EmbeddingModel(
+            id=self.emb_model_id, title="english-embmodel", lang="en"
+        )
+        self.test_session.add(self.emb_model)
         corpus_source_name = "corpus"
 
         self.corpus_test = Corpus(
@@ -136,8 +142,8 @@ class TestQdrantSyncronizer(unittest.TestCase):
             document_id=doc_id,
             order_sequence=0,
             embedding=self.emb0.tobytes(),
-            embedding_model_name="embmodel",
-            embedding_model_id=uuid.uuid4(),
+            embedding_model_name=self.emb_model.title,
+            embedding_model_id=self.emb_model_id,
         )
         self.slice_1 = DocumentSlice(
             id=self.slice_id1,
@@ -145,8 +151,8 @@ class TestQdrantSyncronizer(unittest.TestCase):
             document_id=doc_id,
             order_sequence=1,
             embedding=self.emb1.tobytes(),
-            embedding_model_name="embmodel",
-            embedding_model_id=uuid.uuid4(),
+            embedding_model_name=self.emb_model.title,
+            embedding_model_id=self.emb_model_id,
         )
 
         self.sdgs = [
@@ -206,7 +212,7 @@ class TestQdrantSyncronizer(unittest.TestCase):
         self.assertEqual(Step.DOCUMENT_IN_QDRANT.value, most_recent_state.title)
 
         ret_values_from_qdrant = self.client.scroll(
-            collection_name=f"collection_welearn_en_embmodel",
+            collection_name=f"collection_welearn_en_english-embmodel",
             limit=100,
             with_vectors=True,
         )
