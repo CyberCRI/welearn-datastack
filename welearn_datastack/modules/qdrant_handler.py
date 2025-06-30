@@ -35,9 +35,13 @@ def classify_documents_per_collection(
     """
     tmp_collections_names_in_qdrant = qdrant_connector.get_collections().collections
     collections_names_in_qdrant = [c.name for c in tmp_collections_names_in_qdrant]
-    model_name_collection_name = {
-        x.split("_")[3]: x for x in collections_names_in_qdrant
-    }
+    model_name_collection_name = {}
+    for x in collections_names_in_qdrant:
+        parts = x.split("_")
+        if len(parts) >= 4:
+            model_name_collection_name[parts[3]] = x
+        else:
+            logger.warning("Collection name '%s' does not follow the expected format", x)
 
     ret: Dict[str, Set[UUID]] = defaultdict(set)
     for dslice in slices:
