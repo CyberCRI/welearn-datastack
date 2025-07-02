@@ -37,13 +37,14 @@ beautifulsoup4 = "^4.13.4"
 pyphen = "^0.17.2"
 ijson = "^3.4.0"
 keybert = "^0.9.0"
-torch = {version="^2.7.0+cpu", source = "pytorch_cpu"}
 torchvision = {version="^0.22.0+cpu", source = "pytorch_cpu"}
 xx_sent_ud_sm = {url = "https://github.com/explosion/spacy-models/releases/download/xx_sent_ud_sm-3.8.0/xx_sent_ud_sm-3.8.0-py3-none-any.whl"}
 
 lingua-language-detector = "^2.1.1"
 psycopg2-binary = "^2.9.10"
 brotli = "^1.1.0"
+torchaudio = "^2.7.1"
+torch = "^2.7.1"
 
 [tool.poetry.group.metrics.dependencies]
 alembic = "^1.16.1"
