@@ -20,7 +20,6 @@ class TestEmbeddingHelper(TestCase):
         get_sub_environ_according_prefix.cache_clear()
         os.environ["ST_BACKEND"] = "onnx"
 
-
     def tearDown(self) -> None:
         os.environ.clear()
 
