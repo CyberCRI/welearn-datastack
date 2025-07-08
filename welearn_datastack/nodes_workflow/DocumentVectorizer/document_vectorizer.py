@@ -73,8 +73,8 @@ def main() -> None:
     # Create content slices
     docids_processed = 0
     docsids_not_processed = 0
-    bulk_slices: list = []
-    bulk_process_state: list = []
+    bulk_slices: list[DocumentSlice] = []
+    bulk_process_state: list[ProcessState] = []
     for i, document in enumerate(welearn_documents):
         logger.info("Processing document %s/%s", i, len(welearn_documents))
         try:
