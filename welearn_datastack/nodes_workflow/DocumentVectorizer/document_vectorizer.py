@@ -123,14 +123,13 @@ def main() -> None:
             docids_processed += 1
         except NoModelFoundError:
             logger.error("No model found for document %s", document.id)
-            db_session.add(
+            bulk_process_state.append(
                 ProcessState(
                     id=uuid.uuid4(),
                     document_id=document.id,
                     title=Step.KEPT_FOR_TRACE.value,
                 )
             )
-            db_session.commit()
             docsids_not_processed += 1
             continue
 
