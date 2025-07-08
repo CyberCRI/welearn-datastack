@@ -43,6 +43,8 @@ spec:
             default: 10000000000
           - name: st_device
             default: "cpu"
+          - name: st_backend
+            default: "torch"
           - name: embedding_model_fr
             default: {{ $.Values.common.embeddingModelFr }}
           - name: embedding_model_en
@@ -78,6 +80,9 @@ spec:
           - name: ST_DEVICE
             value: >-
                 {{ print "{{inputs.parameters.st_device}}" }}
+          - name: ST_BACKEND
+            value: >-
+                {{ print "{{inputs.parameters.st_backend}}" }}
           - name: MODELS_PATH_ROOT
             value: {{ $.Values.common.modelsPathRoot }}
 

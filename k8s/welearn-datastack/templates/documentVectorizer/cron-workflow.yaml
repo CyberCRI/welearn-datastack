@@ -54,6 +54,8 @@ spec:
             default: {{ .workflowTemplates.runNode.requests.memory }}
           - name: size_limit
             default: 10000000000 # In bytes
+          - name: st_backend
+            default: "onnx"
         steps:
           - - name: generate-to-vectorize-batch
               templateRef:
@@ -112,6 +114,9 @@ spec:
                   - name: memory
                     value: >-
                       {{ print "{{inputs.parameters.memory_collect_docs}}" }}
+                  - name: st_backend
+                    value: >-
+                      {{ print "{{inputs.parameters.st_backend}}" }}
                 artifacts:
                   - name: batch_ids_csv
                     from: >-
