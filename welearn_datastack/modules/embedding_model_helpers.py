@@ -84,10 +84,14 @@ def load_embedding_model(str_path: str) -> SentenceTransformer:
     logger.info("Loading embedding model from %s", str_path)
 
     device = os.environ.get("ST_DEVICE", None)
+    backend = os.environ.get("ST_BACKEND", None)
     logger.info("ST_DEVICE: %s", device)
 
     if device not in ["cpu", "cuda", None]:
         raise ValueError("ST_DEVICE must be one of 'cpu', 'cuda' or None")
+
+    if not isinstance(backend, str) and backend not in ["torch", "onnx", "openvino"]:
+        raise ValueError("ST_BACKEND must be one of 'torch', 'onnx' or 'openvino'")
 
     model = loaded_models.get(str_path, None)
     if model is not None:
@@ -98,6 +102,7 @@ def load_embedding_model(str_path: str) -> SentenceTransformer:
     loaded_models[str_path] = SentenceTransformer(
         model_name_or_path=str_path,
         device=device,
+        backend=backend,  # type: ignore
     )
     return loaded_models[str_path]
 
