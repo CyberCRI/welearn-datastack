@@ -18,9 +18,7 @@ from welearn_datastack.utils_.virtual_environement_utils import (
 class TestEmbeddingHelper(TestCase):
     def setUp(self) -> None:
         get_sub_environ_according_prefix.cache_clear()
-        os.environ["MODELS_NAME_PREFIX"] = "EMBEDDING_MODEL"
-        os.environ["EMBEDDING_MODEL_FR"] = "test_fr"
-        os.environ["EMBEDDING_MODEL_EN"] = "test_en"
+        os.environ["ST_BACKEND"] = "onnx"
 
     def tearDown(self) -> None:
         os.environ.clear()

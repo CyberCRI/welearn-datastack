@@ -73,6 +73,8 @@ def main() -> None:
     # Create content slices
     docids_processed = 0
     docsids_not_processed = 0
+    bulk_slices: list[DocumentSlice] = []
+    bulk_process_state: list[ProcessState] = []
     for i, document in enumerate(welearn_documents):
         logger.info("Processing document %s/%s", i, len(welearn_documents))
         try:
@@ -87,40 +89,49 @@ def main() -> None:
                     f"No embedding model found for document {document.id}"
                 )
             slices = create_content_slices(document, embedding_model_name=embedding_model_name, embedding_model_id=embedding_model_id)  # type: ignore
+            logger.info("'%s' slices were created", len(slices))
             logger.info("Delete old slices")
             db_session.query(DocumentSlice).filter(
                 DocumentSlice.document_id == document.id
             ).delete()
             db_session.commit()
-            logger.info("Insert new slices")
-            db_session.add_all(slices)
-            logger.info("Insert new state")
-            db_session.add(
+
+            logger.info("Adding slices to bulk")
+            bulk_slices.extend(slices)
+
+            logger.info("Adding process state to bulk")
+            bulk_process_state.append(
                 ProcessState(
                     id=uuid.uuid4(),
                     document_id=document.id,
                     title=Step.DOCUMENT_VECTORIZED.value,
                 )
             )
-            db_session.commit()
-            logger.info("'%s' slices were created", len(slices))
+
             docids_processed += 1
         except NoModelFoundError:
             logger.error("No model found for document %s", document.id)
-            db_session.add(
+            bulk_process_state.append(
                 ProcessState(
                     id=uuid.uuid4(),
                     document_id=document.id,
                     title=Step.KEPT_FOR_TRACE.value,
                 )
             )
-            db_session.commit()
             docsids_not_processed += 1
             continue
 
     logger.info("'%s' documents were processed", docids_processed)
     logger.info("'%s' documents were not processed", docsids_not_processed)
 
+    db_session.bulk_save_objects(bulk_slices)
+    logger.info("'%s' slices were added to the session", len(bulk_slices))
+    db_session.bulk_save_objects(bulk_process_state)
+    logger.info(
+        "'%s' process states were added to the session", len(bulk_process_state)
+    )
+
+    db_session.commit()
     db_session.close()
     logger.info("DocumentVectorizer finished")
 

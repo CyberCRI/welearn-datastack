@@ -45,6 +45,7 @@ lingua-language-detector = "^2.1.1"
 psycopg2-binary = "^2.9.10"
 brotli = "^1.1.0"
 scikit-learn = "1.6.1"
+optimum = {extras = ["onnxruntime"], version = "^1.26.1"}
 
 [tool.poetry.group.metrics.dependencies]
 alembic = "^1.16.1"
