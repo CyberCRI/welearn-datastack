@@ -96,18 +96,6 @@ def main() -> None:
             ).delete()
             db_session.commit()
 
-            # logger.info("Insert new slices")
-            # db_session.add_all(slices)
-            # logger.info("Insert new state")
-            # db_session.add(
-            #     ProcessState(
-            #         id=uuid.uuid4(),
-            #         document_id=document.id,
-            #         title=Step.DOCUMENT_VECTORIZED.value,
-            #     )
-            # )
-            # db_session.commit()
-            #
             logger.info("Adding slices to bulk")
             bulk_slices.extend(slices)
 
