@@ -91,7 +91,7 @@ def load_embedding_model(str_path: str) -> SentenceTransformer:
     if device not in ["cpu", "cuda", None]:
         raise ValueError("ST_DEVICE must be one of 'cpu', 'cuda' or None")
 
-    if not isinstance(backend, str) and backend not in ["torch", "onnx", "openvino"]:
+    if backend not in ["torch", "onnx", "openvino"]:
         raise ValueError("ST_BACKEND must be one of 'torch', 'onnx' or 'openvino'")
 
     model = loaded_models.get(str_path, None)
