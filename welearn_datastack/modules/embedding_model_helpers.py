@@ -86,7 +86,7 @@ def load_embedding_model(str_path: str) -> SentenceTransformer:
     device = os.environ.get("ST_DEVICE", None)
     backend = os.environ.get("ST_BACKEND", None)
     logger.info("ST_DEVICE: %s", device)
-    logger.info("ST_BACKEND: %s", device)
+    logger.info("ST_BACKEND: %s", backend)
 
     if device not in ["cpu", "cuda", None]:
         raise ValueError("ST_DEVICE must be one of 'cpu', 'cuda' or None")
