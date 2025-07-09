@@ -32,7 +32,7 @@ spec:
           - name: csv_path
             default: /etc/welearndatastack/collectors
           - name: parallelism_treshold
-            default: '500'
+            default: '1000'
           - name: parallelism_max
             default: '15'
           - name: retrieval_mode
