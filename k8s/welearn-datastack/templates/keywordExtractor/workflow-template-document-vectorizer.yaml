@@ -47,6 +47,8 @@ spec:
             default: {{ $.Values.common.embeddingModelFr }}
           - name: embedding_model_en
             default: {{ $.Values.common.embeddingModelEn }}
+          - name: st_backend
+            default: "onnx"
         artifacts:
           - name: batch_ids_csv
             path: >-
@@ -80,7 +82,9 @@ spec:
                 {{ print "{{inputs.parameters.st_device}}" }}
           - name: MODELS_PATH_ROOT
             value: {{ $.Values.common.modelsPathRoot }}
-
+          - name: ST_BACKEND
+            value: >-
+                {{ print "{{inputs.parameters.st_backend}}" }}
         args:
           - python
           - "-m"
