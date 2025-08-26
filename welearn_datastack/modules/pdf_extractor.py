@@ -1,8 +1,13 @@
+import io
 import logging
 from typing import List, Tuple
 
+from bs4 import BeautifulSoup
 from pypdf import PdfReader
 from refinedoc.refined_document import RefinedDocument
+
+from welearn_datastack.constants import HEADERS
+from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +33,61 @@ def large_pages_size_flag(reader: PdfReader, limit: int) -> Tuple[List[int], boo
 
     return ret, flag
 
+
+def _send_pdf_to_tika(pdf_content: io.BytesIO, tika_base_url: str) -> dict:
+    """
+    Send a PDF document to Tika micro service and return the content as a dictionary
+    :param pdf_content: the PDF document content as a byte stream
+    :param tika_base_url: the base URL of the Tika micro service
+    :return: the content returned by Tika micro service as a dictionary (JSON)
+    """
+    pdf_process_addr = f"{tika_base_url}/tika"
+    local_headers = {
+        "accept": "application/json",
+        "content-type": "application/octet-stream",
+        "X-Tika-PDFOcrStrategy": "no_ocr",
+    }
+
+    with get_new_https_session() as http_session:
+        resp = http_session.put(
+            url=pdf_process_addr,
+            files={"file": pdf_content},
+            headers=local_headers | HEADERS,
+        )
+        resp.raise_for_status()
+        tika_content = resp.json()
+    return tika_content
+
+
+def _parse_tika_content(tika_content: dict) -> list[list[str]]:
+    """
+    Parse the content returned by Tika micro service
+    :param tika_content: the content returned by Tika micro service
+    :return: the parsed content as a list of list of strings (one list per page
+    """
+    htmlx = tika_content.get("X-TIKA:content")
+    soup = BeautifulSoup(htmlx, features="html.parser")
+    pages = soup.find_all("div", {"class": "page"})
+    res = [p.split("\n") for p in [page.get_text() for page in pages]]
+
+    return res
+
+
+def extract_txt_from_pdf_with_tika(pdf_content: io.BytesIO, tika_base_url: str) -> List[List[str]]:
+    """
+    Extract the text from a PDF document and return it as a list of strings for each page of the document and a list of
+    strings for each page for a filtered document and the reference document (extracted with tika micro service)
+
+    :param pdf_content: the PDF document content as a byte stream
+    :param tika_base_url: the base URL of the Tika micro service
+    :return: Matrix of strings (list of list of strings) for each page of the document
+    """
+    tika_content = _send_pdf_to_tika(pdf_content, tika_base_url)
+    pdf_content = _parse_tika_content(tika_content)
+
+    refined_pdf_content = RefinedDocument(content=pdf_content)
+
+    return refined_pdf_content.body
 
 def extract_txt_from_pdf(
     reader: PdfReader, remove_headers: bool = True, remove_footers: bool = True
