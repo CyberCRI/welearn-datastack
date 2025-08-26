@@ -73,7 +73,9 @@ def _parse_tika_content(tika_content: dict) -> list[list[str]]:
     return res
 
 
-def extract_txt_from_pdf_with_tika(pdf_content: io.BytesIO, tika_base_url: str) -> List[List[str]]:
+def extract_txt_from_pdf_with_tika(
+    pdf_content: io.BytesIO, tika_base_url: str
+) -> List[List[str]]:
     """
     Extract the text from a PDF document and return it as a list of strings for each page of the document and a list of
     strings for each page for a filtered document and the reference document (extracted with tika micro service)
@@ -88,6 +90,7 @@ def extract_txt_from_pdf_with_tika(pdf_content: io.BytesIO, tika_base_url: str) 
     refined_pdf_content = RefinedDocument(content=pdf_content)
 
     return refined_pdf_content.body
+
 
 def extract_txt_from_pdf(
     reader: PdfReader, remove_headers: bool = True, remove_footers: bool = True
