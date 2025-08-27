@@ -79,7 +79,9 @@ class OAPenCollector(IPluginRESTCollector):
         response.raise_for_status()
 
         with io.BytesIO(response.content) as pdf_file:
-            pdf_content = extract_txt_from_pdf_with_tika(pdf_content=pdf_file, tika_base_url=self.tika_adress)
+            pdf_content = extract_txt_from_pdf_with_tika(
+                pdf_content=pdf_file, tika_base_url=self.tika_adress
+            )
 
             # Delete non printable characters
             pdf_content = [
