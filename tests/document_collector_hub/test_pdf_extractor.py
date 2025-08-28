@@ -1,11 +1,7 @@
 import io
 import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from pypdf import PdfReader
-
-from welearn_datastack.data.enumerations import DeletePart
 from welearn_datastack.modules import pdf_extractor
 from welearn_datastack.modules.pdf_extractor import (
     _parse_tika_content,
@@ -15,13 +11,6 @@ from welearn_datastack.modules.pdf_extractor import (
 
 
 class TestPDFExtractor(unittest.TestCase):
-    def setUp(self):
-        resources_fp = (
-            Path(__file__).parent / "resources" / "file_plugin_input" / "hal_pdf.pdf"
-        )
-
-        self.reader = PdfReader(resources_fp)
-
     def test_replace_ligatures(self):
         text = "ﬁrst ﬂight"
         cleaned_text = pdf_extractor.replace_ligatures(text)
@@ -67,7 +56,6 @@ class TestPDFExtractor(unittest.TestCase):
         self.assertEqual(result, {"X-TIKA:content": "<html>Mock Content</html>"})
 
     def test_parse_tika_content(self):
-        # Contenu simulé de Tika
         tika_content = {
             "X-TIKA:content": """
             <html>
@@ -77,10 +65,8 @@ class TestPDFExtractor(unittest.TestCase):
             """
         }
 
-        # Appel de la méthode
         result = _parse_tika_content(tika_content)
 
-        # Assertions
         expected_result = [["Page 1 content"], ["Page 2 content"]]
         self.assertEqual(result, expected_result)
 
@@ -89,20 +75,16 @@ class TestPDFExtractor(unittest.TestCase):
     def test_extract_txt_from_pdf_with_tika(
         self, mock_parse_tika_content, mock_send_pdf_to_tika
     ):
-        # Simuler le contenu PDF
         pdf_content = io.BytesIO(b"%PDF-1.4 simulated content")
         tika_base_url = "http://localhost:9998"
 
-        # Simuler la réponse de Tika
         mock_send_pdf_to_tika.return_value = {
             "X-TIKA:content": "<div class='page'>Page 1 content</div>"
         }
         mock_parse_tika_content.return_value = [["Page 1 content"]]
 
-        # Appeler la méthode
         result = extract_txt_from_pdf_with_tika(pdf_content, tika_base_url)
 
-        # Vérifier les résultats
         self.assertEqual(result, [["Page 1 content"]])
         mock_send_pdf_to_tika.assert_called_once_with(pdf_content, tika_base_url)
         mock_parse_tika_content.assert_called_once_with(
