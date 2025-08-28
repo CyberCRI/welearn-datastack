@@ -1,37 +1,13 @@
 import io
 import logging
-from typing import List, Tuple
+from typing import List
 
 from bs4 import BeautifulSoup
-from pypdf import PdfReader
 from refinedoc.refined_document import RefinedDocument
 
-from welearn_datastack.constants import HEADERS
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
 logger = logging.getLogger(__name__)
-
-
-def large_pages_size_flag(reader: PdfReader, limit: int) -> Tuple[List[int], bool]:
-    """
-    Check the size of a PDF document page
-    :param limit: In byte, limit the pdf need to not exceed
-    :param reader: The PDF document already opened. Each page gonna be processed.
-    :return: List of sizes for each page (index in the list equal index in pdf) and if one of this exceed limit
-    """
-    logger.info(f"Size limit for each page : {limit}")
-    ret = []
-    number_of_pages = len(reader.pages)
-    logger.info(f"Test size of {number_of_pages} pages")
-    flag = False
-    for i in range(number_of_pages):
-        page = reader.pages[i]
-        page_size = len(page.get_contents().get_data())  # type: ignore
-        ret.append(page_size)
-        if page_size > limit:
-            flag = True
-
-    return ret, flag
 
 
 def _send_pdf_to_tika(pdf_content: io.BytesIO, tika_base_url: str) -> dict:
@@ -88,27 +64,6 @@ def extract_txt_from_pdf_with_tika(
     """
     tika_content = _send_pdf_to_tika(pdf_content, tika_base_url)
     pdf_content = _parse_tika_content(tika_content)
-
-    refined_pdf_content = RefinedDocument(content=pdf_content)
-
-    return refined_pdf_content.body
-
-
-def extract_txt_from_pdf(
-    reader: PdfReader, remove_headers: bool = True, remove_footers: bool = True
-) -> List[List[str]]:
-    """
-    Extract the text from a PDF document and return it as a list of strings for each page of the document and a list of
-    strings for each page for a filtered document and the reference document (extracted with PyPDF)
-
-    :param reader: the PDF reader object
-    :return: a tuple containing the extracted & filtered text
-    """
-    pdf_content: List[List[str]] = []
-    for page in reader.pages:
-        text = page.extract_text().split("\n")
-        page_content = [t.strip() for t in text if t.strip()]
-        pdf_content.append(page_content)
 
     refined_pdf_content = RefinedDocument(content=pdf_content)
 
