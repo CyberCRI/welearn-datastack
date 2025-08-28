@@ -4,7 +4,7 @@ INSERT
 	INTO
 		corpus_related.category(title)
 	VALUES
-		('Academic scientific publications')
+		('academic scientific publications')
     RETURNING id AS catid
 )
 UPDATE
