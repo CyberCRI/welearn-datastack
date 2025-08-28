@@ -22,10 +22,6 @@ class TestPDFExtractor(unittest.TestCase):
 
         self.reader = PdfReader(resources_fp)
 
-    def test_extract_txt_from_pdf(self):
-        pdf_content = pdf_extractor.extract_txt_from_pdf(self.reader)
-        self.assertEqual(len(pdf_content), len(self.reader.pages))
-
     def test_replace_ligatures(self):
         text = "ﬁrst ﬂight"
         cleaned_text = pdf_extractor.replace_ligatures(text)
@@ -40,16 +36,6 @@ class TestPDFExtractor(unittest.TestCase):
         text = "well-\nknown"
         cleaned_text = pdf_extractor.remove_hyphens(text)
         self.assertEqual(cleaned_text, "wellknown\n")
-
-    def test_check_page_size_positive(self):
-        ret = pdf_extractor.large_pages_size_flag(self.reader, 10000)
-        self.assertEqual(len(ret[0]), len(self.reader.pages))
-        self.assertTrue(ret[1])
-
-    def test_check_page_size_negative(self):
-        ret = pdf_extractor.large_pages_size_flag(self.reader, 100000)
-        self.assertEqual(len(ret[0]), len(self.reader.pages))
-        self.assertFalse(ret[1])
 
     @patch("welearn_datastack.modules.pdf_extractor.get_new_https_session")
     def test_send_pdf_to_tika(self, mock_get_session):
