@@ -72,8 +72,9 @@ class TestOpenAlexCollector(TestCase):
             tested_query,
         )
 
+    @patch("welearn_datastack.modules.pdf_extractor._send_pdf_to_tika")
     @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_new_https_session")
-    def test__get_pdf_content(self, http_session_mock):
+    def test__get_pdf_content(self, http_session_mock, mock_send_pdf_to_tika):
 
         mock_session = Mock()
         http_session_mock.return_value = mock_session
@@ -81,7 +82,9 @@ class TestOpenAlexCollector(TestCase):
         mock_session.get.return_value = MockResponse(
             status_code=200, content=self.pdf.read_bytes()
         )
-
+        mock_send_pdf_to_tika.return_value = {
+            "X-TIKA:content": "<div class='page'>2.2. Measurements of Fiber Parameters Small pieces were extracted from various positions on the strip. and mechanical properties to provide additional information regarding these areas of study and growth conditions.</div>"
+        }
         tested_result = self.openalexColector._get_pdf_content("https://example.org/1")
         self.assertTrue(
             tested_result.startswith(

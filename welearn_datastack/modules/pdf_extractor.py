@@ -41,10 +41,12 @@ def _send_pdf_to_tika(pdf_content: io.BytesIO, tika_base_url: str) -> dict:
     :param tika_base_url: the base URL of the Tika micro service
     :return: the content returned by Tika micro service as a dictionary (JSON)
     """
+    if tika_base_url.endswith("/"):
+        tika_base_url = tika_base_url[:-1]
     pdf_process_addr = f"{tika_base_url}/tika"
     local_headers = {
-        "accept": "application/json",
-        "content-type": "application/octet-stream",
+        "Accept": "application/json",
+        "Content-type": "application/octet-stream",
         "X-Tika-PDFOcrStrategy": "no_ocr",
     }
 
@@ -52,7 +54,7 @@ def _send_pdf_to_tika(pdf_content: io.BytesIO, tika_base_url: str) -> dict:
         resp = http_session.put(
             url=pdf_process_addr,
             files={"file": pdf_content},
-            headers=local_headers | HEADERS,
+            headers=local_headers,
         )
         resp.raise_for_status()
         tika_content = resp.json()

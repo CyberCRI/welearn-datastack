@@ -125,12 +125,15 @@ class TestHALCollector(TestCase):
             doc0["abstract_s"][0].split(".")[0] + "...",
         )
 
+    @patch("welearn_datastack.modules.pdf_extractor._send_pdf_to_tika")
     @patch(
         "welearn_datastack.plugins.rest_requesters.hal.HAL_URL_BASE",
         "https://example.org/",
     )
     @patch("requests.Session.get")
-    def test__convert_json_dict_to_welearndoc_mode_pdf(self, mock_get):
+    def test__convert_json_dict_to_welearndoc_mode_pdf(
+        self, mock_get, mock_send_pdf_to_tika
+    ):
         class MockResponse:
             def __init__(self, status_code):
                 self.content = (
@@ -144,6 +147,9 @@ class TestHALCollector(TestCase):
             def raise_for_status(self):
                 pass
 
+        mock_send_pdf_to_tika.return_value = {
+            "X-TIKA:content": "<div class='page'>For primary vpiRNAs that are produced from the abundant</div>"
+        }
         mock_get.side_effect = [MockResponse(200)]
         os.environ["PDF_SIZE_PAGE_LIMIT"] = "100000"
         doc0 = self.content_json["response"]["docs"][0]
