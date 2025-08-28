@@ -60,7 +60,7 @@ class OAPenCollector(IPluginRESTCollector):
         self.corpus_name = self.related_corpus
         self.corpus_fix = True
         self.pdf_size_page_limit: int = int(os.getenv("PDF_SIZE_PAGE_LIMIT", 100000))
-        self.tika_adress = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
+        self.tika_address = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
 
     @staticmethod
     def _extract_oapen_ids(urls: Iterable[str]) -> List[str]:
@@ -80,7 +80,7 @@ class OAPenCollector(IPluginRESTCollector):
 
         with io.BytesIO(response.content) as pdf_file:
             pdf_content = extract_txt_from_pdf_with_tika(
-                pdf_content=pdf_file, tika_base_url=self.tika_adress
+                pdf_content=pdf_file, tika_base_url=self.tika_address
             )
 
             # Delete non printable characters

@@ -42,7 +42,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         self.corpus_fix = True
         self.pdf_size_page_limit: int = int(os.getenv("PDF_SIZE_PAGE_LIMIT", 100000))
         self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
-        self.tika_adress = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
+        self.tika_address = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
 
         team_email = os.getenv("TEAM_EMAIL")
         if not isinstance(team_email, str):
@@ -92,7 +92,7 @@ class OpenAlexCollector(IPluginRESTCollector):
 
         with io.BytesIO(response.content) as pdf_file:
             pdf_content = extract_txt_from_pdf_with_tika(
-                pdf_content=pdf_file, tika_base_url=self.tika_adress
+                pdf_content=pdf_file, tika_base_url=self.tika_address
             )
 
             # Delete non printable characters
