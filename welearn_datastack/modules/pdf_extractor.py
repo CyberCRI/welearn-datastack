@@ -1,49 +1,69 @@
+import io
 import logging
-from typing import List, Tuple
+import re
+from typing import List
 
-from pypdf import PdfReader
+from bs4 import BeautifulSoup
 from refinedoc.refined_document import RefinedDocument
+
+from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
 logger = logging.getLogger(__name__)
 
 
-def large_pages_size_flag(reader: PdfReader, limit: int) -> Tuple[List[int], bool]:
+def _send_pdf_to_tika(pdf_content: io.BytesIO, tika_base_url: str) -> dict:
     """
-    Check the size of a PDF document page
-    :param limit: In byte, limit the pdf need to not exceed
-    :param reader: The PDF document already opened. Each page gonna be processed.
-    :return: List of sizes for each page (index in the list equal index in pdf) and if one of this exceed limit
+    Send a PDF document to Tika micro service and return the content as a dictionary
+    :param pdf_content: the PDF document content as a byte stream
+    :param tika_base_url: the base URL of the Tika micro service
+    :return: the content returned by Tika micro service as a dictionary (JSON)
     """
-    logger.info(f"Size limit for each page : {limit}")
-    ret = []
-    number_of_pages = len(reader.pages)
-    logger.info(f"Test size of {number_of_pages} pages")
-    flag = False
-    for i in range(number_of_pages):
-        page = reader.pages[i]
-        page_size = len(page.get_contents().get_data())  # type: ignore
-        ret.append(page_size)
-        if page_size > limit:
-            flag = True
+    tika_base_url = re.sub(r"\/$", "", tika_base_url)
+    pdf_process_addr = f"{tika_base_url}/tika"
+    local_headers = {
+        "Accept": "application/json",
+        "Content-type": "application/octet-stream",
+        "X-Tika-PDFOcrStrategy": "no_ocr",
+    }
 
-    return ret, flag
+    with get_new_https_session() as http_session:
+        resp = http_session.put(
+            url=pdf_process_addr,
+            files={"file": pdf_content},
+            headers=local_headers,
+        )
+        resp.raise_for_status()
+        tika_content = resp.json()
+    return tika_content
 
 
-def extract_txt_from_pdf(
-    reader: PdfReader, remove_headers: bool = True, remove_footers: bool = True
+def _parse_tika_content(tika_content: dict) -> list[list[str]]:
+    """
+    Parse the content returned by Tika micro service
+    :param tika_content: the content returned by Tika micro service
+    :return: the parsed content as a list of list of strings (one list per page
+    """
+    htmlx = tika_content.get("X-TIKA:content")
+    soup = BeautifulSoup(htmlx, features="html.parser")
+    pages = soup.find_all("div", {"class": "page"})
+    res = [p.split("\n") for p in [page.get_text() for page in pages]]
+
+    return res
+
+
+def extract_txt_from_pdf_with_tika(
+    pdf_content: io.BytesIO, tika_base_url: str
 ) -> List[List[str]]:
     """
     Extract the text from a PDF document and return it as a list of strings for each page of the document and a list of
-    strings for each page for a filtered document and the reference document (extracted with PyPDF)
+    strings for each page for a filtered document and the reference document (extracted with tika micro service)
 
-    :param reader: the PDF reader object
-    :return: a tuple containing the extracted & filtered text
+    :param pdf_content: the PDF document content as a byte stream
+    :param tika_base_url: the base URL of the Tika micro service
+    :return: Matrix of strings (list of list of strings) for each page of the document
     """
-    pdf_content: List[List[str]] = []
-    for page in reader.pages:
-        text = page.extract_text().split("\n")
-        page_content = [t.strip() for t in text if t.strip()]
-        pdf_content.append(page_content)
+    tika_content = _send_pdf_to_tika(pdf_content, tika_base_url)
+    pdf_content = _parse_tika_content(tika_content)
 
     refined_pdf_content = RefinedDocument(content=pdf_content)
 

@@ -80,8 +80,9 @@ class TestOAPenCollector(TestCase):
             "https://library.oapen.org/handle/20.500.12657/12345",
         )
 
+    @patch("welearn_datastack.modules.pdf_extractor._send_pdf_to_tika")
     @patch("welearn_datastack.plugins.rest_requesters.oapen.get_new_https_session")
-    def test_get_pdf_content(self, mock_get_new_https_session):
+    def test_get_pdf_content(self, mock_get_new_https_session, mock_send_pdf_to_tika):
         class MockResponse:
             def __init__(self, status_code):
                 self.content = (
@@ -96,6 +97,9 @@ class TestOAPenCollector(TestCase):
                 pass
 
         os.environ["PDF_SIZE_PAGE_LIMIT"] = "100000"
+        mock_send_pdf_to_tika.return_value = {
+            "X-TIKA:content": "<div class='page'>For primary vpiRNAs that are produced from the abundant</div>"
+        }
 
         mock_response = MockResponse(200)
         mock_get_new_https_session.return_value.get.return_value = mock_response

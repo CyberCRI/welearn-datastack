@@ -27,6 +27,7 @@ common:
       RCLONE_CONFIG_DEST_ENV_AUTH: true
       RCLONE_CONFIG_DEST_TYPE: azureblob
       TEAM_EMAIL: welearn@learningplanetinstitute.org
+      TIKA_ADDRESS: http://tika:9998
   embeddingModelFr: sentence-camembert-base
   embeddingModelEn: all-minilm-l6-v2
   modelsPathRoot: /models

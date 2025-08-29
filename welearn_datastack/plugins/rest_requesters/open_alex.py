@@ -5,8 +5,6 @@ from datetime import datetime
 from itertools import batched
 from typing import Any, Dict, List, Tuple
 
-from pypdf import PdfReader
-
 from welearn_datastack.constants import (
     AUTHORIZED_LICENSES,
     HEADERS,
@@ -19,25 +17,19 @@ from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocume
 from welearn_datastack.exceptions import (
     ClosedAccessContent,
     PDFFileSizeExceedLimit,
-    PDFPagesSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedPublisher,
 )
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
-    extract_txt_from_pdf,
-    large_pages_size_flag,
+    extract_txt_from_pdf_with_tika,
     remove_hyphens,
     replace_ligatures,
 )
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
-from welearn_datastack.utils_.text_stat_utils import (
-    predict_duration,
-    predict_readability,
-)
 
 logger = logging.getLogger(__name__)
 
@@ -50,6 +42,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         self.corpus_fix = True
         self.pdf_size_page_limit: int = int(os.getenv("PDF_SIZE_PAGE_LIMIT", 100000))
         self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
+        self.tika_address = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
 
         team_email = os.getenv("TEAM_EMAIL")
         if not isinstance(team_email, str):
@@ -98,15 +91,9 @@ class OpenAlexCollector(IPluginRESTCollector):
         response.raise_for_status()
 
         with io.BytesIO(response.content) as pdf_file:
-            reader = PdfReader(pdf_file)
-            sizes, size_flag = large_pages_size_flag(
-                reader=reader, limit=self.pdf_size_page_limit
+            pdf_content = extract_txt_from_pdf_with_tika(
+                pdf_content=pdf_file, tika_base_url=self.tika_address
             )
-
-            if size_flag:
-                raise PDFPagesSizeExceedLimit(f"PDF page is too heavy {sizes}")
-
-            pdf_content = extract_txt_from_pdf(reader=reader)
 
             # Delete non printable characters
             pdf_content = [

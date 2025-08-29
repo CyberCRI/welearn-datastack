@@ -5,23 +5,24 @@ from datetime import datetime, timezone
 from itertools import batched
 from typing import Any, Iterable, List, Tuple
 
-from pypdf import PdfReader
 from urllib3 import Retry
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HAL_URL_BASE
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
-from welearn_datastack.exceptions import NoContent, PDFPagesSizeExceedLimit
+from welearn_datastack.exceptions import NoContent
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
-    extract_txt_from_pdf,
-    large_pages_size_flag,
+    extract_txt_from_pdf_with_tika,
     remove_hyphens,
     replace_ligatures,
 )
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
-from welearn_datastack.utils_.scraping_utils import get_url_without_hal_like_versionning
+from welearn_datastack.utils_.scraping_utils import (
+    get_url_without_hal_like_versionning,
+    remove_extra_whitespace,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +83,7 @@ class HALCollector(IPluginRESTCollector):
         self._quantity_rows_retruned = "10000"  # 30 by default, 10000 max
         self.licenses = AUTHORIZED_LICENSES_WITHOUT_VERSION + LOCAL_LICENSES
         self.pdf_size_page_limit: int = int(os.getenv("PDF_SIZE_PAGE_LIMIT", 100000))
+        self.tika_address = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
 
     @staticmethod
     def _convert_hal_date_to_ts(hal_dt: str) -> float | None:
@@ -241,37 +243,28 @@ class HALCollector(IPluginRESTCollector):
         response = client.get(url, headers=HEADERS)
         response.raise_for_status()
 
-        pdf_file = io.BytesIO(response.content)
-
-        reader = PdfReader(pdf_file)
-
-        sizes, size_flag = large_pages_size_flag(
-            reader=reader, limit=self.pdf_size_page_limit
-        )
-
-        if size_flag:
-            raise PDFPagesSizeExceedLimit(
-                f"Limit is {self.pdf_size_page_limit} and pages are {sizes}"
+        with io.BytesIO(response.content) as pdf_file:
+            pdf_content = extract_txt_from_pdf_with_tika(
+                pdf_content=pdf_file, tika_base_url=self.tika_address
             )
 
-        pdf_content = extract_txt_from_pdf(reader=reader)
+            # Delete non printable characters
+            pdf_content = [
+                [delete_non_printable_character(word) for word in page]
+                for page in pdf_content
+            ]
 
-        # Delete non printable characters
-        pdf_content = [
-            [delete_non_printable_character(word) for word in page]
-            for page in pdf_content
-        ]
+            pages = []
+            for content in pdf_content:
+                page_text = " ".join(content)
+                page_text = replace_ligatures(page_text)
+                page_text = remove_hyphens(page_text)
+                page_text = delete_accents(page_text)
 
-        pages = []
-        for content in pdf_content:
-            page_text = " ".join(content)
-            page_text = replace_ligatures(page_text)
-            page_text = remove_hyphens(page_text)
-            page_text = delete_accents(page_text)
+                pages.append(page_text)
+            ret = remove_extra_whitespace(" ".join(pages))
 
-            pages.append(page_text)
-
-        return " ".join(pages)
+        return ret
 
     def _get_jsons(self, hal_ids: List[str]) -> List[dict]:
         http = get_new_https_session()
