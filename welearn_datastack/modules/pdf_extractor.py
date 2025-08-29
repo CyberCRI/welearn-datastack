@@ -17,8 +17,7 @@ def _send_pdf_to_tika(pdf_content: io.BytesIO, tika_base_url: str) -> dict:
     :param tika_base_url: the base URL of the Tika micro service
     :return: the content returned by Tika micro service as a dictionary (JSON)
     """
-    if tika_base_url.endswith("/"):
-        tika_base_url = tika_base_url[:-1]
+    tika_base_url = re.sub(r"\/$", "", tika_base_url)
     pdf_process_addr = f"{tika_base_url}/tika"
     local_headers = {
         "Accept": "application/json",
