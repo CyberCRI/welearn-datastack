@@ -1,54 +1,12 @@
 import io
 import logging
-import re
 from typing import List
 
-from bs4 import BeautifulSoup
 from refinedoc.refined_document import RefinedDocument
 
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.modules.tika_client import TikaClient
 
 logger = logging.getLogger(__name__)
-
-
-def _send_pdf_to_tika(pdf_content: io.BytesIO, tika_base_url: str) -> dict:
-    """
-    Send a PDF document to Tika micro service and return the content as a dictionary
-    :param pdf_content: the PDF document content as a byte stream
-    :param tika_base_url: the base URL of the Tika micro service
-    :return: the content returned by Tika micro service as a dictionary (JSON)
-    """
-    tika_base_url = re.sub(r"\/$", "", tika_base_url)
-    pdf_process_addr = f"{tika_base_url}/tika"
-    local_headers = {
-        "Accept": "application/json",
-        "Content-type": "application/octet-stream",
-        "X-Tika-PDFOcrStrategy": "no_ocr",
-    }
-
-    with get_new_https_session() as http_session:
-        resp = http_session.put(
-            url=pdf_process_addr,
-            files={"file": pdf_content},
-            headers=local_headers,
-        )
-        resp.raise_for_status()
-        tika_content = resp.json()
-    return tika_content
-
-
-def _parse_tika_content(tika_content: dict) -> list[list[str]]:
-    """
-    Parse the content returned by Tika micro service
-    :param tika_content: the content returned by Tika micro service
-    :return: the parsed content as a list of list of strings (one list per page
-    """
-    htmlx = tika_content.get("X-TIKA:content")
-    soup = BeautifulSoup(htmlx, features="html.parser")
-    pages = soup.find_all("div", {"class": "page"})
-    res = [p.split("\n") for p in [page.get_text() for page in pages]]
-
-    return res
 
 
 def extract_txt_from_pdf_with_tika(
@@ -62,8 +20,9 @@ def extract_txt_from_pdf_with_tika(
     :param tika_base_url: the base URL of the Tika micro service
     :return: Matrix of strings (list of list of strings) for each page of the document
     """
-    tika_content = _send_pdf_to_tika(pdf_content, tika_base_url)
-    pdf_content = _parse_tika_content(tika_content)
+    client = TikaClient()
+    tika_content = client.tika(pdf_content)
+    pdf_content = client.parse_tika_content(tika_content)
 
     refined_pdf_content = RefinedDocument(content=pdf_content)
 

@@ -50,3 +50,10 @@ class URLStatus(Enum):
     UPDATE = 2
     DELETE = 3
     UNKNOWN = 4
+
+
+class TikaReturnType(Enum):
+    JSON = "application/json"
+    TEXT = "text/plain"
+    HTML = "text/html"
+    XML = "application/xml"

@@ -3,11 +3,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from welearn_datastack.modules import pdf_extractor
-from welearn_datastack.modules.pdf_extractor import (
-    _parse_tika_content,
-    _send_pdf_to_tika,
-    extract_txt_from_pdf_with_tika,
-)
+from welearn_datastack.modules.pdf_extractor import extract_txt_from_pdf_with_tika
+from welearn_datastack.modules.tika_client import parse_tika_content, send_pdf_to_tika
 
 
 class TestPDFExtractor(unittest.TestCase):
@@ -41,7 +38,7 @@ class TestPDFExtractor(unittest.TestCase):
         # Appel de la méthode
         pdf_content = io.BytesIO(b"Mock PDF content")
         tika_base_url = "http://mock-tika-url"
-        result = _send_pdf_to_tika(pdf_content, tika_base_url)
+        result = send_pdf_to_tika(pdf_content, tika_base_url)
 
         # Assertions
         mock_session.put.assert_called_once_with(
@@ -65,7 +62,7 @@ class TestPDFExtractor(unittest.TestCase):
             """
         }
 
-        result = _parse_tika_content(tika_content)
+        result = parse_tika_content(tika_content)
 
         expected_result = [["Page 1 content"], ["Page 2 content"]]
         self.assertEqual(result, expected_result)
