@@ -10,10 +10,6 @@ from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocume
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 from welearn_datastack.utils_.scraping_utils import extract_property_from_html
-from welearn_datastack.utils_.text_stat_utils import (
-    predict_duration,
-    predict_readability,
-)
 
 logger = logging.getLogger(__name__)
 
