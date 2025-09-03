@@ -37,7 +37,7 @@ class UNCCeLearnURLCollector(URLCollector):
         logger.info(f"Got {len(courses)} courses from UNCCeLearn")
         ret: List[WeLearnDocument] = []
 
-        url_template = "https://unccelearn.org/course/view.php?id=<ID_TO_REPLACE>"
+        url_template = "https://unccelearn.org/course/view.php?id=<ID_TO_REPLACE>&page=overview&lang=en"
 
         for course in courses:
             course_id = course.get("data-courseid")
