@@ -8,9 +8,11 @@ import time
 from typing import List, Optional, Tuple
 
 from bs4 import BeautifulSoup, ResultSet  # type: ignore
+from requests.exceptions import RequestException
 
 from welearn_datastack.constants import HEADERS
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.exceptions import NoContent
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
@@ -129,13 +131,21 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
         :param soup: The BeautifulSoup object of the page
         :return: A tuple with the content and the metadata of the PDF file
         """
-        pdf_url = soup.find("a", id="overview_syllabus_download").get("href", "")
+        try:
+            pdf_url = soup.find("a", id="overview_syllabus_download").get("href", "")
+        except AttributeError as e:
+            raise NoContent from e
 
-        pdf_content_bytes = self._get_pdf(pdf_url)
+        if not pdf_url:
+            raise NoContent("No url found")
 
-        pdf_content, tika_metadata = extract_txt_from_pdf_with_tika(
-            pdf_content_bytes, tika_base_url=self.tika_address, with_metadata=True
-        )
+        try:
+            pdf_content_bytes = self._get_pdf(pdf_url)
+            pdf_content, tika_metadata = extract_txt_from_pdf_with_tika(
+                pdf_content_bytes, tika_base_url=self.tika_address, with_metadata=True
+            )
+        except RequestException as e:
+            raise NoContent from e
 
         # Delete non printable characters
         pdf_content = [
@@ -186,9 +196,17 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
         details["keywords"] = format_news_keywords(tika_metadata.get("keywords", None))
         details["type"] = "MOOC"
 
-        content, file_md = self._get_content_and_file_metadata(soup)
-
-        details.update(file_md)
+        try:
+            content, file_md = self._get_content_and_file_metadata(soup)
+            details.update(file_md)
+        except NoContent as e:
+            logger.warning(
+                f"There is no content detect for this url {url} : {str(e)}. Degrated mode activated and use description as content"
+            )
+            content = doc_desc
+            details["content_from_pdf"] = False
+        else:
+            details["content_from_pdf"] = True
 
         return ScrapedWeLearnDocument(
             document_url=url,
