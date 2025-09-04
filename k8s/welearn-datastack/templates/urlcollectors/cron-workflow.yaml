@@ -369,5 +369,10 @@ spec:
                   - name: pb_app_id
                     value: K0SNCQLM4A
 
+            - name: unccelearn
+              templateRef:
+                name: {{ .name }}
+                template: collect-unccelearn
+
 {{- end }}
 {{- end }}
