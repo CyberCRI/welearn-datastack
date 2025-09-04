@@ -5,10 +5,12 @@ from welearn_datastack.plugins.scrapers.conversation import ConversationCollecto
 from welearn_datastack.plugins.scrapers.oe_books import OpenEditionBooksCollector
 from welearn_datastack.plugins.scrapers.peerj import PeerJCollector
 from welearn_datastack.plugins.scrapers.plos import PlosCollector
+from welearn_datastack.plugins.scrapers.unccelearn import UNCCeLearnCollector
 
 plugins_scrape_list: List[Type[IPluginScrapeCollector]] = [
     ConversationCollector,
     PeerJCollector,
     PlosCollector,
     OpenEditionBooksCollector,
+    UNCCeLearnCollector,
 ]
