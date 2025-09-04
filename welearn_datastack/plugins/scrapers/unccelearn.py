@@ -201,7 +201,7 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
             details.update(file_md)
         except NoContent as e:
             logger.warning(
-                f"There is no content detect for this url {url} : {str(e)}. Degrated mode activated and use description as content"
+                f"There is no content detected for this url {url} : {str(e)}. Degraded mode activated and use description as content"
             )
             content = doc_desc
             details["content_from_pdf"] = False
