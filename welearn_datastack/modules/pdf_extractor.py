@@ -52,22 +52,26 @@ def _parse_tika_content(tika_content: dict) -> list[list[str]]:
 
 
 def extract_txt_from_pdf_with_tika(
-    pdf_content: io.BytesIO, tika_base_url: str
-) -> List[List[str]]:
+    pdf_content: io.BytesIO, tika_base_url: str, with_metadata: bool = False
+) -> List[List[str]] | tuple[List[List[str]], dict]:
     """
     Extract the text from a PDF document and return it as a list of strings for each page of the document and a list of
     strings for each page for a filtered document and the reference document (extracted with tika micro service)
 
     :param pdf_content: the PDF document content as a byte stream
     :param tika_base_url: the base URL of the Tika micro service
-    :return: Matrix of strings (list of list of strings) for each page of the document
+    :param with_metadata: if True, return a tuple with the refined document and the metadata extracted by Tika
+    :return: Matrix of strings (list of list of strings) for each page of the document or a tuple with the refined
+             body and the metadata extracted by Tika
     """
     tika_content = _send_pdf_to_tika(pdf_content, tika_base_url)
     pdf_content = _parse_tika_content(tika_content)
 
     refined_pdf_content = RefinedDocument(content=pdf_content)
 
-    return refined_pdf_content.body
+    if not with_metadata:
+        return refined_pdf_content.body
+    return refined_pdf_content.body, tika_content
 
 
 def delete_non_printable_character(text: str) -> str:
