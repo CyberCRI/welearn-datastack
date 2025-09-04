@@ -71,8 +71,7 @@ def extract_txt_from_pdf_with_tika(
 
     if not with_metadata:
         return refined_pdf_content.body
-    else:
-        return refined_pdf_content.body, tika_content
+    return refined_pdf_content.body, tika_content
 
 
 def delete_non_printable_character(text: str) -> str:
