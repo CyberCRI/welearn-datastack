@@ -38,9 +38,9 @@ if __name__ == "__main__":
     urls = unccelearn_collector.collect()
 
     logger.info("URLs retrieved : '%s'", len(urls))
-    # insert_urls(
-    #     session=session,
-    #     urls=urls,
-    # )
+    insert_urls(
+        session=session,
+        urls=urls,
+    )
 
     logger.info("UNCCeLearn collector ended")
