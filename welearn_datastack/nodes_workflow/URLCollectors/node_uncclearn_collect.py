@@ -13,6 +13,7 @@ log_format: str = os.getenv(
     "LOG_FORMAT", "[%(asctime)s][%(name)s][%(levelname)s] - %(message)s"
 )
 
+if not isinstance(log_level, int):
     raise ValueError(f"Log level is not recognized : '{log_level}'")
 
 logging.basicConfig(
