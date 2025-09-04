@@ -38,5 +38,11 @@ class TestUNCCeLearnURLCollector(unittest.TestCase):
 
         # Vérifier les résultats
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0].url, "https://unccelearn.org/course/view.php?id=219")
-        self.assertEqual(result[1].url, "https://unccelearn.org/course/view.php?id=215")
+        self.assertEqual(
+            result[0].url,
+            "https://unccelearn.org/course/view.php?id=219&page=overview&lang=en",
+        )
+        self.assertEqual(
+            result[1].url,
+            "https://unccelearn.org/course/view.php?id=215&page=overview&lang=en",
+        )
