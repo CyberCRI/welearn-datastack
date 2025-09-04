@@ -79,8 +79,8 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
             duration_str = duration_str.replace(",", ".")
 
         if avg_symbol in duration_str:
-            course_duration_in_hour = float(duration_str.split("-")[0])
-            course_duration_in_hour += 0.5
+            parts = duration_str.split("-")
+            course_duration_in_hour = (float(parts[0]) + float(parts[1])) / 2
         else:
             course_duration_in_hour = float(duration_str)
 
