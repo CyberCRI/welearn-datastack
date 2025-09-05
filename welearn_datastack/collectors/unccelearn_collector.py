@@ -45,6 +45,6 @@ class UNCCeLearnURLCollector(URLCollector):
                 continue
             course_url = url_template.replace("<ID_TO_REPLACE>", course_id)
 
-            ret.append(WeLearnDocument(url=course_url))
+            ret.append(WeLearnDocument(url=course_url, corpus=self.corpus))
 
         return ret
