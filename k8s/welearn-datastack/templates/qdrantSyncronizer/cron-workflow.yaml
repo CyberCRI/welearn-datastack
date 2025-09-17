@@ -60,6 +60,8 @@ spec:
             default: "True"
           - name: qdrant_chunk_size
             default: 1000
+          - name: pg_db
+            default: welearn_datastack_prod
         steps:
           - - name: generate-to-syncronize-batch
               templateRef:
@@ -99,6 +101,9 @@ spec:
                   - name: output_filename
                     value: >-
                       {{ print "{{inputs.parameters.batch_urls_ids_file_name}}" }}
+                  - name: pg_db
+                    value: >-
+                      {{ print "{{inputs.parameters.pg_db}}" }}
           - - name: document-syncronizer
               templateRef:
                 name: {{ .name }}-run-node
