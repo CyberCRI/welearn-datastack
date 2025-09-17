@@ -54,6 +54,7 @@ spec:
             default: "INFO"
           - name: size_limit
             default: 10000000000
+          - name: pg_db
       outputs:
         artifacts:
           - name: batch_ids_csv
@@ -103,6 +104,9 @@ spec:
           - name: SIZE_TOTAL_LIMIT
             value: >-
               {{ print "{{inputs.parameters.size_limit}}" }}
+          - name: PG_DB
+            value: >-
+              {{ print "{{inputs.parameters.pg_db}}" }}
         args:
           - python
           - "-m"
