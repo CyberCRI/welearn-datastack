@@ -129,6 +129,9 @@ spec:
                   - name: memory
                     value: >-
                       {{ print "{{inputs.parameters.memory_document_synchronize_batch}}" }}
+                  - name: pg_db
+                    value: >-
+                      {{ print "{{inputs.parameters.pg_db}}" }}
                 artifacts:
                   - name: batch_ids_csv
                     from: >-

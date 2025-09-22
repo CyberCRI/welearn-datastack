@@ -52,6 +52,7 @@ spec:
             default: {{ .workflowTemplates.runNode.requests.memory }}
           - name: qdrant_timeout
             default: 60
+          - name: pg_db
 
         artifacts:
           - name: batch_ids_csv
@@ -93,6 +94,9 @@ spec:
           - name: QDRANT_CHUNK_SIZE
             value: >-
               {{ print "{{inputs.parameters.qdrant_chunk_size}}" }}
+          - name: PG_DB
+            value: >-
+              {{ print "{{inputs.parameters.pg_db}}" }}
         args:
           - python
           - "-m"
