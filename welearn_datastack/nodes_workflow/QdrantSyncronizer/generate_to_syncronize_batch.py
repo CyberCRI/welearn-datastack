@@ -71,7 +71,7 @@ def main() -> None:
                 Step.DOCUMENT_IS_INVALID,
             ],
             size_total_max=size_limit,
-            weighed_scope=WeighedScope.SLICE,
+            weighed_scope=WeighedScope.DOCUMENT,
         )
     )
     ids_to_batch = list(set(ids_to_batch))
