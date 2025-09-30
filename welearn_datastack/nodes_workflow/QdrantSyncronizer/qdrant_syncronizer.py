@@ -114,6 +114,7 @@ def main() -> None:
 
         # Iterate on each collection
         for collection_name in documents_per_collection:
+            logger.info(f"We working on collection : {collection_name}")
             # We need to delete all points related to the documents in the collection for avoiding duplicates
             del_res = delete_points_related_to_document(
                 collection_name=collection_name,
