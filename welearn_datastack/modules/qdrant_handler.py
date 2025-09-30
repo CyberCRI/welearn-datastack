@@ -9,9 +9,7 @@ from qdrant_client.grpc import UpdateResult
 from qdrant_client.http.models import models
 
 from welearn_datastack.data.db_models import DocumentSlice
-from welearn_datastack.exceptions import (
-    ErrorWhileDeletingChunks,
-)
+from welearn_datastack.exceptions import ErrorWhileDeletingChunks
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +77,6 @@ def delete_points_related_to_document(
     """
     logger.info("Deletion started")
     logger.debug(f"Deleting points related to {documents_ids} in {collection_name}")
-    op_res = None
 
     try:
         op_res = qdrant_connector.delete(

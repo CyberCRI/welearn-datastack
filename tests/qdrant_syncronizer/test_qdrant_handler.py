@@ -134,3 +134,28 @@ class TestQdrantHandler(unittest.TestCase):
             "collection_welearn_mul_mulembmodel": {doc_id1},
         }
         self.assertDictEqual(dict(collections_names), expected)
+
+    def test_should_handle_multiple_slices_for_same_collection_with_multi_lingual_collection_and_gibberish(
+        self,
+    ):
+        self.client.create_collection(
+            collection_name="collection_welearn_mul_mulembmodel_og",
+            vectors_config=models.VectorParams(
+                size=50, distance=models.Distance.COSINE
+            ),
+        )
+
+        doc_id0 = uuid.uuid4()
+        doc_id1 = uuid.uuid4()
+        qdrant_connector = self.client
+        fake_slice0 = FakeSlice(doc_id0, embedding_model_name="english-embmodel")
+        fake_slice1 = FakeSlice(doc_id0, embedding_model_name="english-embmodel")
+
+        fake_slice1.order_sequence = 1
+
+        fake_slice2 = FakeSlice(doc_id1, embedding_model_name="mulembmodel")
+        fake_slice2.document.lang = "pt"
+
+        slices = [fake_slice0, fake_slice1, fake_slice2]
+        collections_names = classify_documents_per_collection(qdrant_connector, slices)
+        self.assertNotIn("collection_welearn_mul_mulembmodel_og", collections_names)
