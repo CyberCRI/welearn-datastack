@@ -31,29 +31,35 @@ def classify_documents_per_collection(
     """
     tmp_collections_names_in_qdrant = qdrant_connector.get_collections().collections
     collections_names_in_qdrant = [c.name for c in tmp_collections_names_in_qdrant]
-    model_name_collection_name = {}
-    for x in collections_names_in_qdrant:
-        parts = x.split("_")
-        if len(parts) >= 4:
-            model_name_collection_name[parts[3]] = x
-        else:
-            logger.warning(
-                "Collection name '%s' does not follow the expected format", x
-            )
 
-    ret: Dict[str, Set[UUID]] = defaultdict(set)
+    ret: Dict[str, Set[UUID]] = {}
     for dslice in slices:
-        model_name = dslice.embedding_model.title
-        try:
-            collection_name = model_name_collection_name[model_name]
-            ret[collection_name].add(dslice.document_id)  # type: ignore
-        except KeyError:
-            logger.warning(
-                "No collection found for model %s, document %s",
-                model_name,
-                dslice.document_id,
+        lang = dslice.document.lang
+        model = dslice.embedding_model.title
+        collection_name = None
+        # Check multilingual
+        for cn in collections_names_in_qdrant:
+            multilingual_collection = f"collection_welearn_mul_{model}"
+            if cn == multilingual_collection:
+                collection_name = multilingual_collection
+
+        # Check monolingual
+        for cn in collections_names_in_qdrant:
+            mono_collection = f"collection_welearn_{lang}_{model}"
+            if cn == mono_collection:
+                collection_name = mono_collection
+
+        if not collection_name:
+            logger.error(
+                "Collection %s not found in Qdrant, slice %s ignored",
+                collection_name,
+                dslice.id,
             )
             continue
+
+        if collection_name not in ret:
+            ret[collection_name] = set()
+        ret[collection_name].add(dslice.document_id)  # type: ignore
 
     return ret
 
