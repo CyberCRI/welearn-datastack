@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from typing import Collection, Dict, List, Set, Type
 from uuid import UUID
 
@@ -35,17 +34,18 @@ def classify_documents_per_collection(
         lang = dslice.document.lang
         model = dslice.embedding_model.title
         collection_name = None
-        # Check multilingual
+
+        # Check multilingual or mono lingual
         for cn in collections_names_in_qdrant:
             multilingual_collection = f"collection_welearn_mul_{model}"
+            mono_collection = f"collection_welearn_{lang}_{model}"
+
             if cn == multilingual_collection:
                 collection_name = multilingual_collection
-
-        # Check monolingual
-        for cn in collections_names_in_qdrant:
-            mono_collection = f"collection_welearn_{lang}_{model}"
+                break
             if cn == mono_collection:
                 collection_name = mono_collection
+                break
 
         if not collection_name:
             logger.error(
