@@ -1,5 +1,4 @@
 import logging
-from collections import defaultdict
 from typing import Collection, Dict, List, Set, Type
 from uuid import UUID
 
@@ -9,9 +8,7 @@ from qdrant_client.grpc import UpdateResult
 from qdrant_client.http.models import models
 
 from welearn_datastack.data.db_models import DocumentSlice
-from welearn_datastack.exceptions import (
-    ErrorWhileDeletingChunks,
-)
+from welearn_datastack.exceptions import ErrorWhileDeletingChunks
 
 logger = logging.getLogger(__name__)
 
@@ -31,29 +28,29 @@ def classify_documents_per_collection(
     """
     tmp_collections_names_in_qdrant = qdrant_connector.get_collections().collections
     collections_names_in_qdrant = [c.name for c in tmp_collections_names_in_qdrant]
-    model_name_collection_name = {}
-    for x in collections_names_in_qdrant:
-        parts = x.split("_")
-        if len(parts) >= 4:
-            model_name_collection_name[parts[3]] = x
-        else:
-            logger.warning(
-                "Collection name '%s' does not follow the expected format", x
-            )
 
-    ret: Dict[str, Set[UUID]] = defaultdict(set)
+    ret: Dict[str, Set[UUID]] = {}
     for dslice in slices:
-        model_name = dslice.embedding_model.title
-        try:
-            collection_name = model_name_collection_name[model_name]
-            ret[collection_name].add(dslice.document_id)  # type: ignore
-        except KeyError:
-            logger.warning(
-                "No collection found for model %s, document %s",
-                model_name,
-                dslice.document_id,
+        lang = dslice.document.lang
+        model = dslice.embedding_model.title
+        collection_name = None
+        multilingual_collection = f"collection_welearn_mul_{model}"
+        mono_collection = f"collection_welearn_{lang}_{model}"
+
+        # Check multilingual or mono lingual
+        if multilingual_collection in collections_names_in_qdrant:
+            collection_name = multilingual_collection
+        elif mono_collection in collections_names_in_qdrant:
+            collection_name = mono_collection
+        else:
+            logger.error(
+                f"Collection {collection_name} not found in Qdrant, slice {dslice.id} ignored",
             )
             continue
+
+        if collection_name not in ret:
+            ret[collection_name] = set()
+        ret[collection_name].add(dslice.document_id)  # type: ignore
 
     return ret
 
@@ -73,7 +70,6 @@ def delete_points_related_to_document(
     """
     logger.info("Deletion started")
     logger.debug(f"Deleting points related to {documents_ids} in {collection_name}")
-    op_res = None
 
     try:
         op_res = qdrant_connector.delete(
