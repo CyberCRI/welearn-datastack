@@ -49,9 +49,7 @@ def classify_documents_per_collection(
 
         if not collection_name:
             logger.error(
-                "Collection %s not found in Qdrant, slice %s ignored",
-                collection_name,
-                dslice.id,
+                f"Collection {collection_name} not found in Qdrant, slice {dslice.id} ignored",
             )
             continue
 
