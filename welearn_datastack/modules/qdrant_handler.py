@@ -34,20 +34,15 @@ def classify_documents_per_collection(
         lang = dslice.document.lang
         model = dslice.embedding_model.title
         collection_name = None
+        multilingual_collection = f"collection_welearn_mul_{model}"
+        mono_collection = f"collection_welearn_{lang}_{model}"
 
         # Check multilingual or mono lingual
-        for cn in collections_names_in_qdrant:
-            multilingual_collection = f"collection_welearn_mul_{model}"
-            mono_collection = f"collection_welearn_{lang}_{model}"
-
-            if cn == multilingual_collection:
-                collection_name = multilingual_collection
-                break
-            if cn == mono_collection:
-                collection_name = mono_collection
-                break
-
-        if not collection_name:
+        if multilingual_collection in collections_names_in_qdrant:
+            collection_name = multilingual_collection
+        elif mono_collection in collections_names_in_qdrant:
+            collection_name = mono_collection
+        else:
             logger.error(
                 f"Collection {collection_name} not found in Qdrant, slice {dslice.id} ignored",
             )
