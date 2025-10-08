@@ -22,7 +22,7 @@ class TestPluginFiles(IPluginFilesCollector):
         super().__init__()
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
@@ -33,7 +33,7 @@ class TestPluginRest(IPluginRESTCollector):
     related_corpus: str = "test_rest"
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
@@ -44,7 +44,7 @@ class TestPluginScrape(IPluginScrapeCollector):
     related_corpus: str = "test_scrape"
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
@@ -55,7 +55,7 @@ class TestPluginType(IPluginScrapeCollector):
     related_corpus: str = "invalid_type"
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
@@ -67,7 +67,7 @@ class InvalidPluginRest(IPluginRESTCollector):
     collector_type_name = "invalid_type"  # type: ignore
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []

@@ -119,7 +119,7 @@ class TestCSVTedPlugin(unittest.TestCase):
 
     def test_plugin_run(self):
         urls = ["https://www.example.com/0", "https://www.example.com/1"]
-        res, errors = self.csv_ted_collector.run(urls=urls)
+        res, errors = self.csv_ted_collector.run(urls_or_external_ids=urls)
 
         self.assertEqual(len(res), 2)
         self.assertTrue(isinstance(res[0], ScrapedWeLearnDocument))
@@ -131,7 +131,7 @@ class TestCSVTedPlugin(unittest.TestCase):
         self.assertNotIn("https://www.example.com/2", [r.document_url for r in res])
 
     def test_plugin_run_no_urls(self):
-        res, errors = self.csv_ted_collector.run(urls=[])
+        res, errors = self.csv_ted_collector.run(urls_or_external_ids=[])
         self.assertEqual(len(res), 0)
 
     def test_filter_csv_line(self):

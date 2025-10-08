@@ -49,7 +49,9 @@ class TestAPITedPlugin(unittest.TestCase):
 
         mock_get.side_effect = [MockResponse(text, 200) for text in self.jsons_list]
 
-        scraped_docs, error_docs = self.ted_scraper.run(urls=["https://example.org/4"])
+        scraped_docs, error_docs = self.ted_scraper.run(
+            urls_or_external_ids=["https://example.org/4"]
+        )
 
         self.assertEqual(len(scraped_docs), 1)
         self.assertEqual(len(error_docs), 0)

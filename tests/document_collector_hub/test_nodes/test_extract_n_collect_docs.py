@@ -76,16 +76,16 @@ class TestPluginFiles(IPluginFilesCollector):
         super().__init__()
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors_urls: List[str] = []
         try:
             for doc in list_of_swld:
-                if doc.document_url in urls:
+                if doc.document_url in urls_or_external_ids:
                     res.append(dict_url_for_doc[doc.document_url])
         except Exception as e:
-            errors_urls.append(urls[0])
+            errors_urls.append(urls_or_external_ids[0])
         return res, errors_urls
 
 

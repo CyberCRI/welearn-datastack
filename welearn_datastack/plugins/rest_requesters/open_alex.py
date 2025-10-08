@@ -305,10 +305,10 @@ class OpenAlexCollector(IPluginRESTCollector):
         )
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         page_length = 50
-        sub_batches = batched(urls, page_length)
+        sub_batches = batched(urls_or_external_ids, page_length)
         http_client = get_new_https_session()
 
         collected_docs: List[ScrapedWeLearnDocument] = []

@@ -331,7 +331,9 @@ class TestOpenAlexCollector(TestCase):
             self.json_several_works.open("r").read(), 200
         )
 
-        collected_docs, error_docs = self.openalexColector.run(urls=urls)
+        collected_docs, error_docs = self.openalexColector.run(
+            urls_or_external_ids=urls
+        )
 
         self.assertEqual(len(collected_docs), 39)
         self.assertEqual(len(error_docs), 50 - 39)

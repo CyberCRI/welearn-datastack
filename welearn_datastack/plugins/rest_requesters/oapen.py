@@ -341,7 +341,7 @@ class OAPenCollector(IPluginRESTCollector):
         )
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         logger.info("Running OAPenCollector plugin")
         ret: List[ScrapedWeLearnDocument] = []
@@ -350,9 +350,15 @@ class OAPenCollector(IPluginRESTCollector):
 
         logger.info("Start getting JSON from API")
         sub_batch_qty = 100
-        logger.info(f"We gonna iterate {math.ceil(len(urls)/sub_batch_qty)} times")
-        for i, local_url_batch in enumerate(batched(urls, sub_batch_qty)):
-            logger.info(f"Sub batch {i+1}/{math.ceil(len(urls)/sub_batch_qty)}")
+        logger.info(
+            f"We gonna iterate {math.ceil(len(urls_or_external_ids) / sub_batch_qty)} times"
+        )
+        for i, local_url_batch in enumerate(
+            batched(urls_or_external_ids, sub_batch_qty)
+        ):
+            logger.info(
+                f"Sub batch {i+1}/{math.ceil(len(urls_or_external_ids) / sub_batch_qty)}"
+            )
             try:
                 oapen_ids = self._extract_oapen_ids(local_url_batch)
                 resp_from_oapen.extend(self._get_jsons(oapen_ids))

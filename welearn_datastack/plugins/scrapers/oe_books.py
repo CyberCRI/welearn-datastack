@@ -362,12 +362,12 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
     #
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         logger.info("Running OpenEditionBooksCollector plugin")
         ret: List[ScrapedWeLearnDocument] = []
         error_docs: List[str] = []
-        for url in urls:
+        for url in urls_or_external_ids:
             try:
                 ret.append(self._scrape_url(url))
             except Exception as e:

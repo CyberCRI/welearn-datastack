@@ -36,7 +36,7 @@ class IPlugin:
 
     @abstractmethod
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         pass
 
@@ -107,11 +107,11 @@ class IPluginScrapeCollector(IPlugin, ABC):
 
 class IPluginCSVReader(IPluginFilesCollector, ABC):
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         """
         Run the plugin
-        :param urls: List of urls to filter
+        :param urls_or_external_ids: List of urls to filter
         :return: List of ScrapedWeLearnDocument
         """
         logger.info("Running plugin %s", type(self).__name__)
@@ -128,7 +128,7 @@ class IPluginCSVReader(IPluginFilesCollector, ABC):
                 logger.info("Reading file: %s", fp)
                 dr = csv.DictReader(fin, delimiter=";", quotechar='"')
                 lines_to_keep, error_lines = self.filter_and_convert_lines(
-                    dr=dr, urls=urls
+                    dr=dr, urls=urls_or_external_ids
                 )
                 res.extend(lines_to_keep)
                 error_urls.extend(error_lines)

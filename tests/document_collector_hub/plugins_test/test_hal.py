@@ -208,7 +208,7 @@ class TestHALCollector(TestCase):
         ]
 
         urls = [doc["uri_s"] for doc in docs_from_json]
-        res, errors = self.hal_collector.run(urls=urls)
+        res, errors = self.hal_collector.run(urls_or_external_ids=urls)
         self.assertEqual(len(res), len(urls))
         self.assertEqual(len(errors), 0)
 

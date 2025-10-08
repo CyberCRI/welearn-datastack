@@ -100,7 +100,9 @@ class TestScrapePlosPlugin(unittest.TestCase):
         mock_get.side_effect = [MockResponse(text, 200) for text in self.pages_list]
 
         scraped_docs, error_docs = self.plos_scraper.run(
-            urls=["https://example.org/plosone/article?id=10.1371/journal.pone.0265511"]
+            urls_or_external_ids=[
+                "https://example.org/plosone/article?id=10.1371/journal.pone.0265511"
+            ]
         )
 
         self.assertEqual(len(scraped_docs), 1)

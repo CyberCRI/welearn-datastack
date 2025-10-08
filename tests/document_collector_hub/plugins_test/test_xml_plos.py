@@ -81,7 +81,9 @@ class TestPlosPlugin(unittest.TestCase):
         }
 
         scraped_docs, error_docs = self.xml_plos_collector.run(
-            urls=["https://example.org/plosone/article?id=10.1371/journal.pone.0265511"]
+            urls_or_external_ids=[
+                "https://example.org/plosone/article?id=10.1371/journal.pone.0265511"
+            ]
         )
 
         self.assertEqual(len(scraped_docs), 1)

@@ -51,7 +51,7 @@ class TestXMLPLOSPlugin(unittest.TestCase):
             "https://example.org/hal-01057494",
             "https://example.org/hal-01000000",
         ]
-        res, errors = self.hal_collector.run(urls=urls)
+        res, errors = self.hal_collector.run(urls_or_external_ids=urls)
 
         awaited_docs = self.content_json["response"]["docs"]
 
@@ -75,7 +75,7 @@ class TestXMLPLOSPlugin(unittest.TestCase):
         self.assertNotIn(urls[2], all_urls_in_res)
 
     def test_plugin_run_no_urls(self):
-        res, errors = self.hal_collector.run(urls=[])
+        res, errors = self.hal_collector.run(urls_or_external_ids=[])
         self.assertEqual(len(res), 0)
 
     def test_filter_csv_line(self):

@@ -159,14 +159,14 @@ class TEDCollector(IPluginRESTCollector):
         return json_response
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         logger.info("Running TEDCollectorRest plugin")
         ret: List[ScrapedWeLearnDocument] = []
         error_docs: List[str] = []
 
         try:
-            ted_ids = self._extract_ted_ids(urls)
+            ted_ids = self._extract_ted_ids(urls_or_external_ids)
             json_reqs_for_ted = self._generate_jsons(ted_ids)
 
             for req in json_reqs_for_ted:
@@ -177,7 +177,7 @@ class TEDCollector(IPluginRESTCollector):
         except Exception as e:
             logger.error("Error while getting content from TED API")
             logger.exception(e)
-            for url in urls:
+            for url in urls_or_external_ids:
                 error_docs.append(url)
 
         logger.info(

@@ -289,14 +289,14 @@ class HALCollector(IPluginRESTCollector):
         return docs
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         logger.info("Running HALCollectorRest plugin")
         ret: List[ScrapedWeLearnDocument] = []
         error_docs: List[str] = []
         content_from_hal: List[dict] = []
 
-        for local_url_batch in batched(urls, 100):
+        for local_url_batch in batched(urls_or_external_ids, 100):
             try:
                 hal_ids = self._extract_hal_ids(local_url_batch)
                 content_from_hal.extend(self._get_jsons(hal_ids))

@@ -146,7 +146,7 @@ def extract_data_from_urls(
         # Get data
         corpus_collector = corpus_plugin[corpus_name]
         scraped_docs, error_docs_tmp = corpus_collector.run(
-            urls=[d.url for d in batch_docs[corpus_name]]
+            urls_or_external_ids=[d.url for d in batch_docs[corpus_name]]
         )
 
         handle_scraped_docs(

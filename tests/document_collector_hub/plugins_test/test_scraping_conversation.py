@@ -60,7 +60,7 @@ class TestScrapeConversationPlugin(unittest.TestCase):
         mock_get.side_effect = [MockResponse(text, 200) for text in self.pages_list]
 
         scraped_docs, error_docs = self.conversation_scraper.run(
-            urls=["https://example.org/1", "https://example.org/2"]
+            urls_or_external_ids=["https://example.org/1", "https://example.org/2"]
         )
 
         self.assertEqual(len(scraped_docs), 2)
@@ -81,7 +81,7 @@ class TestScrapeConversationPlugin(unittest.TestCase):
         ]
 
         scraped_docs, error_docs = self.conversation_scraper.run(
-            urls=["https://example.org/1", "https://example.org/2"]
+            urls_or_external_ids=["https://example.org/1", "https://example.org/2"]
         )
         self.assertEqual(1, len(scraped_docs))
         self.assertEqual(1, len(error_docs))

@@ -19,11 +19,11 @@ class XMLPLOSCollector(IPluginFilesCollector):
         super().__init__()
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         """
         Run the plugin
-        :param urls: List of urls to filter
+        :param urls_or_external_ids: List of urls to filter
         :return: List of ScrapedWeLearnDocument
         """
         res: List[ScrapedWeLearnDocument] = []
@@ -32,9 +32,9 @@ class XMLPLOSCollector(IPluginFilesCollector):
         collector = PlosCollector()
 
         # Iterate over files
-        for i, url in enumerate(urls):
+        for i, url in enumerate(urls_or_external_ids):
             # Get file name
-            logger.info("Processing url %s/%s", i, len(urls))
+            logger.info("Processing url %s/%s", i, len(urls_or_external_ids))
             article_id = url.split("/")[-1]
             file_name = f"{article_id}.xml"
             article_file_path = (

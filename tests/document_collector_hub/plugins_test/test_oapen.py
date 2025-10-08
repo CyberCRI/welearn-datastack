@@ -225,7 +225,7 @@ class TestOAPenCollector(TestCase):
         mock_get_jsons.return_value = [json_dict]
 
         urls = ["https://library.oapen.org/handle/20.500.12657/12345"]
-        res, errors = self.oapen_collector.run(urls=urls)
+        res, errors = self.oapen_collector.run(urls_or_external_ids=urls)
         self.assertEqual(len(res), 1)
         self.assertEqual(len(errors), 0)
         self.assertEqual(

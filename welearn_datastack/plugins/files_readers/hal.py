@@ -138,11 +138,11 @@ class JsonHALCollector(IPluginFilesCollector):
         return current
 
     def run(
-        self, urls: List[str], is_external_id=False
+        self, urls_or_external_ids: List[str], is_external_id=False
     ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         """
         Run the plugin
-        :param urls: List of urls to filter
+        :param urls_or_external_ids: List of urls to filter
         :return: List of ScrapedWeLearnDocument
         """
         res: List[ScrapedWeLearnDocument] = []
@@ -157,7 +157,7 @@ class JsonHALCollector(IPluginFilesCollector):
                     json_docs = ijson.items(fin, "response.docs.item")
                     # Filter lines and convert them to ScrapedWeLearnDocument
                     lines_to_keep, error_lines = self.filter_and_convert_lines(
-                        dr=json_docs, urls=urls
+                        dr=json_docs, urls=urls_or_external_ids
                     )
                     res.extend(lines_to_keep)
                     error_urls.extend(error_lines)

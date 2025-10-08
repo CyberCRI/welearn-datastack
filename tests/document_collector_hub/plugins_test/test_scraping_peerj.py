@@ -116,7 +116,7 @@ class TestScrapePeerJPlugin(unittest.TestCase):
         ]
 
         scraped_docs, error_docs = self.conversation_scraper.run(
-            urls=["https://example.org/1"]
+            urls_or_external_ids=["https://example.org/1"]
         )
 
         self.assertEqual(len(scraped_docs), 1)
@@ -142,7 +142,7 @@ class TestScrapePeerJPlugin(unittest.TestCase):
         mock_get.return_value.json.side_effect = self.pages_list[0:1]
 
         scraped_docs, error_urls = self.conversation_scraper.run(
-            urls=["https://example.org/1"]
+            urls_or_external_ids=["https://example.org/1"]
         )
 
         self.assertEqual(len(scraped_docs), 0)

@@ -58,7 +58,10 @@ class TestRestWikipediaPlugin(unittest.TestCase):
 
         wikipedia_rest = WikipediaCollector()
         rest_docs, error_docs = wikipedia_rest.run(
-            urls=["https://en.example.wiki/title1", "https://fr.example.wiki/title2"]
+            urls_or_external_ids=[
+                "https://en.example.wiki/title1",
+                "https://fr.example.wiki/title2",
+            ]
         )
 
         self.assertEqual(len(rest_docs), 2)
@@ -84,7 +87,10 @@ class TestRestWikipediaPlugin(unittest.TestCase):
 
         wikipedia_rest = WikipediaCollector()
         rest_docs, error_docs = wikipedia_rest.run(
-            urls=["https://en.example.wiki/title1", "https://fr.example.wiki/title3"]
+            urls_or_external_ids=[
+                "https://en.example.wiki/title1",
+                "https://fr.example.wiki/title3",
+            ]
         )
 
         self.assertEqual(len(rest_docs), 1)
