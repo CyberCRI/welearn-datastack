@@ -3,7 +3,7 @@ from enum import StrEnum, auto  # type: ignore
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, LargeBinary, UniqueConstraint, func, types
+from sqlalchemy import ForeignKey, Index, LargeBinary, UniqueConstraint, func, types
 from sqlalchemy.dialects.postgresql import ENUM, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
