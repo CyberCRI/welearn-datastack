@@ -31,6 +31,9 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("embedding_model_id", sa.Uuid(), nullable=False),
+        sa.Column("url", sa.String()),
+        sa.Column("full_content", sa.String()),
+        sa.Column("title", sa.String(), nullable=False),
         sa.Column("sdg_related", sa.ARRAY(sa.INTEGER()), nullable=False),
         sa.Column(
             "created_at", postgresql.TIMESTAMP(), server_default="NOW()", nullable=False
