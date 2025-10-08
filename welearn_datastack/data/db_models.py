@@ -64,6 +64,7 @@ class WeLearnDocument(Base):
     id: Mapped[UUID] = mapped_column(
         types.Uuid, primary_key=True, nullable=False, server_default="gen_random_uuid()"
     )
+    external_id: Mapped[str | None]
     url: Mapped[str] = mapped_column(nullable=False)
     title: Mapped[str | None]
     lang: Mapped[str | None]
