@@ -17,6 +17,7 @@ class DbSchemaEnum(StrEnum):
     CORPUS_RELATED = auto()
     DOCUMENT_RELATED = auto()
     USER_RELATED = auto()
+    AGENT_RELATED = auto()
 
 
 class Base(DeclarativeBase):
