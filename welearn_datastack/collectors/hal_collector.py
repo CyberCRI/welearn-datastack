@@ -83,17 +83,18 @@ class HALURLCollector(URLCollector):
     def collect(self) -> List[WeLearnDocument]:
         ret = []
         json_content = self._get_json_hal_api()
-        urls = []
+        urls_external_ids = []
         for doc in json_content:
-            urls.append(HAL_URL_BASE + doc["halId_s"])
+            urls_external_ids.append((HAL_URL_BASE + doc["halId_s"], doc["halId_s"]))
 
-        for url in urls:
+        for url, external_id in urls_external_ids:
             if not url.startswith("https"):
                 continue
             ret.append(
                 WeLearnDocument(
                     url=get_url_without_hal_like_versionning(url),
                     corpus=self.corpus,
+                    external_id=external_id,
                 )
             )
         return ret

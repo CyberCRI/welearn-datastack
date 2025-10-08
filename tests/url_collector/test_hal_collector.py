@@ -59,6 +59,8 @@ class TestHALURLCollector(TestCase):
         self.assertEqual(len(tested_res), 30)
 
         for i, url_from_file in enumerate(url_in_file):
+            external_id = url_from_file.replace("https://example.org/", "")
             self.assertEqual(tested_res[i].url, url_from_file)
+            self.assertEqual(tested_res[i].external_id, external_id)
             self.assertEqual(tested_res[i].corpus.source_name, "hal")
             self.assertEqual(tested_res[i].corpus.is_fix, True)
