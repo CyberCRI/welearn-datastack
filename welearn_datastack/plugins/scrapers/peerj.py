@@ -246,7 +246,9 @@ class PeerJCollector(IPluginScrapeCollector):
 
         return scraped_document
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         logger.info("Running PeerJCollector plugin")
         ret: List[ScrapedWeLearnDocument] = []
         error_docs: List[str] = []

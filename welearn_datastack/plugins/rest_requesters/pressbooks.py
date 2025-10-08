@@ -56,7 +56,9 @@ class PressBooksCollector(IPluginRESTCollector):
         sentences = [sent.text for sent in doc.sents]
         return " ".join(sentences[:3]) if len(sentences) >= 3 else text
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         client = get_new_https_session()
         main_urls = self._extract_books_main_url(urls)
 

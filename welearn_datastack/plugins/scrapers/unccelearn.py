@@ -217,7 +217,9 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
             document_corpus=self.related_corpus,
         )
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         logger.info("Running UNCCeLearnCollector plugin")
         ret: List[ScrapedWeLearnDocument] = []
         error_docs: List[str] = []

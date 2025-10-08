@@ -17,10 +17,10 @@ from sympy.integrals.meijerint_doc import category
 from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.db_models import (
     Base,
+    Category,
     Corpus,
     ProcessState,
     WeLearnDocument,
-    Category,
 )
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.modules import collector_selector
@@ -75,7 +75,9 @@ class TestPluginFiles(IPluginFilesCollector):
     def __init__(self):
         super().__init__()
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors_urls: List[str] = []
         try:

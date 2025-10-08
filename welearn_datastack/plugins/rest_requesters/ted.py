@@ -158,7 +158,9 @@ class TEDCollector(IPluginRESTCollector):
             raise NoContent("No content found")
         return json_response
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         logger.info("Running TEDCollectorRest plugin")
         ret: List[ScrapedWeLearnDocument] = []
         error_docs: List[str] = []

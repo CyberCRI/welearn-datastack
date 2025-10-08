@@ -21,7 +21,9 @@ class TestPluginFiles(IPluginFilesCollector):
     def __init__(self):
         super().__init__()
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
         return res, errors
@@ -30,7 +32,9 @@ class TestPluginFiles(IPluginFilesCollector):
 class TestPluginRest(IPluginRESTCollector):
     related_corpus: str = "test_rest"
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
         return res, errors
@@ -39,7 +43,9 @@ class TestPluginRest(IPluginRESTCollector):
 class TestPluginScrape(IPluginScrapeCollector):
     related_corpus: str = "test_scrape"
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
         return res, errors
@@ -48,7 +54,9 @@ class TestPluginScrape(IPluginScrapeCollector):
 class TestPluginType(IPluginScrapeCollector):
     related_corpus: str = "invalid_type"
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
         return res, errors
@@ -58,7 +66,9 @@ class InvalidPluginRest(IPluginRESTCollector):
     related_corpus: str = "another_corpus"
     collector_type_name = "invalid_type"  # type: ignore
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         res: List[ScrapedWeLearnDocument] = []
         errors: List[str] = []
         return res, errors

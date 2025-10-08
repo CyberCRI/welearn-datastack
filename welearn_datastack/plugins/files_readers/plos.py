@@ -18,7 +18,9 @@ class XMLPLOSCollector(IPluginFilesCollector):
     def __init__(self):
         super().__init__()
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         """
         Run the plugin
         :param urls: List of urls to filter

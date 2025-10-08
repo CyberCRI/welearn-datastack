@@ -288,7 +288,9 @@ class HALCollector(IPluginRESTCollector):
         docs: List = json_req["response"]["docs"]
         return docs
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(
+        self, urls: List[str], is_external_id=False
+    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
         logger.info("Running HALCollectorRest plugin")
         ret: List[ScrapedWeLearnDocument] = []
         error_docs: List[str] = []
