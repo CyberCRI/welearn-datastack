@@ -1,4 +1,4 @@
-from enum import Enum, auto
+from enum import Enum, StrEnum, auto
 
 
 class PluginType(Enum):
@@ -50,3 +50,9 @@ class URLStatus(Enum):
     UPDATE = 2
     DELETE = 3
     UNKNOWN = 4
+
+
+class ContextType(StrEnum):
+    INTRODUCTION = auto()
+    TARGET = auto()
+    SUBJECT = auto()

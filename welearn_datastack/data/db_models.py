@@ -7,7 +7,7 @@ from sqlalchemy import ForeignKey, LargeBinary, UniqueConstraint, func, types
 from sqlalchemy.dialects.postgresql import ENUM, TIMESTAMP
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from welearn_datastack.data.enumerations import Counter, Step
+from welearn_datastack.data.enumerations import ContextType, Counter, Step
 from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
 
 load_dotenv_local()
@@ -678,3 +678,48 @@ class EndpointRequest(Base):
         server_default="NOW()",
     )
     session = relationship("Session", foreign_keys=[session_id])
+
+
+class ContextDocument(Base):
+    __tablename__ = "context_document"
+    __table_args__ = {
+        "schema": DbSchemaEnum.DOCUMENT_RELATED.value,
+    }
+    id: Mapped[UUID] = mapped_column(
+        types.Uuid, primary_key=True, nullable=False, server_default="gen_random_uuid()"
+    )
+    url = Mapped[str]
+    title = Mapped[str | None]
+    full_content = Mapped[str | None]
+    embedding_model_id = mapped_column(
+        types.Uuid,
+        ForeignKey(f"{DbSchemaEnum.CORPUS_RELATED.value}.embedding_model.id"),
+        nullable=False,
+    )
+
+    sdg_related: Mapped[list[int]] = mapped_column(types.ARRAY(types.INTEGER))
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=False),
+        nullable=False,
+        default=func.localtimestamp(),
+        server_default="NOW()",
+    )
+    embedding: Mapped[bytes | None] = mapped_column(LargeBinary)
+
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=False),
+        nullable=False,
+        default=func.localtimestamp(),
+        server_default="NOW()",
+        onupdate=func.localtimestamp(),
+    )
+
+    context_type: Mapped[str] = mapped_column(
+        ENUM(
+            *(e.value.lower() for e in ContextType),
+            name="context_type",
+            schema=DbSchemaEnum.DOCUMENT_RELATED.value,
+        ),
+        nullable=False,
+    )
+    embedding_model: Mapped["EmbeddingModel"] = relationship()
