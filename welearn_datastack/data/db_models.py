@@ -3,14 +3,20 @@ from enum import StrEnum, auto  # type: ignore
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import ForeignKey, Index, LargeBinary, UniqueConstraint, func, types
+from sqlalchemy import ForeignKey, LargeBinary, UniqueConstraint, func, types
 from sqlalchemy.dialects.postgresql import ENUM, TIMESTAMP
+from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from welearn_datastack.data.enumerations import ContextType, Counter, Step
 from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
 
 load_dotenv_local()
+
+
+@compiles(types.ARRAY, "sqlite")
+def compile_array_sqlite(type_, compiler, **kw):
+    return "Integer"
 
 
 class DbSchemaEnum(StrEnum):
