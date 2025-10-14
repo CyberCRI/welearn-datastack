@@ -6,9 +6,9 @@ from zoneinfo import ZoneInfo
 import requests  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
 from urllib3 import Retry
+from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.constants import HAL_SEARCH_URL, HAL_URL_BASE
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.utils_.scraping_utils import get_url_without_hal_like_versionning
 

@@ -5,8 +5,8 @@ from typing import List
 import spacy
 from keybert import KeyBERT  # type: ignore
 from sentence_transformers import SentenceTransformer  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
-from welearn_datastack.data.db_models import WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.modules.embedding_model_helpers import load_embedding_model
 from welearn_datastack.utils_.path_utils import generate_ml_models_path

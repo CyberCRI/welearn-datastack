@@ -3,16 +3,16 @@ import os
 import uuid
 from collections import Counter
 from itertools import batched
-from typing import Dict, Generator, List, Sequence, Tuple, Type
+from typing import Dict, List, Sequence, Type
 from uuid import UUID
 
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import PointStruct, UpdateStatus
 from qdrant_client.qdrant_remote import QdrantRemote
 from sqlalchemy.orm import Session
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import DocumentSlice, ProcessState
 
-from welearn_datastack.data.db_models import DocumentSlice, ProcessState
-from welearn_datastack.data.enumerations import Step
 from welearn_datastack.modules.qdrant_handler import (
     classify_documents_per_collection,
     convert_slice_in_qdrant_point,

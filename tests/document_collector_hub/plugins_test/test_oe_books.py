@@ -4,9 +4,9 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from requests import Session  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import MD_OE_BOOKS_BASE_URL
-from welearn_datastack.data.db_models import WeLearnDocument
 from welearn_datastack.exceptions import UnauthorizedLicense
 from welearn_datastack.plugins.scrapers.oe_books import OpenEditionBooksCollector
 

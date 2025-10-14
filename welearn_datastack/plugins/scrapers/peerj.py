@@ -6,7 +6,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import requests  # type: ignore
 from bs4 import BeautifulSoup, Tag  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
-from urllib3 import Retry
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
@@ -16,10 +15,6 @@ from welearn_datastack.utils_.http_client_utils import get_new_https_session
 from welearn_datastack.utils_.scraping_utils import (
     clean_return_to_line,
     extract_property_from_html,
-)
-from welearn_datastack.utils_.text_stat_utils import (
-    predict_duration,
-    predict_readability,
 )
 
 logger = logging.getLogger(__name__)

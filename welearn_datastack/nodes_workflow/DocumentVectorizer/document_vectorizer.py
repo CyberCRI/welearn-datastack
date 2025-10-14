@@ -3,13 +3,10 @@ import os
 import uuid
 
 from sqlalchemy.orm import Session
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import DocumentSlice, ProcessState, WeLearnDocument
 
-from welearn_datastack.data.db_models import (
-    DocumentSlice,
-    ProcessState,
-    WeLearnDocument,
-)
-from welearn_datastack.data.enumerations import MLModelsType, Step
+from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.exceptions import NoModelFoundError
 from welearn_datastack.modules.embedding_model_helpers import create_content_slices
 from welearn_datastack.modules.retrieve_data_from_database import retrieve_models

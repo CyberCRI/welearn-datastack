@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import List
 
 from sqlalchemy import and_, select
+from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.collectors.csv_collector import CSVURLCollector
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,
 )

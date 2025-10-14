@@ -6,12 +6,12 @@ from typing import List, Set
 import requests  # type: ignore
 import wikipediaapi  # type: ignore
 from requests import Session
+from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.collectors.helpers.feed_helpers import (
     extracted_url_to_url_datastore,
 )
 from welearn_datastack.constants import HEADERS, WIKIPEDIA_BASE_URL
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.data.wikipedia_container import WikipediaContainer
 from welearn_datastack.utils_.database_utils import create_specific_batches_quantity

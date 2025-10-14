@@ -9,9 +9,7 @@ import numpy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sympy.integrals.meijerint_doc import category
-
-from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.db_models import (
+from welearn_database.data.models import (
     Base,
     BiClassifierModel,
     Category,
@@ -22,6 +20,8 @@ from welearn_datastack.data.db_models import (
     Sdg,
     WeLearnDocument,
 )
+
+from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.enumerations import Step
 from welearn_datastack.nodes_workflow.DocumentClassifier import document_classifier
 from welearn_datastack.utils_.virtual_environement_utils import (

@@ -3,8 +3,7 @@ from typing import List
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-
-from welearn_datastack.data.db_models import ProcessState, WeLearnDocument
+from welearn_database.data.models import ProcessState, WeLearnDocument
 
 logger = logging.getLogger(__name__)
 

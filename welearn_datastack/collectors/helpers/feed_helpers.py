@@ -1,6 +1,6 @@
 from typing import List
 
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
+from welearn_database.data.models import Corpus, WeLearnDocument
 
 url_illegal_characters = ['"', "<", ">"]
 

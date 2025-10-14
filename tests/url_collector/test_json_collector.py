@@ -3,8 +3,9 @@ import shutil
 import unittest
 from pathlib import Path
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.json_collector import JSONURLCollector
-from welearn_datastack.data.db_models import Corpus
 
 
 class TestJSONCollector(unittest.TestCase):

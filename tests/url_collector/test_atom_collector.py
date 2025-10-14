@@ -2,8 +2,9 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.atom_collector import AtomURLCollector
-from welearn_datastack.data.db_models import Corpus
 
 
 class Test(TestCase):

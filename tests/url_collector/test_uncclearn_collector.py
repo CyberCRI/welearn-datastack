@@ -1,8 +1,9 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.unccelearn_collector import UNCCeLearnURLCollector
-from welearn_datastack.data.db_models import Corpus
 
 
 class TestUNCCeLearnURLCollector(unittest.TestCase):

@@ -2,7 +2,8 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, patch
 
-from welearn_datastack.data.db_models import EmbeddingModel, WeLearnDocument
+from welearn_database.data.models import EmbeddingModel, WeLearnDocument
+
 from welearn_datastack.modules.keywords_extractor import extract_keywords
 
 

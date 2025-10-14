@@ -1,17 +1,13 @@
 import logging
 import os
 import uuid
-from typing import List, Tuple
-from uuid import UUID
+from typing import List
 
 from sqlalchemy.orm import Session
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import ErrorRetrieval, ProcessState, WeLearnDocument
 
-from welearn_datastack.data.db_models import (
-    ErrorRetrieval,
-    ProcessState,
-    WeLearnDocument,
-)
-from welearn_datastack.data.enumerations import Step, URLStatus
+from welearn_datastack.data.enumerations import URLStatus
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.modules.url_checker import check_url
 from welearn_datastack.utils_.database_utils import create_db_session

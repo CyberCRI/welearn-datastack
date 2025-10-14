@@ -2,9 +2,10 @@ import logging
 import os
 
 from sqlalchemy.orm import Session
+from welearn_database.data.enumeration import Step
 
 from welearn_datastack.data.batch_generator import BatchGenerator
-from welearn_datastack.data.enumerations import Step, WeighedScope
+from welearn_datastack.data.enumerations import WeighedScope
 from welearn_datastack.modules import retrieve_data_from_database
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local

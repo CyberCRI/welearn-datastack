@@ -4,8 +4,8 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import numpy
+from welearn_database.data.models import Corpus, EmbeddingModel, WeLearnDocument
 
-from welearn_datastack.data.db_models import Corpus, EmbeddingModel, WeLearnDocument
 from welearn_datastack.modules.embedding_model_helpers import (
     _split_by_word_respecting_sent_boundary,
     create_content_slices,

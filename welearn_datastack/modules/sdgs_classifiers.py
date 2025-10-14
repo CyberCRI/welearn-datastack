@@ -5,8 +5,8 @@ from typing import List
 import joblib  # type: ignore
 import numpy
 from sklearn.pipeline import Pipeline
+from welearn_database.data.models import DocumentSlice, Sdg
 
-from welearn_datastack.data.db_models import DocumentSlice, Sdg
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
 

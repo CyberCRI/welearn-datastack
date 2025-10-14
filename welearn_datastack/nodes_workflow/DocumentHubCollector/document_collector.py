@@ -6,13 +6,9 @@ from typing import Dict, List, Tuple
 from uuid import UUID
 
 from sqlalchemy.orm import Session
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import ErrorRetrieval, ProcessState, WeLearnDocument
 
-from welearn_datastack.data.db_models import (
-    ErrorRetrieval,
-    ProcessState,
-    WeLearnDocument,
-)
-from welearn_datastack.data.enumerations import Step
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.exceptions import PluginNotFoundError
 from welearn_datastack.modules import collector_selector

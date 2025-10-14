@@ -6,8 +6,8 @@ import numpy
 from qdrant_client import QdrantClient
 from qdrant_client.grpc import UpdateResult
 from qdrant_client.http.models import models
+from welearn_database.data.models import DocumentSlice
 
-from welearn_datastack.data.db_models import DocumentSlice
 from welearn_datastack.exceptions import ErrorWhileDeletingChunks
 
 logger = logging.getLogger(__name__)

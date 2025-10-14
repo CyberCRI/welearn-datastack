@@ -3,9 +3,10 @@ from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 from urllib.parse import urlparse
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.wikipedia_collector import WikipediaURLCollector
 from welearn_datastack.constants import WIKIPEDIA_CONTAINERS
-from welearn_datastack.data.db_models import Corpus
 from welearn_datastack.data.wikipedia_container import WikipediaContainer
 from welearn_datastack.utils_.database_utils import create_specific_batches_quantity
 

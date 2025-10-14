@@ -3,8 +3,9 @@ import shutil
 from pathlib import Path
 from unittest import TestCase
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.csv_collector import CSVURLCollector
-from welearn_datastack.data.db_models import Corpus
 
 
 class TestCSVURLCollector(TestCase):

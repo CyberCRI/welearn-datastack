@@ -13,15 +13,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
 from sympy.integrals.meijerint_doc import category
-
-from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.db_models import (
+from welearn_database.data.models import (
     Base,
+    Category,
     Corpus,
     ProcessState,
     WeLearnDocument,
-    Category,
 )
+
+from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.modules import collector_selector
 from welearn_datastack.nodes_workflow.DocumentHubCollector import document_collector

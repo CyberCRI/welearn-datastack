@@ -6,15 +6,15 @@ from unittest.mock import patch
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.db_models import (
+from welearn_database.data.models import (
     Base,
+    Category,
     Corpus,
     ProcessState,
     WeLearnDocument,
-    Category,
 )
+
+from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.enumerations import Step, URLStatus
 from welearn_datastack.nodes_workflow.URLSanitaryCrawler.url_sanitary_crawler import (
     main,

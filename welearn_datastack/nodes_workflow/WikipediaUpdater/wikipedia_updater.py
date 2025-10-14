@@ -3,9 +3,9 @@ import os
 from typing import List
 
 from sqlalchemy.orm import Session
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import ProcessState, WeLearnDocument
 
-from welearn_datastack.data.db_models import ProcessState, WeLearnDocument
-from welearn_datastack.data.enumerations import Step
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.modules.wikipedia_updater import compare_with_current_version
 from welearn_datastack.utils_.database_utils import create_db_session

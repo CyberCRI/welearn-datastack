@@ -2,9 +2,9 @@ import logging
 import os
 
 from dotenv import load_dotenv
+from welearn_database.data.models import Corpus
 
 from welearn_datastack.collectors.atom_collector import AtomURLCollector
-from welearn_datastack.data.db_models import Corpus
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,
 )

@@ -2,8 +2,9 @@ import logging
 import os
 from datetime import datetime, timedelta
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.hal_collector import HALURLCollector
-from welearn_datastack.data.db_models import Corpus
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,
 )

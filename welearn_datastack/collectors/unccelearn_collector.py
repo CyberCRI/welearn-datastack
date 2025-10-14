@@ -3,9 +3,9 @@ from typing import List
 
 from bs4 import BeautifulSoup
 from requests import Response
+from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.constants import HEADERS
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.exceptions import NotEnoughData
 from welearn_datastack.utils_.http_client_utils import get_new_https_session

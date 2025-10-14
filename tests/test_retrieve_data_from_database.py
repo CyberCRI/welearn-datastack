@@ -6,9 +6,7 @@ from unittest.mock import Mock, patch
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
-
-from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.db_models import (
+from welearn_database.data.models import (
     Base,
     BiClassifierModel,
     Category,
@@ -21,6 +19,8 @@ from welearn_datastack.data.db_models import (
     ProcessState,
     WeLearnDocument,
 )
+
+from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.enumerations import MLModelsType, Step, URLRetrievalType
 from welearn_datastack.modules.retrieve_data_from_database import (
     retrieve_models,
