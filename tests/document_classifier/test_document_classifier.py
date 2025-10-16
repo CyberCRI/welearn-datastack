@@ -2,13 +2,13 @@ import os
 import unittest
 import uuid
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 from uuid import uuid4
 
 import numpy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sympy.integrals.meijerint_doc import category
+from welearn_database.data.enumeration import Step
 from welearn_database.data.models import (
     Base,
     BiClassifierModel,
@@ -22,7 +22,6 @@ from welearn_database.data.models import (
 )
 
 from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.enumerations import Step
 from welearn_datastack.nodes_workflow.DocumentClassifier import document_classifier
 from welearn_datastack.utils_.virtual_environement_utils import (
     get_sub_environ_according_prefix,
@@ -30,7 +29,6 @@ from welearn_datastack.utils_.virtual_environement_utils import (
 
 
 class TestDocumentClassifier(unittest.TestCase):
-
     def setUp(self):
         get_sub_environ_according_prefix.cache_clear()
         os.environ["MODELS_PATH_ROOT"] = "test"
@@ -64,10 +62,9 @@ class TestDocumentClassifier(unittest.TestCase):
             corpus_id=self.corpus_test.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi volutpat aliquam sollicitudin.",
             description="test",
             details={"test": "test"},
-            trace=1,
         )
 
         slice_test_id = uuid.uuid4()
@@ -310,10 +307,9 @@ class TestDocumentClassifier(unittest.TestCase):
             corpus_id=corpus_test.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="Nullam et elementum ante. Vestibulum ut tellus eu velit bibendum ultricies sed sed magna. Class aptent taciti sociosqu ad litora torquent ",
             description="test",
             details={"test": "test", "external_sdg": [10]},
-            trace=1,
         )
 
         slice_test = DocumentSlice(
@@ -409,10 +405,9 @@ class TestDocumentClassifier(unittest.TestCase):
             corpus_id=corpus_test.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="Nullam et elementum ante. Vestibulum ut tellus eu velit bibendum ultricies sed sed magna. Class aptent taciti sociosqu ad litora torquent ",
             description="test",
             details={"test": "test", "external_sdg": None},
-            trace=1,
         )
 
         slice_test = DocumentSlice(

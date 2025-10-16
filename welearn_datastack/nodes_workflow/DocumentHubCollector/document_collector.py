@@ -243,7 +243,6 @@ def handle_scraped_docs(
         doc_from_db.full_content = scraped_doc.document_content  # type: ignore
         doc_from_db.description = scraped_doc.document_desc  # type: ignore
         doc_from_db.details = scraped_doc.document_details  # type: ignore
-        doc_from_db.trace = scraped_doc.trace  # type: ignore
         doc_from_db.title = scraped_doc.document_title  # type: ignore
         ret_documents.append(doc_from_db)
 

@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
+from welearn_database.data.enumeration import Step
 from welearn_database.data.models import (
     Base,
     BiClassifierModel,
@@ -21,7 +22,7 @@ from welearn_database.data.models import (
 )
 
 from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.enumerations import MLModelsType, Step, URLRetrievalType
+from welearn_datastack.data.enumerations import MLModelsType, URLRetrievalType
 from welearn_datastack.modules.retrieve_data_from_database import (
     retrieve_models,
     retrieve_random_documents_ids_according_process_title,
@@ -115,10 +116,9 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             corpus_id=corpus_test.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="test content test content test content test content test content test content test content test content ",
             description="test",
             details={"test": "test"},
-            trace=1,
         )
         doc_test1 = WeLearnDocument(
             id=doc_test_id1,
@@ -126,10 +126,9 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             corpus_id=corpus_test.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="test content test content test content test content test content test content test content test content ",
             description="test",
             details={"test": "test"},
-            trace=1,
         )
         doc_test2 = WeLearnDocument(
             id=doc_test_id2,
@@ -137,10 +136,9 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             corpus_id=corpus_test1.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="test content test content test content test content test content test content test content test content ",
             description="test",
             details={"test": "test"},
-            trace=1,
         )
 
         process_state0 = ProcessState(
@@ -275,10 +273,9 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             corpus_id=corpus_test.id,
             title="test title",
             lang="en",
-            full_content="test content",
-            description="test description",
+            full_content="test content test content test content test content test content test content test content test content test content test content test content ",
+            description="test description vdescription",
             details={"test key details": "test details"},
-            trace=1,
         )
 
         test_session.add(biclassifier_en_test2)
@@ -397,10 +394,9 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             corpus_id=corpus_test.id,
             title="test title",
             lang="en",
-            full_content="test content",
+            full_content="test test content test content test content test content test content test content test content",
             description="test description",
             details={"test key details": "test details"},
-            trace=1,
         )
         test_session.add(nclassifier_en_test2)
         test_session.add(corpus_n_classifier_en_test2)
@@ -516,10 +512,9 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             corpus_id=corpus_test.id,
             title="test title",
             lang="en",
-            full_content="test content",
+            full_content="test content test content test content vtest content test content test content ",
             description="test description",
             details={"test key details": "test details"},
-            trace=1,
         )
 
         test_session.add(embedding_model_en_test2)

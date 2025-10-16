@@ -38,7 +38,7 @@ class TestEmbeddingHelper(TestCase):
         test_document = WeLearnDocument(
             id=uuid.uuid4(),
             title="test",
-            url="test",
+            url="https://example.org/test",
             lang="en",
             full_content="This is a sentence. This is another sentence.",
             corpus=Corpus(

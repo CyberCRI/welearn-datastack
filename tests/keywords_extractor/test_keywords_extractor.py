@@ -36,10 +36,9 @@ class TestKeywordsExtractor(unittest.TestCase):
             corpus_id="test_corpus_id",
             title="test",
             lang="en",
-            full_content="test",
+            full_content="Lorem ispum blablablalbalbzlbalvkjzdqokgfjqd",
             description="This is a test description.",
             details={"test": "test"},
-            trace=1,
         )
 
         embedding_model_from_db = EmbeddingModel(
