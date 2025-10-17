@@ -5,13 +5,12 @@ import re
 import sys
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List
 
-from welearn_database.data.models import WeLearnDocument
+from welearn_database.data.models import ErrorRetrieval, WeLearnDocument
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.enumerations import PluginType
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
 
 logger = logging.getLogger(__name__)
@@ -38,7 +37,7 @@ class IPlugin(ABC):
     related_corpus: str
 
     @abstractmethod
-    def run(self, urls: List[str]) -> list[WrapperRetrieveDocument]:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         pass
 
 
@@ -107,15 +106,14 @@ class IPluginScrapeCollector(IPlugin, ABC):
 
 
 class IPluginCSVReader(IPluginFilesCollector, ABC):
-    def run(self, urls: List[str]) -> list[WrapperRetrieveDocument]:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         """
         Run the plugin
-        :param urls: List of urls to filter
+        :param documents: List of urls to filter
         :return: List of ScrapedWeLearnDocument
         """
         logger.info("Running plugin %s", type(self).__name__)
         res: List[WrapperRetrieveDocument] = []
-        error_urls: List[str] = []
 
         csv.field_size_limit(sys.maxsize)
 
@@ -126,12 +124,11 @@ class IPluginCSVReader(IPluginFilesCollector, ABC):
                 # Read each file as dict
                 logger.info("Reading file: %s", fp)
                 dr = csv.DictReader(fin, delimiter=";", quotechar='"')
-                lines_to_keep, error_lines = self.filter_and_convert_lines(
-                    dr=dr, urls=urls
+                lines_to_keep = self.filter_and_convert_lines(
+                    dr=dr, urls=[d.url for d in documents]
                 )
                 res.extend(lines_to_keep)
-                error_urls.extend(error_lines)
-        return res, error_urls
+        return res
 
     def filter_and_convert_lines(
         self, dr: csv.DictReader, urls: List[str]
@@ -151,15 +148,13 @@ class IPluginCSVReader(IPluginFilesCollector, ABC):
             try:
                 logger.info("Converting line: %s", line.get("url", ""))
                 document = self._convert_csv_line_to_welearndoc(line=line)
-                current_wrapper = WrapperRetrieveDocument(
-                    document=document, is_retrieved=True
-                )
+                current_wrapper = WrapperRetrieveDocument(document=document)
                 res.append(current_wrapper)
             except Exception as e:
                 res.append(
                     WrapperRetrieveDocument(
                         document=WeLearnDocument(url=line.get("url", "")),
-                        is_retrieved=False,
+                        error_info=str(e),
                     )
                 )
                 logger.error("Error when converting line: %s", e)
