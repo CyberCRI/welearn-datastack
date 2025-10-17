@@ -28,3 +28,13 @@ class WrapperRetrieveDocument(Wrapper):
             http_error_code=self.http_error_code,
             error_info=self.error_info,
         )
+
+
+class WrapperRawData(Wrapper):
+    def __init__(self, raw_data: dict, document: WeLearnDocument):
+        self.raw_data = raw_data
+        self.document = document
+
+    #
+    # def update_document_with_raw_data(self, function_update) -> WeLearnDocument:
+    #     return function_update(self.document, self.raw_data)

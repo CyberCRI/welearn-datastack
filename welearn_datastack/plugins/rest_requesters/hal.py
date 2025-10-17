@@ -3,12 +3,13 @@ import logging
 import os
 from datetime import datetime, timezone
 from itertools import batched
-from typing import Any, Iterable, List, Tuple
+from typing import Any, List
 
 from urllib3 import Retry
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HAL_URL_BASE
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
 from welearn_datastack.exceptions import NoContent
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -18,7 +19,10 @@ from welearn_datastack.modules.pdf_extractor import (
     replace_ligatures,
 )
 from welearn_datastack.plugins.interface import IPluginRESTCollector
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
+)
 from welearn_datastack.utils_.scraping_utils import (
     get_url_without_hal_like_versionning,
     remove_extra_whitespace,
@@ -114,18 +118,6 @@ class HALCollector(IPluginRESTCollector):
         return "halId_s:(" + " OR ".join(hal_ids) + ")"
 
     @staticmethod
-    def _extract_hal_ids(urls: Iterable[str]) -> List[str]:
-        """
-        Extract HAL IDs from a list of urls
-        :param urls: List of urls
-        :return: List of HAL IDs
-        """
-        hal_ids: List[str] = []
-        for url in urls:
-            hal_ids.append(url.split("/")[-1])
-        return hal_ids
-
-    @staticmethod
     def _get_hal_url(json_dict: dict) -> str:
         """
         Get the HAL URL from a JSON dict
@@ -161,14 +153,14 @@ class HALCollector(IPluginRESTCollector):
         }
         return details
 
-    def _convert_json_dict_to_welearndoc(
-        self, json_dict: dict
-    ) -> ScrapedWeLearnDocument:
+    def _update_welearn_document(self, wrapper: WrapperRawData) -> WeLearnDocument:
         """
         Convert a json dict to ScrapedWeLearnDocument
-        :param json_dict: JSON dict
-        :return: ScrapedWeLearnDocument
+        :param wrapper: Wrapper with JSON dict and document
+        :return: WeLearnDocument updated
         """
+        json_dict = wrapper.raw_data
+
         pdf_mode: bool = False
         doc_license: str | None = json_dict.get("licence_s", None)
         file_addr: str | None = json_dict.get("fileMain_s", None)
@@ -211,31 +203,15 @@ class HALCollector(IPluginRESTCollector):
         details = self._get_details_from_dict(json_dict)
         details["content_from_pdf"] = pdf_mode
 
-        current = ScrapedWeLearnDocument(
-            document_title=title,
-            document_url=url,
-            document_content=content,
-            document_desc=desc.strip() + "...",
-            document_corpus="hal",
-            document_details=details,
-        )
+        wrapper.document.title = title
+        wrapper.document.description = desc
+        wrapper.document.url = url
+        wrapper.document.content = content
+        wrapper.document.details = details
 
         logger.info("Document %s successfully scraped", url)
 
-        return current
-
-    def _get_url_without_hal_versionning(self, json_dict: dict) -> str:
-        """
-        Get the URL without the versionning part
-        https://hal.science/hal-04337383v1 -> https://hal.science/hal-04337383
-        :param json_dict: JSON dict from HAL API
-        :return: URL without versionning
-        """
-        uri_s: str | None = json_dict.get("uri_s", None)
-        if not uri_s:
-            raise KeyError("This line : '%s' cannot be scraped, no url", str(json_dict))
-
-        return get_url_without_hal_like_versionning(uri_s)
+        return wrapper.document
 
     def _get_pdf_content(self, url: str) -> str:
         logger.info("Getting PDF content from %s", url)
@@ -266,7 +242,11 @@ class HALCollector(IPluginRESTCollector):
 
         return ret
 
-    def _get_jsons(self, hal_ids: List[str]) -> List[dict]:
+    def _get_jsons(self, hal_documents: list[WeLearnDocument]) -> List[WrapperRawData]:
+        urls = [doc.url for doc in hal_documents]
+        hal_ids = []
+        for url in urls:
+            hal_ids.append(url.split("/")[-1])
         http = get_new_https_session()
         url = "https://api.archives-ouvertes.fr/search/"
 
@@ -283,40 +263,68 @@ class HALCollector(IPluginRESTCollector):
             headers=HEADERS,
         )
 
+        response.raise_for_status()
+
         logger.info("Request URL: %s", response.request.url)
         json_req = response.json()
-        docs: List = json_req["response"]["docs"]
-        return docs
+        hal_jsons: List = json_req["response"]["docs"]
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+        # Link each json to its WeLearnDocument
+        ret = []
+        for hal_json in hal_jsons:
+            hal_url = self._get_hal_url(hal_json)
+            for wl_doc in hal_documents:
+                if wl_doc.url == hal_url:
+                    ret.append(
+                        WrapperRawData(
+                            raw_data=hal_json,
+                            document=wl_doc,
+                        )
+                    )
+                    hal_json["welearn_document"] = wl_doc
+                    break
+
+        return ret
+
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running HALCollectorRest plugin")
-        ret: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
-        content_from_hal: List[dict] = []
+        ret: List[WrapperRetrieveDocument] = []
+        content_from_hal: List[WrapperRawData] = []
 
-        for local_url_batch in batched(urls, 100):
+        for local_batch_document in batched(documents, 100):
+            local_batch_document: tuple[WeLearnDocument]
             try:
-                hal_ids = self._extract_hal_ids(local_url_batch)
-                content_from_hal.extend(self._get_jsons(hal_ids))
+                content_from_hal.extend(self._get_jsons(local_batch_document))
             except Exception as e:
                 logger.error("Error while getting JSON from HAL API")
                 logger.error(e)
-                for url in local_url_batch:
-                    error_docs.append(url)
+                for wl_doc in local_batch_document:
+                    logger.error(f"Failed URL: {wl_doc.url}, id: {wl_doc.id}")
+                    http_error_code = get_http_code_from_exception(e)
+                    ret.append(
+                        WrapperRetrieveDocument(
+                            document=wl_doc,
+                            http_error_code=http_error_code,
+                            error_info=str(e),
+                        )
+                    )
 
         for doc in content_from_hal:
             try:
-                ret.append(self._convert_json_dict_to_welearndoc(doc))
-            except Exception as e:
-                logger.exception(
-                    "Error while trying to get contents for url,\n url: '%s' \nError: %s",
-                    self._get_hal_url(doc),
-                    e,
+                ret.append(
+                    WrapperRetrieveDocument(document=self._update_welearn_document(doc))
                 )
-                error_docs.append(self._get_hal_url(doc))
+            except Exception as e:
+                logger.exception(f"Error while processing document {doc.document.url}")
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=doc.document,
+                        error_info=str(e),
+                    )
+                )
                 continue
         logger.info(
             "HALCollectorRest plugin finished, %s urls successfully processed",
             len(ret),
         )
-        return ret, error_docs
+        return ret
