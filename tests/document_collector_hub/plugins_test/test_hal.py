@@ -46,37 +46,6 @@ class TestHALCollector(TestCase):
             self.hal_collector._convert_hal_date_to_ts(tested_str), 1136073600.0
         )
 
-    def test__get_url_without_hal_versionning(self):
-        tested_json_dict = {
-            "uri_s": "https://hal.archives-ouvertes.fr/hal-00006805v1",
-            "docid": "00006805",
-        }
-
-        self.assertEqual(
-            self.hal_collector._get_url_without_hal_versionning(tested_json_dict),
-            "https://hal.archives-ouvertes.fr/hal-00006805",
-        )
-
-        tested_json_dict = {
-            "uri_s": "https://in2p3.hal.science/in2p3-00006402v1",
-            "docid": "10010",
-        }
-
-        self.assertEqual(
-            "https://in2p3.hal.science/in2p3-00006402",
-            self.hal_collector._get_url_without_hal_versionning(tested_json_dict),
-        )
-
-        tested_json_dict = {
-            "uri_s": "https://unvip1.hal.science/univp1-00006402v1",
-            "docid": "10010",
-        }
-
-        self.assertEqual(
-            "https://unvip1.hal.science/univp1-00006402",
-            self.hal_collector._get_url_without_hal_versionning(tested_json_dict),
-        )
-
     def test__format_hal_ids(self):
         tested_list = ["hal-00006805", "hal-00333300"]
         self.assertEqual(
@@ -112,7 +81,7 @@ class TestHALCollector(TestCase):
     def test__convert_json_dict_to_welearndoc(self):
         doc0 = self.content_json["response"]["docs"][0]
 
-        doc = self.hal_collector._convert_json_dict_to_welearndoc(doc0)
+        doc = self.hal_collector._update_welearn_document(doc0)
         self.assertEqual(doc.document_url, doc0["uri_s"])
         self.assertEqual(doc.document_title, doc0["title_s"][0])
         self.assertEqual(doc.document_lang, doc0["language_s"][0])
@@ -155,7 +124,7 @@ class TestHALCollector(TestCase):
         doc0 = self.content_json["response"]["docs"][0]
         doc0["licence_s"] = "http://creativecommons.org/licenses/by/"
         doc0["fileMain_s"] = "https://hal.example.org/hal-01057493/file/2014-01-01.pdf"
-        doc = self.hal_collector._convert_json_dict_to_welearndoc(doc0)
+        doc = self.hal_collector._update_welearn_document(doc0)
         self.assertEqual(doc.document_url, doc0["uri_s"])
         self.assertEqual(doc.document_title, doc0["title_s"][0])
         self.assertEqual(doc.document_lang, "en")
@@ -203,12 +172,11 @@ class TestHALCollector(TestCase):
         mock_get_jsons.return_value = docs_from_json
 
         list_of_awaited_scraped_welearn_doc = [
-            self.hal_collector._convert_json_dict_to_welearndoc(doc)
-            for doc in docs_from_json
+            self.hal_collector._update_welearn_document(doc) for doc in docs_from_json
         ]
 
         urls = [doc["uri_s"] for doc in docs_from_json]
-        res, errors = self.hal_collector.run(urls=urls)
+        res, errors = self.hal_collector.run(documents=urls)
         self.assertEqual(len(res), len(urls))
         self.assertEqual(len(errors), 0)
 
