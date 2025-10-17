@@ -15,10 +15,6 @@ from welearn_datastack.exceptions import UnauthorizedLicense
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 from welearn_datastack.utils_.scraping_utils import clean_return_to_line
-from welearn_datastack.utils_.text_stat_utils import (
-    predict_duration,
-    predict_readability,
-)
 
 logger = logging.getLogger(__name__)
 

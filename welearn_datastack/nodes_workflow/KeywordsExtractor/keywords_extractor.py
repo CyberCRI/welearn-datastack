@@ -4,14 +4,15 @@ import uuid
 from typing import List
 
 from sqlalchemy.orm import Session
-
-from welearn_datastack.data.db_models import (
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import (
     Keyword,
     ProcessState,
     WeLearnDocument,
     WeLearnDocumentKeyword,
 )
-from welearn_datastack.data.enumerations import MLModelsType, Step
+
+from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.modules.keywords_extractor import extract_keywords
 from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv

@@ -6,8 +6,9 @@ from datetime import datetime
 from typing import Dict, List
 from zoneinfo import ZoneInfo
 
+from welearn_database.data.models import Corpus, WeLearnDocument
+
 from welearn_datastack.constants import OPEN_ALEX_BASE_URL, PUBLISHERS_TO_AVOID
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 

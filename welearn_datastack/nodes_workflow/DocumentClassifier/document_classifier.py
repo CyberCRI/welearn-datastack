@@ -6,9 +6,10 @@ from typing import List
 from uuid import UUID
 
 from sqlalchemy.orm import Session
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import DocumentSlice, ProcessState, Sdg
 
-from welearn_datastack.data.db_models import DocumentSlice, ProcessState, Sdg
-from welearn_datastack.data.enumerations import MLModelsType, Step
+from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.modules.sdgs_classifiers import (

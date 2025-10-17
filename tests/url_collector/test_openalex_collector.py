@@ -6,8 +6,9 @@ from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 from zoneinfo import ZoneInfo
 
+from welearn_database.data.models import Corpus, WeLearnDocument
+
 from welearn_datastack.collectors.open_alex_collector import OpenAlexURLCollector
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 
 
 class TestOpenAlexURLCollector(TestCase):

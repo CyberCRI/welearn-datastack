@@ -2,7 +2,8 @@ import unittest
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
-from welearn_datastack.data.db_models import WeLearnDocument
+from welearn_database.data.models import WeLearnDocument
+
 from welearn_datastack.modules.wikipedia_updater import compare_with_current_version
 
 

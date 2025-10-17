@@ -1,12 +1,12 @@
 from typing import List
 
 import requests  # type: ignore
+from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.collectors.helpers.feed_helpers import (
     extracted_url_to_url_datastore,
 )
 from welearn_datastack.constants import TED_API_URL, TED_URL
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.data.url_collector import URLCollector
 
 headers = {

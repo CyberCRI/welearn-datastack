@@ -4,10 +4,10 @@ from typing import Collection, Dict, List, Type, TypedDict
 from uuid import UUID
 
 from sqlalchemy import Column, desc
-from sqlalchemy.orm import Query, aliased
+from sqlalchemy.orm import Query
 from sqlalchemy.sql import and_, func
-
-from welearn_datastack.data.db_models import (
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import (
     BiClassifierModel,
     Corpus,
     CorpusBiClassifierModel,
@@ -20,9 +20,9 @@ from welearn_datastack.data.db_models import (
     Sdg,
     WeLearnDocument,
 )
+
 from welearn_datastack.data.enumerations import (
     MLModelsType,
-    Step,
     URLRetrievalType,
     WeighedScope,
 )

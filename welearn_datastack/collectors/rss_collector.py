@@ -1,12 +1,13 @@
 from typing import List
 from urllib.parse import urlparse
 
+from welearn_database.data.models import Corpus, WeLearnDocument
+
 from welearn_datastack.collectors.helpers.feed_helpers import (
     extracted_url_to_url_datastore,
     lines_to_url,
 )
 from welearn_datastack.constants import HEADERS
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 

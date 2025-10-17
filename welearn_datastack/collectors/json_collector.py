@@ -3,8 +3,9 @@ import sys
 from pathlib import Path
 from typing import List
 
+from welearn_database.data.models import Corpus, WeLearnDocument
+
 from welearn_datastack.collectors.helpers.json_helpers import search_url_field
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.data.url_collector import URLCollector
 
 

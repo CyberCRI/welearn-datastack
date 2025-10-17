@@ -4,8 +4,8 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import numpy
+from welearn_database.data.models import Corpus, EmbeddingModel, WeLearnDocument
 
-from welearn_datastack.data.db_models import Corpus, EmbeddingModel, WeLearnDocument
 from welearn_datastack.modules.embedding_model_helpers import (
     _split_by_word_respecting_sent_boundary,
     create_content_slices,
@@ -38,7 +38,7 @@ class TestEmbeddingHelper(TestCase):
         test_document = WeLearnDocument(
             id=uuid.uuid4(),
             title="test",
-            url="test",
+            url="https://example.org/test",
             lang="en",
             full_content="This is a sentence. This is another sentence.",
             corpus=Corpus(

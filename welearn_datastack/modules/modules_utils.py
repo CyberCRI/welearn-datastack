@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 
-from welearn_datastack.data.db_models import WeLearnDocument
+from welearn_database.data.models import WeLearnDocument
 
 
 def to_dict_url_trace(

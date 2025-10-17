@@ -1,8 +1,9 @@
 import logging
 import os
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.unccelearn_collector import UNCCeLearnURLCollector
-from welearn_datastack.data.db_models import Corpus
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,
 )

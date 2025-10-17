@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from welearn_datastack.data.db_models import WeLearnDocument
+from welearn_database.data.models import WeLearnDocument
 
 
 class URLCollector(ABC):

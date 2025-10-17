@@ -1,9 +1,10 @@
 import logging
 import os
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.wikipedia_collector import WikipediaURLCollector
 from welearn_datastack.constants import WIKIPEDIA_CONTAINERS
-from welearn_datastack.data.db_models import Corpus
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,
 )

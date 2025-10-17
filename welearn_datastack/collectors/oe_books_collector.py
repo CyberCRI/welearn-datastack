@@ -2,13 +2,14 @@ import logging
 import re
 from typing import Dict, List
 
+from welearn_database.data.models import Corpus, WeLearnDocument
+
 from welearn_datastack.collectors.rss_collector import RssURLCollector
 from welearn_datastack.constants import (
     AUTHORIZED_LICENSES,
     HEADERS,
     MD_OE_BOOKS_BASE_URL,
 )
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.utils_.http_client_utils import get_new_https_session

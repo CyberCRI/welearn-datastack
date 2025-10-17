@@ -3,8 +3,9 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.ted_collector import TedURLCollector
-from welearn_datastack.data.db_models import Corpus
 
 
 class Test(TestCase):

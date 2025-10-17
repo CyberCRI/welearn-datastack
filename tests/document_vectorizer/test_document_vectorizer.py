@@ -9,9 +9,8 @@ from unittest.mock import patch
 import numpy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.db_models import (
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import (
     Base,
     Category,
     Corpus,
@@ -21,7 +20,8 @@ from welearn_datastack.data.db_models import (
     ProcessState,
     WeLearnDocument,
 )
-from welearn_datastack.data.enumerations import Step
+
+from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.nodes_workflow.DocumentVectorizer import document_vectorizer
 from welearn_datastack.utils_.virtual_environement_utils import (
     get_sub_environ_according_prefix,

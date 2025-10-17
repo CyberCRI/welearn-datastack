@@ -2,7 +2,8 @@ import unittest
 import uuid
 from unittest.mock import MagicMock, patch
 
-from welearn_datastack.data.db_models import EmbeddingModel, WeLearnDocument
+from welearn_database.data.models import EmbeddingModel, WeLearnDocument
+
 from welearn_datastack.modules.keywords_extractor import extract_keywords
 
 
@@ -35,10 +36,9 @@ class TestKeywordsExtractor(unittest.TestCase):
             corpus_id="test_corpus_id",
             title="test",
             lang="en",
-            full_content="test",
+            full_content="Lorem ispum blablablalbalbzlbalvkjzdqokgfjqd",
             description="This is a test description.",
             details={"test": "test"},
-            trace=1,
         )
 
         embedding_model_from_db = EmbeddingModel(

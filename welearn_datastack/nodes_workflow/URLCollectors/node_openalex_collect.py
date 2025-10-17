@@ -2,8 +2,9 @@ import logging
 import os
 from datetime import datetime, timedelta
 
+from welearn_database.data.models import Corpus
+
 from welearn_datastack.collectors.open_alex_collector import OpenAlexURLCollector
-from welearn_datastack.data.db_models import Corpus
 from welearn_datastack.exceptions import NoCorpusFoundInDb
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,

@@ -2,8 +2,8 @@ import logging
 from datetime import datetime
 
 import requests  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
-from welearn_datastack.data.db_models import WeLearnDocument
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
 logger = logging.getLogger(__name__)

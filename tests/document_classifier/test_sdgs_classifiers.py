@@ -3,8 +3,8 @@ import uuid
 from unittest.mock import patch
 
 import numpy
+from welearn_database.data.models import DocumentSlice
 
-from welearn_datastack.data.db_models import DocumentSlice
 from welearn_datastack.modules.sdgs_classifiers import (
     bi_classify_slices,
     n_classify_slice,

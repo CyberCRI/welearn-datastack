@@ -2,8 +2,9 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+from welearn_database.data.models import Corpus, WeLearnDocument
+
 from welearn_datastack.collectors.oe_books_collector import OpenEditionBooksURLCollector
-from welearn_datastack.data.db_models import Corpus, WeLearnDocument
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.scrapers import OpenEditionBooksCollector
 

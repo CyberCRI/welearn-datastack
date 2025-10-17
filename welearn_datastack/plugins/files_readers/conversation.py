@@ -1,6 +1,5 @@
-import csv
 import logging
-from typing import Any, Generator, List, Tuple
+from typing import Any
 
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.plugins.interface import IPluginCSVReader

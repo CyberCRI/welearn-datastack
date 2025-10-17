@@ -1,7 +1,6 @@
 import sqlalchemy
 from sqlalchemy import Engine
-
-from welearn_datastack.data.db_models import DbSchemaEnum
+from welearn_database.data.models import DbSchemaEnum
 
 
 # Function from :

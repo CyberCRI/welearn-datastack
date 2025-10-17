@@ -8,8 +8,8 @@ from uuid import UUID
 
 import spacy
 from sentence_transformers import SentenceTransformer  # type: ignore
+from welearn_database.data.models import DocumentSlice, WeLearnDocument
 
-from welearn_datastack.data.db_models import DocumentSlice, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.exceptions import NoContent
 from welearn_datastack.utils_.path_utils import generate_ml_models_path

@@ -6,16 +6,17 @@ from unittest.mock import patch
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
-from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.db_models import (
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import (
     Base,
+    Category,
     Corpus,
     ProcessState,
     WeLearnDocument,
-    Category,
 )
-from welearn_datastack.data.enumerations import Step, URLStatus
+
+from tests.database_test_utils import handle_schema_with_sqlite
+from welearn_datastack.data.enumerations import URLStatus
 from welearn_datastack.nodes_workflow.URLSanitaryCrawler.url_sanitary_crawler import (
     main,
 )
@@ -72,10 +73,9 @@ class Test(TestCase):
             corpus_id=corpus_test.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="test test test test test test test test test test test test test test test test test test test ",
             description="test",
             details={"test": "test"},
-            trace=1,
         )
         doc_test1 = WeLearnDocument(
             id=self.doc_test_id1,
@@ -83,10 +83,9 @@ class Test(TestCase):
             corpus_id=corpus_test.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="test test test test test test test test test test test test test test test test test test test ",
             description="test",
             details={"test": "test"},
-            trace=1,
         )
         doc_test2 = WeLearnDocument(
             id=self.doc_test_id2,
@@ -94,10 +93,9 @@ class Test(TestCase):
             corpus_id=corpus_test1.id,
             title="test",
             lang="en",
-            full_content="test",
+            full_content="test test test test test test test test test test test test test test test test test test test ",
             description="test",
             details={"test": "test"},
-            trace=1,
         )
 
         process_state0 = ProcessState(
