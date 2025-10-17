@@ -7,6 +7,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Generator, List, Tuple
 
+from welearn_database.data.models import WeLearnDocument
+
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.enumerations import PluginType
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
@@ -30,12 +33,12 @@ def get_list_of_related_env_vars(class_name: str, suffix: str) -> List[str]:
     return res
 
 
-class IPlugin:
+class IPlugin(ABC):
     collector_type_name: PluginType
     related_corpus: str
 
     @abstractmethod
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(self, urls: List[str]) -> list[WrapperRetrieveDocument]:
         pass
 
 
@@ -104,14 +107,14 @@ class IPluginScrapeCollector(IPlugin, ABC):
 
 
 class IPluginCSVReader(IPluginFilesCollector, ABC):
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(self, urls: List[str]) -> list[WrapperRetrieveDocument]:
         """
         Run the plugin
         :param urls: List of urls to filter
         :return: List of ScrapedWeLearnDocument
         """
         logger.info("Running plugin %s", type(self).__name__)
-        res: List[ScrapedWeLearnDocument] = []
+        res: List[WrapperRetrieveDocument] = []
         error_urls: List[str] = []
 
         csv.field_size_limit(sys.maxsize)
@@ -132,33 +135,42 @@ class IPluginCSVReader(IPluginFilesCollector, ABC):
 
     def filter_and_convert_lines(
         self, dr: csv.DictReader, urls: List[str]
-    ) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    ) -> list[WrapperRetrieveDocument]:
         """
-        Filter lines and convert them to ScrapedWeLearnDocument
+        Filter lines and convert them to WrapperRetrieveDocument
         :param dr: DictReader from CSV
         :param urls: List of urls to filter
-        :return: List of ScrapedWeLearnDocument
+        :return: List of WrapperRetrieveDocument
         """
 
-        res: List[ScrapedWeLearnDocument] = []
-        error_urls: List[str] = []
+        res: list[WrapperRetrieveDocument] = []
 
         # Filter lines and convert them to ScrapedWeLearnDocument
         for line in self._filter_file_line(dr=dr, urls=urls):
+            current_wrapper: WrapperRetrieveDocument
             try:
                 logger.info("Converting line: %s", line.get("url", ""))
-                res.append(self._convert_csv_line_to_welearndoc(line=line))
+                document = self._convert_csv_line_to_welearndoc(line=line)
+                current_wrapper = WrapperRetrieveDocument(
+                    document=document, is_retrieved=True
+                )
+                res.append(current_wrapper)
             except Exception as e:
-                error_urls.append(line.get("url", ""))
+                res.append(
+                    WrapperRetrieveDocument(
+                        document=WeLearnDocument(url=line.get("url", "")),
+                        is_retrieved=False,
+                    )
+                )
                 logger.error("Error when converting line: %s", e)
                 logger.error("This url : %s cannot be scraped", line.get("url"))
-        return res, error_urls
+        return res
 
     @abstractmethod
-    def _convert_csv_line_to_welearndoc(self, line: dict) -> ScrapedWeLearnDocument:
+    def _convert_csv_line_to_welearndoc(self, line: dict) -> WeLearnDocument:
         """
-        Convert a csv line to a ScrapedWeLearnDocument
+        Convert a csv line to a WeLearnDocument
         :param line: CSV line
-        :return: ScrapedWeLearnDocument
+        :return: WeLearnDocument
         """
         pass
