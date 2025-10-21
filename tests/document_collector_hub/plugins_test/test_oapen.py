@@ -1,10 +1,15 @@
+import json
 import os
 from pathlib import Path
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from welearn_database.data.models import WeLearnDocument
+
+from welearn_datastack.data.db_wrapper import WrapperRawData
 from welearn_datastack.data.enumerations import PluginType
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.data.source_models.oapen import OapenModel
 from welearn_datastack.plugins.rest_requesters.oapen import OAPenCollector
 
 
@@ -22,6 +27,9 @@ class MockResponse:
 
 class TestOAPenCollector(TestCase):
     def setUp(self) -> None:
+        self.json_response_oapen: Path = (
+            Path(__file__).parent.parent / "resources/oapen_api.json"
+        )
         self.oapen_collector = OAPenCollector()
         self.desc_en = "At the end of the Western Middle Ages, the new notions of the legitimacy of royal power"
 
@@ -129,18 +137,27 @@ class TestOAPenCollector(TestCase):
 
     @patch("welearn_datastack.plugins.rest_requesters.oapen.get_new_https_session")
     def test_get_jsons(self, mock_get_new_https_session):
-        return_json = [{"content": "Lorem ipsum"}]
-
         mock_session = Mock()
         mock_get_new_https_session.return_value = mock_session
 
-        mock_response = MockResponse(return_json, status_code=200)
+        mock_response = MockResponse(
+            json.load(self.json_response_oapen.open()), status_code=200
+        )
 
         mock_session.get.side_effect = [mock_response]
 
-        oapen_ids = ["20.500.12657/12345"]
-        jsons = self.oapen_collector._get_jsons(oapen_ids)
-        self.assertEqual(jsons, return_json)
+        oapen_ids = [
+            WeLearnDocument(url="https://library.oapen.org/handle/20.500.12657/52203")
+        ]
+        wrappers = self.oapen_collector._get_jsons(oapen_ids)
+        current_doc = wrappers[0]
+        self.assertEqual(
+            current_doc.document.url,
+            "https://library.oapen.org/handle/20.500.12657/52203",
+        )
+        self.assertEqual(
+            current_doc.raw_data.name, "Le roi, son favori et les baronset XVe siècles"
+        )
 
     def test_format_metadata(self):
         metadata = [
@@ -163,18 +180,27 @@ class TestOAPenCollector(TestCase):
         mock_get_txt_content.return_value = "Sample TXT content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
         mock_get_pdf_content.return_value = "Sample PDF content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 
-        json_dict = self.mocked_json_ret
+        test_json = json.load(self.json_response_oapen.open())
 
-        doc = self.oapen_collector._convert_json_dict_to_welearndoc(json_dict)
-        self.assertIsInstance(doc, ScrapedWeLearnDocument)
-        self.assertEqual(doc.document_title, "Sample Title")
+        wrp = WrapperRawData(
+            document=WeLearnDocument(
+                url="https://library.oapen.org/handle/20.500.12657/52203"
+            ),
+            raw_data=OapenModel.model_validate_json(json.dumps(test_json[0])),
+        )
+
+        doc = self.oapen_collector._update_welearn_document(wrp)
+        self.assertIsInstance(doc, WeLearnDocument)
+        self.assertEqual(doc.title, "Le roi, son favori et les baronset XVe siècles")
         self.assertEqual(
-            doc.document_content,
+            doc.full_content,
             "Sample PDF content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
         )
-        self.assertEqual(doc.document_desc, self.desc_en)
-        self.assertEqual(doc.document_details["authors"][0]["name"], "Author Name")
-        self.assertEqual(doc.document_lang, "en")
+        self.assertTrue(
+            doc.description.startswith("Dans la recherche, le rôle politique du favori")
+        )
+        self.assertEqual(doc.details["authors"][0]["name"], "Djro Bilestone")
+        self.assertEqual(doc.lang, "fr")
 
     @patch(
         "welearn_datastack.plugins.rest_requesters.oapen.OAPenCollector._get_pdf_content"
@@ -191,7 +217,7 @@ class TestOAPenCollector(TestCase):
         json_dict = self.mocked_json_ret
         json_dict["metadata"][3]["value"] = "French"
 
-        doc = self.oapen_collector._convert_json_dict_to_welearndoc(json_dict)
+        doc = self.oapen_collector._update_welearn_document(json_dict)
         self.assertIsInstance(doc, ScrapedWeLearnDocument)
         self.assertEqual(doc.document_title, "Sample Title")
         self.assertEqual(
@@ -225,7 +251,7 @@ class TestOAPenCollector(TestCase):
         mock_get_jsons.return_value = [json_dict]
 
         urls = ["https://library.oapen.org/handle/20.500.12657/12345"]
-        res, errors = self.oapen_collector.run(urls=urls)
+        res, errors = self.oapen_collector.run(documents=urls)
         self.assertEqual(len(res), 1)
         self.assertEqual(len(errors), 0)
         self.assertEqual(

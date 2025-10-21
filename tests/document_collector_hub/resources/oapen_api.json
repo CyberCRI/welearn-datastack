@@ -1,0 +1,710 @@
+[
+  {
+    "uuid": "3e3f9e56-3581-495b-b46e-7654527362cf",
+    "name": "Le roi, son favori et les baronset XVe siècles",
+    "handle": "20.500.12657/52203",
+    "type": "item",
+    "expand": [
+      "parentCollection",
+      "parentCollectionList",
+      "parentCommunityList",
+      "all"
+    ],
+    "lastModified": "2025-04-03 08:06:33.492",
+    "parentCollection": null,
+    "parentCollectionList": null,
+    "parentCommunityList": null,
+    "bitstreams": [
+      {
+        "uuid": "daab749b-2747-45b2-9eb3-70bbef86ef96",
+        "name": "9783968220857.pdf",
+        "handle": null,
+        "type": "bitstream",
+        "expand": [
+          "parent",
+          "policies",
+          "all"
+        ],
+        "bundleName": "ORIGINAL",
+        "description": null,
+        "format": "Adobe PDF",
+        "mimeType": "application/pdf",
+        "sizeBytes": 8759025,
+        "parentObject": null,
+        "retrieveLink": "/rest/bitstreams/daab749b-2747-45b2-9eb3-70bbef86ef96/retrieve",
+        "checkSum": {
+          "value": "2a58486b74fa9e2b5a2c124c85614343",
+          "checkSumAlgorithm": "MD5"
+        },
+        "sequenceId": 1,
+        "code": "CC-BY-SA",
+        "policies": null,
+        "link": "/rest/bitstreams/daab749b-2747-45b2-9eb3-70bbef86ef96",
+        "metadata": [
+          {
+            "key": "dc.rights.uri",
+            "value": "https://creativecommons.org/licenses/by-sa/4.0/",
+            "language": null,
+            "schema": "dc",
+            "element": "rights",
+            "qualifier": "uri"
+          },
+          {
+            "key": "dc.source",
+            "value": "http://oapen-ftpserver.org/9783968220857.pdf",
+            "language": null,
+            "schema": "dc",
+            "element": "source",
+            "qualifier": null
+          },
+          {
+            "key": "dc.title",
+            "value": "9783968220857.pdf",
+            "language": null,
+            "schema": "dc",
+            "element": "title",
+            "qualifier": null
+          },
+          {
+            "key": "dc.identifier.urlwebshop",
+            "value": "https://heiup.uni-heidelberg.de/catalog/book/834",
+            "language": null,
+            "schema": "dc",
+            "element": "identifier",
+            "qualifier": "urlwebshop"
+          },
+          {
+            "key": "oapen.relation.isbn",
+            "value": "9783968220857",
+            "language": null,
+            "schema": "oapen",
+            "element": "relation",
+            "qualifier": "isbn"
+          }
+        ]
+      },
+      {
+        "uuid": "0e1e4832-e642-4321-9284-d2c248a772e1",
+        "name": "3e3f9e56-3581-495b-b46e-7654527362cf.marc.xml",
+        "handle": null,
+        "type": "bitstream",
+        "expand": [
+          "parent",
+          "policies",
+          "all"
+        ],
+        "bundleName": "EXPORT",
+        "description": null,
+        "format": "Unknown",
+        "mimeType": "application/octet-stream",
+        "sizeBytes": 8586,
+        "parentObject": null,
+        "retrieveLink": "/rest/bitstreams/0e1e4832-e642-4321-9284-d2c248a772e1/retrieve",
+        "checkSum": {
+          "value": "317dccaec803a198973f12cf39b059b4",
+          "checkSumAlgorithm": "MD5"
+        },
+        "sequenceId": 8,
+        "code": "Other open license",
+        "policies": null,
+        "link": "/rest/bitstreams/0e1e4832-e642-4321-9284-d2c248a772e1",
+        "metadata": [
+          {
+            "key": "dc.title",
+            "value": "3e3f9e56-3581-495b-b46e-7654527362cf.marc.xml",
+            "language": null,
+            "schema": "dc",
+            "element": "title",
+            "qualifier": null
+          }
+        ]
+      },
+      {
+        "uuid": "af2853f6-9032-434a-b5ca-dc8d530ba053",
+        "name": "3e3f9e56-3581-495b-b46e-7654527362cf.onix_3.0.xml",
+        "handle": null,
+        "type": "bitstream",
+        "expand": [
+          "parent",
+          "policies",
+          "all"
+        ],
+        "bundleName": "EXPORT",
+        "description": null,
+        "format": "Unknown",
+        "mimeType": "application/octet-stream",
+        "sizeBytes": 7403,
+        "parentObject": null,
+        "retrieveLink": "/rest/bitstreams/af2853f6-9032-434a-b5ca-dc8d530ba053/retrieve",
+        "checkSum": {
+          "value": "6af71128a44b82317b26db87963205c2",
+          "checkSumAlgorithm": "MD5"
+        },
+        "sequenceId": 9,
+        "code": "Other open license",
+        "policies": null,
+        "link": "/rest/bitstreams/af2853f6-9032-434a-b5ca-dc8d530ba053",
+        "metadata": [
+          {
+            "key": "dc.title",
+            "value": "3e3f9e56-3581-495b-b46e-7654527362cf.onix_3.0.xml",
+            "language": null,
+            "schema": "dc",
+            "element": "title",
+            "qualifier": null
+          }
+        ]
+      },
+      {
+        "uuid": "725513c0-162c-4e53-8762-7ee313d9f86f",
+        "name": "3e3f9e56-3581-495b-b46e-7654527362cf.ris",
+        "handle": null,
+        "type": "bitstream",
+        "expand": [
+          "parent",
+          "policies",
+          "all"
+        ],
+        "bundleName": "EXPORT",
+        "description": null,
+        "format": "Unknown",
+        "mimeType": "application/octet-stream",
+        "sizeBytes": 3073,
+        "parentObject": null,
+        "retrieveLink": "/rest/bitstreams/725513c0-162c-4e53-8762-7ee313d9f86f/retrieve",
+        "checkSum": {
+          "value": "e18d81d175c34683903b58133e3c36a6",
+          "checkSumAlgorithm": "MD5"
+        },
+        "sequenceId": 10,
+        "code": "Other open license",
+        "policies": null,
+        "link": "/rest/bitstreams/725513c0-162c-4e53-8762-7ee313d9f86f",
+        "metadata": [
+          {
+            "key": "dc.title",
+            "value": "3e3f9e56-3581-495b-b46e-7654527362cf.ris",
+            "language": null,
+            "schema": "dc",
+            "element": "title",
+            "qualifier": null
+          }
+        ]
+      },
+      {
+        "uuid": "fbc8b29c-51c2-437f-a7d9-b73fdb2a7110",
+        "name": "3e3f9e56-3581-495b-b46e-7654527362cf.tsv",
+        "handle": null,
+        "type": "bitstream",
+        "expand": [
+          "parent",
+          "policies",
+          "all"
+        ],
+        "bundleName": "EXPORT",
+        "description": null,
+        "format": "Unknown",
+        "mimeType": "application/octet-stream",
+        "sizeBytes": 535,
+        "parentObject": null,
+        "retrieveLink": "/rest/bitstreams/fbc8b29c-51c2-437f-a7d9-b73fdb2a7110/retrieve",
+        "checkSum": {
+          "value": "2b9da8c4d82b3de49f8617d8504ea99f",
+          "checkSumAlgorithm": "MD5"
+        },
+        "sequenceId": -1,
+        "code": "Other open license",
+        "policies": null,
+        "link": "/rest/bitstreams/fbc8b29c-51c2-437f-a7d9-b73fdb2a7110",
+        "metadata": [
+          {
+            "key": "dc.title",
+            "value": "3e3f9e56-3581-495b-b46e-7654527362cf.tsv",
+            "language": null,
+            "schema": "dc",
+            "element": "title",
+            "qualifier": null
+          }
+        ]
+      },
+      {
+        "uuid": "556bf2ef-fec3-42e7-bc38-47bdb91e9512",
+        "name": "9783968220857.pdf.txt",
+        "handle": null,
+        "type": "bitstream",
+        "expand": [
+          "parent",
+          "policies",
+          "all"
+        ],
+        "bundleName": "TEXT",
+        "description": "Extracted text",
+        "format": "Text",
+        "mimeType": "text/plain",
+        "sizeBytes": 1316904,
+        "parentObject": null,
+        "retrieveLink": "/rest/bitstreams/556bf2ef-fec3-42e7-bc38-47bdb91e9512/retrieve",
+        "checkSum": {
+          "value": "e224106e8b4845403e36a4cca419951c",
+          "checkSumAlgorithm": "MD5"
+        },
+        "sequenceId": 6,
+        "code": "Other open license",
+        "policies": null,
+        "link": "/rest/bitstreams/556bf2ef-fec3-42e7-bc38-47bdb91e9512",
+        "metadata": [
+          {
+            "key": "dc.description",
+            "value": "Extracted text",
+            "language": null,
+            "schema": "dc",
+            "element": "description",
+            "qualifier": null
+          },
+          {
+            "key": "dc.source",
+            "value": "Written by FormatFilter org.dspace.app.mediafilter.PDFFilter on 2022-01-06T02:47:40Z (GMT).",
+            "language": null,
+            "schema": "dc",
+            "element": "source",
+            "qualifier": null
+          },
+          {
+            "key": "dc.title",
+            "value": "9783968220857.pdf.txt",
+            "language": null,
+            "schema": "dc",
+            "element": "title",
+            "qualifier": null
+          }
+        ]
+      },
+      {
+        "uuid": "a501a881-94e8-44a7-b9ac-9269bf305640",
+        "name": "9783968220857.pdf.jpg",
+        "handle": null,
+        "type": "bitstream",
+        "expand": [
+          "parent",
+          "policies",
+          "all"
+        ],
+        "bundleName": "THUMBNAIL",
+        "description": "Generated Thumbnail",
+        "format": "JPEG",
+        "mimeType": "image/jpeg",
+        "sizeBytes": 6321,
+        "parentObject": null,
+        "retrieveLink": "/rest/bitstreams/a501a881-94e8-44a7-b9ac-9269bf305640/retrieve",
+        "checkSum": {
+          "value": "c8cc1bb576281ce5ef3ed0fb4be78865",
+          "checkSumAlgorithm": "MD5"
+        },
+        "sequenceId": 7,
+        "code": "Other open license",
+        "policies": null,
+        "link": "/rest/bitstreams/a501a881-94e8-44a7-b9ac-9269bf305640",
+        "metadata": [
+          {
+            "key": "dc.description",
+            "value": "Generated Thumbnail",
+            "language": null,
+            "schema": "dc",
+            "element": "description",
+            "qualifier": null
+          },
+          {
+            "key": "dc.source",
+            "value": "Written by FormatFilter org.dspace.app.mediafilter.PDFBoxThumbnail on 2022-01-06T02:47:40Z (GMT).",
+            "language": null,
+            "schema": "dc",
+            "element": "source",
+            "qualifier": null
+          },
+          {
+            "key": "dc.title",
+            "value": "9783968220857.pdf.jpg",
+            "language": null,
+            "schema": "dc",
+            "element": "title",
+            "qualifier": null
+          }
+        ]
+      }
+    ],
+    "archived": "true",
+    "withdrawn": "false",
+    "link": "/rest/items/3e3f9e56-3581-495b-b46e-7654527362cf",
+    "metadata": [
+      {
+        "key": "dc.contributor.author",
+        "value": "Bilestone, Djro",
+        "language": "",
+        "schema": "dc",
+        "element": "contributor",
+        "qualifier": "author"
+      },
+      {
+        "key": "dc.contributor.author",
+        "value": "Kouamenan, R.",
+        "language": "",
+        "schema": "dc",
+        "element": "contributor",
+        "qualifier": "author"
+      },
+      {
+        "key": "dc.date.accessioned",
+        "value": "2022-01-05T11:58:14Z",
+        "language": "",
+        "schema": "dc",
+        "element": "date",
+        "qualifier": "accessioned"
+      },
+      {
+        "key": "dc.date.available",
+        "value": "2022-01-05T11:58:14Z",
+        "language": "",
+        "schema": "dc",
+        "element": "date",
+        "qualifier": "available"
+      },
+      {
+        "key": "dc.date.issued",
+        "value": "2021",
+        "language": "",
+        "schema": "dc",
+        "element": "date",
+        "qualifier": "issued"
+      },
+      {
+        "key": "dc.identifier",
+        "value": "ONIX_20220105_9783968220857_4",
+        "language": "",
+        "schema": "dc",
+        "element": "identifier",
+        "qualifier": null
+      },
+      {
+        "key": "dc.identifier",
+        "value": "ONIX_20220105_9783968220857_4",
+        "language": null,
+        "schema": "dc",
+        "element": "identifier",
+        "qualifier": null
+      },
+      {
+        "key": "dc.identifier",
+        "value": "OCN: 1302265480",
+        "language": null,
+        "schema": "dc",
+        "element": "identifier",
+        "qualifier": null
+      },
+      {
+        "key": "dc.identifier.issn",
+        "value": "0479-5997",
+        "language": "",
+        "schema": "dc",
+        "element": "identifier",
+        "qualifier": "issn"
+      },
+      {
+        "key": "dc.identifier.uri",
+        "value": "https://library.oapen.org/handle/20.500.12657/52203",
+        "language": "",
+        "schema": "dc",
+        "element": "identifier",
+        "qualifier": "uri"
+      },
+      {
+        "key": "dc.description.abstract",
+        "value": "At the end of the Western Middle Ages, the new notions of the legitimacy of royal power and its exercise were made more visible by the presence of royal favourites whose figure should be reconsidered. The present study links the reproach of sexual misconduct as a political argument in medieval discourse to medieval ideas about royalty and government, opening new perspectives of a cultural history of politics in the Later Middle Ages.",
+        "language": "",
+        "schema": "dc",
+        "element": "description",
+        "qualifier": "abstract"
+      },
+      {
+        "key": "dc.language",
+        "value": "French",
+        "language": "",
+        "code": "fre",
+        "schema": "dc",
+        "element": "language",
+        "qualifier": null
+      },
+      {
+        "key": "dc.relation.ispartofseries",
+        "value": "Pariser Historische Studien",
+        "language": "",
+        "schema": "dc",
+        "element": "relation",
+        "qualifier": "ispartofseries"
+      },
+      {
+        "key": "dc.subject.classification",
+        "value": "thema EDItEUR::N History and Archaeology",
+        "language": "en_US",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "classification"
+      },
+      {
+        "key": "dc.subject.classification",
+        "value": "thema EDItEUR::3 Time period qualifiers::3K CE period up to c 1500",
+        "language": "en_US",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "classification"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Favourite",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Royal Power",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Legitimation",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Political History",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "History of sexualities",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Favori",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Pouvoir royal",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Légitimation",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Histoire politique",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.subject.other",
+        "value": "Histoire des sexualités",
+        "language": "",
+        "schema": "dc",
+        "element": "subject",
+        "qualifier": "other"
+      },
+      {
+        "key": "dc.title",
+        "value": "Le roi, son favori et les baronset XVe siècles",
+        "language": "",
+        "schema": "dc",
+        "element": "title",
+        "qualifier": null
+      },
+      {
+        "key": "dc.title.alternative",
+        "value": "Légitimation et délégitimation du pouvoir royal en Angleterre et en France aux XIVe",
+        "language": "",
+        "schema": "dc",
+        "element": "title",
+        "qualifier": "alternative"
+      },
+      {
+        "key": "dc.type",
+        "value": "book",
+        "language": "",
+        "schema": "dc",
+        "element": "type",
+        "qualifier": null
+      },
+      {
+        "key": "oapen.abstract.otherlanguage",
+        "value": "Die politische Rolle des Favoriten und die Art seiner Beziehung zum König sind in der Forschung oft nicht klar gesehen worden, da in den Diskursen des frühen und späten Mittelalters die besondere Nähe zum Herrscher regelmäßig in der Sprache der Liebe und in Gesten der körperlichen Nähe und Intimität zum Ausdruck kam. So entstand der Eindruck, dass der König aus homosexueller Neigung seinem Günstling übermäßigen Einfluss gewährte – auf Kosten der Barone, die ebenfalls einen Anteil an der Macht beanspruchten. In dieser Studie wird die Figur des Favoriten neu betrachtet und in ihrer Bedeutung über den Einzelfall hinaus verständlich gemacht. Sie setzt den Vorwurf sexuellen Fehlverhaltens als politisches Argument in Bezug zur Entwicklung der Vorstellung von Königtum und Herrschaft und eröffnet so neue Perspektiven einer Kulturgeschichte des Politischen im Spätmittelalter.",
+        "language": "",
+        "schema": "oapen",
+        "element": "abstract",
+        "qualifier": "otherlanguage"
+      },
+      {
+        "key": "oapen.abstract.otherlanguage",
+        "value": "Dans la recherche, le rôle politique du favori et la nature de sa relation avec le roi ont souvent été obscurcis par le fait que, dans les discours du haut et du bas Moyen Âge, la proximité particulière avec le souverain était régulièrement exprimée dans le langage de l’amour et dans des gestes de proximité physique et d’intimité. Ainsi, l’impression est née que le roi, par inclination homosexuelle, accordait une influence excessive à son favori – aux dépens des barons, qui revendiquaient, eux aussi, une part du pouvoir. Dans l’esprit d’une »histoire culturelle de la politique«, le présent ouvrage reconsidère la figure du favori, la rend compréhensible et tangible dans sa signification au-delà du cas individuel. Il met en évidence le caractère constructif des modèles modernes de perception du désir sexuel et souligne l’importance de l’inconduite sexuelle comme argument politique dans le discours médiéval.",
+        "language": "",
+        "schema": "oapen",
+        "element": "abstract",
+        "qualifier": "otherlanguage"
+      },
+      {
+        "key": "oapen.identifier.doi",
+        "value": "10.17885/heiup.834",
+        "language": "",
+        "schema": "oapen",
+        "element": "identifier",
+        "qualifier": "doi"
+      },
+      {
+        "key": "oapen.relation.isPublishedBy",
+        "value": "https://library.oapen.org/handle/20.500.12657/22416",
+        "language": "",
+        "schema": "oapen",
+        "element": "relation",
+        "qualifier": "isPublishedBy"
+      },
+      {
+        "key": "publisher.name",
+        "value": "Heidelberg University Publishing (heiUP)",
+        "language": null,
+        "schema": "publisher",
+        "element": "name",
+        "qualifier": null
+      },
+      {
+        "key": "publisher.website",
+        "value": "https://heiup.uni-heidelberg.de/",
+        "language": "",
+        "schema": "publisher",
+        "element": "website",
+        "qualifier": null
+      },
+      {
+        "key": "oapen.collection",
+        "value": "AG Universitätsverlage",
+        "language": null,
+        "schema": "oapen",
+        "element": "collection",
+        "qualifier": null
+      },
+      {
+        "key": "oapen.series.number",
+        "value": "123",
+        "language": "",
+        "schema": "oapen",
+        "element": "series",
+        "qualifier": "number"
+      },
+      {
+        "key": "oapen.pages",
+        "value": "449",
+        "language": "",
+        "schema": "oapen",
+        "element": "pages",
+        "qualifier": null
+      },
+      {
+        "key": "oapen.place.publication",
+        "value": "Heidelberg",
+        "language": "",
+        "schema": "oapen",
+        "element": "place",
+        "qualifier": "publication"
+      },
+      {
+        "key": "peerreview.anonymity",
+        "value": "Single-anonymised",
+        "language": null,
+        "schema": "peerreview",
+        "element": "anonymity",
+        "qualifier": null
+      },
+      {
+        "key": "peerreview.id",
+        "value": "a02a4356-7871-4f38-8701-21f30d5bf3c9",
+        "language": null,
+        "schema": "peerreview",
+        "element": "id",
+        "qualifier": null
+      },
+      {
+        "key": "peerreview.open.review",
+        "value": "No",
+        "language": null,
+        "schema": "peerreview",
+        "element": "open",
+        "qualifier": "review"
+      },
+      {
+        "key": "peerreview.publish.responsibility",
+        "value": "Books or series editor",
+        "language": null,
+        "schema": "peerreview",
+        "element": "publish",
+        "qualifier": "responsibility"
+      },
+      {
+        "key": "peerreview.review.stage",
+        "value": "Pre-publication",
+        "language": null,
+        "schema": "peerreview",
+        "element": "review",
+        "qualifier": "stage"
+      },
+      {
+        "key": "peerreview.review.type",
+        "value": "Full text",
+        "language": null,
+        "schema": "peerreview",
+        "element": "review",
+        "qualifier": "type"
+      },
+      {
+        "key": "peerreview.reviewer.type",
+        "value": "External peer reviewer",
+        "language": null,
+        "schema": "peerreview",
+        "element": "reviewer",
+        "qualifier": "type"
+      },
+      {
+        "key": "peerreview.title",
+        "value": "Single-Blind-Peer-Review overseen by Series Editor",
+        "language": null,
+        "schema": "peerreview",
+        "element": "title",
+        "qualifier": null
+      }
+    ]
+  }
+]

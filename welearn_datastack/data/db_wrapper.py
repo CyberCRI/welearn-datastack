@@ -2,6 +2,8 @@ from abc import ABC
 
 from welearn_database.data.models import ErrorRetrieval, WeLearnDocument
 
+from welearn_datastack.data.source_models.oapen import OapenModel
+
 
 class Wrapper(ABC):
     pass
@@ -31,10 +33,6 @@ class WrapperRetrieveDocument(Wrapper):
 
 
 class WrapperRawData(Wrapper):
-    def __init__(self, raw_data: dict, document: WeLearnDocument):
+    def __init__(self, raw_data: OapenModel, document: WeLearnDocument):
         self.raw_data = raw_data
         self.document = document
-
-    #
-    # def update_document_with_raw_data(self, function_update) -> WeLearnDocument:
-    #     return function_update(self.document, self.raw_data)

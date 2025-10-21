@@ -25,3 +25,11 @@ def get_new_https_session(retry_total: int = 10):
     session.mount("https://", adapter)
     session.headers = HEADERS  # type: ignore
     return session
+
+
+def get_http_code_from_exception(e: Exception) -> int | None:
+    if not isinstance(e, requests.HTTPError):
+        return None
+    e: requests.HTTPError
+    ret = e.response.status_code
+    return ret
