@@ -2,6 +2,7 @@ from abc import ABC
 
 from welearn_database.data.models import ErrorRetrieval, WeLearnDocument
 
+from welearn_datastack.data.source_models.hal import HALModel
 from welearn_datastack.data.source_models.oapen import OapenModel
 
 
@@ -33,6 +34,6 @@ class WrapperRetrieveDocument(Wrapper):
 
 
 class WrapperRawData(Wrapper):
-    def __init__(self, raw_data: OapenModel, document: WeLearnDocument):
+    def __init__(self, raw_data: OapenModel | HALModel, document: WeLearnDocument):
         self.raw_data = raw_data
         self.document = document
