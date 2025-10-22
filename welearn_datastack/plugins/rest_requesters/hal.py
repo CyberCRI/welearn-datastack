@@ -1,4 +1,5 @@
 import io
+import json
 import logging
 import os
 from datetime import datetime, timezone
@@ -10,6 +11,7 @@ from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HAL_URL_BASE
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.source_models.hal import HALModel
 from welearn_datastack.exceptions import NoContent
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -243,17 +245,18 @@ class HALCollector(IPluginRESTCollector):
         return ret
 
     def _get_jsons(self, hal_documents: list[WeLearnDocument]) -> List[WrapperRawData]:
-        urls = [doc.url for doc in hal_documents]
-        hal_ids = []
-        for url in urls:
-            hal_ids.append(url.split("/")[-1])
+        hal_doc_ids = {}
+        for doc in hal_documents:
+            hal_id = get_url_without_hal_like_versionning(doc.url).split("/")[-1]
+            hal_doc_ids[hal_id] = doc
+
         http = get_new_https_session()
         url = "https://api.archives-ouvertes.fr/search/"
 
         response = http.get(
             url,
             params={
-                "q": self._create_halids_query(hal_ids),
+                "q": self._create_halids_query(list(hal_doc_ids.keys())),
                 "doctype_s": self._query_params_doctype_s,
                 "fl": self._query_params_fl,
                 "wt": self._query_params_wt,
@@ -266,23 +269,22 @@ class HALCollector(IPluginRESTCollector):
         response.raise_for_status()
 
         logger.info("Request URL: %s", response.request.url)
-        json_req = response.json()
-        hal_jsons: List = json_req["response"]["docs"]
+        json_resp = response.json()
+        hal_models = HALModel.model_validate_json(json.dumps(json_resp))
+        docs_from_api: List = hal_models.response.docs
 
         # Link each json to its WeLearnDocument
         ret = []
-        for hal_json in hal_jsons:
-            hal_url = self._get_hal_url(hal_json)
-            for wl_doc in hal_documents:
-                if wl_doc.url == hal_url:
-                    ret.append(
-                        WrapperRawData(
-                            raw_data=hal_json,
-                            document=wl_doc,
-                        )
+        for doc_from_api in docs_from_api:
+            hal_id = doc_from_api.halId_s
+            welearn_doc = hal_doc_ids.get(hal_id)
+            if welearn_doc:
+                ret.append(
+                    WrapperRawData(
+                        raw_data=doc_from_api.model_dump(),
+                        document=welearn_doc,
                     )
-                    hal_json["welearn_document"] = wl_doc
-                    break
+                )
 
         return ret
 
