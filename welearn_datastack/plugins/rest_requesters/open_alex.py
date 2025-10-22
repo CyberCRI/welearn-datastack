@@ -1,9 +1,12 @@
 import io
+import json
 import logging
 import os
 from datetime import datetime
 from itertools import batched
 from typing import Any, Dict, List, Tuple
+
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import (
     AUTHORIZED_LICENSES,
@@ -13,7 +16,13 @@ from welearn_datastack.constants import (
     PUBLISHERS_TO_AVOID,
     YEAR_FIRST_DATE_FORMAT,
 )
+from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.data.source_models.open_alex import (
+    Location,
+    OpenAlexModel,
+    OpenAlexResult,
+)
 from welearn_datastack.exceptions import (
     ClosedAccessContent,
     PDFFileSizeExceedLimit,
@@ -28,7 +37,10 @@ from welearn_datastack.modules.pdf_extractor import (
     replace_ligatures,
 )
 from welearn_datastack.plugins.interface import IPluginRESTCollector
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
+)
 from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
@@ -191,25 +203,23 @@ class OpenAlexCollector(IPluginRESTCollector):
                 logger.error(f"This string can't be cleaned :{string_to_clear}")
         return string_to_clear
 
-    def _convert_json_in_welearn_document(
-        self, to_convert_json: dict[str, Any]
-    ) -> ScrapedWeLearnDocument:
-        document_title = to_convert_json["title"]
-        document_url = to_convert_json["ids"]["openalex"]
+    def _update_welearn_document(self, wrapper: WrapperRawData) -> WeLearnDocument:
+        document_title = wrapper.raw_data.title
+        document_url = wrapper.raw_data.ids.openalex
         logger.info(f"Process {document_url}...")
         document_desc = self._remove_useless_first_word(
             string_to_clear=self._invert_abstract(
-                to_convert_json["abstract_inverted_index"]
+                wrapper.raw_data.abstract_inverted_index
             ),
             useless_words=["background", "abstract", "introduction"],
         )
 
-        work_locations: list[dict] = to_convert_json.get("locations", [])
+        work_locations: list[Location] = wrapper.raw_data.locations
         host_ids = []
         for location in work_locations:
-            host_organization_lineage_malformed: list[str] = location.get(
-                "source", dict()
-            ).get("host_organization_lineage", [])
+            host_organization_lineage_malformed: list[str] = (
+                location.source.host_organization_lineage
+            )
             host_organization_lineage = [
                 h.split("/")[-1] for h in host_organization_lineage_malformed
             ]
@@ -221,16 +231,16 @@ class OpenAlexCollector(IPluginRESTCollector):
                 raise UnauthorizedPublisher(f"{host_id} is not authorized in welearn")
 
         document_content = document_desc
-        if to_convert_json["best_oa_location"]["pdf_url"] is None:
+        if wrapper.raw_data.best_oa_location.pdf_url is None:
             pdf_flag = False
         else:
             try:
                 # Get the content of the PDF
                 logger.info(
-                    f"Getting PDF content from {to_convert_json['best_oa_location']['pdf_url']}"
+                    f"Getting PDF content from {wrapper.raw_data.best_oa_location.pdf_url}"
                 )
                 document_content = self._get_pdf_content(
-                    to_convert_json["best_oa_location"]["pdf_url"],
+                    wrapper.raw_data.best_oa_location.pdf_url,
                     file_size_limit=self.pdf_size_file_limit,
                 )
                 pdf_flag = True
@@ -240,31 +250,30 @@ class OpenAlexCollector(IPluginRESTCollector):
                 )
                 pdf_flag = False
 
-        document_corpus = self.related_corpus
         publication_date = int(
             datetime.strptime(
-                to_convert_json["publication_date"], YEAR_FIRST_DATE_FORMAT
+                wrapper.raw_data.publication_date, YEAR_FIRST_DATE_FORMAT
             ).timestamp()
         )
 
         authors = []
-        for author_info in to_convert_json["authorships"]:
+        for author_info in wrapper.raw_data.authorships:
             authors.append(
                 {
-                    "name": author_info["author"]["display_name"],
-                    "misc": ",".join(author_info["raw_affiliation_strings"]),
+                    "name": author_info.author.display_name,
+                    "misc": ",".join(author_info.raw_affiliation_strings),
                 }
             )
 
-        if not to_convert_json["open_access"]["is_oa"]:
+        if not wrapper.raw_data.open_access.is_oa:
             raise ClosedAccessContent()
         else:
             logger.info(f"The content {document_url} is open access")
 
-        best_oa_location_info = to_convert_json["best_oa_location"]
+        best_oa_location_info = wrapper.raw_data.best_oa_location
 
         # Open Alex format is cc-by...
-        license_openalex_format: str = best_oa_location_info["license"]
+        license_openalex_format: str = best_oa_location_info.license
 
         if not license_openalex_format.startswith("cc"):
             raise UnauthorizedLicense()
@@ -280,73 +289,91 @@ class OpenAlexCollector(IPluginRESTCollector):
 
         document_details = {
             "publication_date": publication_date,
-            "type": to_convert_json["type"],
-            "doi": to_convert_json["ids"]["doi"],
-            "publisher": to_convert_json["best_oa_location"]["source"][
-                "host_organization_name"
-            ],
+            "type": wrapper.raw_data.type,
+            "doi": wrapper.raw_data.ids.doi,
+            "publisher": wrapper.raw_data.best_oa_location.source.host_organization_name,
             "license_url": license_good_format,
-            "issn": to_convert_json["best_oa_location"]["source"]["issn_l"],
+            "issn": wrapper.raw_data.best_oa_location.source.issn_l,
             "content_from_pdf": pdf_flag,
-            "topics": self._transform_topics(to_convert_json["topics"]),
-            "tags": [x.get("display_name") for x in to_convert_json["keywords"]],
-            "referenced_works": to_convert_json["referenced_works"],
-            "related_works": to_convert_json["related_works"],
+            "topics": self._transform_topics(wrapper.raw_data.topics),
+            "tags": [x.get("display_name") for x in wrapper.raw_data.keywords],
+            "referenced_works": wrapper.raw_data.referenced_works,
+            "related_works": wrapper.raw_data.related_works,
             "authors": authors,
         }
 
-        return ScrapedWeLearnDocument(
-            document_title=document_title,
-            document_url=document_url,
-            document_content=document_content,
-            document_desc=document_desc,
-            document_corpus=document_corpus,
-            document_details=document_details,
-        )
+        wrapper.document.title = document_title
+        wrapper.document.description = document_desc
+        wrapper.document.content = document_content
+        wrapper.document.details = document_details
+        return wrapper.document
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
+        ret: list[WrapperRetrieveDocument] = []
         page_length = 50
-        sub_batches = batched(urls, page_length)
+        sub_batches: batched[WeLearnDocument] = batched(documents, page_length)
         http_client = get_new_https_session()
 
-        collected_docs: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
         for sub_batch in sub_batches:
+            urls_docs = {d.url: d for d in documents}
             try:
                 local_params = self._generate_api_query_params(
-                    urls=list(sub_batch), page_ln=page_length
+                    urls=list(urls_docs.keys()), page_ln=page_length
                 )
                 ret_from_openalex = http_client.get(
                     url=OPEN_ALEX_BASE_URL, params=local_params
                 )
+                ret_from_openalex.raise_for_status()
 
                 # Compare returned list of urls from OpenAlex and the requested ones
-                oa_results = ret_from_openalex.json()["results"]
-                urls_from_open_alex = [
-                    result["ids"]["openalex"] for result in oa_results
-                ]
+                oa_resp = OpenAlexModel.model_validate_json(
+                    json.dumps(ret_from_openalex.json())
+                )
+                oa_results: list[OpenAlexResult] = oa_resp.results
+                urls_from_open_alex = [result.ids.openalex for result in oa_results]
                 not_returned_urls = [
-                    url for url in list(sub_batch) if url not in urls_from_open_alex
+                    url for url in urls_docs.keys() if url not in urls_from_open_alex
                 ]
                 logger.info(f"There is {len(not_returned_urls)} not returned urls")
-                error_docs.extend(not_returned_urls)
+                for not_returned_url in not_returned_urls:
+                    ret.append(
+                        WrapperRetrieveDocument(
+                            document=urls_docs[not_returned_url],
+                            error_info=f"{not_returned_url} is not returned from openalex API",
+                        )
+                    )
 
                 for result in oa_results:
+                    wrapper = WrapperRawData(
+                        document=urls_docs[result.ids.openalex], raw_data=result
+                    )
                     try:
-                        doc = self._convert_json_in_welearn_document(result)
-                        collected_docs.append(doc)
+                        doc = self._update_welearn_document(wrapper)
+                        ret.append(WrapperRetrieveDocument(document=doc))
                     except Exception as e:
                         logger.exception(
-                            f"Error while trying to get contents this url : {result['ids']['openalex']}",
+                            f"Error while trying to get contents this url : {result.ids.openalex}",
                             e,
                         )
-                        error_docs.append(result["ids"]["openalex"])
+                        ret.append(
+                            WrapperRetrieveDocument(
+                                document=urls_docs[result.ids.openalex],
+                                error_info=str(e),
+                            )
+                        )
             except Exception as e:
                 logger.exception(
                     "Error while trying to get contents from a sub batch urls",
                     e,
                 )
-                error_docs.extend(list(sub_batch))
+                for doc in sub_batch:
+                    ret.append(
+                        WrapperRetrieveDocument(
+                            document=doc,
+                            http_error_code=get_http_code_from_exception(e),
+                            error_info=f"Error while trying to get contents from OpenAlex API: {str(e)}",
+                        )
+                    )
                 continue
 
-        return collected_docs, error_docs
+        return ret
