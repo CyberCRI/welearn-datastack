@@ -5,6 +5,7 @@ from welearn_database.data.models import ErrorRetrieval, WeLearnDocument
 from welearn_datastack.data.source_models.hal import HALModel
 from welearn_datastack.data.source_models.oapen import OapenModel
 from welearn_datastack.data.source_models.open_alex import OpenAlexResult
+from welearn_datastack.data.source_models.ted import TEDModel
 
 
 class Wrapper(ABC):
@@ -37,7 +38,7 @@ class WrapperRetrieveDocument(Wrapper):
 class WrapperRawData(Wrapper):
     def __init__(
         self,
-        raw_data: OapenModel | HALModel | OpenAlexResult,
+        raw_data: OapenModel | HALModel | OpenAlexResult | TEDModel,
         document: WeLearnDocument,
     ):
         self.raw_data = raw_data
