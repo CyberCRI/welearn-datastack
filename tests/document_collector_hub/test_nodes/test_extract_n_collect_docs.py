@@ -8,6 +8,7 @@ import uuid
 from pathlib import Path
 from typing import Dict, List, Tuple
 from unittest import TestCase, mock
+from unittest.mock import patch
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import DatabaseError
@@ -22,6 +23,7 @@ from welearn_database.data.models import (
 )
 
 from tests.database_test_utils import handle_schema_with_sqlite
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.modules import collector_selector
 from welearn_datastack.nodes_workflow.DocumentHubCollector import document_collector
@@ -69,24 +71,6 @@ list_of_swld = [
 dict_url_for_doc = {doc.document_url: doc for doc in list_of_swld}
 
 
-class TestPluginFiles(IPluginFilesCollector):
-    related_corpus: str = corpus_source_name
-
-    def __init__(self):
-        super().__init__()
-
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
-        res: List[ScrapedWeLearnDocument] = []
-        errors_urls: List[str] = []
-        try:
-            for doc in list_of_swld:
-                if doc.document_url in urls:
-                    res.append(dict_url_for_doc[doc.document_url])
-        except Exception as e:
-            errors_urls.append(urls[0])
-        return res, errors_urls
-
-
 class TestExtractNCollectDocs(TestCase):
     def setUp(self) -> None:
         os.environ["PG_DRIVER"] = "sqlite"
@@ -102,7 +86,7 @@ class TestExtractNCollectDocs(TestCase):
         self.test_session = s_maker()
         Base.metadata.create_all(self.test_session.get_bind())
 
-        collector_selector.plugins_files_list = [TestPluginFiles]
+        # collector_selector.plugins_files_list = [TestPluginFiles]
 
         self.path_test_input = Path(__file__).parent.parent / "resources" / "input"
         self.path_test_input.mkdir(parents=True, exist_ok=True)
@@ -133,16 +117,28 @@ class TestExtractNCollectDocs(TestCase):
         shutil.rmtree(self.path_test_input, ignore_errors=True)
         shutil.rmtree(self.path_test_input.parent / "output", ignore_errors=True)
 
-    def test_extract_data(self):
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.collector_selector"
+    )
+    def test_extract_data(self, collector_selector_mock):
         url_0 = list_of_swld[0].document_url
         url_1 = list_of_swld[1].document_url
-
         wd0 = WeLearnDocument(id=uuid.uuid4(), url=url_0, corpus=self.corpus_test)
-
         wd1 = WeLearnDocument(id=uuid.uuid4(), url=url_1, corpus=self.corpus_test)
         self.test_session.add(wd0)
         self.test_session.add(wd1)
         self.test_session.commit()
+
+        # Mock plugin
+        collector_selector_mock.select_collector.return_value = mock.MagicMock(
+            spec=IPluginFilesCollector
+        )
+        collector_selector_mock.select_collector.return_value.run.return_value = [
+            WrapperRetrieveDocument(document=wd0),
+            WrapperRetrieveDocument(
+                document=wd1, error_info="Not found", http_error_code=404
+            ),
+        ]
 
         (
             extracted_docs,
@@ -150,8 +146,8 @@ class TestExtractNCollectDocs(TestCase):
             process_states,
         ) = document_collector.extract_data_from_urls(welearn_documents=[wd0, wd1])
 
-        self.assertEqual(len(extracted_docs), 2)
-        self.assertEqual(len(error_docs), 0)
+        self.assertEqual(len(extracted_docs), 1)
+        self.assertEqual(len(error_docs), 1)
         self.assertEqual(len(process_states), 2)
 
     def test_extract_data_corpus_not_found(self):
@@ -178,7 +174,7 @@ class TestExtractNCollectDocs(TestCase):
         self.assertEqual(len(extracted_docs), 1)
         self.assertEqual(len(process_states), 1)
 
-    @mock.patch(
+    @patch(
         "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.create_db_session"
     )
     def test_main(self, create_db_session_mock):
@@ -222,42 +218,3 @@ class TestExtractNCollectDocs(TestCase):
             ),
             2,
         )
-
-    # /!\ This filter is not used anymore /!\
-    # def test_filter_already_update(self):
-    #     """
-    #     Check if the method correctly ignore already updated documents in database
-    #     :return:
-    #     """
-    #     states = []
-    #     wd0 = WeLearnDocument(
-    #         id=uuid.uuid4(),
-    #         url=list_of_swld[0].document_url,
-    #         corpus=self.corpus_test,
-    #         title=list_of_swld[0].document_title,
-    #         lang=list_of_swld[0].document_lang,
-    #         full_content=list_of_swld[0].document_content,
-    #         description=list_of_swld[0].document_desc,
-    #         details=list_of_swld[0].document_details,
-    #         trace=list_of_swld[0].trace,
-    #     )
-    #     wd1 = WeLearnDocument(
-    #         id=uuid.uuid4(),
-    #         url=list_of_swld[1].document_url,
-    #         corpus=self.corpus_test,
-    #     )
-    #     ret = []
-    #
-    #     self.test_session.add(wd0)
-    #     self.test_session.add(wd1)
-    #     self.test_session.commit()
-    #
-    #     document_collector.handle_scraped_docs(
-    #         scraped_docs=list_of_swld,
-    #         states=states,
-    #         ret_documents=ret,
-    #         doc_db_urls_dict={x.url: x for x in [wd0, wd1]},
-    #     )
-    #
-    #     self.assertEqual(len(ret), 1)
-    #     self.assertEqual(len(states), 1)
