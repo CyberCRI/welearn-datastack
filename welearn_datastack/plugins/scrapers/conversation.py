@@ -155,7 +155,7 @@ class ConversationCollector(IPluginScrapeCollector):
             try:
                 ret.append(
                     WrapperRetrieveDocument(
-                        document=document,
+                        document=self._scrape_url(document),
                     )
                 )
             except Exception as e:
