@@ -5,10 +5,15 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from bs4 import BeautifulSoup, ResultSet  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
+)
 from welearn_datastack.utils_.scraping_utils import extract_property_from_html
 
 logger = logging.getLogger(__name__)
@@ -101,16 +106,16 @@ class ConversationCollector(IPluginScrapeCollector):
 
         return details
 
-    def _scrape_url(self, url: str) -> ScrapedWeLearnDocument:
+    def _scrape_url(self, document: WeLearnDocument) -> WeLearnDocument:
         """
-        Scrape an url
-        :param url: Url to scrape
-        :return: ScrapedWeLearnDocument
+        Scrape an document
+        :param document: Document to scrape
+        :return: WrapperRetrieveDocument
         """
-        logger.info("Scraping url : '%s'", url)
+        logger.info("Scraping url : '%s'", document.url)
         https_session = get_new_https_session()
 
-        req_res = https_session.get(url=url, timeout=self.timeout)
+        req_res = https_session.get(url=document.url, timeout=self.timeout)
 
         req_res.raise_for_status()  # Raise exception if status code is not a good one
 
@@ -136,34 +141,34 @@ class ConversationCollector(IPluginScrapeCollector):
             error_property_name="content",
         )
 
-        doc_url = url
-        doc_title = title
-        doc_desc = description
-        doc_content = content
-        doc_details = self._get_document_details(soup)
-        scraped_document = ScrapedWeLearnDocument(
-            document_url=doc_url,
-            document_title=doc_title,
-            document_desc=doc_desc,
-            document_content=doc_content,
-            document_details=doc_details,
-            document_corpus=self.related_corpus,
-        )
+        document.title = title
+        document.description = description
+        document.full_content = content
+        document.details = self._get_document_details(soup)
 
-        return scraped_document
+        return document
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running ConversationCollector plugin")
-        ret: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
-        for url in urls:
+        ret: List[WrapperRetrieveDocument] = []
+        for document in documents:
             try:
-                ret.append(self._scrape_url(url))
-            except Exception as e:
-                logger.exception(
-                    "Error while scraping url,\n url: '%s' \nError: %s", url, e
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                    )
                 )
-                error_docs.append(url)
+            except Exception as e:
+                msg = f"Error while scraping url,\n url: '{document.url}' \nError: {str(e)}"
+                logger.exception(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                        http_error_code=get_http_code_from_exception(e),
+                    )
+                )
                 continue
+
         logger.info("ConversationCollector plugin finished, %s urls scraped", len(ret))
-        return ret, error_docs
+        return ret
