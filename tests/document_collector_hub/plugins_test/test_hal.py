@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from welearn_datastack.data.db_wrapper import WrapperRawData
-from welearn_datastack.data.source_models.hal import HALModel
 from welearn_datastack.plugins.rest_requesters.hal import HALCollector
 
 
