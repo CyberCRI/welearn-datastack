@@ -3,7 +3,6 @@ from typing import Dict, List, Type
 
 from welearn_datastack.data.enumerations import PluginType
 from welearn_datastack.exceptions import InvalidPluginType, PluginNotFoundError
-from welearn_datastack.plugins.files_readers import plugins_files_list
 from welearn_datastack.plugins.interface import (
     IPlugin,
     IPluginFilesCollector,
