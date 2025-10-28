@@ -208,7 +208,7 @@ class HALCollector(IPluginRESTCollector):
         wrapper.document.title = title
         wrapper.document.description = desc
         wrapper.document.url = url
-        wrapper.document.content = content
+        wrapper.document.full_content = content
         wrapper.document.details = details
 
         logger.info("Document %s successfully scraped", url)
