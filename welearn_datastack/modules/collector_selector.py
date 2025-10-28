@@ -5,7 +5,6 @@ from welearn_datastack.data.enumerations import PluginType
 from welearn_datastack.exceptions import InvalidPluginType, PluginNotFoundError
 from welearn_datastack.plugins.interface import (
     IPlugin,
-    IPluginFilesCollector,
     IPluginRESTCollector,
     IPluginScrapeCollector,
 )
@@ -23,22 +22,16 @@ def select_collector(
     :param corpus: Corpus name
     :return: Collector class
     """
-    mother_classes: List[
-        Type[IPluginFilesCollector | IPluginRESTCollector | IPluginScrapeCollector]
-    ] = []
+    mother_classes: List[Type[IPluginRESTCollector | IPluginScrapeCollector]] = []
     mother_classes.extend(plugins_scrape_list)
-    mother_classes.extend(plugins_files_list)
     mother_classes.extend(plugins_rest_list)
     logger.info("There is %s collectors classes", len(mother_classes))
 
-    plugins_corpus: Dict[
-        str, Type[IPluginFilesCollector | IPluginRESTCollector | IPluginScrapeCollector]
-    ] = {}
+    plugins_corpus: Dict[str, Type[IPluginRESTCollector | IPluginScrapeCollector]] = {}
 
     for collectors_classes in mother_classes:
         plugins_corpus[collectors_classes.related_corpus] = collectors_classes
 
-    plugins_corpus = plugins_corpus
     meta_collector = plugins_corpus.get(corpus, None)
 
     if meta_collector is None:
