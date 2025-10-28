@@ -11,35 +11,35 @@ class Content(BaseModel):
 
 class PressBooksModel(BaseModel):
     content: Content
-    _links: dict
+    links_: dict
 
 
 class EditorItem(BaseModel):
     name: str
     slug: str
-    _type: str = Field(..., alias="@type")
+    type_: str = Field(..., alias="@type")
 
 
 class AuthorItem(BaseModel):
     name: str
     slug: str
     contributor_institution: Optional[str]
-    _type: str = Field(..., alias="@type")
+    type_: str = Field(..., alias="@type")
 
 
 class Address(BaseModel):
-    _type: str = Field(..., alias="@type")
+    type_: str = Field(..., alias="@type")
     addressLocality: str
 
 
 class Publisher(BaseModel):
-    _type: str = Field(..., alias="@type")
+    type_: str = Field(..., alias="@type")
     name: str
     address: Address
 
 
 class License(BaseModel):
-    _type: str = Field(..., alias="@type")
+    type_: str = Field(..., alias="@type")
     url: str
     name: str
 
@@ -53,4 +53,4 @@ class PressBooksMetadataModel(BaseModel):
     date_gmt: Optional[str]
     modified_gmt: Optional[str]
     license: License
-    _links: dict
+    links_: dict
