@@ -7,14 +7,13 @@ import re
 from collections import deque
 from datetime import datetime
 from itertools import batched
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List
 
 from lingua import Language
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.data.source_models.oapen import Metadatum, OapenModel
 from welearn_datastack.exceptions import (
     NoDescriptionFoundError,
