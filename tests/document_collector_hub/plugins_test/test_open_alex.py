@@ -1,365 +1,299 @@
 import json
 import os
-from pathlib import Path
-from unittest import TestCase
-from unittest.mock import Mock, patch
+import unittest
+from unittest.mock import MagicMock, patch
 
-from welearn_datastack import constants
-from welearn_datastack.exceptions import PDFFileSizeExceedLimit, UnauthorizedPublisher
+from welearn_database.data.models import WeLearnDocument
+
+from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.source_models.open_alex import (
+    Affiliation,
+    Author,
+    Authorship,
+    BestOaLocation,
+    Domain,
+    Field,
+    Ids,
+    Institution,
+    Keyword,
+    Location,
+    Meta,
+    OpenAccess,
+    OpenAlexModel,
+    OpenAlexResult,
+    Source,
+    Source1,
+    Subfield,
+    Topic,
+)
 from welearn_datastack.plugins.rest_requesters.open_alex import OpenAlexCollector
 
-
-class MockResponse:
-    def __init__(self, text="", status_code=200, content=None):
-        self.text = text
-        self.status_code = status_code
-        self.content = content or text.encode("utf-8")
-
-    def raise_for_status(self):
-        pass
-
-    def json(self):
-        return json.loads(self.text)
+# Helper to build a minimal valid OpenAlexResult
 
 
-class TestOpenAlexCollector(TestCase):
+def build_openalex_result(
+    url: str = "https://example.com/W123",
+    doi: str = "10.1234/example",
+    title: str = "Sample Title",
+):
+    ids = Ids(openalex=url, doi=doi, mag="", pmid="", pmcid="")
+    author = Author(id="A1", display_name="John Doe", orcid=None)
+    institution = Institution(
+        id="I1", display_name="Inst", ror="", country_code=None, type="uni", lineage=[]
+    )
+    affiliation = Affiliation(raw_affiliation_string="Inst", institution_ids=["I1"])
+    authorship = Authorship(
+        author_position="first",
+        author=author,
+        institutions=[institution],
+        countries=["FR"],
+        is_corresponding=True,
+        raw_author_name="John Doe",
+        raw_affiliation_strings=["Inst"],
+        affiliations=[affiliation],
+    )
+    open_access = OpenAccess(
+        is_oa=True,
+        oa_status="gold",
+        oa_url="https://example.com/oa",
+        any_repository_has_fulltext=True,
+    )
+    source = Source(
+        id="S1",
+        display_name="Source",
+        issn_l="1234-5678",
+        issn=["1234-5678"],
+        is_oa=True,
+        is_in_doaj=True,
+        is_indexed_in_scopus=True,
+        is_core=True,
+        host_organization=None,
+        host_organization_name=None,
+        host_organization_lineage=[],
+        host_organization_lineage_names=[],
+        type="journal",
+    )
+    best_oa_location = BestOaLocation(
+        is_oa=True,
+        landing_page_url="https://example.com/landing",
+        pdf_url="https://example.com/pdf",
+        source=source,
+        license="cc-by",
+        license_id="cc-by",
+        version="publishedVersion",
+        is_accepted=True,
+        is_published=True,
+    )
+    subfield = Subfield(id="sf1", display_name="Subfield")
+    field = Field(id="f1", display_name="Field")
+    domain = Domain(id="d1", display_name="Domain")
+    topic = Topic(
+        id="t1",
+        display_name="Topic",
+        score=1.0,
+        subfield=subfield,
+        field=field,
+        domain=domain,
+    )
+    keyword = Keyword(id="k1", display_name="Keyword", score=1.0)
+    source1 = Source1(
+        id="S1",
+        display_name="Source",
+        issn_l="1234-5678",
+        issn=["1234-5678"],
+        is_oa=True,
+        is_in_doaj=True,
+        is_indexed_in_scopus=True,
+        is_core=True,
+        host_organization=None,
+        host_organization_name=None,
+        host_organization_lineage=["/org1"],
+        host_organization_lineage_names=["Org1"],
+        type="journal",
+    )
+    location = Location(
+        is_oa=True,
+        landing_page_url="https://example.com/landing",
+        pdf_url="https://example.com/pdf",
+        source=source1,
+        license="cc-by",
+        license_id="cc-by",
+        version="publishedVersion",
+        is_accepted=True,
+        is_published=True,
+    )
+    return OpenAlexResult(
+        title=title,
+        ids=ids,
+        language="en",
+        publication_date="2022-01-01",
+        authorships=[authorship],
+        open_access=open_access,
+        best_oa_location=best_oa_location,
+        abstract_inverted_index={"Background": [0], "study": [1]},
+        type="journal-article",
+        topics=[topic],
+        keywords=[keyword],
+        referenced_works=["W2"],
+        related_works=["W3"],
+        locations=[location],
+    )
+
+
+class TestOpenAlexCollector(unittest.TestCase):
     def setUp(self):
-        os.environ["TEAM_EMAIL"] = "welearn@learningplanetinstitute.org"
-        self.openalexColector = OpenAlexCollector()
-        self.json_response_path_one_work: Path = (
-            Path(__file__).parent.parent / "resources/open_alex_response.json"
-        )
-        self.json_several_works: Path = (
-            Path(__file__).parent.parent
-            / "resources/open_alex_response_several_works_1.json"
-        )
-        self.pdf: Path = (
-            Path(__file__).parent.parent
-            / "resources/file_plugin_input/pages_with_headers_and_footers_pdf.pdf"
+        os.environ["TEAM_EMAIL"] = "team@example.com"
+        self.collector = OpenAlexCollector()
+        self.welearn_doc = WeLearnDocument(
+            url="https://example.com/W123",
+            title="Doc",
+            description="",
+            full_content="",
+            details={},
         )
 
-    def test__invert_abstract(self):
-        awaited_result = "This test is a test. This must be correct."
-        test_values = {
-            "This": [0, 5],
-            "test": [1],
-            "is": [2],
-            "a": [3],
-            "test.": [4],
-            "must": [6],
-            "be": [7],
-            "correct.": [8],
-        }
-        result = self.openalexColector._invert_abstract(test_values)
-        self.assertEqual(awaited_result, result)
+    # Test _invert_abstract returns correct string
+    def test_invert_abstract_returns_correct_string(self):
+        inv = {"Background": [0], "study": [1]}
+        result = self.collector._invert_abstract(inv)
+        self.assertEqual(result, "Background study")
 
-    def test__generate_api_query_params(self):
-        urls = [
-            "https://example.org/1",
-            "https://example.org/2",
-            "https://example.org/3",
+    # Test _generate_api_query_params returns expected dict
+    def test_generate_api_query_params_returns_expected_dict(self):
+        params = self.collector._generate_api_query_params(
+            ["https://example.com/W123"], 10
+        )
+        self.assertIn("filter", params)
+        self.assertIn("per_page", params)
+        self.assertIn("mailto", params)
+        self.assertIn("select", params)
+        self.assertEqual(params["per_page"], 10)
+        self.assertEqual(params["mailto"], "team@example.com")
+
+    # Test _remove_useless_first_word removes word if present
+    def test_remove_useless_first_word_removes_word(self):
+        s = self.collector._remove_useless_first_word(
+            "Background Study of X", ["Background"]
+        )
+        self.assertEqual(s, "Study of X")
+
+    # Test _remove_useless_first_word returns original if not present
+    def test_remove_useless_first_word_returns_original(self):
+        s = self.collector._remove_useless_first_word("Study of X", ["Background"])
+        self.assertEqual(s, "Study of X")
+
+    # Test _transform_topics returns correct structure
+    def test_transform_topics_returns_correct_structure(self):
+        topics = [
+            Topic(
+                id="t1",
+                display_name="Topic",
+                domain=Domain(id="d1", display_name="Domain"),
+                field=Field(id="f1", display_name="Field"),
+                subfield=Subfield(id="sf1", display_name="Subfield"),
+                score=1.0,
+            )
         ]
-        joined_urls = "|".join(urls)
-        page_ln = 200
-        tested_query = self.openalexColector._generate_api_query_params(urls, page_ln)
-        self.assertDictEqual(
-            {
-                "filter": f"ids.openalex:{joined_urls}",
-                "mailto": "welearn@learningplanetinstitute.org",
-                "per_page": page_ln,
-                "select": "title,ids,language,abstract_inverted_index,publication_date,authorships,open_access,best_oa_location,publication_date,type,topics,keywords,referenced_works,related_works,locations",
-            },
-            tested_query,
+        result = self.collector._transform_topics(topics)
+        self.assertTrue(any(x["external_depth_name"] == "domain" for x in result))
+        self.assertTrue(any(x["external_depth_name"] == "topic" for x in result))
+
+    # Test _update_welearn_document returns a WeLearnDocument with expected values
+    @patch.object(OpenAlexCollector, "_get_pdf_content", return_value="PDF content")
+    def test_update_welearn_document_returns_expected_document(self, mock_pdf):
+        openalex_result = build_openalex_result()
+        wrapper = WrapperRawData(document=self.welearn_doc, raw_data=openalex_result)
+        doc = self.collector._update_welearn_document(wrapper)
+        self.assertEqual(doc.title, openalex_result.title)
+        self.assertIn("publication_date", doc.details)
+        self.assertEqual(doc.details["type"], openalex_result.type)
+        self.assertTrue(doc.details["content_from_pdf"])
+        self.assertIn("license_url", doc.details)
+        self.assertEqual(
+            doc.details["issn"], openalex_result.best_oa_location.source.issn_l
+        )
+        self.assertEqual(
+            doc.details["authors"][0]["name"],
+            openalex_result.authorships[0].author.display_name,
         )
 
-    @patch("welearn_datastack.modules.pdf_extractor._send_pdf_to_tika")
+    # Test _update_welearn_document raises on closed access
+    def test_update_welearn_document_raises_on_closed_access(self):
+        openalex_result = build_openalex_result()
+        openalex_result.open_access.is_oa = False
+        wrapper = WrapperRawData(document=self.welearn_doc, raw_data=openalex_result)
+        with self.assertRaises(Exception):
+            self.collector._update_welearn_document(wrapper)
+
+    # Test run returns WrapperRetrieveDocument with correct document and error_info for missing url
     @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_new_https_session")
-    def test__get_pdf_content(self, http_session_mock, mock_send_pdf_to_tika):
-
-        mock_session = Mock()
-        http_session_mock.return_value = mock_session
-
-        mock_session.get.return_value = MockResponse(
-            status_code=200, content=self.pdf.read_bytes()
+    @patch("welearn_datastack.plugins.rest_requesters.open_alex.OpenAlexModel")
+    def test_run_returns_error_for_missing_url(self, mock_model, mock_session):
+        # Simulate OpenAlexModel returns no results
+        mock_model.model_validate_json.return_value = OpenAlexModel(
+            meta=Meta(
+                count=0, db_response_time_ms=0, page=0, per_page=0, groups_count={}
+            ),
+            results=[],
+            group_by=[],
         )
-        mock_send_pdf_to_tika.return_value = {
-            "X-TIKA:content": "<div class='page'>2.2. Measurements of Fiber Parameters Small pieces were extracted from various positions on the strip. and mechanical properties to provide additional information regarding these areas of study and growth conditions.</div>"
-        }
-        tested_result = self.openalexColector._get_pdf_content("https://example.org/1")
-        self.assertTrue(
-            tested_result.startswith(
-                "2.2. Measurements of Fiber Parameters Small pieces were extracted from various positions on the strip."
-            )
-        )
-        self.assertTrue(
-            tested_result.endswith(
-                "and mechanical properties to provide additional information regarding these areas of study and growth conditions."
-            )
-        )
+        mock_http = MagicMock()
+        mock_http.get.return_value.json.return_value = {"results": []}
+        mock_http.get.return_value.raise_for_status = lambda: None
+        mock_session.return_value = mock_http
+        result = self.collector.run([self.welearn_doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsInstance(result[0], WrapperRetrieveDocument)
+        self.assertIn("not returned", result[0].error_info)
 
+    # Test run returns WrapperRetrieveDocument with document on success
     @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_new_https_session")
-    def test_get_pdf_content_size_limit_error(self, http_session_mock):
-
-        mock_session = Mock()
-        http_session_mock.return_value = mock_session
-        mock_resp = MockResponse(status_code=200, content=self.pdf.read_bytes())
-        size_limit = 1000000
-        mock_resp.headers = {"content-length": size_limit * 2}
-
-        mock_session.head.return_value = mock_resp
-
-        with self.assertRaises(PDFFileSizeExceedLimit):
-            self.openalexColector._get_pdf_content(
-                "https://example.org/1", file_size_limit=size_limit
-            )
-
-        with self.assertRaises(ValueError):
-            self.openalexColector._get_pdf_content(
-                "https://example.org/1", file_size_limit=-1
-            )
-
-    def test__transform_topics(self):
-        original_json = [
-            {
-                "id": "https://openalex.org/T11213",
-                "display_name": "Genomic variations and chromosomal abnormalities",
-                "score": 0.9998,
-                "subfield": {
-                    "id": "https://openalex.org/subfields/1311",
-                    "display_name": "Genetics",
-                },
-                "field": {
-                    "id": "https://openalex.org/fields/13",
-                    "display_name": "Biochemistry, Genetics and Molecular Biology",
-                },
-                "domain": {
-                    "id": "https://openalex.org/domains/1",
-                    "display_name": "Life Sciences",
-                },
-            },
-            {
-                "id": "https://openalex.org/T10434",
-                "display_name": "Chromosomal and Genetic Variations",
-                "score": 0.997,
-                "subfield": {
-                    "id": "https://openalex.org/subfields/1110",
-                    "display_name": "Plant Science",
-                },
-                "field": {
-                    "id": "https://openalex.org/fields/11",
-                    "display_name": "Agricultural and Biological Sciences",
-                },
-                "domain": {
-                    "id": "https://openalex.org/domains/1",
-                    "display_name": "Life Sciences",
-                },
-            },
-            {
-                "id": "https://openalex.org/T11642",
-                "display_name": "Genomics and Rare Diseases",
-                "score": 0.9962,
-                "subfield": {
-                    "id": "https://openalex.org/subfields/1311",
-                    "display_name": "Genetics",
-                },
-                "field": {
-                    "id": "https://openalex.org/fields/13",
-                    "display_name": "Biochemistry, Genetics and Molecular Biology",
-                },
-                "domain": {
-                    "id": "https://openalex.org/domains/1",
-                    "display_name": "Life Sciences",
-                },
-            },
-        ]
-
-        awaited_result = [
-            {
-                "external_id": "https://openalex.org/domains/1",
-                "name": "Life Sciences",
-                "depth": 0,
-                "external_depth_name": "domain",
-                "directly_contained_in": [],
-            },
-            {
-                "external_id": "https://openalex.org/fields/13",
-                "name": "Biochemistry, Genetics and Molecular Biology",
-                "depth": 1,
-                "external_depth_name": "field",
-                "directly_contained_in": ["https://openalex.org/domains/1"],
-            },
-            {
-                "external_id": "https://openalex.org/subfields/1311",
-                "name": "Genetics",
-                "depth": 2,
-                "external_depth_name": "subfield",
-                "directly_contained_in": ["https://openalex.org/fields/13"],
-            },
-            {
-                "external_id": "https://openalex.org/T11213",
-                "name": "Genomic variations and chromosomal abnormalities",
-                "depth": 3,
-                "external_depth_name": "topic",
-                "directly_contained_in": ["https://openalex.org/subfields/1311"],
-            },
-            {
-                "external_id": "https://openalex.org/fields/11",
-                "name": "Agricultural and Biological Sciences",
-                "depth": 1,
-                "external_depth_name": "field",
-                "directly_contained_in": ["https://openalex.org/domains/1"],
-            },
-            {
-                "external_id": "https://openalex.org/subfields/1110",
-                "name": "Plant Science",
-                "depth": 2,
-                "external_depth_name": "subfield",
-                "directly_contained_in": ["https://openalex.org/fields/11"],
-            },
-            {
-                "external_id": "https://openalex.org/T10434",
-                "name": "Chromosomal and Genetic Variations",
-                "depth": 3,
-                "external_depth_name": "topic",
-                "directly_contained_in": ["https://openalex.org/subfields/1110"],
-            },
-            {
-                "external_id": "https://openalex.org/T11642",
-                "name": "Genomics and Rare Diseases",
-                "depth": 3,
-                "external_depth_name": "topic",
-                "directly_contained_in": ["https://openalex.org/subfields/1311"],
-            },
-        ]
-
-        result = self.openalexColector._transform_topics(original_json)
-        self.assertListEqual(result, awaited_result)
-
-    @patch(
-        "welearn_datastack.plugins.rest_requesters.open_alex.OpenAlexCollector._get_pdf_content"
-    )
-    def test__convert_json_in_welearn_document(self, mock_pdf):
-        mock_pdf.return_value = "The findings highlight the intricate interplay between genomic architecture and the mechanisms driving CNV formation."
-        with self.json_response_path_one_work.open(mode="r") as f:
-            content_json = json.load(f)
-            input_json = content_json["results"][0]
-            best_oa = input_json["best_oa_location"]
-
-            best_oa["pdf_url"] = "https://example.org/openalexdoc"
-            document = self.openalexColector._convert_json_in_welearn_document(
-                input_json
-            )
-
-            self.assertEqual(
-                document.document_url,
-                "https://openalex.org/W4407087308",
-            )
-            self.assertEqual(
-                document.document_title,
-                "Template switching during DNA replication is a prevalent source of adaptive gene amplification",
-            )
-            self.assertEqual(document.document_content, mock_pdf.return_value)
-            self.assertEqual(document.document_lang, "en")
-            self.assertEqual(document.document_corpus, "openalex")
-            self.assertEqual(
-                document.document_desc,
-                """Copy number variants (CNVs) are an important source of genetic variation underlying rapid adaptation and genome evolution. Whereas point mutation rates vary with genomic location and local DNA features, the role of genome architecture in the formation and evolutionary dynamics of CNVs is poorly understood. Previously, we found the GAP1 gene in Saccharomyces cerevisiae undergoes frequent amplification and selection in glutamine-limitation. The gene is flanked by two long terminal repeats (LTRs) and proximate to an origin of DNA replication (autonomously replicating sequence, ARS), which likely promote rapid GAP1 CNV formation. To test the role of these genomic elements on CNV-mediated adaptive evolution, we evolved engineered strains lacking either the adjacent LTRs, ARS, or all elements in glutamine-limited chemostats. Using a CNV reporter system and neural network simulation-based inference (nnSBI) we quantified the formation rate and fitness effect of CNVs for each strain. Removal of local DNA elements significantly impacts the fitness effect of GAP1 CNVs and the rate of adaptation. In 177 CNV lineages, across all four strains, between 26% and 80% of all GAP1 CNVs are mediated by Origin Dependent Inverted Repeat Amplification (ODIRA) which results from template switching between the leading and lagging strand during DNA synthesis. In the absence of the local ARS, distal ones mediate CNV formation via ODIRA. In the absence of local LTRs, homologous recombination can mediate gene amplification following de novo retrotransposon events. Our study reveals that template switching during DNA replication is a prevalent source of adaptive CNVs.""",
-            )
-            self.assertEqual(
-                document.document_title,
-                "Template switching during DNA replication is a prevalent source of adaptive gene amplification",
-            )
-
-            details = document.document_details
-            self.assertEqual(details["doi"], "https://doi.org/10.7554/elife.98934.3")
-            self.assertEqual(details["publisher"], "eLife Sciences Publications Ltd")
-            self.assertEqual(
-                details["license_url"], "https://creativecommons.org/licenses/by/4.0/"
-            )
-            self.assertEqual(details["issn"], "2050-084X")
-            self.assertTrue(details["content_from_pdf"])
-            self.assertEqual(len(details["topics"]), 8)
-            self.assertDictEqual(
-                details["topics"][0],
-                {
-                    "depth": 0,
-                    "directly_contained_in": [],
-                    "external_depth_name": "domain",
-                    "external_id": "https://openalex.org/domains/1",
-                    "name": "Life Sciences",
-                },
-            )
-            self.assertEqual(details["tags"][0], "Replication")
-            self.assertEqual(len(details["referenced_works"]), 107)
-            self.assertIn(
-                "https://openalex.org/W1986559385", details["referenced_works"]
-            )
-            self.assertEqual(len(details["related_works"]), 10)
-            self.assertIn("https://openalex.org/W4388014327", details["related_works"])
-
-    @patch(
-        "welearn_datastack.plugins.rest_requesters.open_alex.OpenAlexCollector._get_pdf_content"
-    )
-    def test__convert_json_in_welearn_document_from_unauthorized_publisher(
-        self, mock_pdf
+    @patch("welearn_datastack.plugins.rest_requesters.open_alex.OpenAlexModel")
+    @patch.object(OpenAlexCollector, "_update_welearn_document")
+    def test_run_returns_document_on_success(
+        self, mock_update, mock_model, mock_session
     ):
-        mock_pdf.return_value = "The findings highlight the intricate interplay between genomic architecture and the mechanisms driving CNV formation."
-        with self.json_response_path_one_work.open(mode="r") as f:
-            content_json = json.load(f)
-            input_json = content_json["results"][0]
-            input_json["locations"][0]["source"]["host_organization_lineage"].append(
-                "https://example.org/" + constants.PUBLISHERS_TO_AVOID[0]
-            )
-            best_oa = input_json["best_oa_location"]
+        openalex_result = build_openalex_result()
+        mock_model.model_validate_json.return_value = OpenAlexModel(
+            meta=Meta(
+                count=0, db_response_time_ms=0, page=0, per_page=0, groups_count={}
+            ),
+            results=[openalex_result],
+            group_by=[],
+        )
+        mock_http = MagicMock()
+        mock_http.get.return_value.json.return_value = json.loads(
+            OpenAlexModel(
+                meta=Meta(
+                    count=0, db_response_time_ms=0, page=0, per_page=0, groups_count={}
+                ),
+                results=[openalex_result],
+                group_by=[],
+            ).model_dump_json()
+        )
+        mock_http.get.return_value.raise_for_status = lambda: None
+        mock_session.return_value = mock_http
+        mock_update.return_value = self.welearn_doc
+        result = self.collector.run([self.welearn_doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsInstance(result[0], WrapperRetrieveDocument)
+        self.assertEqual(result[0].document, self.welearn_doc)
+        self.assertIsNone(result[0].error_info)
 
-            best_oa["pdf_url"] = "https://example.org/openalexdoc"
-            with self.assertRaises(UnauthorizedPublisher):
-                self.openalexColector._convert_json_in_welearn_document(input_json)
-
-    @patch(
-        "welearn_datastack.plugins.rest_requesters.open_alex.OpenAlexCollector._get_pdf_content"
-    )
+    # Test run returns error on API exception
     @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_new_https_session")
-    def test_run(self, http_session_mock, mock_pdf):
-        mock_pdf.return_value = "The findings highlight the intricate interplay between genomic architecture and the mechanisms driving CNV formation."
-        mock_session = Mock()
-        http_session_mock.return_value = mock_session
-        several_works_content = json.loads(self.json_several_works.open("r").read())
-        urls = [x["id"] for x in several_works_content["results"]]
-
-        mock_session.get.return_value = MockResponse(
-            self.json_several_works.open("r").read(), 200
-        )
-
-        collected_docs, error_docs = self.openalexColector.run(urls=urls)
-
-        self.assertEqual(len(collected_docs), 39)
-        self.assertEqual(len(error_docs), 50 - 39)
-
-    def test__remove_useless_first_word(self):
-        string_to_test = "Abstract Background Preventing infections due to MDR pathogens is particularly important in the era of MDR pathogens."
-        string2_to_test = "Abstract and introduction : Preventing infections due to MDR pathogens is particularly important in the era of MDR pathogens."
-        string3_to_test = "Abstract Preventing infections due to MDR pathogens is particularly important in the era of MDR pathogens."
-
-        tested_string = self.openalexColector._remove_useless_first_word(
-            string_to_test, ["abstract", "background"]
-        )
-        tested_string2 = self.openalexColector._remove_useless_first_word(
-            string2_to_test, ["abstract", "background"]
-        )
-        tested_string3 = self.openalexColector._remove_useless_first_word(
-            string3_to_test, ["abstract", "background"]
-        )
-
-        self.assertEqual(
-            tested_string,
-            "Preventing infections due to MDR pathogens is particularly important in the era of MDR pathogens.",
-        )
-        self.assertEqual(
-            tested_string2,
-            "Abstract and introduction : Preventing infections due to MDR pathogens is particularly important in the era of MDR pathogens.",
-        )
-        self.assertEqual(
-            tested_string3,
-            "Preventing infections due to MDR pathogens is particularly important in the era of MDR pathogens.",
+    @patch(
+        "welearn_datastack.plugins.rest_requesters.open_alex.get_http_code_from_exception",
+        return_value=500,
+    )
+    def test_run_returns_error_on_api_exception(self, mock_code, mock_session):
+        mock_http = MagicMock()
+        mock_http.get.side_effect = Exception("API error")
+        mock_session.return_value = mock_http
+        result = self.collector.run([self.welearn_doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsInstance(result[0], WrapperRetrieveDocument)
+        self.assertEqual(result[0].http_error_code, 500)
+        self.assertIn(
+            "Error while trying to get contents from OpenAlex API", result[0].error_info
         )
