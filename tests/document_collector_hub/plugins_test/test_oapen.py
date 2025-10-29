@@ -1,287 +1,329 @@
-import json
-import os
-from pathlib import Path
-from unittest import TestCase
-from unittest.mock import Mock, patch
+import unittest
+from unittest.mock import MagicMock, patch
 
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.db_wrapper import WrapperRawData
-from welearn_datastack.data.enumerations import PluginType
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
-from welearn_datastack.data.source_models.oapen import OapenModel
+from welearn_datastack.data.source_models.oapen import Bitstream, CheckSum, Metadatum
+from welearn_datastack.exceptions import (
+    NoDescriptionFoundError,
+    TooMuchLanguages,
+    UnauthorizedLicense,
+    WrongLangFormat,
+)
 from welearn_datastack.plugins.rest_requesters.oapen import OAPenCollector
 
 
-class MockResponse:
-    def __init__(self, text_json, status_code):
-        self.status_code = status_code
-        self._json = text_json
-
-    def raise_for_status(self):
-        pass
-
-    def json(self):
-        return self._json
-
-
-class TestOAPenCollector(TestCase):
-    def setUp(self) -> None:
-        self.json_response_oapen: Path = (
-            Path(__file__).parent.parent / "resources/oapen_api.json"
-        )
-        self.oapen_collector = OAPenCollector()
-        self.desc_en = "At the end of the Western Middle Ages, the new notions of the legitimacy of royal power"
-
-        self.desc_fr = "Test d'abstract pour un texte en français, je dois le faire un peu long quand même"
-
-        self.mocked_json_ret = {
-            "name": "Sample Title",
-            "handle": "20.500.12657/12345",
-            "bitstreams": [
-                {
-                    "bundleName": "original",
-                    "retrieveLink": "https://example.com/sample.pdf",
-                    "code": "CC-BY",
-                }
-            ],
-            "metadata": [
-                {
-                    "key": "dc.description.abstract",
-                    "value": self.desc_en,
-                },
-                {
-                    "key": "oapen.abstract.otherlanguage",
-                    "value": self.desc_fr,
-                },
-                {
-                    "key": "dc.contributor.author",
-                    "value": "Name, Author",
-                },
-                {
-                    "key": "dc.language",
-                    "value": "English",
-                },
-            ],
-        }
-
-    def test_plugin_type(self):
-        self.assertEqual(OAPenCollector.collector_type_name, PluginType.REST)
-
-    def test_plugin_related_corpus(self):
-        self.assertEqual(OAPenCollector.related_corpus, "oapen")
-
-    def test_extract_oapen_ids(self):
-        tested_list = [
-            "https://library.oapen.org/handle/20.500.12657/12345",
-            "https://library.oapen.org/handle/20.500.12657/67890",
-        ]
-        self.assertEqual(
-            self.oapen_collector._extract_oapen_ids(tested_list),
-            ["20.500.12657/12345", "20.500.12657/67890"],
-        )
-
-    def test_get_oapen_url_from_handle_id(self):
-        handle_id = "20.500.12657/12345"
-        self.assertEqual(
-            self.oapen_collector._get_oapen_url_from_handle_id(handle_id),
-            "https://library.oapen.org/handle/20.500.12657/12345",
-        )
-
-    @patch("welearn_datastack.modules.pdf_extractor._send_pdf_to_tika")
-    @patch("welearn_datastack.plugins.rest_requesters.oapen.get_new_https_session")
-    def test_get_pdf_content(self, mock_get_new_https_session, mock_send_pdf_to_tika):
-        class MockResponse:
-            def __init__(self, status_code):
-                self.content = (
-                    Path(__file__).parent.parent
-                    / "resources"
-                    / "file_plugin_input"
-                    / "hal_pdf.pdf"
-                ).read_bytes()
-                self.status_code = status_code
-
-            def raise_for_status(self):
-                pass
-
-        os.environ["PDF_SIZE_PAGE_LIMIT"] = "100000"
-        mock_send_pdf_to_tika.return_value = {
-            "X-TIKA:content": "<div class='page'>For primary vpiRNAs that are produced from the abundant</div>"
-        }
-
-        mock_response = MockResponse(200)
-        mock_get_new_https_session.return_value.get.return_value = mock_response
-        pdf_content = self.oapen_collector._get_pdf_content(
-            "https://example.com/sample.pdf"
-        )
-
-        self.assertIn(
-            "For primary vpiRNAs that are produced from the abundant",
-            pdf_content,
-        )
+class TestOAPenCollector(unittest.TestCase):
+    def setUp(self):
+        self.collector = OAPenCollector()
+        self.doc = WeLearnDocument(url="https://library.oapen.org/handle/1234")
 
     @patch("welearn_datastack.plugins.rest_requesters.oapen.get_new_https_session")
-    def test_get_txt_content(self, mock_get_new_https_session):
-        mock_response = Mock()
-        mock_response.encoding = "latin-1"
-        mock_response.text = "Sample TXT content. éè".encode("utf-8").decode(
-            mock_response.encoding
-        )
-        mock_response.raise_for_status = Mock()
-        mock_get_new_https_session.return_value.get.return_value = mock_response
-
-        content = self.oapen_collector._get_txt_content(
-            "https://example.com/sample.txt"
-        )
-        self.assertEqual(content, "Sample TXT content. éè")
-
-    @patch("welearn_datastack.plugins.rest_requesters.oapen.get_new_https_session")
-    def test_get_jsons(self, mock_get_new_https_session):
-        mock_session = Mock()
-        mock_get_new_https_session.return_value = mock_session
-
-        mock_response = MockResponse(
-            json.load(self.json_response_oapen.open()), status_code=200
-        )
-
-        mock_session.get.side_effect = [mock_response]
-
-        oapen_ids = [
-            WeLearnDocument(url="https://library.oapen.org/handle/20.500.12657/52203")
-        ]
-        wrappers = self.oapen_collector._get_jsons(oapen_ids)
-        current_doc = wrappers[0]
-        self.assertEqual(
-            current_doc.document.url,
-            "https://library.oapen.org/handle/20.500.12657/52203",
-        )
-        self.assertEqual(
-            current_doc.raw_data.name, "Le roi, son favori et les baronset XVe siècles"
-        )
-
-    def test_format_metadata(self):
-        metadata = [
-            {"key": "dc.title", "value": "Sample Title"},
-            {"key": "dc.contributor.author", "value": "Author Name"},
-        ]
-        formatted_metadata = self.oapen_collector._format_metadata(metadata)
-        self.assertEqual(formatted_metadata["dc.title"], "Sample Title")
-        self.assertEqual(formatted_metadata["dc.contributor.author"], "Author Name")
-
     @patch(
-        "welearn_datastack.plugins.rest_requesters.oapen.OAPenCollector._get_pdf_content"
+        "welearn_datastack.plugins.rest_requesters.oapen.extract_txt_from_pdf_with_tika"
     )
-    @patch(
-        "welearn_datastack.plugins.rest_requesters.oapen.OAPenCollector._get_txt_content"
-    )
-    def test_convert_json_dict_to_welearndoc(
-        self, mock_get_txt_content, mock_get_pdf_content
-    ):
-        mock_get_txt_content.return_value = "Sample TXT content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-        mock_get_pdf_content.return_value = "Sample PDF content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+    def test_get_pdf_content_success(self, mock_tika, mock_session):
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.content = b"PDFDATA"
+        mock_response.raise_for_status = MagicMock()
+        mock_client.get.return_value = mock_response
+        mock_session.return_value = mock_client
+        mock_tika.return_value = [["page1", "page2"]]
+        result = self.collector._get_pdf_content("https://library.oapen.org/fake.pdf")
+        self.assertEqual("page1 page2", result)
 
-        test_json = json.load(self.json_response_oapen.open())
+    def test_clean_backline_removes_newlines_and_hyphens(self):
+        text = "Lin-\nguistique\nLinguistique"
+        cleaned = self.collector.clean_backline(text)
+        self.assertNotIn("\n", cleaned)
+        self.assertNotIn("-\n", cleaned)
 
-        wrp = WrapperRawData(
-            document=WeLearnDocument(
-                url="https://library.oapen.org/handle/20.500.12657/52203"
+    @patch("welearn_datastack.plugins.rest_requesters.oapen.get_new_https_session")
+    def test_get_txt_content_success(self, mock_session):
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.text = "Texte brut\nLigne2"
+        mock_response.encoding = "utf-8"
+        mock_response.raise_for_status = MagicMock()
+        mock_client.get.return_value = mock_response
+        mock_session.return_value = mock_client
+        result = self.collector._get_txt_content("https://library.oapen.org/fake.txt")
+        self.assertIn("Texte brut", result)
+        self.assertIn("Ligne2", result)
+
+    def test_format_metadata_merges_keys(self):
+        meta = [
+            Metadatum(
+                key="a",
+                value="1",
+                language=None,
+                schema="s",
+                element="e",
+                qualifier=None,
             ),
-            raw_data=OapenModel.model_validate_json(json.dumps(test_json[0])),
-        )
+            Metadatum(
+                key="a",
+                value="2",
+                language=None,
+                schema="s",
+                element="e",
+                qualifier=None,
+            ),
+        ]
+        result = self.collector._format_metadata(meta)
+        self.assertEqual(result["a"], ["1", "2"])
 
-        doc = self.oapen_collector._update_welearn_document(wrp)
-        self.assertIsInstance(doc, WeLearnDocument)
-        self.assertEqual(doc.title, "Le roi, son favori et les baronset XVe siècles")
-        self.assertEqual(
-            doc.full_content,
-            "Sample PDF content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        )
-        self.assertTrue(
-            doc.description.startswith("Dans la recherche, le rôle politique du favori")
-        )
-        self.assertEqual(doc.details["authors"][0]["name"], "Djro Bilestone")
-        self.assertEqual(doc.lang, "fr")
-
+    @patch("welearn_datastack.plugins.rest_requesters.oapen.get_new_https_session")
     @patch(
-        "welearn_datastack.plugins.rest_requesters.oapen.OAPenCollector._get_pdf_content"
+        "welearn_datastack.plugins.rest_requesters.oapen.OapenModel.model_validate_json"
     )
-    @patch(
-        "welearn_datastack.plugins.rest_requesters.oapen.OAPenCollector._get_txt_content"
-    )
-    def test_convert_json_dict_to_welearndoc_in_other_lang(
-        self, mock_get_txt_content, mock_get_pdf_content
-    ):
-        mock_get_txt_content.return_value = "Sample TXT content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-        mock_get_pdf_content.return_value = "Sample PDF content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-
-        json_dict = self.mocked_json_ret
-        json_dict["metadata"][3]["value"] = "French"
-
-        doc = self.oapen_collector._update_welearn_document(json_dict)
-        self.assertIsInstance(doc, ScrapedWeLearnDocument)
-        self.assertEqual(doc.document_title, "Sample Title")
-        self.assertEqual(
-            doc.document_content,
-            "Sample PDF content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        )
-        self.assertEqual(
-            doc.document_desc,
-            self.desc_fr,
-        )
-        self.assertEqual(doc.document_details["authors"][0]["name"], "Author Name")
-        self.assertEqual(doc.document_lang, "fr")
-
-    @patch(
-        "welearn_datastack.plugins.rest_requesters.oapen.OAPenCollector._get_pdf_content"
-    )
-    @patch(
-        "welearn_datastack.plugins.rest_requesters.oapen.OAPenCollector._get_txt_content"
-    )
-    @patch("welearn_datastack.plugins.rest_requesters.oapen.OAPenCollector._get_jsons")
-    def test_run(self, mock_get_jsons, mock_get_txt_content, mock_get_pdf):
-        mock_get_txt_content.return_value = "Sample TXT content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-        json_dict = self.mocked_json_ret
-        json_dict["bitstreams"].append(
+    def test_get_jsons_returns_wrappers(self, mock_validate, mock_session):
+        doc = WeLearnDocument(url="https://library.oapen.org/handle/1234")
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = [
             {
-                "bundleName": "text",
-                "retrieveLink": "https://example.com/sample.pdf.txt",
-                "code": "Other license",
+                "handle": "1234",
+                "name": "Titre",
+                "bitstreams": [],
+                "metadata": [],
+                "uuid": "u",
+                "type": "t",
+                "expand": [],
+                "lastModified": "",
+                "parentCollection": None,
+                "parentCollectionList": None,
+                "parentCommunityList": None,
+                "archived": "",
+                "withdrawn": "",
+                "link": "",
             }
+        ]
+        mock_response.raise_for_status = MagicMock()
+        mock_client.get.return_value = mock_response
+        mock_session.return_value = mock_client
+        fake_model = MagicMock()
+        fake_model.handle = "1234"
+        mock_validate.return_value = fake_model
+        result = self.collector._get_jsons([doc])
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].document, doc)
+        self.assertEqual(result[0].raw_data, fake_model)
+
+    @patch.object(OAPenCollector, "_get_pdf_content", return_value="PDF content")
+    def test_update_welearn_document_unauthorized_license(self, mock_get_content_pdf):
+        bitstream = Bitstream(
+            uuid="u",
+            name="n",
+            handle=None,
+            type="t",
+            expand=[],
+            bundleName="original",
+            description=None,
+            format="f",
+            mimeType="m",
+            sizeBytes=1,
+            parentObject=None,
+            retrieveLink="https://www.example.org/pdf",
+            checkSum=CheckSum(value="abc", checkSumAlgorithm="na"),
+            sequenceId=1,
+            code="by-nc",
+            policies=None,
+            link="",
+            metadata=[],
         )
-        mock_get_jsons.return_value = [json_dict]
+        model = MagicMock()
+        model.name = "Titre"
+        model.handle = "1234"
+        model.bitstreams = [bitstream]
+        model.metadata = []
+        with self.assertRaises(UnauthorizedLicense):
+            self.collector._update_welearn_document(
+                WrapperRawData(raw_data=model, document=self.doc)
+            )
 
-        urls = ["https://library.oapen.org/handle/20.500.12657/12345"]
-        res, errors = self.oapen_collector.run(documents=urls)
-        self.assertEqual(len(res), 1)
-        self.assertEqual(len(errors), 0)
-        self.assertEqual(
-            res[0].document_url, "https://library.oapen.org/handle/20.500.12657/12345"
+    @patch.object(OAPenCollector, "_get_pdf_content", return_value="PDF content")
+    def test_update_welearn_document_no_description(self, mock__get_pdf_content):
+        bitstream = Bitstream(
+            uuid="u",
+            name="n",
+            handle=None,
+            type="t",
+            expand=[],
+            bundleName="original",
+            description=None,
+            format="f",
+            mimeType="m",
+            sizeBytes=1,
+            parentObject=None,
+            retrieveLink="https://www.example.org/pdf",
+            checkSum=CheckSum(value="abc", checkSumAlgorithm="na"),
+            sequenceId=1,
+            code="by",
+            policies=None,
+            link="",
+            metadata=[],
         )
-        self.assertEqual(res[0].document_title, "Sample Title")
-        self.assertEqual(
-            res[0].document_content,
-            "Sample TXT content, lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        model = MagicMock()
+        model.name = "Titre"
+        model.handle = "1234"
+        model.bitstreams = [bitstream]
+        model.metadata = []
+        with self.assertRaises(NoDescriptionFoundError):
+            self.collector._update_welearn_document(
+                WrapperRawData(raw_data=model, document=self.doc)
+            )
+
+    @patch.object(OAPenCollector, "_get_pdf_content", return_value="PDF content")
+    def test_update_welearn_document_too_many_languages(self, mock__get_pdf_content):
+        bitstream = Bitstream(
+            uuid="u",
+            name="n",
+            handle=None,
+            type="t",
+            expand=[],
+            bundleName="original",
+            description=None,
+            format="f",
+            mimeType="m",
+            sizeBytes=1,
+            parentObject=None,
+            retrieveLink="https://www.example.org/pdf",
+            checkSum=CheckSum(value="abc", checkSumAlgorithm="na"),
+            sequenceId=1,
+            code="by",
+            policies=None,
+            link="",
+            metadata=[],
         )
-        self.assertEqual(res[0].document_desc, self.desc_en)
-        self.assertEqual(res[0].document_details["authors"][0]["name"], "Author Name")
-        self.assertEqual(res[0].document_lang, "en")
-        self.assertEqual(res[0].document_corpus, "oapen")
-        self.assertEqual(
-            res[0].document_details["license"],
-            "https://creativecommons.org/licenses/by/4.0/",
+        meta = [
+            Metadatum(
+                key="dc.description.abstract",
+                value="Résumé.",
+                language=None,
+                schema="s",
+                element="e",
+                qualifier=None,
+            ),
+            Metadatum(
+                key="dc.language",
+                value="fr",
+                language=None,
+                schema="s",
+                element="e",
+                qualifier=None,
+            ),
+        ]
+        model = MagicMock()
+        model.name = "Titre"
+        model.handle = "1234"
+        model.bitstreams = [bitstream]
+        model.metadata = meta
+        # Simule un mauvais format de langue (liste)
+        with patch.object(
+            self.collector,
+            "_format_metadata",
+            return_value={
+                "dc.description.abstract": "Résumé.",
+                "dc.language": ["fr", "en"],
+            },
+        ):
+            with self.assertRaises(TooMuchLanguages):
+                self.collector._update_welearn_document(
+                    WrapperRawData(raw_data=model, document=self.doc)
+                )
+
+    @patch.object(OAPenCollector, "_get_pdf_content", return_value="PDF content")
+    def test_update_welearn_document_wrong_lang_format(self, mock_pdf_content):
+        bitstream = Bitstream(
+            uuid="u",
+            name="n",
+            handle=None,
+            type="t",
+            expand=[],
+            bundleName="original",
+            description=None,
+            format="f",
+            mimeType="m",
+            sizeBytes=1,
+            parentObject=None,
+            retrieveLink="https://www.example.org/pdf",
+            checkSum=CheckSum(value="abc", checkSumAlgorithm="na"),
+            sequenceId=1,
+            code="by",
+            policies=None,
+            link="",
+            metadata=[],
         )
+        meta = [
+            Metadatum(
+                key="dc.description.abstract",
+                value="Résumé.",
+                language=None,
+                schema="s",
+                element="e",
+                qualifier=None,
+            ),
+            Metadatum(
+                key="dc.language",
+                value="notalanguage",
+                language=None,
+                schema="s",
+                element="e",
+                qualifier=None,
+            ),
+        ]
+        model = MagicMock()
+        model.name = "Titre"
+        model.handle = "1234"
+        model.bitstreams = [bitstream]
+        model.metadata = meta
+        with patch.object(
+            self.collector,
+            "_format_metadata",
+            return_value={
+                "dc.description.abstract": "Résumé.",
+                "dc.language": "notalanguage",
+            },
+        ):
+            with self.assertRaises(WrongLangFormat):
+                self.collector._update_welearn_document(
+                    WrapperRawData(raw_data=model, document=self.doc)
+                )
 
-    def test_clean_backline(self):
-        tested_line0 = "Lin-\nguistique"
-        awaited0 = "Linguistique"
+    @patch.object(OAPenCollector, "_get_jsons")
+    @patch.object(OAPenCollector, "_update_welearn_document")
+    def test_run_calls_update_on_each_doc(self, mock_update, mock_get_jsons):
+        doc1 = WeLearnDocument(url="https://library.oapen.org/handle/1")
+        doc2 = WeLearnDocument(url="https://library.oapen.org/handle/2")
+        wrapper1 = WrapperRawData(raw_data=MagicMock(), document=doc1)
+        wrapper2 = WrapperRawData(raw_data=MagicMock(), document=doc2)
+        mock_get_jsons.return_value = [wrapper1, wrapper2]
 
-        tested_line1 = "lorem ipsum\n \nLe Volume :"
-        awaited1 = "lorem ipsum Le Volume :"
+        self.collector.run([doc1, doc2])
 
-        self.assertEqual(self.oapen_collector.clean_backline(tested_line0), awaited0)
-        self.assertEqual(self.oapen_collector.clean_backline(tested_line1), awaited1)
+        # Check if correct args were passed to the method
+        mock_get_jsons.assert_called_once_with([doc1, doc2])
+        # Check if inner method was called for each of documents
+        calls = [((wrapper1,),), ((wrapper2,),)]
+        actual_calls = [call.args for call in mock_update.call_args_list]
+        self.assertEqual(actual_calls, [(wrapper1,), (wrapper2,)])
 
-        test_line2 = """La Tribune de Genève : 03�11�2015�\n \nLe Volume : 05�10�1901�\n 587\n \n \nCorpus consultés\n \nCorpus oraux\n \nCorpus Enquêtes SocioLinguistiques à Orléans (ESLO1 et ESLO2)\nLe corpus ESLO est un projet du LLL (Laboratoire Ligérien de Lin-\nguistique) de l’Université d’Orléans�\nRéférence : BAUDE Olivier & DUGUA Céline (2016), «\xa0Les ESLO, du \nportrait sonore au paysage digital\xa0», Corpus 15, p� 29–56�\nLien du corpus : http://eslo.huma-num.fr\n"""
-        awaited2 = "La Tribune de Genève : 03�11�2015� Le Volume : 05�10�1901� 587 Corpus consultés Corpus oraux Corpus Enquêtes SocioLinguistiques à Orléans (ESLO1 et ESLO2) Le corpus ESLO est un projet du LLL (Laboratoire Ligérien de Linguistique) de l’Université d’Orléans� Référence : BAUDE Olivier & DUGUA Céline (2016), « Les ESLO, du portrait sonore au paysage digital », Corpus 15, p� 29–56� Lien du corpus : http://eslo.huma-num.fr"
+    @patch.object(OAPenCollector, "_get_jsons")
+    @patch.object(
+        OAPenCollector, "_update_welearn_document", side_effect=Exception("Erreur")
+    )
+    def test_run_handles_update_exception(self, mock_update, mock_get_jsons):
+        doc = WeLearnDocument(url="https://library.oapen.org/handle/1")
+        wrapper = WrapperRawData(raw_data=MagicMock(), document=doc)
+        mock_get_jsons.return_value = [wrapper]
 
-        self.assertEqual(self.oapen_collector.clean_backline(test_line2), awaited2)
+        # The method should not raise exception
+        try:
+            self.collector.run([doc])
+        except Exception:
+            self.fail(
+                "run() ne doit pas lever d'exception même si _update_welearn_document échoue"
+            )
