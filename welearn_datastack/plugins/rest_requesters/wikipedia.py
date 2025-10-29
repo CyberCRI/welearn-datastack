@@ -1,18 +1,13 @@
 import logging
 import re
-from typing import List, Tuple
+from typing import List
 
 import requests  # type: ignore
 from welearn_database.data.models import WeLearnDocument
 from wikipediaapi import Wikipedia, WikipediaPage, WikipediaPageSection  # type: ignore
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.plugins.interface import IPluginRESTCollector
-from welearn_datastack.utils_.text_stat_utils import (
-    predict_duration,
-    predict_readability,
-)
 
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0"
 

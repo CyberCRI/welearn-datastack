@@ -21,6 +21,7 @@ from welearn_datastack.data.source_models.open_alex import (
     Location,
     OpenAlexModel,
     OpenAlexResult,
+    Topic,
 )
 from welearn_datastack.exceptions import (
     ClosedAccessContent,
@@ -125,30 +126,30 @@ class OpenAlexCollector(IPluginRESTCollector):
         return ret
 
     @staticmethod
-    def _transform_topics(original_json: dict) -> List[dict]:
+    def _transform_topics(topics: List[Topic]) -> List[dict]:
         """
         Transform the topics from the original json to the format expected by the WeLearn DB
-        :param original_json: Original json from OpenAlex
+        :param topics: Original json from OpenAlex
         :return: List of topics in the format expected by the WeLearn DB
         """
         transformed = []
         unique_items = set()  # For check every external_id is unique
 
-        for topic in original_json:
-            domain = topic["domain"]
-            field = topic["field"]
-            subfield = topic["subfield"]
+        for topic in topics:
+            domain = topic.domain
+            field = topic.field
+            subfield = topic.subfield
 
             # Hierachical level definition
             levels = [
-                (domain, 0, "domain", []),
-                (field, 1, "field", [domain["id"]]),
-                (subfield, 2, "subfield", [field["id"]]),
+                (domain.model_dump(), 0, "domain", []),
+                (field.model_dump(), 1, "field", [domain.id]),
+                (subfield.model_dump(), 2, "subfield", [field.id]),
                 (
-                    {"id": topic["id"], "display_name": topic["display_name"]},
+                    {"id": topic.id, "display_name": topic.display_name},
                     3,
                     "topic",
-                    [subfield["id"]],
+                    [subfield.id],
                 ),
             ]
 
@@ -295,7 +296,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             "issn": wrapper.raw_data.best_oa_location.source.issn_l,
             "content_from_pdf": pdf_flag,
             "topics": self._transform_topics(wrapper.raw_data.topics),
-            "tags": [x.get("display_name") for x in wrapper.raw_data.keywords],
+            "tags": [x.display_name for x in wrapper.raw_data.keywords],
             "referenced_works": wrapper.raw_data.referenced_works,
             "related_works": wrapper.raw_data.related_works,
             "authors": authors,
@@ -362,8 +363,7 @@ class OpenAlexCollector(IPluginRESTCollector):
                         )
             except Exception as e:
                 logger.exception(
-                    "Error while trying to get contents from a sub batch urls",
-                    e,
+                    f"Error while trying to get contents from a sub batch urls: {e}",
                 )
                 for doc in sub_batch:
                     ret.append(
