@@ -72,7 +72,10 @@ class TEDCollector(IPluginRESTCollector):
         """
         Concatenate content from JSON
         """
+        if not ted_json_paragraph:
+            return ""
         ret = ""
+
         for paragraph in ted_json_paragraph:
             cues = paragraph.cues
             for cue in cues:
