@@ -218,10 +218,13 @@ class TestOpenAlexCollector(unittest.TestCase):
         )
 
     # Test _update_welearn_document raises on closed access
-    def test_update_welearn_document_raises_on_closed_access(self):
+    @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_new_https_session")
+    def test_update_welearn_document_raises_on_closed_access(self, mock_session):
         openalex_result = build_openalex_result()
         openalex_result.open_access.is_oa = False
         wrapper = WrapperRawData(document=self.welearn_doc, raw_data=openalex_result)
+        # Mock any network call that could be triggered (e.g. PDF download)
+        mock_session.return_value.get.return_value = MagicMock()
         with self.assertRaises(Exception):
             self.collector._update_welearn_document(wrapper)
 
