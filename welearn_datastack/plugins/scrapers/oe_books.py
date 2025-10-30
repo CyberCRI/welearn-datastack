@@ -9,7 +9,6 @@ from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, MD_OE_BOOKS_BASE_URL
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.exceptions import ClosedAccessContent
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginScrapeCollector

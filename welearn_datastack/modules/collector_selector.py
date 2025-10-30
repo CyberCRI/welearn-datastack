@@ -40,9 +40,6 @@ def select_collector(
     res: IPlugin
 
     match meta_collector.collector_type_name:
-        case PluginType.FILES:
-            res_file: IPluginFilesCollector = meta_collector()  # type: ignore
-            res = res_file
         case PluginType.REST:
             res_rest: IPluginRESTCollector = meta_collector()  # type: ignore
             res = res_rest

@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup, ResultSet  # type: ignore
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,

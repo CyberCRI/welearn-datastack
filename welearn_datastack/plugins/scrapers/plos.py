@@ -12,7 +12,6 @@ from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import ANTI_URL_REGEX, AUTHORIZED_LICENSES
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.exceptions import UnauthorizedLicense
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.utils_.http_client_utils import (

@@ -41,51 +41,6 @@ class IPlugin(ABC):
         pass
 
 
-class IPluginFilesCollector(IPlugin, ABC):
-    collector_type_name: PluginType = PluginType.FILES
-    _resource_folder_root: Path = Path(f"../../plugins_resources/")
-    resource_files_names: List[str]
-
-    def __init__(self) -> None:
-        self._files_locations: List[Path] = []
-        self.resource_files_names: List[str] = []
-
-        if os.environ.get("PLUGINS_RESOURCES_FOLDER_ROOT", None):
-            plugins_resources_folder_root: str = os.environ.get(
-                "PLUGINS_RESOURCES_FOLDER_ROOT", ""
-            )
-            self._resource_folder_root = Path(plugins_resources_folder_root)
-
-        # Get list of related env vars and append to resource_files_names
-        for var in get_list_of_related_env_vars(
-            class_name=type(self).__name__, suffix="FILE_NAME"
-        ):
-            self.resource_files_names.append(var)
-
-        # Create the files locations
-        for file_name in self.resource_files_names:
-            self._files_locations.append(
-                self._resource_folder_root / type(self).__name__ / file_name
-            )
-
-    @staticmethod
-    def _filter_file_line(
-        dr: csv.DictReader | List[Dict[str, Any]],
-        urls: List[str],
-        url_label: str = "url",
-    ) -> Generator[dict, None, None]:
-        """
-        Filter csv line
-        :param dr: DictReader from CSV
-        :param urls: List of urls to filter
-        :param url_label: Label of the url location in file (column or field)
-        :return: Generator of filtered lines
-        """
-        for line in dr:  # type: ignore
-            if line.get(url_label) in urls:
-                yield line
-
-
 class IPluginRESTCollector(IPlugin, ABC):
     collector_type_name: PluginType = PluginType.REST
 
