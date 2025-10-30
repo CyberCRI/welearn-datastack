@@ -13,7 +13,6 @@ from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
 from welearn_datastack.exceptions import NoContent
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -183,7 +182,7 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
 
         return ret, file_metadata
 
-    def _scrape_url(self, document: WeLearnDocument) -> WeLearnDocument:
+    def _scrape_document(self, document: WeLearnDocument) -> WeLearnDocument:
         logger.info("Scraping url : '%s'", document.url)
 
         client = get_new_https_session()
@@ -227,7 +226,7 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
             try:
                 ret.append(
                     WrapperRetrieveDocument(
-                        document=self._scrape_url(document),
+                        document=self._scrape_document(document),
                     )
                 )
             except Exception as e:
