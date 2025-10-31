@@ -8,12 +8,16 @@ from urllib.parse import urlparse, urlunparse
 import requests  # type: ignore
 from bs4 import BeautifulSoup, Tag  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import ANTI_URL_REGEX, AUTHORIZED_LICENSES
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import UnauthorizedLicense
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
+)
 from welearn_datastack.utils_.scraping_utils import clean_return_to_line
 
 logger = logging.getLogger(__name__)
@@ -199,15 +203,15 @@ class PlosCollector(IPluginScrapeCollector):
                 categories.add(subject.text.strip())
         return categories
 
-    def _scrape_url(self, url: str) -> ScrapedWeLearnDocument:
+    def _scrape_url(self, document: WeLearnDocument) -> WeLearnDocument:
         """
-        Scrape an url
-        :param url: Url to scrape
-        :return: ScrapedWeLearnDocument
+        Scrape an document
+        :param document: Document to scrape
+        :return: WrapperRetrieveDocument
         """
-        logger.info("Scraping url : '%s'", url)
+        logger.info("Scraping url : '%s'", document.url)
 
-        api_page_url = self._generate_api_url(url)
+        api_page_url = self._generate_api_url(document.url)
         logger.info("Simple page url : '%s'", api_page_url)
 
         # Create a new session object
@@ -217,11 +221,13 @@ class PlosCollector(IPluginScrapeCollector):
         req_res.raise_for_status()
         txt = req_res.text
 
-        scraped_document = self.extract_data_from_plos_xml(txt, url)
+        scraped_document = self.extract_data_from_plos_xml(txt, document)
 
         return scraped_document
 
-    def extract_data_from_plos_xml(self, txt, url):
+    def extract_data_from_plos_xml(
+        self, txt, document: WeLearnDocument
+    ) -> WeLearnDocument:
         soup = BeautifulSoup(txt, "html.parser")
 
         # Document content and lang
@@ -233,7 +239,6 @@ class PlosCollector(IPluginScrapeCollector):
         messy_content = body.text
         doc_content = re.sub(ANTI_URL_REGEX, "", messy_content).strip()
         clean_doc_content = clean_return_to_line(doc_content)
-        doc_url = url
 
         # Article meta
         article_meta = soup.find("article-meta")
@@ -250,16 +255,12 @@ class PlosCollector(IPluginScrapeCollector):
         doc_desc_extract = full_doc_desc_extract.find_all("p")
         doc_desc = " ".join([p.text for p in doc_desc_extract])
 
-        doc_details = self._get_document_details(soup=soup)
-        scraped_document = ScrapedWeLearnDocument(
-            document_url=doc_url,
-            document_title=clean_return_to_line(doc_title),
-            document_desc=clean_return_to_line(doc_desc),
-            document_content=clean_doc_content,
-            document_details=doc_details,
-            document_corpus=self.related_corpus,
-        )
-        return scraped_document
+        document.title = clean_return_to_line(doc_title)
+        document.description = clean_return_to_line(doc_desc)
+        document.full_content = clean_doc_content
+        document.details = self._get_document_details(soup=soup)
+
+        return document
 
     def _generate_api_url(self, url):
         # Generate API URL
@@ -278,18 +279,27 @@ class PlosCollector(IPluginScrapeCollector):
         )
         return api_page_url
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
-        logger.info("Running PlosJCollector plugin")
-        ret: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
-        for url in urls:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
+        logger.info("Running PLOSCollector plugin")
+        ret: List[WrapperRetrieveDocument] = []
+        for document in documents:
             try:
-                ret.append(self._scrape_url(url))
-            except Exception as e:
-                logger.exception(
-                    "Error while scraping url,\n url: '%s' \nError: %s", url, e
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=self._scrape_url(document),
+                    )
                 )
-                error_docs.append(url)
+            except Exception as e:
+                msg = f"Error while scraping url,\n url: '{document.url}' \nError: {str(e)}"
+                logger.exception(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                        http_error_code=get_http_code_from_exception(e),
+                    )
+                )
                 continue
-        logger.info("PlosJCollector plugin finished, %s urls scraped", len(ret))
-        return ret, error_docs
+
+        logger.info("PLOSCollector plugin finished, %s urls scraped", len(ret))
+        return ret

@@ -47,6 +47,7 @@ scikit-learn = "~=1.6.1"
 optimum = {extras = ["onnxruntime"], version = "^1.26.1"}
 azure-storage-blob = "^12.26.0"
 welearn-database = "^0.2.5"
+pydantic = "^2.12.3"
 
 [tool.poetry.group.metrics.dependencies]
 alembic = "^1.16.1"
@@ -70,3 +71,9 @@ priority = "explicit"
 
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">=1.8"
+
+[tool.coverage.run]
+omit = [
+    # omit pytorch-generated files in /tmp
+    "/tmp/*",
+]

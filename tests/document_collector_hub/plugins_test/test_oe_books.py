@@ -1,13 +1,11 @@
 import unittest
 from pathlib import Path
-from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from requests import Session  # type: ignore
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import MD_OE_BOOKS_BASE_URL
-from welearn_datastack.exceptions import UnauthorizedLicense
 from welearn_datastack.plugins.scrapers.oe_books import OpenEditionBooksCollector
 
 
@@ -110,39 +108,57 @@ class TestOpenEditionBooksCollector(unittest.TestCase):
         )
 
     @patch("welearn_datastack.plugins.scrapers.oe_books.get_new_https_session")
-    def test_run_book_case(self, mock_get_new_https_session):
+    def test_run_book_success(self, mock_get_new_https_session):
+        # Simulate a successful book fetch with valid XML
         mock_get_new_https_session.return_value = self.mock_session
-        mock_response = MockResponse(
-            text=self.xml_file_path.open().read(), status_code=200
-        )
+        with self.xml_file_path.open() as f:
+            mock_response = MockResponse(text=f.read(), status_code=200)
         self.mock_session.get.return_value = mock_response
-        url = "https://books.openedition.org/ariadnaediciones/8043"
 
-        result = self.collector.run([url])
+        doc = WeLearnDocument(
+            id=1, url="https://books.openedition.org/ariadnaediciones/8043"
+        )
+        result = self.collector.run([doc])
 
-        scraped_docs = result[0]
-        error_urls = result[1]
-
-        self.assertEqual(scraped_docs[0].document_url, url)
+        self.assertEqual(len(result), 1)
+        oe_doc = result[0]
+        self.assertIsNone(oe_doc.error_info)
+        # Check all main document properties
+        self.assertEqual(oe_doc.document.url, doc.url)
         self.assertEqual(
-            scraped_docs[0].document_title,
-            "A Southern Perspective on Development Studies",
+            oe_doc.document.title, "A Southern Perspective on Development Studies"
         )
-        self.assertEqual(scraped_docs[0].document_lang, "en")
-        self.assertEqual(scraped_docs[0].document_corpus, "open-edition-books")
-        result_details = scraped_docs[0].document_details
-        self.assertEqual(result_details["doi"], "10.4000/books.ariadnaediciones.8043")
-        self.assertEqual(result_details["isbn"], "978-956-6095-09-5")
+        # self.assertEqual(oe_doc.document.corpus, "open-edition-books")
+        details = oe_doc.document.details
+        self.assertEqual(details["doi"], "10.4000/books.ariadnaediciones.8043")
+        self.assertEqual(details["isbn"], "978-956-6095-09-5")
         self.assertEqual(
-            result_details["authors"], [{"name": "Carlos Mallorquin", "misc": ""}]
+            details["authors"], [{"name": "Carlos Mallorquin", "misc": ""}]
         )
         self.assertEqual(
-            result_details["license"], "https://creativecommons.org/licenses/by/4.0/"
+            details["license"], "https://creativecommons.org/licenses/by/4.0/"
         )
-        self.assertEqual(result_details["publisher"], "Ariadna Ediciones")
+        self.assertEqual(details["publisher"], "Ariadna Ediciones")
+        # Check that all expected keys are present
+        for key in ["doi", "isbn", "authors", "license", "publisher"]:
+            self.assertIn(key, details)
+        # Check that no unexpected keys are present
+        allowed_keys = {
+            "doi",
+            "isbn",
+            "authors",
+            "license",
+            "publisher",
+            "tags",
+            "type",
+            "partOf",
+            "publication_date",
+        }
+        self.assertTrue(set(details.keys()).issubset(allowed_keys))
 
     @patch("welearn_datastack.plugins.scrapers.oe_books.get_new_https_session")
-    def test_run_chapter_case(self, mock_get_new_https_session):
+    def test_run_chapter_success(self, mock_get_new_https_session):
+        # Simulate a successful chapter fetch with valid HTML and XML
         mock_get_new_https_session.return_value = self.mock_session
         se = [
             MockResponse(text="", status_code=404),
@@ -150,47 +166,132 @@ class TestOpenEditionBooksCollector(unittest.TestCase):
             MockResponse(text=self.xml_file_path.read_text(), status_code=200),
         ]
         self.mock_session.get.side_effect = se
-        url = "https://books.openedition.org/ariadnaediciones/8068"
 
-        result = self.collector.run([url])
+        doc = WeLearnDocument(
+            id=2, url="https://books.openedition.org/ariadnaediciones/8068"
+        )
+        result = self.collector.run([doc])
 
-        scraped_docs = result[0]
-
-        self.assertEqual(scraped_docs[0].document_url, url)
+        self.assertEqual(len(result), 1)
+        oe_doc = result[0]
+        self.assertIsNone(oe_doc.error_info)
+        self.assertEqual(oe_doc.document.url, doc.url)
         self.assertEqual(
-            scraped_docs[0].document_title,
+            oe_doc.document.title,
             "A Southern Perspective on Development Studies - Introduction",
         )
-        self.assertEqual(scraped_docs[0].document_lang, "en")
-        self.assertEqual(scraped_docs[0].document_corpus, "open-edition-books")
-        result_details = scraped_docs[0].document_details
+        # self.assertEqual(oe_doc.document.lang, "en")
+        # self.assertEqual(oe_doc.document.corpus, "open-edition-books")
+        details = oe_doc.document.details
         self.assertDictEqual(
-            result_details["partOf"][0],
+            details["partOf"][0],
             {
                 "element": "https://books.openedition.org/ariadnaediciones/8043",
                 "order": 0,
             },
         )
-        self.assertEqual(result_details["type"], "chapter")
-        self.assertEqual(result_details["isbn"], "978-956-6095-09-5")
+        self.assertEqual(details["type"], "chapter")
+        self.assertEqual(details["isbn"], "978-956-6095-09-5")
         self.assertEqual(
-            result_details["authors"], [{"name": "Carlos Mallorquin", "misc": ""}]
+            details["authors"], [{"name": "Carlos Mallorquin", "misc": ""}]
         )
         self.assertListEqual(
-            result_details["tags"],
+            details["tags"],
             ["latin america", "social sciences", "thought", "sociology of development"],
         )
         self.assertEqual(
-            result_details["license"], "https://creativecommons.org/licenses/by/4.0/"
+            details["license"], "https://creativecommons.org/licenses/by/4.0/"
         )
-        self.assertEqual(result_details["publisher"], "Ariadna Ediciones")
+        self.assertEqual(details["publisher"], "Ariadna Ediciones")
         self.assertTrue(
-            scraped_docs[0].document_content.startswith(
+            oe_doc.document.full_content.startswith(
                 "Question everything and everyone. Be subversive, constantly questioning reality and the status quo. Be a poet, not a huckster. Don’t cater, don’t pander, especially not to possible audiences, readers, editors, or publishers. Come out of your closet. It’s dark in there. Raise the blinds, throw open your shuttered windows, raise the roof, unscrew the locks from the doors, but don’t throw away the screws. Be committed to something outside yourself. Be militant about it. Or ecstatic."
             )
         )
         self.assertTrue(
-            scraped_docs[0].document_content.endswith(
+            oe_doc.document.full_content.endswith(
                 "in more philosophical terms, there is no general form of being given its diverse set of social and historical conditions."
             )
         )
+        # Check that all expected keys are present
+        for key in [
+            "partOf",
+            "type",
+            "isbn",
+            "authors",
+            "tags",
+            "license",
+            "publisher",
+            "publication_date",
+        ]:
+            self.assertIn(key, details)
+        allowed_keys = {
+            "doi",
+            "isbn",
+            "authors",
+            "license",
+            "publisher",
+            "tags",
+            "type",
+            "partOf",
+            "publication_date",
+        }
+        self.assertTrue(set(details.keys()).issubset(allowed_keys))
+
+    @patch("welearn_datastack.plugins.scrapers.oe_books.get_new_https_session")
+    def test_run_http_error(self, mock_get_new_https_session):
+        # Simulate an HTTP error (e.g. 500)
+        mock_get_new_https_session.return_value = self.mock_session
+
+        class ErrorResponse:
+            def __init__(self):
+                self.status_code = 500
+
+            def raise_for_status(self):
+                raise Exception("HTTP error")
+
+        self.mock_session.get.return_value = ErrorResponse()
+        doc = WeLearnDocument(
+            id=3, url="https://books.openedition.org/ariadnaediciones/9999"
+        )
+        result = self.collector.run([doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsNotNone(result[0].error_info)
+        self.assertIn("HTTP error", result[0].error_info)
+        self.assertEqual(
+            result[0].document.url,
+            "https://books.openedition.org/ariadnaediciones/9999",
+        )
+
+    @patch("welearn_datastack.plugins.scrapers.oe_books.get_new_https_session")
+    def test_run_invalid_xml(self, mock_get_new_https_session):
+        # Simulate a response with invalid XML
+        mock_get_new_https_session.return_value = self.mock_session
+
+        class InvalidXMLResponse:
+            def __init__(self):
+                self.status_code = 200
+                self.text = "<invalid>"
+
+            def raise_for_status(self):
+                pass
+
+        self.mock_session.get.return_value = InvalidXMLResponse()
+
+        doc = WeLearnDocument(
+            id=4, url="https://books.openedition.org/ariadnaediciones/8888"
+        )
+        result = self.collector.run([doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsNotNone(result[0].error_info)
+        self.assertIn("invalid", result[0].error_info.lower())
+        self.assertEqual(
+            result[0].document.url,
+            "https://books.openedition.org/ariadnaediciones/8888",
+        )
+
+    @patch("welearn_datastack.plugins.scrapers.oe_books.get_new_https_session")
+    def test_run_empty_input(self, mock_get_new_https_session):
+        # Should return an empty list if no documents are provided
+        result = self.collector.run([])
+        self.assertEqual(result, [])

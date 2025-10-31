@@ -2,7 +2,6 @@ from enum import Enum, auto
 
 
 class PluginType(Enum):
-    FILES = 1
     SCRAPE = 2
     REST = 3
 

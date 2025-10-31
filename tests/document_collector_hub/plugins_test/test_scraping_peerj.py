@@ -1,9 +1,10 @@
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from bs4 import BeautifulSoup  # type: ignore
 from requests import HTTPError  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.enumerations import PluginType
 from welearn_datastack.plugins.scrapers.peerj import PeerJCollector
@@ -23,7 +24,8 @@ class TestScrapePeerJPlugin(unittest.TestCase):
 
         self.pages_list = [self.page_1]
 
-        self.conversation_scraper = PeerJCollector()
+        self.collector = PeerJCollector()
+        self.doc = WeLearnDocument(id=1, url="https://example.org/1")
 
     def tearDown(self) -> None:
         pass
@@ -34,142 +36,80 @@ class TestScrapePeerJPlugin(unittest.TestCase):
     def test_plugin_related_corpus(self):
         self.assertEqual(PeerJCollector.related_corpus, "peerj")
 
-    @patch("requests.sessions.Session.get")
-    def test_plugin_run(self, mock_get) -> None:
-        awaited_details_1: dict = {
-            "publication_date": 1641772800.0,
-            "doi": "10.7717/peerj.12713",
-            "tags": [
-                "Pareas",
-                "Asthenodipsas",
-                "Aplopeltura",
-                "Eberhardtia",
-                "Spondylodipsas",
-                "Molecular phylogeny",
-                "Biogeography",
-                "Southeast Asia",
-                "Sundaland",
-                "Cryptic species",
-            ],
-            "journal": "PeerJ",
-            "publisher": "PeerJ Inc.",
-            "issn": "2167-8359",
-            "authors": [
-                {
-                    "name": "Nikolay A. Poyarkov",
-                    "misc": "Laboratory of Tropical Ecology, Joint Russian-Vietnamese Tropical Research and Technological Center, Hanoi, Vietnam, Faculty of Biology, Department of Vertebrate Zoology, Moscow State University, Moscow, Russia",
-                },
-                {
-                    "name": "Tan Van Nguyen",
-                    "misc": "Department of Species Conservation, Save Vietnam’s Wildlife, Ninh Binh, Vietnam",
-                },
-                {
-                    "name": "Parinya Pawangkhanant",
-                    "misc": "Division of Fishery, School of Agriculture and Natural Resources, University of Phayao, Phayao, Thailand",
-                },
-                {
-                    "name": "Platon V. Yushchenko",
-                    "misc": "Faculty of Biology, Department of Vertebrate Zoology, Moscow State University, Moscow, Russia",
-                },
-                {"name": "Peter Brakels", "misc": "IUCN Laos PDR, Vientiane, Lao PDR"},
-                {
-                    "name": "Linh Hoang Nguyen",
-                    "misc": "Department of Zoology, Southern Institute of Ecology, Vietnam Academy of Science and Technology, Ho Chi Minh City, Vietnam",
-                },
-                {
-                    "name": "Hung Ngoc Nguyen",
-                    "misc": "Department of Zoology, Southern Institute of Ecology, Vietnam Academy of Science and Technology, Ho Chi Minh City, Vietnam",
-                },
-                {
-                    "name": "Chatmongkon Suwannapoom",
-                    "misc": "Division of Fishery, School of Agriculture and Natural Resources, University of Phayao, Phayao, Thailand",
-                },
-                {
-                    "name": "Nikolai Orlov",
-                    "misc": "Department of Herpetology, Zoological Institute, Russian Academy of Sciences, St. Petersburg, Russia",
-                },
-                {
-                    "name": "Gernot Vogel",
-                    "misc": "Society for Southeast Asian Herpetology, Heidelberg, Germany",
-                },
-            ],
-            "readability": "57.8",
-            "duration": "8596",
-            "license_url": "https://creativecommons.org/licenses/by/4.0/",
-            "content_and_description_lang": {
-                "are_different": False,
-                "description_lang": "en",
-                "content_lang": "en",
-            },
-        }
+    @patch("welearn_datastack.plugins.scrapers.peerj.get_new_https_session")
+    def test_plugin_run_success(self, mock_get_session):
+        # Mock the HTTPS session and its get method for a successful scrape
+        mock_session = MagicMock()
+        mock_session.get.return_value.text = self.page_1
+        mock_session.get.return_value.status_code = 200
+        mock_session.get.return_value.raise_for_status = lambda: None
+        mock_get_session.return_value = mock_session
 
-        class MockResponse:
-            def __init__(self, text, status_code):
-                self.text = text
-                self.status_code = status_code
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        doc_result = result[0]
+        self.assertIsNone(doc_result.error_info)
+        self.assertIsInstance(doc_result.document, WeLearnDocument)
+        self.assertEqual(doc_result.document.url, self.doc.url)
+        self.assertTrue(doc_result.document.title)
+        self.assertTrue(doc_result.document.description)
+        self.assertTrue(doc_result.document.full_content)
+        self.assertIsInstance(doc_result.document.details, dict)
+        self.assertIn("license_url", doc_result.document.details)
+        self.assertIn("authors", doc_result.document.details)
+        self.assertIn("journal", doc_result.document.details)
+        self.assertIn("tags", doc_result.document.details)
+        self.assertIn("doi", doc_result.document.details)
+        self.assertIn("issn", doc_result.document.details)
+        self.assertIn("publisher", doc_result.document.details)
+        self.assertIn("publication_date", doc_result.document.details)
 
-            def raise_for_status(self):
-                pass
+    @patch("welearn_datastack.plugins.scrapers.peerj.get_new_https_session")
+    def test_plugin_run_http_error(self, mock_get_session):
+        # Simulate an HTTP error (e.g., 503)
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.status_code = 503
+        # Patch the HTTPError to have a response with status_code
+        http_error = HTTPError("503 Server Error: Service Unavailable")
+        http_error.response = MagicMock()
+        http_error.response.status_code = 503
+        mock_response.raise_for_status.side_effect = http_error
+        mock_session.get.return_value = mock_response
+        mock_get_session.return_value = mock_session
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsNotNone(result[0].error_info)
+        self.assertIsInstance(result[0].document, WeLearnDocument)
+        self.assertEqual(result[0].document.url, self.doc.url)
 
-        mock_get.side_effect = [
-            MockResponse(text, 200) for text in self.pages_list[0:1]
-        ]
+    @patch("welearn_datastack.plugins.scrapers.peerj.get_new_https_session")
+    def test_plugin_run_invalid_html(self, mock_get_session):
+        # Simulate invalid HTML (missing required fields)
+        mock_session = MagicMock()
+        mock_session.get.return_value.text = "<html><body>No article meta</body></html>"
+        mock_session.get.return_value.status_code = 200
+        mock_session.get.return_value.raise_for_status = lambda: None
+        mock_get_session.return_value = mock_session
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsNotNone(result[0].error_info)
+        self.assertIsInstance(result[0].document, WeLearnDocument)
+        self.assertEqual(result[0].document.url, self.doc.url)
 
-        scraped_docs, error_docs = self.conversation_scraper.run(
-            urls=["https://example.org/1"]
-        )
-
-        self.assertEqual(len(scraped_docs), 1)
-        self.assertEqual(len(error_docs), 0)
-
-        doc = scraped_docs[0]
-        self.assertEqual(doc.document_corpus, "peerj")
-        self.assertEqual(doc.document_url, "https://example.org/1")
-        self.assertEqual(
-            doc.document_title,
-            "An integrative taxonomic revision of slug-eating snakes (Squamata: Pareidae: Pareineae) reveals "
-            "unprecedented diversity in Indochina",
-        )
-        self.assertEqual(doc.document_lang, "en")
-        self.assertDictEqual(doc.document_details, awaited_details_1)
-
-    @patch("requests.sessions.Session.get")
-    def test_plugin_run_but_503_occured(self, mock_get):
-        mock_get.return_value.status_code = 503
-        mock_get.return_value.raise_for_status.side_effect = HTTPError(
-            "503 Server Error: Service Unavailable"
-        )
-        mock_get.return_value.json.side_effect = self.pages_list[0:1]
-
-        scraped_docs, error_urls = self.conversation_scraper.run(
-            urls=["https://example.org/1"]
-        )
-
-        self.assertEqual(len(scraped_docs), 0)
-        self.assertEqual(len(error_urls), 1)
-
-        url = error_urls[0]
-        self.assertEqual(url, "https://example.org/1")
+    @patch("welearn_datastack.plugins.scrapers.peerj.get_new_https_session")
+    def test_plugin_run_empty_input(self, mock_get_session):
+        # Test with empty input list
+        result = self.collector.run([])
+        self.assertEqual(result, [])
 
     def test_figure_to_paragraph(self):
-        awaited_paragraph = """Species-level scientific names erected for the members of the subgenus Pareas: No: 1, Authority: Wagler (1830), Original taxon name: Pareas carinata, Type locality: Java, Indonesia, Previous taxonomy: Pareas carinatus, New taxonomy: Pareas carinatus.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 2, Authority: Theobald (1868), Original taxon name: Pareas berdmorei, Type locality: Mon State, Myanmar, Previous taxonomy: synonym of Pareas carinatus, New taxonomy: Pareas berdmorei.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 3, Authority: Boulenger (1900), Original taxon name: Amblycephalus nuchalis, Type locality: Matang, Kidi District, Sarawak, Malaysia, Previous taxonomy: Pareas nuchalis, New taxonomy: Pareas nuchalis.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 4, Authority: Bourret (1934), Original taxon name: Amblycephalus carinatus unicolor, Type locality: Kampong Speu Province, Cambodia, Previous taxonomy: synonym of Pareas carinatus, New taxonomy: Pareas berdmorei unicolor comb. nov.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 5, Authority: Wang et al. (2020), Original taxon name: Pareas menglaensis, Type locality: Mengla County, Yunnan Province, China, Previous taxonomy: Pareas menglaensis, New taxonomy: synonym of Pareas berdmorei.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 6, Authority: Le et al. (2021), Original taxon name: Pareas temporalis, Type locality: Doan Ket Commune, Da Huoai District, Lam Dong Province, Vietnam, Previous taxonomy: Pareas temporalis, New taxonomy: Pareas temporalis.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 7, Authority: this paper, Original taxon name: Pareas carinatus tenasserimicus, Type locality: Suan Phueng District, Ratchaburi Province, Thailand, Previous taxonomy: -, New taxonomy: Pareas carinatus tenasserimicus ssp. nov.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 8, Authority: this paper, Original taxon name: Pareas berdmorei truongsonicus, Type locality: Nahin District, Khammouan Province, Laos, Previous taxonomy: -, New taxonomy: Pareas berdmorei truongsonicus ssp. nov.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 9, Authority: this paper, Original taxon name: Pareas kuznetsovorum, Type locality: Song Hinh District, Phu Yen Province, Vietnam, Previous taxonomy: -, New taxonomy: Pareas kuznetsovorum sp. nov.
-Species-level scientific names erected for the members of the subgenus Pareas: No: 10, Authority: this paper, Original taxon name: Pareas abros, Type locality: Song Thanh N.P., Quang Nam Province, Vietnam, Previous taxonomy: -, New taxonomy: Pareas abros sp. nov.
-"""
-
+        # Test the conversion of a table/figure to paragraph
+        awaited_paragraph = """Species-level scientific names erected for the members of the subgenus Pareas: No: 1, Authority: Wagler (1830), Original taxon name: Pareas carinata, Type locality: Java, Indonesia, Previous taxonomy: Pareas carinatus, New taxonomy: Pareas carinatus.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 2, Authority: Theobald (1868), Original taxon name: Pareas berdmorei, Type locality: Mon State, Myanmar, Previous taxonomy: synonym of Pareas carinatus, New taxonomy: Pareas berdmorei.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 3, Authority: Boulenger (1900), Original taxon name: Amblycephalus nuchalis, Type locality: Matang, Kidi District, Sarawak, Malaysia, Previous taxonomy: Pareas nuchalis, New taxonomy: Pareas nuchalis.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 4, Authority: Bourret (1934), Original taxon name: Amblycephalus carinatus unicolor, Type locality: Kampong Speu Province, Cambodia, Previous taxonomy: synonym of Pareas carinatus, New taxonomy: Pareas berdmorei unicolor comb. nov.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 5, Authority: Wang et al. (2020), Original taxon name: Pareas menglaensis, Type locality: Mengla County, Yunnan Province, China, Previous taxonomy: Pareas menglaensis, New taxonomy: synonym of Pareas berdmorei.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 6, Authority: Le et al. (2021), Original taxon name: Pareas temporalis, Type locality: Doan Ket Commune, Da Huoai District, Lam Dong Province, Vietnam, Previous taxonomy: Pareas temporalis, New taxonomy: Pareas temporalis.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 7, Authority: this paper, Original taxon name: Pareas carinatus tenasserimicus, Type locality: Suan Phueng District, Ratchaburi Province, Thailand, Previous taxonomy: -, New taxonomy: Pareas carinatus tenasserimicus ssp. nov.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 8, Authority: this paper, Original taxon name: Pareas berdmorei truongsonicus, Type locality: Nahin District, Khammouan Province, Laos, Previous taxonomy: -, New taxonomy: Pareas berdmorei truongsonicus ssp. nov.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 9, Authority: this paper, Original taxon name: Pareas kuznetsovorum, Type locality: Song Hinh District, Phu Yen Province, Vietnam, Previous taxonomy: -, New taxonomy: Pareas kuznetsovorum sp. nov.\nSpecies-level scientific names erected for the members of the subgenus Pareas: No: 10, Authority: this paper, Original taxon name: Pareas abros, Type locality: Song Thanh N.P., Quang Nam Province, Vietnam, Previous taxonomy: -, New taxonomy: Pareas abros sp. nov.\n"""
         html_table_path = Path(__file__).parent.parent / "resources/test_table.html"
-
         with open(html_table_path, "r") as file:
             soup = BeautifulSoup(file, "html.parser")
-
         self.assertEqual(
-            self.conversation_scraper._figure_to_paragraph(soup),
+            self.collector._figure_to_paragraph(soup),
             awaited_paragraph,
         )

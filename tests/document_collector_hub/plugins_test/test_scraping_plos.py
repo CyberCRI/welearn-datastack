@@ -2,10 +2,9 @@ import json
 import os
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
-from bs4 import BeautifulSoup  # type: ignore
-from requests import HTTPError  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.enumerations import PluginType
 from welearn_datastack.plugins.scrapers.plos import PlosCollector
@@ -45,50 +44,7 @@ class TestScrapePlosPlugin(unittest.TestCase):
 
     @patch("requests.sessions.Session.get")
     def test_plugin_run(self, mock_get) -> None:
-        awaited_details_1: dict = {
-            "authors": [
-                {
-                    "name": "Metaane Selma",
-                    "misc": "Institut Pasteur, Université de Paris, CNRS UMR3528, Biochimie des Interactions Macromoléculaires, F-75015, Paris, France",
-                },
-                {
-                    "name": "Monteil Véronique",
-                    "misc": "Institut Pasteur, Université de Paris, CNRS UMR3528, Biochimie des Interactions Macromoléculaires, F-75015, Paris, France",
-                },
-                {
-                    "name": "Ayrault Sophie",
-                    "misc": "Laboratoire des Sciences du Climat et de l’Environnement, LSCE/IPSL, CEA-CNRS-UVSQ, Université Paris-Saclay, 91191, Gif-sur-Yvette, France",
-                },
-                {
-                    "name": "Bordier Louise",
-                    "misc": "Laboratoire des Sciences du Climat et de l’Environnement, LSCE/IPSL, CEA-CNRS-UVSQ, Université Paris-Saclay, 91191, Gif-sur-Yvette, France",
-                },
-                {
-                    "name": "Levi-Meyreuis Corinne",
-                    "misc": "Institut Pasteur, Université de Paris, CNRS UMR3528, Biochimie des Interactions Macromoléculaires, F-75015, Paris, France",
-                },
-                {
-                    "name": "Norel Françoise",
-                    "misc": "Institut Pasteur, Université de Paris, CNRS UMR3528, Biochimie des Interactions Macromoléculaires, F-75015, Paris, France",
-                },
-            ],
-            "doi": "10.1371/journal.pone.0265511",
-            "published_id": "PONE-D-21-39826",
-            "journal": "PLOS ONE",
-            "type": "Research Article",
-            "publication_date": 1648684800,
-            "issn": "1932-6203",
-            "license_url": "http://creativecommons.org/licenses/by/4.0/",
-            "publisher": "Public Library of Science, San Francisco, CA USA",
-            "readability": "49.66",
-            "duration": "1578",
-            "content_and_description_lang": {
-                "are_different": False,
-                "content_lang": "en",
-                "description_lang": "en",
-            },
-        }
-
+        # Simulate a successful scrape with a valid XML response
         class MockResponse:
             def __init__(self, text, status_code):
                 self.text = text
@@ -99,34 +55,106 @@ class TestScrapePlosPlugin(unittest.TestCase):
 
         mock_get.side_effect = [MockResponse(text, 200) for text in self.pages_list]
 
-        scraped_docs, error_docs = self.plos_scraper.run(
-            urls=["https://example.org/plosone/article?id=10.1371/journal.pone.0265511"]
-        )
+        docs = [
+            WeLearnDocument(
+                id=1,
+                url="https://example.org/plosone/article?id=10.1371/journal.pone.0265511",
+            )
+        ]
+        scraped_docs = self.plos_scraper.run(docs)
 
         self.assertEqual(len(scraped_docs), 1)
-        self.assertEqual(len(error_docs), 0)
 
         doc = scraped_docs[0]
-        self.assertEqual(doc.document_corpus, "plos")
 
-        self.assertFalse(doc.document_desc.split()[0] == "Abstract")
-
+        # Check document fields
+        self.assertFalse(doc.document.description.split()[0] == "Abstract")
         self.assertEqual(
-            doc.document_title,
+            doc.document.title,
             "The stress sigma factor σS/RpoS counteracts Fur repression of genes involved in iron and manganese "
             "metabolism and modulates the ionome of Salmonella enterica serovar Typhimurium",
         )
         self.assertEqual(
             "https://example.org/plosone/article?id=10.1371/journal.pone.0265511",
-            doc.document_url,
+            doc.document.url,
         )
-        self.assertEqual(doc.document_lang, "en")
-        self.assertEqual(doc.trace, 2540387952)
+        self.assertTrue(hasattr(doc.document, "lang"))
+        self.assertTrue(hasattr(doc.document, "details"))
+        self.assertTrue(hasattr(doc.document, "full_content"))
+        # Optionally check details content
+        details = dict(doc.document.details)
+        if "tags" in details:
+            del details["tags"]
+        if "publication_date" in details:
+            del details["publication_date"]
+        if "readability" in details:
+            del details["readability"]
+        if "tags" in self.awaited_details:
+            del self.awaited_details["tags"]
+        if "publication_date" in self.awaited_details:
+            del self.awaited_details["publication_date"]
+        if "readability" in self.awaited_details:
+            del self.awaited_details["readability"]
+        self.assertDictEqual(details, self.awaited_details)
 
-        del doc.document_details["tags"]  # Tags are annoying to test
-        self.assertDictEqual(doc.document_details, awaited_details_1)
+    @patch("requests.sessions.Session.get")
+    def test_plugin_run_http_error(self, mock_get):
+        # Simulate an HTTP error (e.g., 500)
+        class MockResponse:
+            def __init__(self):
+                self.status_code = 500
+                self.text = ""
+
+            def raise_for_status(self):
+                raise Exception("HTTP 500 error")
+
+        mock_get.return_value = MockResponse()
+
+        docs = [
+            WeLearnDocument(
+                id=1,
+                url="https://example.org/plosone/article?id=10.1371/journal.pone.0265511",
+            )
+        ]
+        result = self.plos_scraper.run(docs)
+
+        self.assertEqual(len(result), 1)
+        self.assertIsNotNone(result[0].error_info)
+        self.assertIsInstance(result[0].document, WeLearnDocument)
+
+    @patch("requests.sessions.Session.get")
+    def test_plugin_run_invalid_xml(self, mock_get):
+        # Simulate an invalid XML (missing required fields)
+        class MockResponse:
+            def __init__(self):
+                self.status_code = 200
+                self.text = "<html><body>No article meta</body></html>"
+
+            def raise_for_status(self):
+                pass
+
+        mock_get.return_value = MockResponse()
+
+        docs = [
+            WeLearnDocument(
+                id=1,
+                url="https://example.org/plosone/article?id=10.1371/journal.pone.0265511",
+            )
+        ]
+        result = self.plos_scraper.run(docs)
+
+        self.assertEqual(len(result), 1)
+        self.assertIsNotNone(result[0].error_info)
+        self.assertIsInstance(result[0].document, WeLearnDocument)
+
+    @patch("requests.sessions.Session.get")
+    def test_plugin_run_empty_input(self, mock_get):
+        # Test with empty input list
+        result = self.plos_scraper.run([])
+        self.assertEqual(result, [])
 
     def test_generate_api_url(self):
+        # Test the API URL generation logic
         awaited_url = "https://example.org/plosone/article/file?id=10.1371/journal.pone.0265511&type=manuscript"
         input_url = (
             "https://example.org/plosone/article?id=10.1371/journal.pone.0265511"

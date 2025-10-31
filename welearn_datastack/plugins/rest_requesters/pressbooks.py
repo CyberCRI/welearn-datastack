@@ -1,17 +1,24 @@
+import json
 import logging
-from collections import defaultdict
 from datetime import datetime
 from functools import cache
-from typing import List, Tuple
 from urllib.parse import urlparse, urlunparse
 
 import requests.exceptions
 import spacy
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
+from welearn_datastack.data.source_models.pressbooks import (
+    PressBooksMetadataModel,
+    PressBooksModel,
+)
 from welearn_datastack.plugins.interface import IPluginRESTCollector
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
+)
 from welearn_datastack.utils_.scraping_utils import clean_text
 
 logger = logging.getLogger(__name__)
@@ -32,17 +39,34 @@ class PressBooksCollector(IPluginRESTCollector):
     def _create_pressbook_id(main_url: str, post_id: int):
         return f"{main_url}?p={post_id}"
 
-    def _extract_books_main_url(self, urls: List[str]):
-        ret = defaultdict(list)
-        for url in urls:
-            parsed_url = urlparse(url)
-            book_addr = urlunparse(
-                ["https", parsed_url.netloc, parsed_url.path, "", "", ""]
-            )
-            post_id = int(parsed_url.query.split("=")[-1])  # Left part
-            ret[book_addr].append(post_id)
+    @staticmethod
+    def _extract_book_main_url(url: str) -> str:
 
-        return ret
+        parsed_url = urlparse(url)
+        book_addr = urlunparse(
+            ["https", parsed_url.netloc, parsed_url.path, "", "", ""]
+        )
+
+        return book_addr
+
+    @staticmethod
+    def _extract_post_id(url: str) -> str:
+        parsed_url = urlparse(url)
+        return parsed_url.path.replace("p=", "")
+
+    @staticmethod
+    def _extract_pressbook_type(url: str) -> str:
+        http_client = get_new_https_session()
+        ret = http_client.head(url, allow_redirects=True)
+        ret.raise_for_status()
+
+        p = urlparse(ret.url)
+        type_name = p.path.split("/")[2]
+
+        if type_name in ["chapter", "part"]:
+            type_name += "s"
+
+        return type_name
 
     @staticmethod
     def _extract_three_first_sentences(text: str) -> str:
@@ -56,154 +80,146 @@ class PressBooksCollector(IPluginRESTCollector):
         sentences = [sent.text for sent in doc.sents]
         return " ".join(sentences[:3]) if len(sentences) >= 3 else text
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         client = get_new_https_session()
-        main_urls = self._extract_books_main_url(urls)
+        ret: list[WrapperRetrieveDocument] = []
 
-        collected_docs: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
-        # Get different book containers
-        for main_url in main_urls:
-            for container_name in CONTAINERS_NAME:
-                forged_url = f"{main_url}/wp-json/pressbooks/v2/{container_name}"
-                container_content = client.get(url=forged_url)
-                try:
-                    container_content.raise_for_status()
-                except requests.exceptions.RequestException:
-                    logger.error(
-                        f"Error while retrieving {container_name} for {main_url}: {forged_url}"
+        for document in documents:
+            # Identify post type
+            post_type = self._extract_pressbook_type(document.url)
+            main_url = self._extract_book_main_url(document.url)
+            post_id = self._extract_post_id(document.url)
+            forged_url = f"{main_url}/wp-json/pressbooks/v2/{post_type}/{post_id}"
+
+            post_content = client.get(url=forged_url)
+            try:
+                post_content.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                msg = f"Error while retrieving metadata for post ID {post_id} in {main_url}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        http_error_code=get_http_code_from_exception(e),
+                        error_info=msg,
                     )
-                    continue
-                container_content = container_content.json()
-                if not container_content:
-                    logger.warning(
-                        f"No content found for {container_name} in {main_url}"
+                )
+                continue
+
+            raw_data = PressBooksModel.model_validate_json(
+                json.dumps(post_content.json())
+            )
+
+            metadata_resp = client.get(url=f"{forged_url}/metadata")
+            try:
+                metadata_resp.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                msg = f"Error while retrieving metadata for post ID {post_id} in {main_url}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        http_error_code=get_http_code_from_exception(e),
+                        error_info=msg,
                     )
-                    continue
+                )
+                continue
 
-                for item in container_content:
-                    post_id = item["id"]
-                    url = self._create_pressbook_id(main_url, post_id)
-                    try:
-                        metadata_url = item["_links"]["metadata"][0]["href"]
-                    except KeyError:
-                        logger.error(
-                            f"Metadata link not found for url {url} in {main_url}, we assume there is no content"
-                        )
-                        error_docs.append(url)
-                        continue
-                    if not metadata_url.endswith("/"):
-                        metadata_url += "/"
-                    metadata_resp = client.get(metadata_url)
-                    try:
-                        metadata_resp.raise_for_status()
-                    except requests.exceptions.RequestException:
-                        logger.error(
-                            f"Error while retrieving metadata for post ID {post_id} in {main_url}"
-                        )
-                        error_docs.append(url)
-                        continue
-                    metadata = metadata_resp.json()
-                    license_url = metadata["license"]["url"]
-                    if license_url not in AUTHORIZED_LICENSES:
-                        logger.error(
-                            f"Unauthorized license {license_url} for post ID {post_id} in {main_url}"
-                        )
-                        error_docs.append(url)
-                        continue
-                    book_title = clean_text(metadata.get("isPartOf"))
-                    element_title = clean_text(metadata["name"])
+            raw_metadata = PressBooksMetadataModel.model_validate_json(
+                json.dumps(metadata_resp.json())
+            )
+            license_url = raw_metadata.license.url
 
-                    if book_title:
-                        title = f"{book_title} - {element_title}"
-                    else:
-                        title = element_title
+            if license_url not in AUTHORIZED_LICENSES:
+                msg = f"Unauthorized license {license_url} for post ID {post_id} in {main_url}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
 
-                    # Content stuff
-                    not_formatted_content = item["content"]["raw"]
-                    content = clean_text(not_formatted_content)
+            book_title = clean_text(raw_metadata.isPartOf)
+            element_title = clean_text(raw_metadata.name)
 
-                    # Date stuff
-                    pubdate: float | None
-                    if "date_gmt" in metadata:
-                        collected_pubdate = metadata["date_gmt"]
-                        pubdate = datetime.strptime(
-                            collected_pubdate, "%Y-%m-%dT%H:%M:%S"
-                        ).timestamp()
-                    elif "datePublished" in metadata:
-                        # Fallback for datePublished
-                        collected_pubdate = metadata["datePublished"]
-                        pubdate = datetime.strptime(
-                            collected_pubdate, "%Y-%m-%d"
-                        ).timestamp()
-                    else:
-                        logger.warning(
-                            f"No publication date found for post ID {post_id} in {main_url}"
-                        )
-                        pubdate = None
+            if book_title:
+                title = f"{book_title} - {element_title}"
+            else:
+                title = element_title
 
-                    update_date: float | None
-                    if "modified_gmt" in metadata:
-                        collected_update_date = metadata["modified_gmt"]
-                        update_date = datetime.strptime(
-                            collected_update_date, "%Y-%m-%dT%H:%M:%S"
-                        ).timestamp()
-                    else:
-                        logger.warning(
-                            f"No update date found for post ID {post_id} in {main_url}"
-                        )
-                        update_date = None
+            # Content stuff
+            not_formatted_content = raw_data.content.raw
+            content = clean_text(not_formatted_content)
 
-                    # Authors stuff
-                    authors = []
-                    for author in metadata["author"]:
-                        authors.append(
-                            {
-                                "name": clean_text(author["name"]),
-                                "misc": clean_text(
-                                    author.get("contributor_institution")
-                                ),
-                            }
-                        )
+            # Date stuff
+            pubdate: float | None
+            if raw_metadata.date_gmt:
+                collected_pubdate = raw_metadata.date_gmt
+                pubdate = datetime.strptime(
+                    collected_pubdate, "%Y-%m-%dT%H:%M:%S"
+                ).timestamp()
+            elif raw_metadata.datePublished:
+                # Fallback for datePublished
+                collected_pubdate = raw_metadata.datePublished
+                pubdate = datetime.strptime(collected_pubdate, "%Y-%m-%d").timestamp()
+            else:
+                logger.warning(
+                    f"No publication date found for post ID {post_id} in {main_url}"
+                )
+                pubdate = None
 
-                    # Editors stuff
-                    editors = []
-                    for editor in metadata["editor"]:
-                        editors.append(
-                            {
-                                "name": clean_text(editor["name"]),
-                            }
-                        )
+            update_date: float | None
+            if raw_metadata.modified_gmt:
+                collected_update_date = raw_metadata.modified_gmt
+                update_date = datetime.strptime(
+                    collected_update_date, "%Y-%m-%dT%H:%M:%S"
+                ).timestamp()
+            else:
+                logger.warning(
+                    f"No update date found for post ID {post_id} in {main_url}"
+                )
+                update_date = None
 
-                    publisher = clean_text(metadata.get("publisher", {}).get("name"))
-
-                    details = {
-                        "license": license_url,
-                        "update_date": update_date,
-                        "publication_date": pubdate,
-                        "authors": authors,
-                        "editors": editors,
-                        "publisher": publisher,
-                        "type": container_name,
-                        "partOf": {"element": main_url, "order": None},
+            # Authors stuff
+            authors = []
+            for author in raw_metadata.author:
+                authors.append(
+                    {
+                        "name": clean_text(author.name),
+                        "misc": clean_text(author.contributor_institution),
                     }
-                    try:
-                        collected_docs.append(
-                            ScrapedWeLearnDocument(
-                                document_title=title,
-                                document_url=url,
-                                document_content=content,
-                                document_corpus=self.related_corpus,
-                                document_desc=self._extract_three_first_sentences(
-                                    content
-                                ),
-                                document_details=details,
-                            )
-                        )
-                    except Exception as e:
-                        logger.error(
-                            f"Error while creating ScrapedWeLearnDocument for {url}: {e}"
-                        )
-                        error_docs.append(url)
-                        continue
-        return collected_docs, error_docs
+                )
+
+            # Editors stuff
+            editors = []
+            for editor in raw_metadata.editor:
+                editors.append(
+                    {
+                        "name": clean_text(editor.name),
+                    }
+                )
+
+            if raw_metadata.publisher:
+                publisher = raw_metadata.publisher.name
+            else:
+                publisher = None
+
+            details = {
+                "license": license_url,
+                "update_date": update_date,
+                "publication_date": pubdate,
+                "authors": authors,
+                "editors": editors,
+                "publisher": publisher,
+                "type": post_type,
+                "partOf": {"element": main_url, "order": None},
+            }
+
+            document.title = title
+            document.full_content = content
+            document.description = self._extract_three_first_sentences(content)
+            document.details = details
+
+        return ret

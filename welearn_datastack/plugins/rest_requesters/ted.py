@@ -1,33 +1,26 @@
+import json
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Tuple, TypedDict
+from typing import Dict, List
 
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_database.data.models import WeLearnDocument
+
+from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.source_models.ted import (
+    Paragraph,
+    TEDModel,
+    Translation,
+    Video,
+)
 from welearn_datastack.exceptions import NoContent
+from welearn_datastack.modules.computed_metadata import predict_readability
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 from welearn_datastack.utils_.scraping_utils import clean_return_to_line
-from welearn_datastack.utils_.text_stat_utils import predict_readability
 
 logger = logging.getLogger(__name__)
 
 PROHIBITED_TEXT = ["(Music)", "(Applause)", "(Laughter)"]
-
-
-# JSON Types
-class TEDVideoRelatedJSON(TypedDict):
-    description: str
-    internalLanguageCode: str
-    presenterDisplayName: str
-    duration: int
-    title: str
-    publishedAt: str
-    canonicalUrl: str
-    type: Dict[str, str]
-
-
-class TEDTranslationRelatedJSON(TypedDict):
-    paragraphs: List[Dict[str, List[Dict[str, str]]]]
 
 
 # Collector
@@ -60,84 +53,76 @@ class TEDCollector(IPluginRESTCollector):
         """
 
     @staticmethod
-    def _extract_ted_ids(urls: List[str]) -> List[str]:
-        ted_ids = []
-        for url in urls:
-            ted_ids.append(url.split("/")[-1])
-        return ted_ids
+    def _extract_ted_ids(ted_docs: list[WeLearnDocument]) -> dict[str, WeLearnDocument]:
+        return {ted_doc.url.split("/")[-1]: ted_doc for ted_doc in ted_docs}
 
-    def _generate_jsons(self, ted_ids: List[str]) -> List[Dict[str, str]]:
+    def _generate_json(self, ted_id: str) -> Dict[str, str]:
         """
         Generate JSONs for API requests
         """
-        ret = []
-        for _id in ted_ids:
-            current_json = {
-                "query": self.ted_graphql_query.replace("<PLACEHOLDER_ID>", _id)
-            }
-            ret.append(current_json)
-        return ret
+        current_json = {
+            "query": self.ted_graphql_query.replace("<PLACEHOLDER_ID>", ted_id)
+        }
+        return current_json
 
     @staticmethod
     def _concat_content_from_json(
-        ted_json_paragraph: List[Dict[str, List[Dict[str, str]]]],
+        ted_json_paragraph: list[Paragraph],
     ) -> str:
         """
         Concatenate content from JSON
         """
+        if not ted_json_paragraph:
+            return ""
         ret = ""
+
         for paragraph in ted_json_paragraph:
-            cues = paragraph["cues"]
+            cues = paragraph.cues
             for cue in cues:
-                text = cue["text"]
+                text = cue.text
                 if text not in PROHIBITED_TEXT:
                     ret += clean_return_to_line(text) + " "
         return ret.strip()
 
-    def _convert_json_dict_to_welearndoc(
-        self, ted_content: Dict
-    ) -> ScrapedWeLearnDocument:
+    def _update_welearndocument(self, wrapper: WrapperRawData) -> WeLearnDocument:
         """
         Convert JSON to ScrapedWeLearnDocument
         """
-        video_related: TEDVideoRelatedJSON = ted_content["data"]["video"]
-        translation_related: TEDTranslationRelatedJSON = ted_content["data"][
-            "translation"
-        ]
+
+        video_related: Video = wrapper.raw_data.data.video
+        translation_related: Translation = wrapper.raw_data.data.translation
 
         if not video_related or not translation_related:
             raise NoContent("No content found")
 
-        desc = video_related["description"]
-        lang = video_related["internalLanguageCode"]
-        title = video_related["title"]
-        canonical_url = video_related["canonicalUrl"]
-        doc_content = self._concat_content_from_json(translation_related["paragraphs"])
+        desc = video_related.description
+        lang = video_related.internalLanguageCode
+        title = video_related.title
+        canonical_url = video_related.canonicalUrl
+        doc_content = self._concat_content_from_json(translation_related.paragraphs)
 
         ted_date_format = "%Y-%m-%dT%H:%M:%SZ"
-        pubdate = datetime.strptime(video_related["publishedAt"], ted_date_format)
+        pubdate = datetime.strptime(video_related.publishedAt, ted_date_format)
         pubdate.replace(tzinfo=timezone.utc)
         pubdate_ts = pubdate.timestamp()
         document_details = {
-            "duration": str(video_related["duration"]),
+            "duration": str(video_related.duration),
             "readability": predict_readability(doc_content, lang),
-            "authors": [{"name": video_related["presenterDisplayName"], "misc": ""}],
+            "authors": [{"name": video_related.presenterDisplayName, "misc": ""}],
             "publication_date": pubdate_ts,
-            "type": video_related.get("type", {}).get("name", ""),
+            "type": video_related.type.name,
         }
 
-        return ScrapedWeLearnDocument(
-            document_title=title,
-            document_url=canonical_url,
-            document_lang=lang,
-            document_content=doc_content,
-            document_desc=desc,
-            document_corpus=self.corpus_name,
-            document_details=document_details,
-        )
+        wrapper.document.document_title = title
+        wrapper.document.document_url = canonical_url
+        wrapper.document.document_desc = desc
+        wrapper.document.document_content = doc_content
+        wrapper.document.document_details = document_details
+
+        return wrapper.document
 
     @staticmethod
-    def _get_ted_content(ted_json: Dict) -> Dict:
+    def _get_ted_content(ted_json: Dict) -> TEDModel:
         """
         Get content from TED API
 
@@ -156,30 +141,37 @@ class TEDCollector(IPluginRESTCollector):
         json_response = response.json()
         if json_response.get("errors"):
             raise NoContent("No content found")
-        return json_response
+        ret = TEDModel.model_validate_json(json.dumps(json_response))
+        return ret
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running TEDCollectorRest plugin")
-        ret: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
+        ret: List[WrapperRetrieveDocument] = []
 
-        try:
-            ted_ids = self._extract_ted_ids(urls)
-            json_reqs_for_ted = self._generate_jsons(ted_ids)
-
-            for req in json_reqs_for_ted:
-                ret.append(
-                    self._convert_json_dict_to_welearndoc(self._get_ted_content(req))
+        ted_ids_docs = self._extract_ted_ids(documents)
+        for ted_id, doc in ted_ids_docs.items():
+            json_req = self._generate_json(ted_id)
+            try:
+                ted_content = self._get_ted_content(json_req)
+                wrapper = WrapperRawData(
+                    raw_data=ted_content,
+                    document=doc,
                 )
+                welearn_doc = self._update_welearndocument(wrapper)
 
-        except Exception as e:
-            logger.error("Error while getting content from TED API")
-            logger.exception(e)
-            for url in urls:
-                error_docs.append(url)
+                ret.append(WrapperRetrieveDocument(document=welearn_doc))
+            except Exception as e:
+                logger.error(f"Error processing TED ID {ted_id}")
+                logger.exception(e)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=doc,
+                        error_info=str(e),
+                    )
+                )
 
         logger.info(
             "TEDCollector plugin finished, %s urls successfully processed",
             len(ret),
         )
-        return ret, error_docs
+        return ret
