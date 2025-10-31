@@ -14,7 +14,6 @@ from welearn_datastack.modules import collector_selector
 from welearn_datastack.plugins.interface import IPlugin
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
-from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
 
 log_level: int = logging.getLevelName(os.getenv("LOG_LEVEL", "INFO"))
 log_format: str = os.getenv(
@@ -160,8 +159,3 @@ def extract_data_from_urls(
             "'%s' documents were retrieved for %s", len(ret_documents), corpus_name
         )
     return ret_documents, error_docs, states
-
-
-if __name__ == "__main__":
-    load_dotenv_local()
-    main()

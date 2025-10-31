@@ -21,6 +21,7 @@ from welearn_datastack.exceptions import (
     UnauthorizedLicense,
     WrongLangFormat,
 )
+from welearn_datastack.modules.computed_metadata import get_language_detector
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
@@ -34,7 +35,6 @@ from welearn_datastack.utils_.http_client_utils import (
     get_new_https_session,
 )
 from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
-from welearn_datastack.utils_.text_stat_utils import get_language_detector
 
 logger = logging.getLogger(__name__)
 
