@@ -69,7 +69,7 @@ class WikipediaCollector(IPluginRESTCollector):
         """
         logger.info("Getting text content for url : '%s'", document)
 
-        lang = re.match(r"https://([a-z]{2})", document)[0][-2:]  # type: ignore
+        lang = re.match(r"https://([a-z]{2})", document.url)[0][-2:]  # type: ignore
         wiki_wiki = Wikipedia(USER_AGENT, lang)
 
         page: WikipediaPage | None = None
