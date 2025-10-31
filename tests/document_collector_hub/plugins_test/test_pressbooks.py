@@ -17,11 +17,13 @@ from welearn_datastack.data.source_models.pressbooks import (
 )
 from welearn_datastack.plugins.rest_requesters.pressbooks import PressBooksCollector
 
-# Helper to build a minimal valid PressBooksModel and PressBooksMetadataModel
-
 
 def build_pressbooks_model():
-    content = Content(raw="Raw content.", rendered="Rendered content.", protected=False)
+    content = Content(
+        raw="Raw content, test test test test test test",
+        rendered="Rendered content.",
+        protected=False,
+    )
     return PressBooksModel(content=content, links_={})
 
 
@@ -52,6 +54,7 @@ def build_pressbooks_metadata_model(
         modified_gmt="2022-01-02T12:00:00",
         license=license,
         links_={},
+        isPartOf="Part of this book",
     )
 
 
@@ -100,7 +103,7 @@ class TestPressBooksCollector(unittest.TestCase):
         # Run
         result = self.collector.run([self.doc])
         self.assertEqual(result, [])
-        self.assertEqual(self.doc.title, "Publisher Name - Element Title")
+        self.assertEqual(self.doc.title, "Part of this book - Element Title")
         self.assertIn("license", self.doc.details)
         self.assertEqual(
             self.doc.details["license"], "https://creativecommons.org/licenses/by/4.0/"
@@ -110,9 +113,9 @@ class TestPressBooksCollector(unittest.TestCase):
         self.assertEqual(self.doc.details["publisher"], "Publisher Name")
         self.assertEqual(self.doc.details["type"], "chapters")
         self.assertTrue(hasattr(self.doc, "full_content"))
-        self.assertTrue(isinstance(getattr(self.doc, "full_content", ""), str))
+        self.assertTrue(isinstance(self.doc.full_content, str))
         self.assertTrue(hasattr(self.doc, "description"))
-        self.assertTrue(isinstance(getattr(self.doc, "description", ""), str))
+        self.assertTrue(isinstance(self.doc.description, str))
 
     @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
     def test_run_http_error_on_content(self, mock_session):
@@ -126,7 +129,11 @@ class TestPressBooksCollector(unittest.TestCase):
 
         # Mock GET pour le contenu qui lève l'erreur sur .raise_for_status()
         mock_get_content = MagicMock()
-        mock_get_content.raise_for_status.side_effect = HTTPError("500 Server Error")
+        http_error = HTTPError("500 Server Error")
+        http_error.response = MagicMock()
+        http_error.response.status_code = 500
+        mock_get_content.raise_for_status.side_effect = http_error
+        mock_get_content.json.return_value = {}
         mock_client.get.return_value = mock_get_content
 
         result = self.collector.run([self.doc])
@@ -148,9 +155,12 @@ class TestPressBooksCollector(unittest.TestCase):
         mock_get_content = MagicMock()
         mock_get_content.json.return_value = build_pressbooks_model().model_dump()
         mock_get_content.raise_for_status = lambda: None
-        # Mock GET for metadata raises error
         mock_get_metadata = MagicMock()
-        mock_get_metadata.raise_for_status.side_effect = Exception("Request failed")
+
+        http_error = HTTPError("500 Server Error")
+        http_error.response = MagicMock()
+        http_error.response.status_code = 500
+        mock_get_metadata.raise_for_status.side_effect = http_error
         mock_client.get.side_effect = [mock_get_content, mock_get_metadata]
         mock_model.model_validate_json.side_effect = lambda x: build_pressbooks_model()
         result = self.collector.run([self.doc])
@@ -194,7 +204,3 @@ class TestPressBooksCollector(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertIsInstance(result[0], WrapperRetrieveDocument)
         self.assertIn("Unauthorized license", result[0].error_info)
-
-
-if __name__ == "__main__":
-    unittest.main()

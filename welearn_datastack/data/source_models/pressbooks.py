@@ -46,6 +46,7 @@ class License(BaseModel):
 
 class PressBooksMetadataModel(BaseModel):
     name: str
+    isPartOf: str
     editor: List[EditorItem]
     author: List[AuthorItem]
     publisher: Optional[Publisher]
