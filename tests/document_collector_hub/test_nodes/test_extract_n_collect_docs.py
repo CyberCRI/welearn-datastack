@@ -156,27 +156,32 @@ class TestExtractNCollectDocs(TestCase):
     def test_main(self, extract_data_mock, create_db_session_mock):
         create_db_session_mock.return_value = self.test_session
         uuids = [uuid.uuid4() for _ in range(2)]
+
         wd0 = WeLearnDocument(
             id=uuids[0],
             url="https://example.org/wiki/Randomness__1",
-            lang="en",
-            full_content=random_string(300),
-            description=random_string(100),
+            full_content="In common usage, randomness is the apparent or actual lack of definite patterns or predictability in information.",
+            description="In common usage, randomness",
             corpus_id=self.corpus_test.id,
+            details={},
         )
 
         wd1 = WeLearnDocument(
             id=uuids[1],
             url="https://example.org/wiki/Randomness__2",
-            lang="en",
-            full_content=random_string(300),
-            description=random_string(100),
+            full_content="The fields of mathematics, probability, and statistics use formal definitions of randomness",
+            description="The fields of mathematics, probability, and statistics",
             corpus_id=self.corpus_test.id,
+            details={},
         )
 
         self.test_session.add(wd0)
         self.test_session.add(wd1)
         self.test_session.commit()
+
+        # Retrieve ORM instances from the session
+        wd0_db = self.test_session.query(WeLearnDocument).filter_by(id=uuids[0]).one()
+        wd1_db = self.test_session.query(WeLearnDocument).filter_by(id=uuids[1]).one()
 
         with (self.path_test_input / "batch_ids.csv").open("w") as f:
             writer = csv.writer(f)
@@ -186,13 +191,17 @@ class TestExtractNCollectDocs(TestCase):
         # Ajout des ProcessState simulés
         process_states = [
             ProcessState(
-                id=uuid.uuid4(), document_id=wd0.id, title=Step.DOCUMENT_SCRAPED.value
+                id=uuid.uuid4(),
+                document_id=wd0_db.id,
+                title=Step.DOCUMENT_SCRAPED.value,
             ),
             ProcessState(
-                id=uuid.uuid4(), document_id=wd1.id, title=Step.DOCUMENT_SCRAPED.value
+                id=uuid.uuid4(),
+                document_id=wd1_db.id,
+                title=Step.DOCUMENT_SCRAPED.value,
             ),
         ]
-        extract_data_mock.return_value = ([wd0, wd1], [], process_states)
+        extract_data_mock.return_value = ([wd0_db, wd1_db], [], process_states)
 
         document_collector.main()
 
@@ -206,7 +215,14 @@ class TestExtractNCollectDocs(TestCase):
             self.assertEqual(current_doc.corpus_id, self.corpus_test.id)
             self.assertEqual(current_doc.corpus.source_name, corpus_source_name)
 
-        # Vérifie la présence des ProcessState
+            # Check computed metadata
+            self.assertIsInstance(current_doc.lang, str)
+            self.assertEqual(current_doc.lang, "en")
+            self.assertIn("duration", current_doc.details)
+            self.assertIn("readability", current_doc.details)
+            self.assertIn("content_and_description_lang", current_doc.details)
+
+        # Cehck existence of ProcessState
         db_states = list(
             self.test_session.query(ProcessState).filter(
                 ProcessState.document_id.in_(uuids)

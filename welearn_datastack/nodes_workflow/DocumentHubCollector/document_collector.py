@@ -6,11 +6,17 @@ from typing import Dict, List, Tuple
 from uuid import UUID
 
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.attributes import flag_modified
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import ErrorRetrieval, ProcessState, WeLearnDocument
 
 from welearn_datastack.exceptions import PluginNotFoundError
 from welearn_datastack.modules import collector_selector
+from welearn_datastack.modules.computed_metadata import (
+    compute_duration,
+    compute_readability,
+    identify_document_language,
+)
 from welearn_datastack.plugins.interface import IPlugin
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
@@ -74,6 +80,16 @@ def main() -> None:
     logger.info("Data extraction - Retrieve URLs and documents")
     batch_documents, errors, states = extract_data_from_urls(welearn_documents)
     logger.info("Data extraction - URLs and documents were retrieved")
+
+    # Compute some metadata
+    logger.info("Compute some metadata for retrieved documents")
+    for doc in batch_documents:
+        if not doc.details:
+            doc.details = {}
+        identify_document_language(doc)
+        compute_duration(doc)
+        compute_readability(doc)
+        flag_modified(doc, "details")
 
     db_session.add_all(states)
     db_session.add_all(errors)

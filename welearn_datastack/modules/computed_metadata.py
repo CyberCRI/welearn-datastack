@@ -35,7 +35,11 @@ def get_language_detector():
     """
     Returns a language detector instance.
     """
-    return LanguageDetectorBuilder.from_all_languages().with_low_accuracy_mode().build()
+    return (
+        LanguageDetectorBuilder.from_all_spoken_languages()
+        .with_low_accuracy_mode()
+        .build()
+    )
 
 
 def remove_punctuation(text: str) -> str:
@@ -223,4 +227,18 @@ def identify_document_language(document: WeLearnDocument) -> WeLearnDocument:
         },
     }
 
+    return document
+
+
+def compute_duration(document: WeLearnDocument) -> WeLearnDocument:
+    document.details["duration"] = predict_duration(
+        document.full_content, document.lang
+    )
+    return document
+
+
+def compute_readability(document: WeLearnDocument) -> WeLearnDocument:
+    document.details["readability"] = predict_readability(
+        document.full_content, document.lang
+    )
     return document
