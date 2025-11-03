@@ -12,6 +12,7 @@ class TestComputedMetadata(unittest.TestCase):
         self.text_fr = (
             "Ceci est une phrase de test simple. Elle est écrite en français."
         )
+        self.text_zh = "这是一句简单的测试语句。它用法语写成"
         self.doc_en = WeLearnDocument(
             id=1,
             url="https://example.org/test_en",
@@ -42,6 +43,10 @@ class TestComputedMetadata(unittest.TestCase):
     def test_predict_readability_en(self):
         score = computed_metadata.predict_readability(self.text_en, "en")
         self.assertTrue(80.0 <= float(score) <= 100.0)
+
+    def test_predict_readability_zh(self):
+        score = computed_metadata.predict_readability(self.text_zh, "zh")
+        self.assertIsNone(score)
 
     def test_predict_duration_en(self):
         duration = computed_metadata.predict_duration(self.text_en, "en")

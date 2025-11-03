@@ -146,7 +146,7 @@ def avg_syllables_per_word(text: str, lang: str) -> float:
         return 0.0
 
 
-def predict_readability(text: str, lang: str) -> str:
+def predict_readability(text: str, lang: str) -> str | None:
     """scores the readability with flesch reading ease (score from 0 to 100)
 
     Args:
@@ -157,7 +157,7 @@ def predict_readability(text: str, lang: str) -> str:
         float: flesch reading ease score
     """
     if lang not in FLESCH_KINCAID_CONSTANTS:
-        return ""
+        return None
     fre_base = FLESCH_KINCAID_CONSTANTS[lang]["fre_base"]
     fre_sentence_length = FLESCH_KINCAID_CONSTANTS[lang]["fre_sentence_length"]
     fre_syll_per_word = FLESCH_KINCAID_CONSTANTS[lang]["fre_syll_per_word"]
@@ -169,6 +169,7 @@ def predict_readability(text: str, lang: str) -> str:
     )
     flesch = float(math.floor((flesch * 100) + math.copysign(0.5, flesch))) / 100
     ret = min(100.0, max(0.0, flesch))
+
     return str(ret)
 
 
