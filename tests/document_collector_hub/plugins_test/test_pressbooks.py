@@ -69,6 +69,12 @@ class TestPressBooksCollector(unittest.TestCase):
             details={},
         )
 
+    def test_extract_post_id(self):
+        url_to_test = "https://wtcs.pressbooks.pub/communications/?p=5"
+        awaited_result = "5"
+        result = self.collector._extract_post_id(url_to_test)
+        self.assertEqual(result, awaited_result)
+
     @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
     @patch("welearn_datastack.plugins.rest_requesters.pressbooks.PressBooksModel")
     @patch(

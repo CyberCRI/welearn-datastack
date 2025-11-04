@@ -52,7 +52,7 @@ class PressBooksCollector(IPluginRESTCollector):
     @staticmethod
     def _extract_post_id(url: str) -> str:
         parsed_url = urlparse(url)
-        return parsed_url.path.replace("p=", "")
+        return parsed_url.query.replace("p=", "")
 
     @staticmethod
     def _extract_pressbook_type(url: str) -> str:
