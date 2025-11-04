@@ -35,7 +35,7 @@ class Metadatum(BaseModel):
     key: str
     value: str
     language: Optional[str]
-    schema: str
+    schema_: str
     element: str
     qualifier: Optional[str]
     code: Optional[str] = None
