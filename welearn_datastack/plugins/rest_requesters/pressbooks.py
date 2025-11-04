@@ -221,5 +221,6 @@ class PressBooksCollector(IPluginRESTCollector):
             document.full_content = content
             document.description = self._extract_three_first_sentences(content)
             document.details = details
+            ret.append(WrapperRetrieveDocument(document=document))
 
         return ret

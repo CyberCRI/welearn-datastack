@@ -108,20 +108,22 @@ class TestPressBooksCollector(unittest.TestCase):
         )
         # Run
         result = self.collector.run([self.doc])
-        self.assertEqual(result, [])
-        self.assertEqual(self.doc.title, "Part of this book - Element Title")
-        self.assertIn("license", self.doc.details)
+        self.assertEqual(len(result), 1)
+        self.assertIsInstance(result[0], WrapperRetrieveDocument)
+        doc_result = result[0].document
+        self.assertIsInstance(doc_result, WeLearnDocument)
+        self.assertEqual(doc_result.title, "Part of this book - Element Title")
+        self.assertIn("license", doc_result.details)
         self.assertEqual(
-            self.doc.details["license"], "https://creativecommons.org/licenses/by/4.0/"
+            doc_result.details["license"],
+            "https://creativecommons.org/licenses/by/4.0/",
         )
-        self.assertEqual(self.doc.details["authors"][0]["name"], "Author Name")
-        self.assertEqual(self.doc.details["editors"][0]["name"], "Editor Name")
-        self.assertEqual(self.doc.details["publisher"], "Publisher Name")
-        self.assertEqual(self.doc.details["type"], "chapters")
-        self.assertTrue(hasattr(self.doc, "full_content"))
-        self.assertTrue(isinstance(self.doc.full_content, str))
-        self.assertTrue(hasattr(self.doc, "description"))
-        self.assertTrue(isinstance(self.doc.description, str))
+        self.assertEqual(doc_result.details["authors"][0]["name"], "Author Name")
+        self.assertEqual(doc_result.details["editors"][0]["name"], "Editor Name")
+        self.assertEqual(doc_result.details["publisher"], "Publisher Name")
+        self.assertEqual(doc_result.details["type"], "chapters")
+        self.assertIsInstance(doc_result.full_content, str)
+        self.assertIsInstance(doc_result.description, str)
 
     @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
     def test_run_http_error_on_content(self, mock_session):
