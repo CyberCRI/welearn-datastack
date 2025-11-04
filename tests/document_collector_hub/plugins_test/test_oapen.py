@@ -305,9 +305,8 @@ class TestOAPenCollector(unittest.TestCase):
         self.collector.run([doc1, doc2])
 
         # Check if correct args were passed to the method
-        mock_get_jsons.assert_called_once_with([doc1, doc2])
+        mock_get_jsons.assert_called_once_with((doc1, doc2))
         # Check if inner method was called for each of documents
-        calls = [((wrapper1,),), ((wrapper2,),)]
         actual_calls = [call.args for call in mock_update.call_args_list]
         self.assertEqual(actual_calls, [(wrapper1,), (wrapper2,)])
 

@@ -367,7 +367,7 @@ class OAPenCollector(IPluginRESTCollector):
         for i, local_doc_batch in enumerate(batched(documents, sub_batch_qty)):
             logger.info(f"Sub batch {i+1}/{math.ceil(len(documents) / sub_batch_qty)}")
             try:
-                resp_from_oapen.extend(self._get_jsons(documents))
+                resp_from_oapen.extend(self._get_jsons(local_doc_batch))
             except Exception as e:
                 logger.error("Error while getting JSON from OApen API")
                 logger.error(e)
