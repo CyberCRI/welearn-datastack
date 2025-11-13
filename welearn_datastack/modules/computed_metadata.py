@@ -53,7 +53,7 @@ def remove_punctuation(text: str) -> str:
     """
     text = re.sub(r"\'(?![tsd]\b|ve\b|ll\b|re\b)", '"', text)
     # remove all punctuation except apostrophes
-    punctuation_regex = r"[^\w\s\']"
+    punctuation_regex = r"[^\w\s'\.,]|(?<!\d)[.,](?!\d)"
 
     text = re.sub(punctuation_regex, "", text)
     return text
