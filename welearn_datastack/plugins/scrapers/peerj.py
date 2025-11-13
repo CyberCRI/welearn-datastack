@@ -6,12 +6,16 @@ from typing import Any, Dict, List, Optional, Tuple
 import requests  # type: ignore
 from bs4 import BeautifulSoup, Tag  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import UnauthorizedLicense
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
+)
 from welearn_datastack.utils_.scraping_utils import (
     clean_return_to_line,
     extract_property_from_html,
@@ -180,18 +184,18 @@ class PeerJCollector(IPluginScrapeCollector):
             sentence = sentence[:-2] + ".\n"
         return sentence
 
-    def _scrape_url(self, url: str) -> ScrapedWeLearnDocument:
+    def _scrape_url(self, document: WeLearnDocument) -> WeLearnDocument:
         """
-        Scrape an url
-        :param url: Url to scrape
-        :return: ScrapedWeLearnDocument
+        Scrape an document
+        :param document: Document to scrape
+        :return: WrapperRetrieveDocument
         """
-        logger.info("Scraping url : '%s'", url)
+        logger.info("Scraping url : '%s'", document.url)
 
-        simple_page_url = url
+        simple_page_url = document.url
         # Generate simple page url
-        if not url.endswith(".html"):
-            if url.endswith("/"):
+        if not document.url.endswith(".html"):
+            if document.url.endswith("/"):
                 simple_page_url = simple_page_url[:-1]
             simple_page_url += ".html"
 
@@ -227,32 +231,33 @@ class PeerJCollector(IPluginScrapeCollector):
             error_property_name="description",
         )
 
-        # Get details
-        doc_details = self._get_document_details(soup=soup)
+        document.title = title
+        document.description = description
+        document.full_content = content_bs_txt
+        document.details = self._get_document_details(soup=soup)
 
-        scraped_document = ScrapedWeLearnDocument(
-            document_url=url,
-            document_title=title,
-            document_desc=description,
-            document_content=content_bs_txt,
-            document_details=doc_details,
-            document_corpus=self.related_corpus,
-        )
+        return document
 
-        return scraped_document
-
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running PeerJCollector plugin")
-        ret: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
-        for url in urls:
+        ret: List[WrapperRetrieveDocument] = []
+        for document in documents:
             try:
-                ret.append(self._scrape_url(url))
-            except Exception as e:
-                logger.exception(
-                    "Error while scraping url,\n url: '%s' \nError: %s", url, e
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=self._scrape_url(document),
+                    )
                 )
-                error_docs.append(url)
+            except Exception as e:
+                msg = f"Error while scraping url,\n url: '{document.url}' \nError: {str(e)}"
+                logger.exception(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                        http_error_code=get_http_code_from_exception(e),
+                    )
+                )
                 continue
         logger.info("PeerJCollector plugin finished, %s urls scraped", len(ret))
-        return ret, error_docs
+        return ret

@@ -5,13 +5,17 @@ from typing import Any, Dict, List, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
 from requests import Session  # type: ignore
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, MD_OE_BOOKS_BASE_URL
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import ClosedAccessContent
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
+)
 from welearn_datastack.utils_.scraping_utils import extract_property_from_html
 
 logger = logging.getLogger(__name__)
@@ -26,19 +30,21 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
 
         self.parent_page_cache: Dict[str, BeautifulSoup] = {}
 
-    def _scrape_url(self, url: str) -> ScrapedWeLearnDocument:
+    def _scrape_url(self, document: WeLearnDocument) -> WeLearnDocument:
         """
-        Scrape an url
-        :param url: Url to scrape
-        :return: ScrapedWeLearnDocument
+        Scrape an document
+        :param document: Document to scrape
+        :return: WrapperRetrieveDocument
         """
-        logger.info("Scraping url : '%s'", url)
+        logger.info("Scraping url : '%s'", document.url)
         https_session = get_new_https_session()
 
-        md_id, mets_api_res = self._get_mets_metadata(https_session, url)
+        md_id, mets_api_res = self._get_mets_metadata(https_session, document.url)
         dmdid = f"MD_OB_{md_id.replace('/', '_')}"
 
         resource_type = ""
+        title = None
+        desc = None
 
         # Root extractor is the full XML file from the METS api, it's opposed to the
         # local_dmd which is the XML file of the chapter
@@ -57,10 +63,10 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
                 raise ValueError(
                     "The DMD section related to DMDID was not found %s on %s",
                     dmdid,
-                    url,
+                    document.url,
                 )
         elif mets_api_res.status_code == 404:
-            soup = self._get_soup_from_url(https_session, url)
+            soup = self._get_soup_from_url(https_session, document.url)
 
             # Get type
             resource_type = extract_property_from_html(
@@ -112,7 +118,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
             case "chapter":
                 details["type"] = "chapter"
                 if not soup:
-                    soup = self._get_soup_from_url(https_session, url)
+                    soup = self._get_soup_from_url(https_session, document.url)
 
                 parent_url = extract_property_from_html(
                     soup.find("link", {"rel": "Contents"}), attribute_name="href"
@@ -149,7 +155,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
 
                 if not local_dmd:
                     raise ValueError(
-                        f"The DMD section related to DMDID was not found {dmdid} on {url}",
+                        f"The DMD section related to DMDID was not found {dmdid} on {document.url}",
                     )
 
                 # Get DOI and ISBN
@@ -242,14 +248,18 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
         publisher = root_extractor.extract_content("dcterms:publisher")[0].content
         details["publisher"] = publisher
 
-        return ScrapedWeLearnDocument(
-            document_title=title,
-            document_url=url,
-            document_content=content,
-            document_desc=desc,
-            document_corpus=self.related_corpus,
-            document_details=details,
-        )
+        if not title:
+            raise ValueError("No title found")
+
+        if not desc:
+            raise ValueError("No description found")
+
+        document.title = title
+        document.description = desc
+        document.full_content = content
+        document.details = details
+
+        return document
 
     @staticmethod
     def _extract_book_dmd_id(xml_extractor):
@@ -348,29 +358,29 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
         mets_api_res = https_session.get(url=md_url, timeout=self.timeout)
         return md_id, mets_api_res
 
-    #
-    # def get_chapter_order(self, xml_extractor: XMLExtractor) -> int:
-    #     """
-    #     Get the chapters order from METS xml
-    #     :param xml_extractor: XMLExtractor object containing the METS xml
-    #     :return: Chapter order
-    #     """
-    #
-
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running OpenEditionBooksCollector plugin")
-        ret: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
-        for url in urls:
+        ret: List[WrapperRetrieveDocument] = []
+        for document in documents:
             try:
-                ret.append(self._scrape_url(url))
-            except Exception as e:
-                logger.exception(
-                    "Error while scraping url,\n url: '%s' \nError: %s", url, e
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=self._scrape_url(document),
+                    )
                 )
-                error_docs.append(url)
+            except Exception as e:
+                msg = f"Error while scraping url,\n url: '{document.url}' \nError: {str(e)}"
+                logger.exception(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                        http_error_code=get_http_code_from_exception(e),
+                    )
+                )
                 continue
+
         logger.info(
             "OpenEditionBooksCollector plugin finished, %s urls scraped", len(ret)
         )
-        return ret, error_docs
+        return ret

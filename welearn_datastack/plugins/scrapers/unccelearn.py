@@ -9,9 +9,10 @@ from typing import List, Optional, Tuple
 
 from bs4 import BeautifulSoup, ResultSet  # type: ignore
 from requests.exceptions import RequestException
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import HEADERS
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import NoContent
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -21,7 +22,10 @@ from welearn_datastack.modules.pdf_extractor import (
     replace_ligatures,
 )
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
-from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
+)
 from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
@@ -178,11 +182,11 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
 
         return ret, file_metadata
 
-    def _scrape_url(self, url: str) -> ScrapedWeLearnDocument:
-        logger.info("Scraping url : '%s'", url)
+    def _scrape_document(self, document: WeLearnDocument) -> WeLearnDocument:
+        logger.info("Scraping url : '%s'", document.url)
 
         client = get_new_https_session()
-        resp = client.get(url=url, timeout=self.timeout)
+        resp = client.get(url=document.url, timeout=self.timeout)
         resp.raise_for_status()
         tika_metadata = self._get_metadata_from_tika(
             io.BytesIO(resp.content), content_type="text/html; charset=utf-8"
@@ -201,34 +205,41 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
             details.update(file_md)
         except NoContent as e:
             logger.warning(
-                f"There is no content detected for this url {url} : {str(e)}. Degraded mode activated and use description as content"
+                f"There is no content detected for this url {document.url} : {str(e)}. Degraded mode activated and use description as content"
             )
             content = doc_desc
             details["content_from_pdf"] = False
         else:
             details["content_from_pdf"] = True
 
-        return ScrapedWeLearnDocument(
-            document_url=url,
-            document_title=doc_title,
-            document_desc=doc_desc,
-            document_content=content,
-            document_details=details,
-            document_corpus=self.related_corpus,
-        )
+        document.title = doc_title
+        document.description = doc_desc
+        document.full_content = content
+        document.details = details
 
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
+        return document
+
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running UNCCeLearnCollector plugin")
-        ret: List[ScrapedWeLearnDocument] = []
-        error_docs: List[str] = []
-        for url in urls:
+        ret: List[WrapperRetrieveDocument] = []
+        for document in documents:
             try:
-                ret.append(self._scrape_url(url))
-            except Exception as e:
-                logger.exception(
-                    "Error while scraping url,\n url: '%s' \nError: %s", url, e
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=self._scrape_document(document),
+                    )
                 )
-                error_docs.append(url)
+            except Exception as e:
+                msg = f"Error while scraping url,\n url: '{document.url}' \nError: {str(e)}"
+                logger.exception(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                        http_error_code=get_http_code_from_exception(e),
+                    )
+                )
                 continue
+
         logger.info("UNCCeLearnCollector plugin finished, %s urls scraped", len(ret))
-        return ret, error_docs
+        return ret

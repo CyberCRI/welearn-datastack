@@ -1,18 +1,16 @@
 import csv
-import json
 import os
 import random
 import shutil
 import string
 import uuid
 from pathlib import Path
-from typing import Dict, List, Tuple
 from unittest import TestCase, mock
+from unittest.mock import patch
 
 from sqlalchemy import create_engine
-from sqlalchemy.exc import DatabaseError
 from sqlalchemy.orm import sessionmaker
-from sympy.integrals.meijerint_doc import category
+from welearn_database.data.enumeration import Step
 from welearn_database.data.models import (
     Base,
     Category,
@@ -22,10 +20,9 @@ from welearn_database.data.models import (
 )
 
 from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.scraped_welearn_document import ScrapedWeLearnDocument
-from welearn_datastack.modules import collector_selector
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.nodes_workflow.DocumentHubCollector import document_collector
-from welearn_datastack.plugins.interface import IPluginFilesCollector
+from welearn_datastack.plugins.interface import IPluginRESTCollector
 
 
 def random_string(length: int):
@@ -35,56 +32,6 @@ def random_string(length: int):
 
 
 corpus_source_name = "test_corpus"
-list_of_swld = [
-    ScrapedWeLearnDocument(
-        document_title=random_string(20),
-        document_url="https://example.org/wiki/Randomness",
-        document_lang="en",
-        document_content=random_string(300),
-        document_desc=random_string(100),
-        document_corpus=corpus_source_name,
-        document_details={
-            random_string(5): random_string(20),
-            random_string(5): random_string(20),
-            random_string(5): random_string(20),
-            random_string(5): random_string(20),
-        },
-    ),
-    ScrapedWeLearnDocument(
-        document_title=random_string(20),
-        document_url="https://example.org/wiki/Unit_testing",
-        document_lang="en",
-        document_content=random_string(300),
-        document_desc=random_string(100),
-        document_corpus=corpus_source_name,
-        document_details={
-            random_string(5): random_string(20),
-            random_string(5): random_string(20),
-            random_string(5): random_string(20),
-            random_string(5): random_string(20),
-        },
-    ),
-]
-
-dict_url_for_doc = {doc.document_url: doc for doc in list_of_swld}
-
-
-class TestPluginFiles(IPluginFilesCollector):
-    related_corpus: str = corpus_source_name
-
-    def __init__(self):
-        super().__init__()
-
-    def run(self, urls: List[str]) -> Tuple[List[ScrapedWeLearnDocument], List[str]]:
-        res: List[ScrapedWeLearnDocument] = []
-        errors_urls: List[str] = []
-        try:
-            for doc in list_of_swld:
-                if doc.document_url in urls:
-                    res.append(dict_url_for_doc[doc.document_url])
-        except Exception as e:
-            errors_urls.append(urls[0])
-        return res, errors_urls
 
 
 class TestExtractNCollectDocs(TestCase):
@@ -102,8 +49,6 @@ class TestExtractNCollectDocs(TestCase):
         self.test_session = s_maker()
         Base.metadata.create_all(self.test_session.get_bind())
 
-        collector_selector.plugins_files_list = [TestPluginFiles]
-
         self.path_test_input = Path(__file__).parent.parent / "resources" / "input"
         self.path_test_input.mkdir(parents=True, exist_ok=True)
 
@@ -111,9 +56,7 @@ class TestExtractNCollectDocs(TestCase):
         self.category_name = "categroy_test0"
 
         self.category_id = uuid.uuid4()
-
         self.category = Category(id=self.category_id, title=self.category_name)
-
         self.test_session.add(self.category)
 
         self.corpus_test = Corpus(
@@ -123,8 +66,27 @@ class TestExtractNCollectDocs(TestCase):
             is_active=True,
             category_id=self.category_id,
         )
-
         self.test_session.add(self.corpus_test)
+        self.test_session.commit()
+
+        self.doc_valid = WeLearnDocument(
+            id=uuid.uuid4(),
+            url="https://example.org/wiki/Randomness",
+            lang="en",
+            full_content=random_string(300),
+            description=random_string(100),
+            corpus_id=self.corpus_test.id,
+        )
+        self.doc_invalid = WeLearnDocument(
+            id=uuid.uuid4(),
+            url="https://example.org/wiki/Unit_testing",
+            lang="en",
+            full_content=random_string(300),
+            description=random_string(100),
+            corpus_id=uuid.uuid4(),  # corpus inexistant
+        )
+        self.test_session.add(self.doc_valid)
+        self.test_session.add(self.doc_invalid)
         self.test_session.commit()
 
     def tearDown(self) -> None:
@@ -133,71 +95,113 @@ class TestExtractNCollectDocs(TestCase):
         shutil.rmtree(self.path_test_input, ignore_errors=True)
         shutil.rmtree(self.path_test_input.parent / "output", ignore_errors=True)
 
-    def test_extract_data(self):
-        url_0 = list_of_swld[0].document_url
-        url_1 = list_of_swld[1].document_url
-
-        wd0 = WeLearnDocument(id=uuid.uuid4(), url=url_0, corpus=self.corpus_test)
-
-        wd1 = WeLearnDocument(id=uuid.uuid4(), url=url_1, corpus=self.corpus_test)
-        self.test_session.add(wd0)
-        self.test_session.add(wd1)
-        self.test_session.commit()
-
-        (
-            extracted_docs,
-            error_docs,
-            process_states,
-        ) = document_collector.extract_data_from_urls(welearn_documents=[wd0, wd1])
-
-        self.assertEqual(len(extracted_docs), 2)
-        self.assertEqual(len(error_docs), 0)
-        self.assertEqual(len(process_states), 2)
-
-    def test_extract_data_corpus_not_found(self):
-        url_0 = list_of_swld[0].document_url
-        url_1 = list_of_swld[1].document_url
-
-        wd0 = WeLearnDocument(id=uuid.uuid4(), url=url_0, corpus=self.corpus_test)
-
-        wd1 = WeLearnDocument(
-            id=uuid.uuid4(),
-            url=url_1,
-            corpus_id=uuid.uuid4(),
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.collector_selector"
+    )
+    def test_extract_data(self, collector_selector_mock):
+        collector_selector_mock.select_collector.return_value = mock.MagicMock(
+            spec=IPluginRESTCollector
         )
-        self.test_session.add(wd0)
-        self.test_session.add(wd1)
+        collector_selector_mock.select_collector.return_value.run.return_value = [
+            WrapperRetrieveDocument(document=self.doc_valid),
+            WrapperRetrieveDocument(
+                document=self.doc_invalid, error_info="Not found", http_error_code=404
+            ),
+        ]
 
-        self.test_session.commit()
         (
             extracted_docs,
             error_docs,
             process_states,
-        ) = document_collector.extract_data_from_urls(welearn_documents=[wd0, wd1])
+        ) = document_collector.extract_data_from_urls(
+            welearn_documents=[self.doc_valid, self.doc_invalid]
+        )
 
         self.assertEqual(len(extracted_docs), 1)
+        self.assertEqual(extracted_docs[0].id, self.doc_valid.id)
+        self.assertEqual(len(error_docs), 1)
+        self.assertEqual(error_docs[0].document_id, self.doc_invalid.id)
+        self.assertEqual(len(process_states), 2)
+
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.collector_selector"
+    )
+    def test_extract_data_corpus_not_found(self, collector_selector_mock):
+        # Utilise les documents préparés dans setUp
+        collector_selector_mock.select_collector.return_value = mock.MagicMock(
+            spec=IPluginRESTCollector
+        )
+        collector_selector_mock.select_collector.return_value.run.return_value = [
+            WrapperRetrieveDocument(document=self.doc_valid)
+        ]
+
+        (
+            extracted_docs,
+            error_docs,
+            process_states,
+        ) = document_collector.extract_data_from_urls(
+            welearn_documents=[self.doc_valid, self.doc_invalid]
+        )
+
+        self.assertEqual(len(extracted_docs), 1)
+        self.assertEqual(extracted_docs[0].id, self.doc_valid.id)
         self.assertEqual(len(process_states), 1)
 
-    @mock.patch(
+    @patch(
         "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.create_db_session"
     )
-    def test_main(self, create_db_session_mock):
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.extract_data_from_urls"
+    )
+    def test_main(self, extract_data_mock, create_db_session_mock):
         create_db_session_mock.return_value = self.test_session
         uuids = [uuid.uuid4() for _ in range(2)]
+
         wd0 = WeLearnDocument(
-            id=uuids[0], url=list_of_swld[0].document_url, corpus=self.corpus_test
+            id=uuids[0],
+            url="https://example.org/wiki/Randomness__1",
+            full_content="In common usage, randomness is the apparent or actual lack of definite patterns or predictability in information.",
+            description="In common usage, randomness",
+            corpus_id=self.corpus_test.id,
+            details={},
         )
+
         wd1 = WeLearnDocument(
-            id=uuids[1], url=list_of_swld[1].document_url, corpus=self.corpus_test
+            id=uuids[1],
+            url="https://example.org/wiki/Randomness__2",
+            full_content="The fields of mathematics, probability, and statistics use formal definitions of randomness",
+            description="The fields of mathematics, probability, and statistics",
+            corpus_id=self.corpus_test.id,
+            details={},
         )
+
         self.test_session.add(wd0)
         self.test_session.add(wd1)
         self.test_session.commit()
+
+        # Retrieve ORM instances from the session
+        wd0_db = self.test_session.query(WeLearnDocument).filter_by(id=uuids[0]).one()
+        wd1_db = self.test_session.query(WeLearnDocument).filter_by(id=uuids[1]).one()
 
         with (self.path_test_input / "batch_ids.csv").open("w") as f:
             writer = csv.writer(f)
             for uuid_ in uuids:
                 writer.writerow([uuid_])
+
+        # Ajout des ProcessState simulés
+        process_states = [
+            ProcessState(
+                id=uuid.uuid4(),
+                document_id=wd0_db.id,
+                title=Step.DOCUMENT_SCRAPED.value,
+            ),
+            ProcessState(
+                id=uuid.uuid4(),
+                document_id=wd1_db.id,
+                title=Step.DOCUMENT_SCRAPED.value,
+            ),
+        ]
+        extract_data_mock.return_value = ([wd0_db, wd1_db], [], process_states)
 
         document_collector.main()
 
@@ -208,56 +212,22 @@ class TestExtractNCollectDocs(TestCase):
                 .filter(WeLearnDocument.id == uuid_)
                 .one()
             )
-
             self.assertEqual(current_doc.corpus_id, self.corpus_test.id)
             self.assertEqual(current_doc.corpus.source_name, corpus_source_name)
 
-        self.assertEqual(
-            len(
-                list(
-                    self.test_session.query(ProcessState).filter(
-                        ProcessState.document_id.in_(uuids)
-                    )
-                )
-            ),
-            2,
-        )
+            # Check computed metadata
+            self.assertIsInstance(current_doc.lang, str)
+            self.assertEqual(current_doc.lang, "en")
+            self.assertIn("duration", current_doc.details)
+            self.assertIn("readability", current_doc.details)
+            self.assertIn("content_and_description_lang", current_doc.details)
 
-    # /!\ This filter is not used anymore /!\
-    # def test_filter_already_update(self):
-    #     """
-    #     Check if the method correctly ignore already updated documents in database
-    #     :return:
-    #     """
-    #     states = []
-    #     wd0 = WeLearnDocument(
-    #         id=uuid.uuid4(),
-    #         url=list_of_swld[0].document_url,
-    #         corpus=self.corpus_test,
-    #         title=list_of_swld[0].document_title,
-    #         lang=list_of_swld[0].document_lang,
-    #         full_content=list_of_swld[0].document_content,
-    #         description=list_of_swld[0].document_desc,
-    #         details=list_of_swld[0].document_details,
-    #         trace=list_of_swld[0].trace,
-    #     )
-    #     wd1 = WeLearnDocument(
-    #         id=uuid.uuid4(),
-    #         url=list_of_swld[1].document_url,
-    #         corpus=self.corpus_test,
-    #     )
-    #     ret = []
-    #
-    #     self.test_session.add(wd0)
-    #     self.test_session.add(wd1)
-    #     self.test_session.commit()
-    #
-    #     document_collector.handle_scraped_docs(
-    #         scraped_docs=list_of_swld,
-    #         states=states,
-    #         ret_documents=ret,
-    #         doc_db_urls_dict={x.url: x for x in [wd0, wd1]},
-    #     )
-    #
-    #     self.assertEqual(len(ret), 1)
-    #     self.assertEqual(len(states), 1)
+        # Cehck existence of ProcessState
+        db_states = list(
+            self.test_session.query(ProcessState).filter(
+                ProcessState.document_id.in_(uuids)
+            )
+        )
+        self.assertEqual(len(db_states), 2)
+        self.assertSetEqual(set([s.document_id for s in db_states]), set(uuids))
+        self.assertTrue(all(s.title == Step.DOCUMENT_SCRAPED.value for s in db_states))

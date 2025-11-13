@@ -1,135 +1,214 @@
-import json
-from pathlib import Path
-from unittest import TestCase
-from unittest.mock import Mock, patch
+import unittest
+from unittest.mock import MagicMock, patch
 
-import requests
+from requests import HTTPError
+from welearn_database.data.models import WeLearnDocument
 
-from welearn_datastack.data.enumerations import PluginType
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
+from welearn_datastack.data.source_models.pressbooks import (
+    Address,
+    AuthorItem,
+    Content,
+    EditorItem,
+    License,
+    PressBooksMetadataModel,
+    PressBooksModel,
+    Publisher,
+)
 from welearn_datastack.plugins.rest_requesters.pressbooks import PressBooksCollector
 
 
-class MockResponse:
-    def __init__(self, json_data, status_code=200):
-        self._json = json_data
-        self.status_code = status_code
-
-    def json(self):
-        return self._json
-
-    def raise_for_status(self):
-        if self.status_code >= 400:
-            raise requests.exceptions.HTTPError()
+def build_pressbooks_model():
+    content = Content(
+        raw="Raw content, test test test test test test",
+        rendered="Rendered content.",
+        protected=False,
+    )
+    return PressBooksModel(content=content, links_={})
 
 
-class TestPressBooksCollector(TestCase):
+def build_pressbooks_metadata_model(
+    license_url="https://creativecommons.org/licenses/by/4.0/",
+):
+    license = License(**{"@type": "License"}, url=license_url, name="CC BY 4.0")
+    editor = [EditorItem(name="Editor Name", slug="editor-name", **{"@type": "Person"})]
+    author = [
+        AuthorItem(
+            name="Author Name",
+            slug="author-name",
+            contributor_institution="Institution",
+            **{"@type": "Person"},
+        )
+    ]
+    address = Address(**{"@type": "PostalAddress"}, addressLocality="Paris")
+    publisher = Publisher(
+        **{"@type": "Organization"}, name="Publisher Name", address=address
+    )
+    return PressBooksMetadataModel(
+        name="Element Title",
+        editor=editor,
+        author=author,
+        publisher=publisher,
+        datePublished="2022-01-01",
+        date_gmt="2022-01-01T12:00:00",
+        modified_gmt="2022-01-02T12:00:00",
+        license=license,
+        links_={},
+        isPartOf="Part of this book",
+    )
+
+
+class TestPressBooksCollector(unittest.TestCase):
     def setUp(self):
         self.collector = PressBooksCollector()
-        self.mock_base_path = Path(__file__).parent.parent / "resources"
+        self.doc = WeLearnDocument(
+            url="https://example.com/book/?p=123",
+            title="",
+            description="",
+            full_content="",
+            details={},
+        )
 
-        with open(self.mock_base_path / "pb_chapter_5_metadata.json") as f:
-            self.mock_metadata = json.load(f)
-
-        with open(self.mock_base_path / "pb_chapters.json") as f:
-            self.mock_chapters = json.load(f)
-
-    def test_plugin_type(self):
-        self.assertEqual(PressBooksCollector.collector_type_name, PluginType.REST)
-
-    def test_plugin_related_corpus(self):
-        self.assertEqual(PressBooksCollector.related_corpus, "press-books")
+    def test_extract_post_id(self):
+        url_to_test = "https://wtcs.pressbooks.pub/communications/?p=5"
+        awaited_result = "5"
+        result = self.collector._extract_post_id(url_to_test)
+        self.assertEqual(result, awaited_result)
 
     @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
-    def test_run_success(self, mock_get_session):
-        mock_session = Mock()
-        mock_get_session.return_value = mock_session
+    @patch("welearn_datastack.plugins.rest_requesters.pressbooks.PressBooksModel")
+    @patch(
+        "welearn_datastack.plugins.rest_requesters.pressbooks.PressBooksMetadataModel"
+    )
+    def test_run_successful_document_retrieval(
+        self, mock_metadata_model, mock_model, mock_session
+    ):
+        # Mock HTTP client and responses
+        mock_client = MagicMock()
+        mock_session.return_value = mock_client
+        # Mock HEAD for _extract_pressbook_type
+        mock_head = MagicMock()
+        mock_head.url = "https://example.com/book/chapters/123"
+        mock_head.raise_for_status = lambda: None
+        mock_client.head.return_value = mock_head
+        # Mock GET for post content and metadata
+        mock_get_content = MagicMock()
+        mock_get_content.json.return_value = build_pressbooks_model().model_dump()
+        mock_get_content.raise_for_status = lambda: None
+        mock_get_metadata = MagicMock()
+        mock_get_metadata.json.return_value = (
+            build_pressbooks_metadata_model().model_dump()
+        )
+        mock_get_metadata.raise_for_status = lambda: None
+        mock_client.get.side_effect = [mock_get_content, mock_get_metadata]
+        # Mock model_validate_json
+        mock_model.model_validate_json.side_effect = lambda x: build_pressbooks_model()
+        mock_metadata_model.model_validate_json.side_effect = (
+            lambda x: build_pressbooks_metadata_model()
+        )
+        # Run
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsInstance(result[0], WrapperRetrieveDocument)
+        doc_result = result[0].document
+        self.assertIsInstance(doc_result, WeLearnDocument)
+        self.assertEqual(doc_result.title, "Part of this book - Element Title")
+        self.assertIn("license", doc_result.details)
+        self.assertEqual(
+            doc_result.details["license"],
+            "https://creativecommons.org/licenses/by/4.0/",
+        )
+        self.assertEqual(doc_result.details["authors"][0]["name"], "Author Name")
+        self.assertEqual(doc_result.details["editors"][0]["name"], "Editor Name")
+        self.assertEqual(doc_result.details["publisher"], "Publisher Name")
+        self.assertEqual(doc_result.details["type"], "chapters")
+        self.assertIsInstance(doc_result.full_content, str)
+        self.assertIsInstance(doc_result.description, str)
 
-        def mock_get(url, *args, **kwargs):
-            if url.endswith("/chapters"):
-                return MockResponse(self.mock_chapters)
-            elif url.endswith("/chapters/5/metadata/"):
-                return MockResponse(self.mock_metadata)
-            else:
-                return MockResponse([], 404)
+    @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
+    def test_run_http_error_on_content(self, mock_session):
+        mock_client = MagicMock()
+        mock_session.return_value = mock_client
+        # Mock HEAD pour _extract_pressbook_type
+        mock_head = MagicMock()
+        mock_head.url = "https://example.com/book/chapters/123"
+        mock_head.raise_for_status = lambda: None
+        mock_client.head.return_value = mock_head
 
-        mock_session.get.side_effect = mock_get
+        # Mock GET pour le contenu qui lève l'erreur sur .raise_for_status()
+        mock_get_content = MagicMock()
+        http_error = HTTPError("500 Server Error")
+        http_error.response = MagicMock()
+        http_error.response.status_code = 500
+        mock_get_content.raise_for_status.side_effect = http_error
+        mock_get_content.json.return_value = {}
+        mock_client.get.return_value = mock_get_content
 
-        urls = ["https://wtcs.pressbooks.pub/communications/?p=5"]
-        collected_docs, error_docs = self.collector.run(urls)
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsInstance(result[0], WrapperRetrieveDocument)
+        self.assertIn("Error while retrieving metadata", result[0].error_info)
 
-        self.assertEqual(len(collected_docs), 1)
-        doc = collected_docs[0]
-        self.assertEqual(doc.document_title, f"{self.mock_metadata["isPartOf"]} - {self.mock_metadata["name"]}")
-        self.assertTrue(
-            doc.document_content.startswith(
-                "Chapter 1: Introduction to Communication Situations"
+    @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
+    @patch("welearn_datastack.plugins.rest_requesters.pressbooks.PressBooksModel")
+    def test_run_http_error_on_metadata(self, mock_model, mock_session):
+        mock_client = MagicMock()
+        mock_session.return_value = mock_client
+        # Mock HEAD for _extract_pressbook_type
+        mock_head = MagicMock()
+        mock_head.url = "https://example.com/book/chapters/123"
+        mock_head.raise_for_status = lambda: None
+        mock_client.head.return_value = mock_head
+        # Mock GET for post content
+        mock_get_content = MagicMock()
+        mock_get_content.json.return_value = build_pressbooks_model().model_dump()
+        mock_get_content.raise_for_status = lambda: None
+        mock_get_metadata = MagicMock()
+
+        http_error = HTTPError("500 Server Error")
+        http_error.response = MagicMock()
+        http_error.response.status_code = 500
+        mock_get_metadata.raise_for_status.side_effect = http_error
+        mock_client.get.side_effect = [mock_get_content, mock_get_metadata]
+        mock_model.model_validate_json.side_effect = lambda x: build_pressbooks_model()
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsInstance(result[0], WrapperRetrieveDocument)
+        self.assertIn("Error while retrieving metadata", result[0].error_info)
+
+    @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
+    @patch("welearn_datastack.plugins.rest_requesters.pressbooks.PressBooksModel")
+    @patch(
+        "welearn_datastack.plugins.rest_requesters.pressbooks.PressBooksMetadataModel"
+    )
+    def test_run_unauthorized_license(
+        self, mock_metadata_model, mock_model, mock_session
+    ):
+        mock_client = MagicMock()
+        mock_session.return_value = mock_client
+        # Mock HEAD for _extract_pressbook_type
+        mock_head = MagicMock()
+        mock_head.url = "https://example.com/book/chapters/123"
+        mock_head.raise_for_status = lambda: None
+        mock_client.head.return_value = mock_head
+        # Mock GET for post content and metadata
+        mock_get_content = MagicMock()
+        mock_get_content.json.return_value = build_pressbooks_model().model_dump()
+        mock_get_content.raise_for_status = lambda: None
+        mock_get_metadata = MagicMock()
+        # Unauthorized license
+        mock_get_metadata.json.return_value = build_pressbooks_metadata_model(
+            license_url="https://unauthorized.org/license"
+        ).model_dump()
+        mock_get_metadata.raise_for_status = lambda: None
+        mock_client.get.side_effect = [mock_get_content, mock_get_metadata]
+        mock_model.model_validate_json.side_effect = lambda x: build_pressbooks_model()
+        mock_metadata_model.model_validate_json.side_effect = (
+            lambda x: build_pressbooks_metadata_model(
+                license_url="https://unauthorized.org/license"
             )
         )
-        self.assertEqual(
-            doc.document_details["license"], self.mock_metadata["license"]["url"]
-        )
-        self.assertEqual(doc.document_details["authors"][0]["name"], "Jane Doe")
-        self.assertEqual(doc.document_details["editors"][0]["name"], "John Smith")
-        self.assertEqual(doc.document_details["publisher"], "WisTech Open")
-        self.assertEqual(doc.document_details["type"], "chapters")
-
-    def test__extract_three_first_sentences(self):
-        text = "This is one. This is two. This is three. This is four."
-        result = self.collector._extract_three_first_sentences(text)
-        self.assertEqual(result, "This is one. This is two. This is three.")
-
-    def test__extract_books_main_url(self):
-        urls = [
-            "https://example.com/book/?p=42",
-            "https://example.com/book/?p=99",
-        ]
-        result = self.collector._extract_books_main_url(urls)
-        self.assertIn("https://example.com/book/", result)
-        self.assertIn(42, result["https://example.com/book/"])
-        self.assertIn(99, result["https://example.com/book/"])
-
-    @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
-    def test_run_unauthorized_license(self, mock_get_session):
-        mock_session = Mock()
-        mock_get_session.return_value = mock_session
-
-        # Modifier la licence pour une non autorisée
-        bad_metadata = self.mock_metadata.copy()
-        bad_metadata["license"]["url"] = "http://unauthorized.license.org"
-
-        def mock_get(url, *args, **kwargs):
-            if url.endswith("/chapters"):
-                return MockResponse(self.mock_chapters)
-            elif url.endswith("/chapters/5/metadata/"):
-                return MockResponse(bad_metadata)
-            return MockResponse([], 404)
-
-        mock_session.get.side_effect = mock_get
-
-        urls = ["https://wtcs.pressbooks.pub/communications/?p=5"]
-        collected_docs, error_docs = self.collector.run(urls)
-
-        self.assertEqual(len(collected_docs), 0)
-        self.assertEqual(len(error_docs), 1)
-        self.assertTrue(
-            "https://wtcs.pressbooks.pub/communications/?p=5" in error_docs[0]
-        )
-
-    @patch("welearn_datastack.plugins.rest_requesters.pressbooks.get_new_https_session")
-    def test_run_http_error_on_container(self, mock_get_session):
-        mock_session = Mock()
-        mock_get_session.return_value = mock_session
-
-        # Simuler une erreur 500 sur les containers
-        def mock_get(url, *args, **kwargs):
-            if "chapters" in url:
-                return MockResponse({}, status_code=500)
-            return MockResponse([], 404)
-
-        mock_session.get.side_effect = mock_get
-
-        urls = ["https://wtcs.pressbooks.pub/communications/?p=5"]
-        collected_docs, error_docs = self.collector.run(urls)
-
-        self.assertEqual(collected_docs, [])
-        self.assertEqual(error_docs, [])
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsInstance(result[0], WrapperRetrieveDocument)
+        self.assertIn("Unauthorized license", result[0].error_info)

@@ -1,5 +1,6 @@
 import unittest
 
+import welearn_datastack.modules.computed_metadata
 import welearn_datastack.utils_.scraping_utils
 import welearn_datastack.utils_.text_stat_utils
 
@@ -9,7 +10,7 @@ class TestUtils(unittest.TestCase):
         text_w_punctuation = "Hello, World! Isn't it a beautiful day?"
         text_wo_punctuation = "Hello World Isn't it a beautiful day"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.remove_punctuation(
+            welearn_datastack.modules.computed_metadata.remove_punctuation(
                 text_w_punctuation
             ),
             text_wo_punctuation,
@@ -18,45 +19,48 @@ class TestUtils(unittest.TestCase):
     def test_lexicon_count(self):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.lexicon_count(text), 7
+            welearn_datastack.modules.computed_metadata.lexicon_count(text), 7
         )
 
     def test_sentence_count(self):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.sentence_count(text), 1
+            welearn_datastack.modules.computed_metadata.sentence_count(text), 1
         )
 
     def test_avg_sentence_length(self):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.avg_sentence_length(text), 7.0
+            welearn_datastack.modules.computed_metadata.avg_sentence_length(text), 7.0
         )
 
     def test_syllable_count(self):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.syllable_count(text, "en"), 10
+            welearn_datastack.modules.computed_metadata.syllable_count(text, "en"), 10
         )
 
     def test_avg_syllables_per_word(self):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.avg_syllables_per_word(text, "en"),
+            welearn_datastack.modules.computed_metadata.avg_syllables_per_word(
+                text, "en"
+            ),
             1.4285714285714286,
         )
 
     def test_predict_readability(self):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.predict_readability(text, "en"),
+            welearn_datastack.modules.computed_metadata.predict_readability(text, "en"),
             "78.87",
         )
 
     def test_predict_duration(self):
         text = "Hello, World! Isn't it a beautiful day?"
         self.assertEqual(
-            welearn_datastack.utils_.text_stat_utils.predict_duration(text, "en"), "2"
+            welearn_datastack.modules.computed_metadata.predict_duration(text, "en"),
+            "2",
         )
 
     def test_clean_text(self):
