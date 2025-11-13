@@ -5671,14 +5671,14 @@ test = ["pytest", "websockets"]
 
 [[package]]
 name = "welearn-database"
-version = "0.2.5"
+version = "0.2.6"
 description = "All stuff related to relationnal database from the WeLearn project"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "welearn_database-0.2.5-py3-none-any.whl", hash = "sha256:73a403a8677511649599ef1dd528152d75d30d7bf8e7c856967194508ce73071"},
-    {file = "welearn_database-0.2.5.tar.gz", hash = "sha256:3c28e96a39dd7787e62bf2cb179119226e37f66ec759966b2d89910392fff3ba"},
+    {file = "welearn_database-0.2.6-py3-none-any.whl", hash = "sha256:a5a9ada9f58dda1deef5c4a624b7024c2d3291e1f54eedb6e0ccf8b8b0eed090"},
+    {file = "welearn_database-0.2.6.tar.gz", hash = "sha256:500634ab0a8d75c0bf47956b45126712ff759e0a631440ad0500ee430d90f3ad"},
 ]
 
 [package.dependencies]
@@ -6203,4 +6203,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "1e295a874e9abd39dee69369e3e62886c53a267cc6d5eb15aa40797752a264d8"
+content-hash = "8ec5a440e9cb5c2a6a11971a564d8d983ce545a5715d83cade4d653d4cbe31f7"
