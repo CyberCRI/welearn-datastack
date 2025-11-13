@@ -42,7 +42,7 @@ xx_sent_ud_sm = {url = "https://github.com/explosion/spacy-models/releases/downl
 
 lingua-language-detector = "^2.1.1"
 psycopg2-binary = "^2.9.10"
-brotli = "^1.1.0"
+brotli = "^1.2.0"
 scikit-learn = "~=1.6.1"
 optimum = {extras = ["onnxruntime"], version = "^1.26.1"}
 azure-storage-blob = "^12.26.0"
