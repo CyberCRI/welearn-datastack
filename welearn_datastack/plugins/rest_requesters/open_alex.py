@@ -81,7 +81,7 @@ class OpenAlexCollector(IPluginRESTCollector):
                 openalex_id = url.split("openalex.org/")[-1]
                 openalex_ids.append(openalex_id)
             else:
-                raise UnknownURL(f"URL {url} is not a valid OpenAlex URL")
+                raise UnknownURL(f"URL {url} does not contain 'openalex.org/' - expected format: https://openalex.org/<id>")
 
         if len(openalex_ids) == 0:
             raise NotEnoughData("No valid OpenAlex IDs found in the provided URLs")
