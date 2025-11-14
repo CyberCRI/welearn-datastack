@@ -4,7 +4,7 @@ import logging
 import os
 from datetime import datetime
 from itertools import batched
-from typing import Dict, List
+from typing import Dict
 
 from welearn_database.data.models import WeLearnDocument
 
@@ -67,8 +67,19 @@ class OpenAlexCollector(IPluginRESTCollector):
             l_inv = [(w, p) for w, pos in inv_index.items() for p in pos]
             return " ".join(map(lambda x: x[0], sorted(l_inv, key=lambda x: x[1])))
 
+    @staticmethod
+    def _extract_openalex_id_from_urls(urls: list[str]) -> list[str]:
+        openalex_ids = []
+        for url in urls:
+            if "openalex.org/" in url:
+                openalex_id = url.split("openalex.org/")[-1]
+                openalex_ids.append(openalex_id)
+            else:
+                raise ValueError(f"URL {url} is not a valid OpenAlex URL")
+        return openalex_ids
+
     def _generate_api_query_params(
-        self, urls: List[str], page_ln: int
+        self, urls: list[str], page_ln: int
     ) -> Dict[str, str | bool | int]:
         return {
             "filter": f"ids.openalex:{'|'.join(urls)}",
@@ -126,11 +137,11 @@ class OpenAlexCollector(IPluginRESTCollector):
         return ret
 
     @staticmethod
-    def _transform_topics(topics: List[Topic]) -> List[dict]:
+    def _transform_topics(topics: list[Topic]) -> list[dict]:
         """
         Transform the topics from the original json to the format expected by the WeLearn DB
         :param topics: Original json from OpenAlex
-        :return: List of topics in the format expected by the WeLearn DB
+        :return: list of topics in the format expected by the WeLearn DB
         """
         transformed = []
         unique_items = set()  # For check every external_id is unique
@@ -171,7 +182,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         return transformed
 
     def _remove_useless_first_word(
-        self, string_to_clear: str, useless_words: List[str]
+        self, string_to_clear: str, useless_words: list[str]
     ):
         """
         Remove the first word of a string
