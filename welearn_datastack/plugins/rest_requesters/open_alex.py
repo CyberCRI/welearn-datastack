@@ -6,8 +6,8 @@ from datetime import datetime
 from itertools import batched
 from typing import Dict
 
+from urllib.parse import urlparse
 from welearn_database.data.models import WeLearnDocument
-
 from welearn_datastack.constants import (
     AUTHORIZED_LICENSES,
     HEADERS,
@@ -77,11 +77,12 @@ class OpenAlexCollector(IPluginRESTCollector):
             if url is None:
                 logger.warning("URL is None, skip it")
                 continue
-            if "openalex.org/" in url:
-                openalex_id = url.split("openalex.org/")[-1]
+            parsed_url = urlparse(url)
+            if parsed_url.hostname and parsed_url.hostname.lower() == "openalex.org":
+                openalex_id = parsed_url.path.lstrip("/")
                 openalex_ids.append(openalex_id)
             else:
-                raise UnknownURL(f"URL {url} does not contain 'openalex.org/' - expected format: https://openalex.org/<id>")
+                raise UnknownURL(f"URL {url} does not have the expected hostname 'openalex.org' - expected format: https://openalex.org/<id>")
 
         if len(openalex_ids) == 0:
             raise NotEnoughData("No valid OpenAlex IDs found in the provided URLs")
