@@ -32,7 +32,7 @@ from welearn_datastack.plugins.rest_requesters.open_alex import OpenAlexCollecto
 
 
 def build_openalex_result(
-    url: str = "https://example.com/W123",
+    url: str = "https://openalex.org/W123",
     doi: str = "10.1234/example",
     title: str = "Sample Title",
 ):
@@ -55,7 +55,7 @@ def build_openalex_result(
     open_access = OpenAccess(
         is_oa=True,
         oa_status="gold",
-        oa_url="https://example.com/oa",
+        oa_url="https://openalex.org/oa",
         any_repository_has_fulltext=True,
     )
     source = Source(
@@ -75,8 +75,8 @@ def build_openalex_result(
     )
     best_oa_location = BestOaLocation(
         is_oa=True,
-        landing_page_url="https://example.com/landing",
-        pdf_url="https://example.com/pdf",
+        landing_page_url="https://openalex.org/landing",
+        pdf_url="https://openalex.org/pdf",
         source=source,
         license="cc-by",
         license_id="cc-by",
@@ -113,8 +113,8 @@ def build_openalex_result(
     )
     location = Location(
         is_oa=True,
-        landing_page_url="https://example.com/landing",
-        pdf_url="https://example.com/pdf",
+        landing_page_url="https://openalex.org/landing",
+        pdf_url="https://openalex.org/pdf",
         source=source1,
         license="cc-by",
         license_id="cc-by",
@@ -142,10 +142,10 @@ def build_openalex_result(
 
 class TestOpenAlexCollector(unittest.TestCase):
     def setUp(self):
-        os.environ["TEAM_EMAIL"] = "team@example.com"
+        os.environ["TEAM_EMAIL"] = "team@openalex.org"
         self.collector = OpenAlexCollector()
         self.welearn_doc = WeLearnDocument(
-            url="https://example.com/W123",
+            url="https://openalex.org/W123",
             title="Doc",
             description="",
             full_content="",
@@ -161,14 +161,14 @@ class TestOpenAlexCollector(unittest.TestCase):
     # Test _generate_api_query_params returns expected dict
     def test_generate_api_query_params_returns_expected_dict(self):
         params = self.collector._generate_api_query_params(
-            ["https://example.com/W123"], 10
+            ["https://openalex.org/W123"], 10
         )
         self.assertIn("filter", params)
         self.assertIn("per_page", params)
         self.assertIn("mailto", params)
         self.assertIn("select", params)
         self.assertEqual(params["per_page"], 10)
-        self.assertEqual(params["mailto"], "team@example.com")
+        self.assertEqual(params["mailto"], "team@openalex.org")
 
     # Test _remove_useless_first_word removes word if present
     def test_remove_useless_first_word_removes_word(self):
