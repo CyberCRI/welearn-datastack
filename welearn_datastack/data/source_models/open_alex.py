@@ -6,163 +6,163 @@ from pydantic import BaseModel
 
 
 class Meta(BaseModel):
-    count: int
-    db_response_time_ms: int
-    page: int
-    per_page: int
-    groups_count: Any
+    count: Optional[int] = None
+    db_response_time_ms: Optional[int] = None
+    page: Optional[int] = None
+    per_page: Optional[int] = None
+    groups_count: Optional[Any] = None
 
 
 class Ids(BaseModel):
-    openalex: str
-    doi: str
-    mag: str
-    pmid: str
-    pmcid: str
+    openalex: Optional[str] = None
+    doi: Optional[str] = None
+    mag: Optional[str] = None
+    pmid: Optional[str] = None
+    pmcid: Optional[str] = None
 
 
 class Author(BaseModel):
-    id: str
-    display_name: str
-    orcid: Optional[str]
+    id: Optional[str] = None
+    display_name: Optional[str] = None
+    orcid: Optional[str] = None
 
 
 class Institution(BaseModel):
-    id: str
-    display_name: str
-    ror: str
-    country_code: Optional[str]
-    type: str
-    lineage: List[str]
+    id: Optional[str] = None
+    display_name: Optional[str] = None
+    ror: Optional[str] = None
+    country_code: Optional[str] = None
+    type: Optional[str] = None
+    lineage: Optional[List[Optional[str]]] = None
 
 
 class Affiliation(BaseModel):
-    raw_affiliation_string: str
-    institution_ids: List[str]
+    raw_affiliation_string: Optional[str] = None
+    institution_ids: Optional[List[Optional[str]]] = None
 
 
 class Authorship(BaseModel):
-    author_position: str
-    author: Author
-    institutions: List[Institution]
-    countries: List[str]
-    is_corresponding: bool
-    raw_author_name: str
-    raw_affiliation_strings: List[str]
-    affiliations: List[Affiliation]
+    author_position: Optional[str] = None
+    author: Optional[Author] = None
+    institutions: Optional[List[Institution]] = None
+    countries: Optional[List[str]] = None
+    is_corresponding: Optional[bool] = None
+    raw_author_name: Optional[str] = None
+    raw_affiliation_strings: Optional[List[str]] = None
+    affiliations: Optional[List[Affiliation]] = None
 
 
 class OpenAccess(BaseModel):
-    is_oa: bool
-    oa_status: str
-    oa_url: str
-    any_repository_has_fulltext: bool
+    is_oa: Optional[bool] = None
+    oa_status: Optional[str] = None
+    oa_url: Optional[str] = None
+    any_repository_has_fulltext: Optional[bool] = None
 
 
 class Source(BaseModel):
-    id: str
-    display_name: str
-    issn_l: str
-    issn: List[str]
-    is_oa: bool
-    is_in_doaj: bool
-    is_indexed_in_scopus: bool
-    is_core: bool
-    host_organization: Any
-    host_organization_name: Any
-    host_organization_lineage: List
-    host_organization_lineage_names: List
-    type: str
+    id: Optional[str] = None
+    display_name: Optional[str] = None
+    issn_l: Optional[str] = None
+    issn: Optional[List[str]] = None
+    is_oa: Optional[bool] = None
+    is_in_doaj: Optional[bool] = None
+    is_indexed_in_scopus: Optional[bool] = None
+    is_core: Optional[bool] = None
+    host_organization: Optional[Any] = None
+    host_organization_name: Optional[Any] = None
+    host_organization_lineage: Optional[List[Optional[str]]] = None
+    host_organization_lineage_names: Optional[List[Optional[str]]] = None
+    type: Optional[str] = None
 
 
 class BestOaLocation(BaseModel):
-    is_oa: bool
-    landing_page_url: str
-    pdf_url: str
-    source: Source
-    license: str
-    license_id: str
-    version: str
-    is_accepted: bool
-    is_published: bool
+    is_oa: Optional[bool] = None
+    landing_page_url: Optional[str] = None
+    pdf_url: Optional[str] = None
+    source: Optional[Source] = None
+    license: Optional[str] = None
+    license_id: Optional[str] = None
+    version: Optional[str] = None
+    is_accepted: Optional[bool] = None
+    is_published: Optional[bool] = None
 
 
 class Subfield(BaseModel):
-    id: str
-    display_name: str
+    id: Optional[str] = None
+    display_name: Optional[str] = None
 
 
 class Field(BaseModel):
-    id: str
-    display_name: str
+    id: Optional[str] = None
+    display_name: Optional[str] = None
 
 
 class Domain(BaseModel):
-    id: str
-    display_name: str
+    id: Optional[str] = None
+    display_name: Optional[str] = None
 
 
 class Topic(BaseModel):
-    id: str
-    display_name: str
-    score: float
-    subfield: Subfield
-    field: Field
-    domain: Domain
+    id: Optional[str] = None
+    display_name: Optional[str] = None
+    score: Optional[float] = None
+    subfield: Optional[Subfield] = None
+    field: Optional[Field] = None
+    domain: Optional[Domain] = None
 
 
 class Keyword(BaseModel):
-    id: str
-    display_name: str
-    score: float
+    id: Optional[str] = None
+    display_name: Optional[str] = None
+    score: Optional[float] = None
 
 
 class Source1(BaseModel):
-    id: str
-    display_name: str
-    issn_l: Optional[str]
-    issn: Optional[List[str]]
-    is_oa: bool
-    is_in_doaj: bool
-    is_indexed_in_scopus: bool
-    is_core: bool
-    host_organization: Optional[str]
-    host_organization_name: Optional[str]
-    host_organization_lineage: List[str]
-    host_organization_lineage_names: List[str]
-    type: str
+    id: Optional[str] = None
+    display_name: Optional[str] = None
+    issn_l: Optional[str] = None
+    issn: Optional[List[str]] = None
+    is_oa: Optional[bool] = None
+    is_in_doaj: Optional[bool] = None
+    is_indexed_in_scopus: Optional[bool] = None
+    is_core: Optional[bool] = None
+    host_organization: Optional[str] = None
+    host_organization_name: Optional[str] = None
+    host_organization_lineage: Optional[List[Optional[str]]] = None
+    host_organization_lineage_names: Optional[List[Optional[str]]] = None
+    type: Optional[str] = None
 
 
 class Location(BaseModel):
-    is_oa: bool
-    landing_page_url: str
-    pdf_url: Optional[str]
-    source: Source1
-    license: Optional[str]
-    license_id: Optional[str]
-    version: Optional[str]
-    is_accepted: bool
-    is_published: bool
+    is_oa: Optional[bool] = None
+    landing_page_url: Optional[str] = None
+    pdf_url: Optional[str] = None
+    source: Optional[Source1] = None
+    license: Optional[str] = None
+    license_id: Optional[str] = None
+    version: Optional[str] = None
+    is_accepted: Optional[bool] = None
+    is_published: Optional[bool] = None
 
 
 class OpenAlexResult(BaseModel):
-    title: str
-    ids: Ids
-    language: str
-    publication_date: str
-    authorships: List[Authorship]
-    open_access: OpenAccess
-    best_oa_location: BestOaLocation
-    abstract_inverted_index: dict[str, list[int]]
-    type: str
-    topics: List[Topic]
-    keywords: List[Keyword]
-    referenced_works: List[str]
-    related_works: List[str]
-    locations: Optional[List[Location]]
+    title: Optional[str] = None
+    ids: Optional[Ids] = None
+    language: Optional[str] = None
+    publication_date: Optional[str] = None
+    authorships: Optional[List[Authorship]] = None
+    open_access: Optional[OpenAccess] = None
+    best_oa_location: Optional[BestOaLocation] = None
+    abstract_inverted_index: Optional[dict[str, list[int]]] = None
+    type: Optional[str] = None
+    topics: Optional[List[Topic]] = None
+    keywords: Optional[List[Keyword]] = None
+    referenced_works: Optional[List[str]] = None
+    related_works: Optional[List[str]] = None
+    locations: Optional[List[Location]] = None
 
 
 class OpenAlexModel(BaseModel):
-    meta: Meta
-    results: List[OpenAlexResult]
-    group_by: List
+    meta: Optional[Meta] = None
+    results: Optional[List[OpenAlexResult]] = None
+    group_by: Optional[List[Any]] = None
