@@ -173,7 +173,10 @@ def extract_data_from_urls(
                 )
             )
         logger.info(
-            "'%s' documents were retrieved for %s", len(ret_documents), corpus_name
+            f"'{len(ret_documents)}/{len(welearn_documents)}' documents were retrieved for {corpus_name}"
+        )
+        logger.info(
+            f"'{len(error_docs)}/{len(welearn_documents)}' errors were retrieved for {corpus_name}"
         )
     return ret_documents, error_docs, states
 

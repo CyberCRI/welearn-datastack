@@ -4,7 +4,8 @@ import logging
 import os
 from datetime import datetime
 from itertools import batched
-from typing import Dict, List
+from typing import Iterable
+from urllib.parse import urlparse
 
 from welearn_database.data.models import WeLearnDocument
 
@@ -25,9 +26,12 @@ from welearn_datastack.data.source_models.open_alex import (
 )
 from welearn_datastack.exceptions import (
     ClosedAccessContent,
+    ManagementExceptions,
+    NotEnoughData,
     PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedPublisher,
+    UnknownURL,
 )
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -67,9 +71,29 @@ class OpenAlexCollector(IPluginRESTCollector):
             l_inv = [(w, p) for w, pos in inv_index.items() for p in pos]
             return " ".join(map(lambda x: x[0], sorted(l_inv, key=lambda x: x[1])))
 
+    @staticmethod
+    def _extract_openalex_id_from_urls(urls: Iterable[str]) -> list[str]:
+        openalex_ids = []
+        for url in urls:
+            if url is None:
+                logger.warning("URL is None, skip it")
+                continue
+            parsed_url = urlparse(url)
+            if parsed_url.hostname and parsed_url.hostname.lower() == "openalex.org":
+                openalex_ids.append(parsed_url.path.lstrip("/"))
+            else:
+                raise UnknownURL(
+                    f"URL {url} does not have the expected hostname 'openalex.org' - expected format: https://openalex.org/<id>"
+                )
+
+        if len(openalex_ids) == 0:
+            raise NotEnoughData("No valid OpenAlex IDs found in the provided URLs")
+
+        return openalex_ids
+
     def _generate_api_query_params(
-        self, urls: List[str], page_ln: int
-    ) -> Dict[str, str | bool | int]:
+        self, urls: list[str], page_ln: int
+    ) -> dict[str, str | bool | int]:
         return {
             "filter": f"ids.openalex:{'|'.join(urls)}",
             "per_page": page_ln,
@@ -126,11 +150,11 @@ class OpenAlexCollector(IPluginRESTCollector):
         return ret
 
     @staticmethod
-    def _transform_topics(topics: List[Topic]) -> List[dict]:
+    def _transform_topics(topics: list[Topic]) -> list[dict]:
         """
         Transform the topics from the original json to the format expected by the WeLearn DB
         :param topics: Original json from OpenAlex
-        :return: List of topics in the format expected by the WeLearn DB
+        :return: list of topics in the format expected by the WeLearn DB
         """
         transformed = []
         unique_items = set()  # For check every external_id is unique
@@ -171,7 +195,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         return transformed
 
     def _remove_useless_first_word(
-        self, string_to_clear: str, useless_words: List[str]
+        self, string_to_clear: str, useless_words: list[str]
     ):
         """
         Remove the first word of a string
@@ -220,10 +244,21 @@ class OpenAlexCollector(IPluginRESTCollector):
             host_organization_lineage_malformed: list[str] = (
                 location.source.host_organization_lineage
             )
-            host_organization_lineage = [
-                h.split("/")[-1] for h in host_organization_lineage_malformed
-            ]
-            host_ids.extend(host_organization_lineage)
+            if (
+                host_organization_lineage_malformed is None
+                or len(host_organization_lineage_malformed) == 0
+            ):
+                continue
+            try:
+                host_organization_lineage = self._extract_openalex_id_from_urls(
+                    host_organization_lineage_malformed
+                )
+                host_ids.extend(host_organization_lineage)
+            except ManagementExceptions as e:
+                logger.warning(
+                    f"Cannot extract host organization lineage from {location.source.host_organization_lineage}: {e}"
+                )
+                continue
 
         avoiding_ids = PUBLISHERS_TO_AVOID
         for host_id in host_ids:
@@ -315,10 +350,11 @@ class OpenAlexCollector(IPluginRESTCollector):
         http_client = get_new_https_session()
 
         for sub_batch in sub_batches:
-            urls_docs = {d.url: d for d in documents}
+            urls_docs = {d.url: d for d in sub_batch}
             try:
                 local_params = self._generate_api_query_params(
-                    urls=list(urls_docs.keys()), page_ln=page_length
+                    urls=self._extract_openalex_id_from_urls(urls_docs.keys()),
+                    page_ln=page_length,
                 )
                 ret_from_openalex = http_client.get(
                     url=OPEN_ALEX_BASE_URL, params=local_params
