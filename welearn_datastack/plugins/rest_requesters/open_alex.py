@@ -80,8 +80,7 @@ class OpenAlexCollector(IPluginRESTCollector):
                 continue
             parsed_url = urlparse(url)
             if parsed_url.hostname and parsed_url.hostname.lower() == "openalex.org":
-                openalex_id = parsed_url.path.lstrip("/")
-                openalex_ids.append(openalex_id)
+                openalex_ids.append(parsed_url.path.lstrip("/"))
             else:
                 raise UnknownURL(
                     f"URL {url} does not have the expected hostname 'openalex.org' - expected format: https://openalex.org/<id>"
