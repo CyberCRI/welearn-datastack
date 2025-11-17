@@ -4,10 +4,10 @@ import logging
 import os
 from datetime import datetime
 from itertools import batched
-from typing import Dict
-
 from urllib.parse import urlparse
+
 from welearn_database.data.models import WeLearnDocument
+
 from welearn_datastack.constants import (
     AUTHORIZED_LICENSES,
     HEADERS,
@@ -82,7 +82,9 @@ class OpenAlexCollector(IPluginRESTCollector):
                 openalex_id = parsed_url.path.lstrip("/")
                 openalex_ids.append(openalex_id)
             else:
-                raise UnknownURL(f"URL {url} does not have the expected hostname 'openalex.org' - expected format: https://openalex.org/<id>")
+                raise UnknownURL(
+                    f"URL {url} does not have the expected hostname 'openalex.org' - expected format: https://openalex.org/<id>"
+                )
 
         if len(openalex_ids) == 0:
             raise NotEnoughData("No valid OpenAlex IDs found in the provided URLs")
@@ -91,7 +93,7 @@ class OpenAlexCollector(IPluginRESTCollector):
 
     def _generate_api_query_params(
         self, urls: list[str], page_ln: int
-    ) -> Dict[str, str | bool | int]:
+    ) -> dict[str, str | bool | int]:
         return {
             "filter": f"ids.openalex:{'|'.join(urls)}",
             "per_page": page_ln,
