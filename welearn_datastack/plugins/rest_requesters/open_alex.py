@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import datetime
 from itertools import batched
+from typing import Iterable
 from urllib.parse import urlparse
 
 from welearn_database.data.models import WeLearnDocument
@@ -71,7 +72,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             return " ".join(map(lambda x: x[0], sorted(l_inv, key=lambda x: x[1])))
 
     @staticmethod
-    def _extract_openalex_id_from_urls(urls: list[str]) -> list[str]:
+    def _extract_openalex_id_from_urls(urls: Iterable[str]) -> list[str]:
         openalex_ids = []
         for url in urls:
             if url is None:
@@ -353,7 +354,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             urls_docs = {d.url: d for d in sub_batch}
             try:
                 local_params = self._generate_api_query_params(
-                    urls=self._extract_openalex_id_from_urls(list(urls_docs.keys())),
+                    urls=self._extract_openalex_id_from_urls(urls_docs.keys()),
                     page_ln=page_length,
                 )
                 ret_from_openalex = http_client.get(
