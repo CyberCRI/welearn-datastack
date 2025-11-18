@@ -75,6 +75,19 @@ class TestQdrantHandler(unittest.TestCase):
     def tearDown(self):
         self.client.close()
 
+    def test_slice_without_embedding_model_should_go_to_none_collection(self):
+        doc_id = uuid.uuid4()
+        qdrant_connector = self.client
+        fake_slice = FakeSlice(doc_id)
+        fake_slice.embedding_model = None
+        slices = [fake_slice]
+        collections_names = classify_documents_per_collection(qdrant_connector, slices)
+
+        expected = {
+            None: {fake_slice.document_id},
+        }
+        self.assertEqual(dict(collections_names), expected)
+
     def test_should_get_collections_names_for_given_slices(self):
         doc_id = uuid.uuid4()
         qdrant_connector = self.client
@@ -83,7 +96,10 @@ class TestQdrantHandler(unittest.TestCase):
         slices = [fake_slice]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
 
-        expected = {"collection_welearn_en_english-embmodel": {fake_slice.document_id}}
+        expected = {
+            None: set(),
+            "collection_welearn_en_english-embmodel": {fake_slice.document_id},
+        }
         self.assertEqual(dict(collections_names), expected)
 
     def test_should_handle_multiple_slices_for_same_collection(self):
@@ -101,6 +117,7 @@ class TestQdrantHandler(unittest.TestCase):
         slices = [fake_slice0, fake_slice1, fake_slice2]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
         expected = {
+            None: set(),
             "collection_welearn_en_english-embmodel": {doc_id0},
             "collection_welearn_fr_french-embmodel": {doc_id1},
         }
@@ -130,6 +147,7 @@ class TestQdrantHandler(unittest.TestCase):
         slices = [fake_slice0, fake_slice1, fake_slice2]
         collections_names = classify_documents_per_collection(qdrant_connector, slices)
         expected = {
+            None: set(),
             "collection_welearn_en_english-embmodel": {doc_id0},
             "collection_welearn_mul_mulembmodel": {doc_id1},
         }
