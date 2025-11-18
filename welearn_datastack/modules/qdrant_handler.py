@@ -36,7 +36,7 @@ def classify_documents_per_collection(
             model = dslice.embedding_model.title
         except AttributeError:
             logger.error(
-                f"Slice {dslice.id} has no updated embedding model, document ({dslice.document_id} put in error",
+                f"Slice {dslice.id} has no updated embedding model, document ({dslice.document_id}) put in error",
             )
             ret[None].add(dslice.document_id)  # type: ignore
             continue
