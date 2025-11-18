@@ -112,6 +112,21 @@ def main() -> None:
             qdrant_connector=qdrant_client, slices=slices
         )
 
+        # Flag documents with no collection
+        logger.info(
+            "Flag documents with no collection: %s", len(documents_per_collection[None])
+        )
+        for docid in documents_per_collection[None]:
+            db_session.add(
+                ProcessState(
+                    id=uuid.uuid4(),
+                    document_id=docid,
+                    title=Step.KEPT_FOR_TRACE.value,
+                )
+            )
+        del documents_per_collection[None]
+        db_session.commit()
+
         # Iterate on each collection
         for collection_name in documents_per_collection:
             logger.info(f"We are working on collection : {collection_name}")

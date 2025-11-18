@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 def classify_documents_per_collection(
     qdrant_connector: QdrantClient, slices: Collection[Type[DocumentSlice]]
-) -> Dict[str, Set[UUID]]:
+) -> Dict[str | None, Set[UUID]]:
     """
     Classify documents per collection in Qdrant.
 
@@ -29,10 +29,18 @@ def classify_documents_per_collection(
     tmp_collections_names_in_qdrant = qdrant_connector.get_collections().collections
     collections_names_in_qdrant = [c.name for c in tmp_collections_names_in_qdrant]
 
-    ret: Dict[str, Set[UUID]] = {}
+    ret: Dict[str | None, Set[UUID]] = {None: set()}
     for dslice in slices:
         lang = dslice.document.lang
-        model = dslice.embedding_model.title
+        try:
+            model = dslice.embedding_model.title
+        except AttributeError:
+            logger.error(
+                f"Slice {dslice.id} has no updated embedding model, document ({dslice.document_id}) put in error",
+            )
+            ret[None].add(dslice.document_id)  # type: ignore
+            continue
+
         collection_name = None
         multilingual_collection = f"collection_welearn_mul_{model}"
         mono_collection = f"collection_welearn_{lang}_{model}"
