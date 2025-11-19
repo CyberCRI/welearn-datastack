@@ -69,3 +69,10 @@ class TestUtils(unittest.TestCase):
             welearn_datastack.utils_.scraping_utils.clean_text(html_text),
             "Hello, World! Isn't it a beautiful day?",
         )
+
+    def test_extract_hal_id_from_url(self):
+        url = "https://hal.science/hal-04337383v1"
+        self.assertEqual(
+            welearn_datastack.utils_.scraping_utils.extract_hal_id_from_url(url),
+            "hal-04337383",
+        )

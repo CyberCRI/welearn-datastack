@@ -1,29 +1,34 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
+from welearn_database.data.enumeration import ExternalIdType
+
 from welearn_datastack.data.db_wrapper import WrapperRawData
 from welearn_datastack.plugins.rest_requesters.hal import HALCollector
+from welearn_datastack.utils_.scraping_utils import extract_hal_id_from_url
 
 
-class DummyWeLearnDocument:
+class DummyHALWeLearnDocument:
     def __init__(self, url="https://example.com/hal-00006805"):
         self.url = url
         self.title = None
         self.description = None
         self.full_content = None
         self.details = None
+        self.external_id = extract_hal_id_from_url(url)
+        self.external_id_type = ExternalIdType.API_ID.value.lower()
 
 
 class DummyWrapperRawData:
     def __init__(self, raw_data=None, document=None):
         self.raw_data = raw_data or {}
-        self.document = document or DummyWeLearnDocument()
+        self.document = document or DummyHALWeLearnDocument()
 
 
 class TestHALCollector(unittest.TestCase):
     def setUp(self):
         self.collector = HALCollector()
-        self.dummy_doc = DummyWeLearnDocument()
+        self.dummy_doc = DummyHALWeLearnDocument()
         self.dummy_wrapper = DummyWrapperRawData(document=self.dummy_doc)
 
     def test_convert_hal_date_to_ts_valid(self):
@@ -98,7 +103,7 @@ class TestHALCollector(unittest.TestCase):
             "authFullName_s": ["A. Author"],
         }
         wrapper = DummyWrapperRawData(
-            raw_data=raw_data, document=DummyWeLearnDocument()
+            raw_data=raw_data, document=DummyHALWeLearnDocument()
         )
         with self.assertRaises(KeyError):
             self.collector._update_welearn_document(wrapper)
@@ -111,7 +116,7 @@ class TestHALCollector(unittest.TestCase):
             "authFullName_s": ["A. Author"],
         }
         wrapper = DummyWrapperRawData(
-            raw_data=raw_data, document=DummyWeLearnDocument()
+            raw_data=raw_data, document=DummyHALWeLearnDocument()
         )
         with self.assertRaises(KeyError):
             self.collector._update_welearn_document(wrapper)
@@ -125,7 +130,7 @@ class TestHALCollector(unittest.TestCase):
             "authFullName_s": ["A. Author"],
         }
         wrapper = DummyWrapperRawData(
-            raw_data=raw_data, document=DummyWeLearnDocument()
+            raw_data=raw_data, document=DummyHALWeLearnDocument()
         )
         from welearn_datastack.exceptions import NoContent
 
@@ -147,7 +152,7 @@ class TestHALCollector(unittest.TestCase):
             "fileMain_s": "https://example.com/fake.pdf",
         }
         wrapper = DummyWrapperRawData(
-            raw_data=raw_data, document=DummyWeLearnDocument()
+            raw_data=raw_data, document=DummyHALWeLearnDocument()
         )
         doc = self.collector._update_welearn_document(wrapper)
         self.assertEqual(doc.title, "Titre")
@@ -166,7 +171,7 @@ class TestHALCollector(unittest.TestCase):
             "authFullName_s": ["A. Author"],
         }
         wrapper = DummyWrapperRawData(
-            raw_data=raw_data, document=DummyWeLearnDocument()
+            raw_data=raw_data, document=DummyHALWeLearnDocument()
         )
         doc = self.collector._update_welearn_document(wrapper)
         self.assertEqual(doc.title, "Titre")
@@ -180,8 +185,8 @@ class TestHALCollector(unittest.TestCase):
     @patch("welearn_datastack.plugins.rest_requesters.hal.HALModel")
     def test_get_jsons_returns_wrappers(self, mock_halmodel, mock_session):
         # Préparation des mocks
-        doc1 = DummyWeLearnDocument(url="https://example.com/hal-00006805")
-        doc2 = DummyWeLearnDocument(url="https://example.com/hal-00333300")
+        doc1 = DummyHALWeLearnDocument(url="https://example.com/hal-00006805")
+        doc2 = DummyHALWeLearnDocument(url="https://example.com/hal-00333300")
         hal_documents = [doc1, doc2]
         # Mock de la session HTTP
         mock_http = MagicMock()
@@ -267,8 +272,8 @@ class TestHALCollector(unittest.TestCase):
 
     @patch.object(HALCollector, "_get_jsons")
     def test_run_returns_wrapped_documents(self, mock_get_jsons):
-        doc1 = DummyWeLearnDocument(url="https://example.com/hal-00006805")
-        doc2 = DummyWeLearnDocument(url="https://example.com/hal-00333300")
+        doc1 = DummyHALWeLearnDocument(url="https://example.com/hal-00006805")
+        doc2 = DummyHALWeLearnDocument(url="https://example.com/hal-00333300")
         # raw_data doit être un dict, pas un HALModel
         raw_data1 = {
             "halId_s": "hal-00006805",
@@ -313,5 +318,5 @@ class TestHALCollector(unittest.TestCase):
         self.assertFalse(result[0].document.details.get("content_from_pdf", True))
         self.assertFalse(result[1].document.details.get("content_from_pdf", True))
         self.assertTrue(
-            all(isinstance(d.document, DummyWeLearnDocument) for d in result)
+            all(isinstance(d.document, DummyHALWeLearnDocument) for d in result)
         )

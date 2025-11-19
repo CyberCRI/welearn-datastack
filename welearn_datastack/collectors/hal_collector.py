@@ -6,11 +6,15 @@ from zoneinfo import ZoneInfo
 import requests  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
 from urllib3 import Retry
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.constants import HAL_SEARCH_URL, HAL_URL_BASE
 from welearn_datastack.data.url_collector import URLCollector
-from welearn_datastack.utils_.scraping_utils import get_url_without_hal_like_versionning
+from welearn_datastack.utils_.scraping_utils import (
+    extract_hal_id_from_url,
+    get_url_without_hal_like_versionning,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +98,8 @@ class HALURLCollector(URLCollector):
                 WeLearnDocument(
                     url=get_url_without_hal_like_versionning(url),
                     corpus=self.corpus,
+                    external_id=extract_hal_id_from_url(url),
+                    external_id_type=ExternalIdType.API_ID.value.lower(),
                 )
             )
         return ret

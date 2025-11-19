@@ -3,10 +3,14 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus
 
 from welearn_datastack.collectors.hal_collector import HALURLCollector
-from welearn_datastack.utils_.scraping_utils import get_url_without_hal_like_versionning
+from welearn_datastack.utils_.scraping_utils import (
+    extract_hal_id_from_url,
+    get_url_without_hal_like_versionning,
+)
 
 
 class TestHALURLCollector(TestCase):
@@ -63,3 +67,9 @@ class TestHALURLCollector(TestCase):
             self.assertEqual(tested_res[i].url, url_from_file)
             self.assertEqual(tested_res[i].corpus.source_name, "hal")
             self.assertEqual(tested_res[i].corpus.is_fix, True)
+            self.assertEqual(
+                tested_res[i].external_id, extract_hal_id_from_url(url_from_file)
+            )
+            self.assertEqual(
+                tested_res[i].external_id_type, ExternalIdType.API_ID.value.lower()
+            )

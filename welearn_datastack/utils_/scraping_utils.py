@@ -168,3 +168,12 @@ def get_url_without_hal_like_versionning(url: str) -> str:
         return url
     uri = re.sub(r"v\d+$", "", url)
     return uri.strip()
+
+
+def extract_hal_id_from_url(url: str) -> str:
+    """
+    Extract the HAL ID from a HAL URL
+    :param url: HAL URL
+    :return: HAL ID
+    """
+    return get_url_without_hal_like_versionning(url).split("/")[-1]

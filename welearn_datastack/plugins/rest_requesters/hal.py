@@ -26,6 +26,7 @@ from welearn_datastack.utils_.http_client_utils import (
     get_new_https_session,
 )
 from welearn_datastack.utils_.scraping_utils import (
+    extract_hal_id_from_url,
     get_url_without_hal_like_versionning,
     remove_extra_whitespace,
 )
@@ -247,8 +248,7 @@ class HALCollector(IPluginRESTCollector):
     def _get_jsons(self, hal_documents: list[WeLearnDocument]) -> List[WrapperRawData]:
         hal_doc_ids = {}
         for doc in hal_documents:
-            hal_id = get_url_without_hal_like_versionning(doc.url).split("/")[-1]
-            hal_doc_ids[hal_id] = doc
+            hal_doc_ids[doc.external_id] = doc
 
         http = get_new_https_session()
         url = "https://api.archives-ouvertes.fr/search/"
