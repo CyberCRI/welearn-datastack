@@ -60,6 +60,15 @@ class TestPressBooksURLCollector(unittest.TestCase):
         self.assertEqual(len(collected), 57)
         awaited_url = "https://ecampusontario.pressbooks.pub/2023prehealth/?p=17"
         awaited_url2 = "https://iu.pressbooks.pub/resourceconveniencestore/?p=181"
+        external_ids = [u.external_id for u in collected]
         urls = [u.url for u in collected]
         self.assertIn(awaited_url, urls)
         self.assertIn(awaited_url2, urls)
+        self.assertIn(
+            "2023prehealth/?p=17",
+            external_ids,
+        )
+        self.assertIn(
+            "resourceconveniencestore/?p=181",
+            external_ids,
+        )

@@ -4,6 +4,7 @@ from urllib.parse import urlparse, urlunparse
 
 import requests
 from requests import Response
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.constants import HEADERS
@@ -80,7 +81,7 @@ class PressBooksURLCollector(URLCollector):
             local_urls: list[str] = [i.get("href") for i in metadata]
             preformated_page_urls.extend(local_urls)
 
-        page_urls = set()
+        page_urls: dict[str, str] = {}
         for url in preformated_page_urls:
             preformat = url.replace("/metadata", "")
             parsed = urlparse(preformat)
@@ -92,11 +93,18 @@ class PressBooksURLCollector(URLCollector):
             final_url = urlunparse(
                 ["https", parsed.netloc, book_domain + "/", "", f"p={post_id}", ""]
             )
-            page_urls.add(final_url)
+            external_id = f"{book_domain}/?p={post_id}"
+            page_urls[final_url] = external_id
+
         logger.info(f"There is {len(page_urls)} found in this pressbooks batch")
         ret: list[WeLearnDocument] = []
-        for page_url in page_urls:
-            local_doc = WeLearnDocument(url=page_url, corpus_id=self.corpus.id)
+        for page_url in page_urls.keys():
+            local_doc = WeLearnDocument(
+                url=page_url,
+                corpus_id=self.corpus.id,
+                external_id=page_urls[page_url],
+                external_id_type=ExternalIdType.API_ID,
+            )
             ret.append(local_doc)
 
         return ret
