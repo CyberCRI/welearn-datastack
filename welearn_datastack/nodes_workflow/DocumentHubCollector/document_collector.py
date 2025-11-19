@@ -153,7 +153,7 @@ def extract_data_from_urls(
     for corpus_name in batch_docs:
         # Get data
         corpus_collector = corpus_plugin[corpus_name]
-        documents = corpus_collector.run(documents=welearn_documents)  # type: ignore
+        documents = corpus_collector.run(documents=batch_docs[corpus_name])  # type: ignore
 
         for wrapper_document in documents:
             state_title = (
