@@ -37,7 +37,7 @@ class TestOpenAlexURLCollector(TestCase):
         ).strftime(str_format_date_iso)
         to_date = datetime.now().strftime(str_format_date_iso)
 
-        self.assertEqual(returned_params["select"], "id")
+        self.assertEqual(returned_params["select"], "id,doi")
         self.assertEqual(returned_params["per_page"], 200)
 
         self.assertEqual(returned_params["sort"], "publication_date:desc")
@@ -76,9 +76,12 @@ class TestOpenAlexURLCollector(TestCase):
 
         returned_wldoc: List[WeLearnDocument] = self.open_alex_collector.collect()
         returned_urls = [v.url for v in returned_wldoc]
+        returned_external_ids = [v.external_id for v in returned_wldoc]
 
         full_content = self.content_json1["results"] + self.content_json2["results"]
         awaited_urls = [v["id"] for v in full_content]
+        awaited_external_ids = [v["doi"] for v in full_content]
 
         self.assertListEqual(returned_urls, awaited_urls)
+        self.assertListEqual(returned_external_ids, awaited_external_ids)
         self.assertEqual(len(returned_urls), 400)

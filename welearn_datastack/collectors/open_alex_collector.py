@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Dict, List
 from zoneinfo import ZoneInfo
 
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.constants import OPEN_ALEX_BASE_URL, PUBLISHERS_TO_AVOID
@@ -110,7 +111,7 @@ class OpenAlexURLCollector(URLCollector, ABC):
             "per_page": 200,
             "apc_sum": False,
             "cited_by_count_sum": False,
-            "select": "id",
+            "select": "id,doi",
             "cursor": "*",
             "mailto": self.team_email,
         }
@@ -138,7 +139,14 @@ class OpenAlexURLCollector(URLCollector, ABC):
         for i in range(0, iteration_quantity):
             logger.info(f"Iteration {i+1}/{iteration_quantity}")
             for work in json_from_oa["results"]:
-                ret.append(WeLearnDocument(url=work["id"], corpus=self.corpus))
+                ret.append(
+                    WeLearnDocument(
+                        url=work["id"],
+                        corpus=self.corpus,
+                        external_id=work["doi"],
+                        external_id_type=ExternalIdType.DOI,
+                    )
+                )
 
             if json_from_oa["meta"]["next_cursor"]:
                 params["cursor"] = json_from_oa["meta"]["next_cursor"]
