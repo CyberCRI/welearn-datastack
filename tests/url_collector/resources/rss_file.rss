@@ -9,18 +9,21 @@
     <item>
       <title>First Item</title>
       <link>https://www.example.com/article1</link>
+      <guid>guid-article-1</guid>
       <description>This is the description of the first item.</description>
       <pubDate>Mon, 12 Sep 2023 12:00:00 GMT</pubDate>
     </item>
     <item>
       <title>Second Item</title>
       <link>https://www.example.com/article2</link>
+      <guid>guid-article-2</guid>
       <description>This is the description of the second item.</description>
       <pubDate>Tue, 13 Sep 2023 09:30:00 GMT</pubDate>
     </item>
     <item>
       <title>Third Item</title>
       <link>https://www.example.com/article3</link>
+      <guid>guid-article-3</guid>
       <description>This is the description of the third item.</description>
       <pubDate>Wed, 14 Sep 2023 15:45:00 GMT</pubDate>
     </item>

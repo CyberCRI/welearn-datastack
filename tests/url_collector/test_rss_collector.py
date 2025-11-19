@@ -38,3 +38,4 @@ class Test(TestCase):
             self.assertEqual(collected[i].url, f"https://www.example.com/article{i+1}")
             self.assertEqual(collected[i].corpus.source_name, "test")
             self.assertEqual(collected[i].corpus.is_fix, False)
+            self.assertEqual(collected[i].external_id, f"guid-article-{i+1}")

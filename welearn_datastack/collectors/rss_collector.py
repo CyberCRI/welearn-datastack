@@ -9,6 +9,7 @@ from welearn_datastack.collectors.helpers.feed_helpers import (
 )
 from welearn_datastack.constants import HEADERS
 from welearn_datastack.data.url_collector import URLCollector
+from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
 
@@ -27,25 +28,32 @@ class RssURLCollector(URLCollector):
         res = client.get(url=self.feed_url, headers=HEADERS)
         content = res.content.decode("utf-8")
 
-        # Check if were in articles part
-        flag = False
+        root = XMLExtractor(content)
+        items = root.extract_content("item")
 
-        # Check if link tag was the last thing read
-        link_flag = False
-        link_lines: List[str] = []
+        ret: list[WeLearnDocument] = []
 
-        # Retrieve lines where URL are
-        for line in content.split(">"):
-            if flag and link_flag:
-                link_lines.append(line.strip())
-                link_flag = False
-            if flag and line.strip().startswith("<link"):
-                link_flag = True
-            if line.strip().startswith("<item"):
-                flag = True
+        for item in items:
+            item_extractor = XMLExtractor(item.content)
+            link_lines = item_extractor.extract_content("link")
+            assert len(link_lines) == 1
+            url = link_lines[0].content
 
-        urls = lines_to_url(domain, link_lines)
+            if not url.startswith(domain):
+                continue
 
-        ret = extracted_url_to_url_datastore(urls=urls, corpus=self.corpus)
+            guid = item_extractor.extract_content("guid")
+            if guid:
+                guid = guid[0].content
+            else:
+                guid = None
+
+            ret.append(
+                WeLearnDocument(
+                    url=url,
+                    corpus=self.corpus,
+                    external_id=guid,
+                )
+            )
 
         return ret
