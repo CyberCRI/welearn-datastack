@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -7,12 +7,12 @@ class Doc(BaseModel):
     docid: str
     title_s: List[str]
     abstract_s: List[str]
-    authFullName_s: List[str]
-    language_s: List[str]
+    authFullName_s: Optional[List[str]]
+    language_s: Optional[List[str]] = None
     uri_s: str
-    docType_s: str
-    producedDate_tdate: str
-    publicationDate_tdate: str
+    docType_s: Optional[str]
+    producedDate_tdate: Optional[str]
+    publicationDate_tdate: Optional[str] = None
     halId_s: str
 
 
@@ -25,4 +25,4 @@ class Response(BaseModel):
 
 class HALModel(BaseModel):
     response: Response
-    nextCursorMark: str
+    nextCursorMark: Optional[str] = None
