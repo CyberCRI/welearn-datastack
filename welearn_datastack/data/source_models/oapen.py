@@ -6,53 +6,53 @@ from pydantic import BaseModel
 
 
 class CheckSum(BaseModel):
-    value: str
-    checkSumAlgorithm: str
+    value: Optional[str] = None
+    checkSumAlgorithm: Optional[str] = None
 
 
 class Bitstream(BaseModel):
-    uuid: str
-    name: str
-    handle: Any
-    type: str
-    expand: List[str]
+    uuid: Optional[str] = None
+    name: Optional[str] = None
+    handle: Optional[Any] = None
+    type: Optional[str] = None
+    expand: Optional[List[str]] = None
     bundleName: str
-    description: Optional[str]
-    format: str
-    mimeType: str
-    sizeBytes: int
-    parentObject: Any
+    description: Optional[str] = None
+    format: Optional[str] = None
+    mimeType: Optional[str] = None
+    sizeBytes: Optional[int] = None
+    parentObject: Optional[Any] = None
     retrieveLink: str
-    checkSum: CheckSum
-    sequenceId: int
+    checkSum: Optional[CheckSum] = None
+    sequenceId: Optional[int] = None
     code: str
-    policies: Any
-    link: str
-    metadata: List[Metadatum]
+    policies: Optional[Any] = None
+    link: Optional[str] = None
+    metadata: Optional[List[Metadatum]] = None
 
 
 class Metadatum(BaseModel):
     key: str
     value: str
-    language: Optional[str]
-    schema_: str
-    element: str
-    qualifier: Optional[str]
+    language: Optional[str] = None
+    schema_: Optional[str] = None
+    element: Optional[str] = None
+    qualifier: Optional[str] = None
     code: Optional[str] = None
 
 
 class OapenModel(BaseModel):
-    uuid: str
+    uuid: Optional[str] = None
     name: str
     handle: str
-    type: str
-    expand: List[str]
-    lastModified: str
-    parentCollection: Any
-    parentCollectionList: Any
-    parentCommunityList: Any
+    type: Optional[str] = None
+    expand: Optional[List[str]] = None
+    lastModified: Optional[str] = None
+    parentCollection: Optional[Any] = None
+    parentCollectionList: Optional[Any] = None
+    parentCommunityList: Optional[Any] = None
     bitstreams: List[Bitstream]
-    archived: str
-    withdrawn: str
-    link: str
+    archived: Optional[str] = None
+    withdrawn: Optional[str] = None
+    link: Optional[str] = None
     metadata: List[Metadatum]

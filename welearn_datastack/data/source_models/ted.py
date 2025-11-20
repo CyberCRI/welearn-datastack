@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from pydantic import BaseModel
 
 
@@ -21,17 +23,17 @@ class Cue(BaseModel):
 
 
 class Paragraph(BaseModel):
-    cues: list[Cue]
+    cues: Optional[List[Cue]] = None
 
 
 class Translation(BaseModel):
-    paragraphs: list[Paragraph]
+    paragraphs: Optional[List[Paragraph]] = None
 
 
 class TEDData(BaseModel):
-    video: Video
-    translation: Translation
+    video: Optional[Video] = None
+    translation: Optional[Translation] = None
 
 
 class TEDModel(BaseModel):
-    data: TEDData
+    data: Optional[TEDData] = None
