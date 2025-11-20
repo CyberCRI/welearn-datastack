@@ -126,6 +126,31 @@ class TestExtractNCollectDocs(TestCase):
     @patch(
         "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.collector_selector"
     )
+    def test_extract_and_with_none_data(self, collector_selector_mock):
+        collector_selector_mock.select_collector.return_value = mock.MagicMock(
+            spec=IPluginRESTCollector
+        )
+        self.doc_valid.full_content = None  # Simulate missing content
+        collector_selector_mock.select_collector.return_value.run.return_value = [
+            WrapperRetrieveDocument(document=self.doc_valid),
+        ]
+
+        (
+            extracted_docs,
+            error_docs,
+            process_states,
+        ) = document_collector.extract_data_from_urls(
+            welearn_documents=[self.doc_valid, self.doc_invalid]
+        )
+
+        self.assertEqual(len(extracted_docs), 0)
+        self.assertEqual(len(error_docs), 1)
+        self.assertEqual(error_docs[0].document_id, self.doc_valid.id)
+        self.assertEqual(len(process_states), 1)
+
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.collector_selector"
+    )
     def test_extract_data_corpus_not_found(self, collector_selector_mock):
         # Utilise les documents préparés dans setUp
         collector_selector_mock.select_collector.return_value = mock.MagicMock(
