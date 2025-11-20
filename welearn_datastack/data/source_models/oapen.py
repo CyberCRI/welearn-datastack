@@ -16,24 +16,24 @@ class Bitstream(BaseModel):
     handle: Optional[Any] = None
     type: Optional[str] = None
     expand: Optional[List[str]] = None
-    bundleName: str
+    bundleName: Optional[str] = None
     description: Optional[str] = None
     format: Optional[str] = None
     mimeType: Optional[str] = None
     sizeBytes: Optional[int] = None
     parentObject: Optional[Any] = None
-    retrieveLink: str
+    retrieveLink: Optional[str] = None
     checkSum: Optional[CheckSum] = None
     sequenceId: Optional[int] = None
-    code: str
+    code: Optional[str] = None
     policies: Optional[Any] = None
     link: Optional[str] = None
     metadata: Optional[List[Metadatum]] = None
 
 
 class Metadatum(BaseModel):
-    key: str
-    value: str
+    key: Optional[str] = None
+    value: Optional[str] = None
     language: Optional[str] = None
     schema_: Optional[str] = None
     element: Optional[str] = None
