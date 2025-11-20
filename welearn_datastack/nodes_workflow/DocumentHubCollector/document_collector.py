@@ -17,6 +17,7 @@ from welearn_datastack.modules.computed_metadata import (
     compute_readability,
     identify_document_language,
 )
+from welearn_datastack.modules.validation import validate_non_null_fields_document
 from welearn_datastack.plugins.interface import IPlugin
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
@@ -156,6 +157,13 @@ def extract_data_from_urls(
         documents = corpus_collector.run(documents=welearn_documents)  # type: ignore
 
         for wrapper_document in documents:
+            is_none_valid = validate_non_null_fields_document(wrapper_document.document)
+            if not is_none_valid and not wrapper_document.is_error:
+                wrapper_document.http_error_code = 422
+                wrapper_document.error_info = (
+                    "Mandatory fields are missing after extraction"
+                )
+
             state_title = (
                 Step.DOCUMENT_SCRAPED.value
                 if not wrapper_document.is_error
