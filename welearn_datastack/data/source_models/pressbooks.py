@@ -17,14 +17,14 @@ class PressBooksModel(BaseModel):
 class EditorItem(BaseModel):
     name: str
     slug: Optional[str]
-    type_: Optional[str] = Field(..., alias="@type")
+    type_: str = Field(..., alias="@type")
 
 
 class AuthorItem(BaseModel):
     name: str
     slug: Optional[str]
     contributor_institution: Optional[str]
-    type_: Optional[str] = Field(..., alias="@type")
+    type_: str = Field(..., alias="@type")
 
 
 class Address(BaseModel):
