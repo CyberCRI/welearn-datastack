@@ -16,15 +16,15 @@ class PressBooksModel(BaseModel):
 
 class EditorItem(BaseModel):
     name: str
-    slug: str
-    type_: str = Field(..., alias="@type")
+    slug: Optional[str]
+    type_: Optional[str] = Field(..., alias="@type")
 
 
 class AuthorItem(BaseModel):
     name: str
-    slug: str
+    slug: Optional[str]
     contributor_institution: Optional[str]
-    type_: str = Field(..., alias="@type")
+    type_: Optional[str] = Field(..., alias="@type")
 
 
 class Address(BaseModel):
@@ -33,9 +33,9 @@ class Address(BaseModel):
 
 
 class Publisher(BaseModel):
-    type_: str = Field(..., alias="@type")
-    name: str
-    address: Address
+    type_: Optional[str] = Field(..., alias="@type")
+    name: Optional[str]
+    address: Optional[Address]
 
 
 class License(BaseModel):
@@ -47,8 +47,8 @@ class License(BaseModel):
 class PressBooksMetadataModel(BaseModel):
     name: str
     isPartOf: str
-    editor: List[EditorItem]
-    author: List[AuthorItem]
+    editor: Optional[List[EditorItem]]
+    author: Optional[List[AuthorItem]]
     publisher: Optional[Publisher]
     datePublished: Optional[str]
     date_gmt: Optional[str]
