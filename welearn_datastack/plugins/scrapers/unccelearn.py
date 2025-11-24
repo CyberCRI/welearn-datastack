@@ -115,7 +115,7 @@ class UNCCeLearnCollector(IPluginScrapeCollector):
         certification = page_details.find("p", class_="certification")
         if certification:
             details["certifying"] = (
-                certification.text.strip().lower() == "with certification"
+                certification.text.strip().lower().startswith("with certification")
             )
 
         type = page_details.find("p", class_="type")
