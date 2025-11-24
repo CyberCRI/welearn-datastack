@@ -231,14 +231,39 @@ def identify_document_language(document: WeLearnDocument) -> WeLearnDocument:
     return document
 
 
-def compute_duration(document: WeLearnDocument) -> WeLearnDocument:
+def compute_duration(
+    document: WeLearnDocument, strict: bool = False
+) -> WeLearnDocument:
+    """
+    Computes the estimated reading duration for a document and updates its details.
+    :param document: WeLearnDocument object to compute duration for
+    :param strict: If True, recompute duration even if it already exists
+
+    :return: Updated WeLearnDocument with estimated duration in details
+    """
+    if not strict and "duration" in document.details:
+        return document
+
     document.details["duration"] = predict_duration(
         document.full_content, document.lang
     )
     return document
 
 
-def compute_readability(document: WeLearnDocument) -> WeLearnDocument:
+def compute_readability(
+    document: WeLearnDocument, strict: bool = False
+) -> WeLearnDocument:
+    """
+    Computes the readability score for a document and updates its details.
+
+    :param document: WeLearnDocument object to compute readability for
+    :param strict: If True, recompute readability even if it already exists
+
+    :return: Updated WeLearnDocument with readability score in details
+    """
+    if not strict and "readability" in document.details:
+        return document
+
     document.details["readability"] = predict_readability(
         document.full_content, document.lang
     )

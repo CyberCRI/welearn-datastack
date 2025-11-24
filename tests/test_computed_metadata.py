@@ -116,3 +116,78 @@ class TestComputedMetadata(unittest.TestCase):
             computed_metadata.predict_duration(text, "en"),
             "2",
         )
+
+    def test_compute_duration_sets_estimated_reading_time(self):
+        doc = WeLearnDocument(
+            id=5,
+            url="https://example.org/test_duration",
+            full_content=self.text_en,
+            description="A test document in English.",
+            details={},
+        )
+        result = computed_metadata.compute_duration(doc)
+        self.assertIn("duration", result.details)
+        self.assertEqual(result.details["duration"], "3")
+
+    def test_compute_duration_sets_estimated_reading_time_strict(self):
+        doc = WeLearnDocument(
+            id=7,
+            url="https://example.org/test_duration_strict",
+            full_content=self.text_en,
+            description="A test document in English.",
+            details={"duration": "5"},
+        )
+        result = computed_metadata.compute_duration(doc, strict=True)
+        self.assertIn("duration", result.details)
+        self.assertEqual(result.details["duration"], "3")
+
+    def test_compute_duration_sets_estimated_reading_time_not_strict(self):
+        doc = WeLearnDocument(
+            id=10,
+            url="https://example.org/test_duration_not_strict",
+            full_content=self.text_en,
+            description="A test document in English.",
+            details={"duration": "5"},
+        )
+        result = computed_metadata.compute_duration(doc, strict=False)
+        self.assertIn("duration", result.details)
+        self.assertEqual(result.details["duration"], "5")
+
+    def test_compute_readability_sets_readability_score(self):
+        doc = WeLearnDocument(
+            id=6,
+            url="https://example.org/test_readability",
+            full_content=self.text_en,
+            lang="en",
+            description="A test document in English.",
+            details={},
+        )
+        result = computed_metadata.compute_readability(doc)
+        self.assertIn("readability", result.details)
+        self.assertEqual(result.details["readability"], "93.58")
+
+    def test_compute_readability_sets_readability_score_strict(self):
+        doc = WeLearnDocument(
+            id=8,
+            url="https://example.org/test_readability_strict",
+            full_content=self.text_en,
+            lang="en",
+            description="A test document in English.",
+            details={"readability": "50.0"},
+        )
+        result = computed_metadata.compute_readability(doc, strict=True)
+        self.assertIn("readability", result.details)
+        self.assertEqual(result.details["readability"], "93.58")
+
+    def test_compute_readability_sets_readability_score_not_strict(self):
+        doc = WeLearnDocument(
+            id=9,
+            url="https://example.org/test_readability_not_strict",
+            full_content=self.text_en,
+            lang="en",
+            description="A test document in English.",
+            details={"readability": "50.0"},
+        )
+        result = computed_metadata.compute_readability(doc, strict=False)
+        self.assertIn("readability", result.details)
+        self.assertEqual(result.details["readability"], "50.0")
