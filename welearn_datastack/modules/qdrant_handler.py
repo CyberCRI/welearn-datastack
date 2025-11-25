@@ -52,8 +52,10 @@ def classify_documents_per_collection(
             collection_name = mono_collection
         else:
             logger.error(
-                f"Collection {collection_name} not found in Qdrant, slice {dslice.id} ignored",
+                f"Collection {collection_name} not found in Qdrant, slice {dslice.id} flagged as error",
             )
+            ret[None].add(dslice.document_id)  # type: ignore
+
             continue
 
         if collection_name not in ret:
