@@ -1,6 +1,6 @@
 [project]
 name = "welearn-datastack"
-version = "1.1.14"
+version = "1.1.15"
 description = "Data stack for WeLearn LPI projects. This pipeline can collect, vectorize and store data from various sources."
 authors = [
     { name = "Théo Nardin", email = "theo.nardin@learningplanetinstitute.org" },
