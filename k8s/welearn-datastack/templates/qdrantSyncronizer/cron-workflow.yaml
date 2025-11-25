@@ -61,7 +61,7 @@ spec:
           - name: qdrant_chunk_size
             default: 1000
           - name: pg_db
-            default: welearn_datastack_prod
+            default: welearn_datastack
         steps:
           - - name: generate-to-syncronize-batch
               templateRef:

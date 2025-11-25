@@ -114,7 +114,7 @@ documentCollectorHub:
         memory: 75M
     runNode:
       requests:
-        memory: 360M
+        memory: 500M
 
   cronWorkflowTemplate:
     standard:

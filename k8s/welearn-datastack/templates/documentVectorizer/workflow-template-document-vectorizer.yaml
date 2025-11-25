@@ -44,7 +44,7 @@ spec:
           - name: st_device
             default: "cpu"
           - name: st_backend
-            default: "onnx"
+            default: "torch"
           - name: embedding_model_fr
             default: {{ $.Values.common.embeddingModelFr }}
           - name: embedding_model_en
