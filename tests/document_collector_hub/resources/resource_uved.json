@@ -1,0 +1,199 @@
+{
+  "categories": [
+    {
+      "title": "Labellisé",
+      "parent": {
+        "title": "État",
+        "parent": null,
+        "uid": 70,
+        "@id": "/api/V1/categories/70"
+      },
+      "uid": 71,
+      "@id": "/api/V1/categories/71"
+    },
+    {
+      "title": "Français",
+      "parent": {
+        "title": "Langues",
+        "parent": null,
+        "uid": 77,
+        "@id": "/api/V1/categories/77"
+      },
+      "uid": 80,
+      "@id": "/api/V1/categories/80"
+    },
+    {
+      "title": "Partage des conditions à l'identique",
+      "parent": {
+        "title": "Licence Creative Commons",
+        "parent": null,
+        "uid": 5,
+        "@id": "/api/V1/categories/5"
+      },
+      "uid": 6,
+      "@id": "/api/V1/categories/6"
+    },
+    {
+      "title": "Pas d'utilisation commerciale",
+      "parent": {
+        "title": "Licence Creative Commons",
+        "parent": null,
+        "uid": 5,
+        "@id": "/api/V1/categories/5"
+      },
+      "uid": 9,
+      "@id": "/api/V1/categories/9"
+    },
+    {
+      "title": "Pas de modification",
+      "parent": {
+        "title": "Licence Creative Commons",
+        "parent": null,
+        "uid": 5,
+        "@id": "/api/V1/categories/5"
+      },
+      "uid": 13,
+      "@id": "/api/V1/categories/13"
+    },
+    {
+      "title": "Cours",
+      "parent": {
+        "title": "Nature pédagogique",
+        "parent": null,
+        "uid": 10,
+        "@id": "/api/V1/categories/10"
+      },
+      "uid": 11,
+      "@id": "/api/V1/categories/11"
+    },
+    {
+      "title": "15. Vie terrestre",
+      "parent": {
+        "title": "Objectifs de Développement Durable",
+        "parent": null,
+        "uid": 90,
+        "@id": "/api/V1/categories/90"
+      },
+      "uid": 112,
+      "@id": "/api/V1/categories/112"
+    },
+    {
+      "title": "3. Bonne santé et bien-être",
+      "parent": {
+        "title": "Objectifs de Développement Durable",
+        "parent": null,
+        "uid": 90,
+        "@id": "/api/V1/categories/90"
+      },
+      "uid": 99,
+      "@id": "/api/V1/categories/99"
+    },
+    {
+      "title": "Environnement - Santé",
+      "parent": {
+        "title": "Thèmes",
+        "parent": null,
+        "uid": 20,
+        "@id": "/api/V1/categories/20"
+      },
+      "uid": 86,
+      "@id": "/api/V1/categories/86"
+    },
+    {
+      "title": "Episode de podcast",
+      "parent": {
+        "title": "Types",
+        "parent": null,
+        "uid": 1,
+        "@id": "/api/V1/categories/1"
+      },
+      "uid": 185,
+      "@id": "/api/V1/categories/185"
+    }
+  ],
+  "type": {
+    "title": "Episode de podcast",
+    "parent": {
+      "title": "Types",
+      "parent": null,
+      "uid": 1,
+      "@id": "/api/V1/categories/1"
+    },
+    "uid": 185,
+    "@id": "/api/V1/categories/185"
+  },
+  "title": "Agroforesterie, bien-être et santé mentale",
+  "url": "",
+  "date": "2025-04-04T00:00:00.000+00:00",
+  "duration": 471,
+  "description": "<p>Édith Le Cadre, professeure à l'Institut Agro Rennes-Angers, discute dans cette vidéo de <strong>la relation entre santé mentale des agriculteurs et agricultrices et agroforesterie</strong>. Elle met en évidence les constats faits par les premiers travaux de recherche ayant exploré ce sujet, et en appelle à une évaluation des effets des arbres sur la santé mentale dans le milieu agricole.</p>\r\n<p><strong>Objectifs d'apprentissage :</strong></p>\r\n<p>- Définir les notions de bien-être et de santé mentale<br /> - Identifier les problématiques de santé mentale auxquelles sont aujourd'hui soumis les agriculteurs et agricultrices<br /> - Mettre en relation les enjeux de santé mentale et l'adoption de pratiques d'agroforesterie</p>",
+  "contexte": "",
+  "kit": null,
+  "transcriptionFile": {
+    "uid": 10573,
+    "url": "https://www.uved.fr/fileadmin/user_upload/Documents/pdf/Transcriptions/Arbres/MOOC_UVED_Arbres_Transcription_LeCadre_2.pdf",
+    "file": {
+      "uid": 13596,
+      "name": "MOOC_UVED_Arbres_Transcription_LeCadre_2.pdf",
+      "mimeType": "application/pdf",
+      "size": 740051
+    }
+  },
+  "transcription": "",
+  "slug": "agroforesterie-bien-etre-et-sante-mentale-1",
+  "rate": 0,
+  "star": 0,
+  "contributor": [
+    {
+      "name": "",
+      "firstName": "Édith",
+      "lastName": "Le Cadre",
+      "title": "professeure",
+      "uid": 2761,
+      "@id": "/api/V1/persons/2761"
+    }
+  ],
+  "contact": null,
+  "originalParent": null,
+  "mainInstitution": {
+    "name": "UVED - Université Virtuelle Environnement et Développement durable",
+    "title": "",
+    "uid": 832,
+    "@id": "/api/V1/institutions/832"
+  },
+  "secondaryInstitutions": [],
+  "keywords": [
+    {
+      "title": "arbres",
+      "dewey": "582.16",
+      "uid": 1142,
+      "@id": "/api/V1/keywords/1142"
+    },
+    {
+      "title": "agroforesterie",
+      "dewey": "",
+      "uid": 1755,
+      "@id": "/api/V1/keywords/1755"
+    },
+    {
+      "title": "agricullture",
+      "dewey": "",
+      "uid": 3573,
+      "@id": "/api/V1/keywords/3573"
+    },
+    {
+      "title": "Santé humaine",
+      "dewey": "",
+      "uid": 4509,
+      "@id": "/api/V1/keywords/4509"
+    },
+    {
+      "title": "sociologie",
+      "dewey": "305.24",
+      "uid": 460,
+      "@id": "/api/V1/keywords/460"
+    }
+  ],
+  "uid": 5070,
+  "@id": "/api/V1/resources/5070"
+}

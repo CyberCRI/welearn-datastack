@@ -16,6 +16,7 @@ from welearn_datastack import constants
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
 from welearn_datastack.data.source_models.oapen import Metadatum, OapenModel
+from welearn_datastack.data.source_models.uved import Category, UVEDMemberItem
 from welearn_datastack.exceptions import (
     NoDescriptionFoundError,
     TooMuchLanguages,
@@ -57,7 +58,18 @@ class UVEDCollector(IPluginRESTCollector):
     def _get_pdf_content(self, url: str) -> str:
         pass
 
-    def _get_txt_content(self, url: str) -> str:
+    def _clean_txt_content(self, url: str) -> str:
+        pass
+
+    def _extract_licence(self, uved_document: UVEDMemberItem) -> str:
+        pass
+
+    def _extract_metadata(self, uved_document: UVEDMemberItem) -> Dict:
+        pass
+
+    def _extract_external_sdg_id(
+        self, uved_metadata_categorization: list[Category]
+    ) -> str:
         pass
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:

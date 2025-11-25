@@ -19,7 +19,7 @@ class Type(BaseModel):
     at_id: str = Field(..., alias="@id")
 
 
-class MainInstitution(BaseModel):
+class Institution(BaseModel):
     name: str
     title: str
     uid: int
@@ -43,9 +43,15 @@ class UVEDMemberItem(BaseModel):
     description: str
     contexte: Optional[str]
     slug: str
+    transcription: Optional[str]
+    transcriptionFile: Optional[TranscriptionFile]
+    kit: Optional[str]
+    contact: Optional[str]
+    orignalParent: Optional[str]
+    secondaryInstitutions: Optional[list]
     rate: int
     star: int
-    mainInstitution: MainInstitution
+    mainInstitution: Institution
     keywords: list[Keyword]
     uid: int
     at_id: str = Field(..., alias="@id")
@@ -75,3 +81,16 @@ class RootUVEDModel(BaseModel):
     hydra_totalItems: int = Field(..., alias="hydra:totalItems")
     hydra_view: HydraView = Field(..., alias="hydra:view")
     hydra_search: HydraSearch = Field(..., alias="hydra:search")
+
+
+class File(BaseModel):
+    uid: int
+    name: str
+    mimeType: str
+    size: int
+
+
+class TranscriptionFile(BaseModel):
+    uid: int
+    url: str
+    file: File
