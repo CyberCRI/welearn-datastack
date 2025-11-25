@@ -61,6 +61,7 @@ def build_pressbooks_metadata_model(
 class TestPressBooksCollector(unittest.TestCase):
     def setUp(self):
         self.collector = PressBooksCollector()
+        self.metadata = build_pressbooks_metadata_model()
         self.doc = WeLearnDocument(
             url="https://example.com/book/?p=123",
             title="",
@@ -212,3 +213,67 @@ class TestPressBooksCollector(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertIsInstance(result[0], WrapperRetrieveDocument)
         self.assertIn("Unauthorized license", result[0].error_info)
+
+    def test_extract_publisher(self):
+        publisher = self.collector.extract_publisher(self.metadata)
+        self.assertEqual(publisher, "Publisher Name")
+        meta = build_pressbooks_metadata_model()
+        meta.publisher = None
+        publisher_none = self.collector.extract_publisher(meta)
+        self.assertIsNone(publisher_none)
+
+    def test_extract_editors(self):
+        editors = self.collector._extract_editors(self.metadata)
+        self.assertIsInstance(editors, list)
+        self.assertEqual(editors[0]["name"], "Editor Name")
+
+    def test_extract_authors(self):
+        authors = self.collector._extract_authors(self.metadata)
+        self.assertIsInstance(authors, list)
+        self.assertEqual(authors[0]["name"], "Author Name")
+        self.assertEqual(authors[0]["misc"], "Institution")
+
+    def test_extract_updated_date(self):
+        updated = self.collector._extract_updated_date("main_url", "123", self.metadata)
+        self.assertIsInstance(updated, float)
+        # Test avec modified_gmt=None
+        meta = build_pressbooks_metadata_model()
+        meta.modified_gmt = None
+        updated_none = self.collector._extract_updated_date("main_url", "123", meta)
+        self.assertIsNone(updated_none)
+
+    def test_extract_publication_date(self):
+        pubdate = self.collector._extract_publication_date(
+            "main_url", "123", self.metadata
+        )
+        self.assertIsInstance(pubdate, float)
+        # Test fallback avec datePublished
+        meta = build_pressbooks_metadata_model()
+        meta.date_gmt = None
+        pubdate_fallback = self.collector._extract_publication_date(
+            "main_url", "123", meta
+        )
+        self.assertIsInstance(pubdate_fallback, float)
+        # Test avec aucune date
+        meta.datePublished = None
+        pubdate_none = self.collector._extract_publication_date("main_url", "123", meta)
+        self.assertIsNone(pubdate_none)
+
+    def test_extract_content(self):
+        model = build_pressbooks_model()
+        content = self.collector._extract_content(model)
+        self.assertEqual(content, "Raw content, test test test test test test")
+
+    def test_compose_title(self):
+        title = self.collector._compose_title(self.metadata)
+        self.assertEqual(title, "Part of this book - Element Title")
+        # Test avec isPartOf vide
+        meta = build_pressbooks_metadata_model()
+        meta.isPartOf = ""
+        title_simple = self.collector._compose_title(meta)
+        self.assertEqual(title_simple, "Element Title")
+
+    def test_extract_three_first_sentences(self):
+        text = "Première phrase. Deuxième phrase! Troisième phrase? Quatrième phrase."
+        result = self.collector._extract_three_first_sentences(text)
+        self.assertTrue(result.startswith("Première phrase"))
