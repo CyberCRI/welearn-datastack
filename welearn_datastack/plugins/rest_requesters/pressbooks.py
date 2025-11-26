@@ -241,7 +241,7 @@ class PressBooksCollector(IPluginRESTCollector):
             try:
                 post_type = self._extract_pressbook_type(document.url)
             except requests.exceptions.RequestException as e:
-                msg = f"Error while retrieving metadata for post ID {post_id} in {main_url}"
+                msg = f"Error while retrieving type from url : {document.url}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
@@ -257,7 +257,7 @@ class PressBooksCollector(IPluginRESTCollector):
             try:
                 raw_data = self._get_pressbook_document(client, forged_url)
             except requests.exceptions.RequestException as e:
-                msg = f"Error while retrieving metadata for post ID {post_id} in {main_url}"
+                msg = f"Error while retrieving document for post ID {post_id} in {main_url}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
