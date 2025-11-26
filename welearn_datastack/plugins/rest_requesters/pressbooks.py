@@ -234,10 +234,24 @@ class PressBooksCollector(IPluginRESTCollector):
         ret: list[WrapperRetrieveDocument] = []
 
         for document in documents:
-            # Identify post type
-            post_type = self._extract_pressbook_type(document.url)
             main_url = self._extract_book_main_url(document.url)
             post_id = self._extract_post_id(document.url)
+
+            # Identify post type
+            try:
+                post_type = self._extract_pressbook_type(document.url)
+            except requests.exceptions.RequestException as e:
+                msg = f"Error while retrieving metadata for post ID {post_id} in {main_url}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        http_error_code=get_http_code_from_exception(e),
+                        error_info=msg,
+                    )
+                )
+                continue
+
             forged_url = f"{main_url}/wp-json/pressbooks/v2/{post_type}/{post_id}"
 
             try:
