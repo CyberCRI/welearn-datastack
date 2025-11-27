@@ -47,8 +47,8 @@ class UVEDMemberItem(BaseModel):
     transcriptionFile: Optional[TranscriptionFile]
     kit: Optional[str]
     contact: Optional[str]
-    orignalParent: Optional[str]
-    secondaryInstitutions: Optional[list]
+    orignalParent: Optional[str] = None
+    secondaryInstitutions: Optional[list] = None
     rate: int
     star: int
     mainInstitution: Institution

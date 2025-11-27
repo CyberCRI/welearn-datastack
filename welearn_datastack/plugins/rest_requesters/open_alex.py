@@ -2,6 +2,7 @@ import io
 import json
 import logging
 import os
+from dataclasses import asdict
 from datetime import datetime
 from itertools import batched
 from typing import Iterable
@@ -18,6 +19,7 @@ from welearn_datastack.constants import (
     YEAR_FIRST_DATE_FORMAT,
 )
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.details_dataclass.topics import TopicDetails
 from welearn_datastack.data.source_models.open_alex import (
     Location,
     OpenAlexModel,
@@ -150,7 +152,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         return ret
 
     @staticmethod
-    def _transform_topics(topics: list[Topic]) -> list[dict]:
+    def _transform_topics(topics: list[Topic]) -> list[TopicDetails]:
         """
         Transform the topics from the original json to the format expected by the WeLearn DB
         :param topics: Original json from OpenAlex
@@ -183,13 +185,13 @@ class OpenAlexCollector(IPluginRESTCollector):
                 if external_id not in unique_items:
                     unique_items.add(external_id)
                     transformed.append(
-                        {
-                            "external_id": external_id,
-                            "name": item["display_name"],
-                            "depth": depth,
-                            "external_depth_name": depth_name,
-                            "directly_contained_in": parent_ids,
-                        }
+                        TopicDetails(
+                            external_id=external_id,
+                            name=item["display_name"],
+                            depth=depth,
+                            external_depth_name=depth_name,
+                            directly_contained_in=parent_ids,
+                        )
                     )
 
         return transformed
@@ -330,7 +332,9 @@ class OpenAlexCollector(IPluginRESTCollector):
             "license_url": license_good_format,
             "issn": wrapper.raw_data.best_oa_location.source.issn_l,
             "content_from_pdf": pdf_flag,
-            "topics": self._transform_topics(wrapper.raw_data.topics),
+            "topics": [
+                asdict(t) for t in self._transform_topics(wrapper.raw_data.topics)
+            ],
             "tags": [x.display_name for x in wrapper.raw_data.keywords],
             "referenced_works": wrapper.raw_data.referenced_works,
             "related_works": wrapper.raw_data.related_works,

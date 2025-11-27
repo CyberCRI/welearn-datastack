@@ -195,8 +195,8 @@ class TestOpenAlexCollector(unittest.TestCase):
             )
         ]
         result = self.collector._transform_topics(topics)
-        self.assertTrue(any(x["external_depth_name"] == "domain" for x in result))
-        self.assertTrue(any(x["external_depth_name"] == "topic" for x in result))
+        self.assertTrue(any(x.external_depth_name == "domain" for x in result))
+        self.assertTrue(any(x.external_depth_name == "topic" for x in result))
 
     # Test _update_welearn_document returns a WeLearnDocument with expected values
     @patch.object(OpenAlexCollector, "_get_pdf_content", return_value="PDF content")

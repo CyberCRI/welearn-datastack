@@ -97,7 +97,35 @@ class TestUVEDCollector(unittest.TestCase):
         # Should extract correct license from categories
         licence = self.collector._extract_licence(self.uved_item)
         self.assertTrue(isinstance(licence, str))
-        self.assertIn("Creative Commons", licence)
+        self.assertEqual("https://creativecommons.org/licenses/by-nc-nd/4.0/", licence)
+
+    def test_clean_txt_content(self):
+        # Should clean text content
+        raw_content = """
+        <p>Édith Le Cadre, professeure à l'Institut Agro Rennes-Angers, discute dans cette vidéo de <strong>la relation entre santé mentale des agriculteurs et agricultrices et agroforesterie</strong>. Elle met en évidence les constats faits par les premiers travaux de recherche ayant exploré ce sujet, et en appelle à une évaluation des effets des arbres sur la santé mentale dans le milieu agricole.</p>
+        <p><strong>Objectifs d'apprentissage :</strong></p>
+        <p>- Définir les notions de bien-être et de santé mentale<br /> - Identifier les problématiques de santé mentale auxquelles sont aujourd'hui soumis les agriculteurs et agricultrices<br /> - Mettre en relation les enjeux de santé mentale et l'adoption de pratiques d'agroforesterie</p>
+        """
+        cleaned_content = self.collector._clean_txt_content(raw_content)
+        self.assertEqual(
+            cleaned_content,
+            "Édith Le Cadre, professeure à l'Institut Agro Rennes-Angers, discute dans cette vidéo de la relation entre santé mentale des agriculteurs et agricultrices et agroforesterie. Elle met en évidence les constats faits par les premiers travaux de recherche ayant exploré ce sujet, et en appelle à une évaluation des effets des arbres sur la santé mentale dans le milieu agricole. Objectifs d'apprentissage : - Définir les notions de bien-être et de santé mentale - Identifier les problématiques de santé mentale auxquelles sont aujourd'hui soumis les agriculteurs et agricultrices - Mettre en relation les enjeux de santé mentale et l'adoption de pratiques d'agroforesterie",
+        )
+
+    def test__extract_topics(self):
+        # Should extract topics from categories
+        topics = self.collector._extract_topics(self.uved_item.categories)
+        self.assertTrue(isinstance(topics, list))
+        self.assertTrue(len(topics) > 0)
+        for topic in topics:
+            if topic.external_depth_name == "Domaines":
+                self.assertEqual(topic.name, "Agronomie & Agriculture")
+                self.assertEqual(topic.external_id, "42")
+                self.assertEqual(topic.depth, 0)
+            if topic.external_depth_name == "Thèmes":
+                self.assertEqual(topic.name, "Environnement - Santé")
+                self.assertEqual(topic.external_id, "86")
+                self.assertEqual(topic.depth, 0)
 
     def test_extract_metadata(self):
         # Should extract metadata dict

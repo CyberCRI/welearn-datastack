@@ -16,6 +16,7 @@ from welearn_database.modules.text_cleaning import clean_text
 from welearn_datastack import constants
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.details_dataclass.topics import TopicDetails
 from welearn_datastack.data.source_models.oapen import Metadatum, OapenModel
 from welearn_datastack.data.source_models.uved import Category, UVEDMemberItem
 from welearn_datastack.exceptions import (
@@ -38,7 +39,10 @@ from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
+from welearn_datastack.utils_.scraping_utils import (
+    format_cc_license,
+    remove_extra_whitespace,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -120,19 +124,46 @@ class UVEDCollector(IPluginRESTCollector):
             13: "nd",  # NoDerivatives
             9: "nc",  # NonCommercial
         }
-        licence_flag_cc: list[str] = []
+        licence_flag_cc: set[str] = {"by"}
         for cat in cats:
             if (
                 cat.uid in license_equivalence_uved_cc.keys()
             ):  # Authorized licenses uids
-                licence_flag_cc.append(license_equivalence_uved_cc[cat.uid])
+                licence_flag_cc.add(license_equivalence_uved_cc[cat.uid])
         if "nd" in licence_flag_cc and "sa" in licence_flag_cc:
             licence_flag_cc.remove(
                 "sa"
             )  # ND and SA are incompatible, ND takes precedence
         if licence_flag_cc:
-            licence = "CC " + "-".join(sorted(licence_flag_cc)) + " 4.0"
-        return licence
+            licence = "CC-" + "-".join(sorted(licence_flag_cc)) + "-4.0"
+        return format_cc_license(licence)
+
+    def _extract_topics(
+        self, uved_metadata_categorization: list[Category]
+    ) -> list[TopicDetails]:
+        ret: list[TopicDetails] = []
+        for category in uved_metadata_categorization:
+            if category.parent and category.parent.title == "Domaines":
+                ret.append(
+                    TopicDetails(
+                        name=category.title,
+                        depth=0,
+                        external_depth_name="Domaines",
+                        directly_contained_in=[],
+                        external_id=str(category.uid),
+                    )
+                )
+            if category.parent and category.parent.title == "Thèmes":
+                ret.append(
+                    TopicDetails(
+                        name=category.title,
+                        depth=0,
+                        external_depth_name="Thèmes",
+                        directly_contained_in=[],
+                        external_id=str(category.uid),
+                    )
+                )
+        return ret
 
     def _extract_metadata(self, uved_document: UVEDMemberItem) -> Dict:
         pass

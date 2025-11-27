@@ -99,6 +99,17 @@
       "uid": 86,
       "@id": "/api/V1/categories/86"
     },
+      {
+      "title": "Agronomie & Agriculture",
+      "parent": {
+        "title": "Domaines",
+        "parent": null,
+        "uid": 31,
+        "@id": "/api/V1/categories/31"
+      },
+      "uid": 42,
+      "@id": "/api/V1/categories/42"
+    },
     {
       "title": "Episode de podcast",
       "parent": {
