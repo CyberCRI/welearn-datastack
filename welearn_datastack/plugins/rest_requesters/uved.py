@@ -16,6 +16,7 @@ from welearn_database.modules.text_cleaning import clean_text
 from welearn_datastack import constants
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.details_dataclass.scholar_level import ScholarLevelDetails
 from welearn_datastack.data.details_dataclass.topics import TopicDetails
 from welearn_datastack.data.source_models.oapen import Metadatum, OapenModel
 from welearn_datastack.data.source_models.uved import Category, UVEDMemberItem
@@ -143,35 +144,120 @@ class UVEDCollector(IPluginRESTCollector):
     ) -> list[TopicDetails]:
         ret: list[TopicDetails] = []
         for category in uved_metadata_categorization:
-            if category.parent and category.parent.title == "Domaines":
+            if (
+                category.parent
+                and category.parent.uid == 31
+                or category.parent.uid == 20
+            ):
                 ret.append(
                     TopicDetails(
                         name=category.title,
                         depth=0,
-                        external_depth_name="Domaines",
-                        directly_contained_in=[],
-                        external_id=str(category.uid),
-                    )
-                )
-            if category.parent and category.parent.title == "Thèmes":
-                ret.append(
-                    TopicDetails(
-                        name=category.title,
-                        depth=0,
-                        external_depth_name="Thèmes",
+                        external_depth_name=category.parent.title,
                         directly_contained_in=[],
                         external_id=str(category.uid),
                     )
                 )
         return ret
 
-    def _extract_metadata(self, uved_document: UVEDMemberItem) -> Dict:
-        pass
-
-    def _extract_external_sdg_id(
+    def _extract_activities_types(
         self, uved_metadata_categorization: list[Category]
-    ) -> str:
-        pass
+    ) -> list[str | None]:
+        activity_type_mapping = {
+            "Cours": "course",
+            "Exercice": "exercise",
+            "Activités": "activity",
+            "Animation": "workshop",
+            "Autoévaluation": "self-assessment",
+            "Documentaire": "documentary",
+            "Étude de cas": "case Study",
+            "Évaluation": "assessment",
+            "Lecture": "reading",
+            "Outil": "tool",
+            "Parcours de formation": "learning Path",
+            "Présentation": "presentation",
+            "Questionnaire": "quiz",
+            "Scénario pédagogique": "learning scenario",
+            "Simulation": "simulation",
+            "Entretiens et témoignages": "interviews and testimonials",
+            "Démonstration": "demonstration",
+            "Glossaire": "glossary",
+            "Directs": "live session",
+        }
+        ret: list[str] = []
+        for category in uved_metadata_categorization:
+            if category.parent and category.parent.uid == 10:
+                mapped_value = activity_type_mapping.get(category.title)
+                if mapped_value:
+                    ret.append(mapped_value)
+                else:
+                    logger.warning(
+                        f"Activity type '{category.title}' not found in mapping."
+                    )
+                    ret.append(category.title)
+        return ret
+
+    def _convert_level(self, input_str) -> ScholarLevelDetails:
+        corres_french_level_cite = {
+            "bac": 344,
+            "bac+1": 541,
+            "bac+2": 641,
+            "bac+3": 665,
+            "bac+4": 761,
+            "bac+5": 766,
+            "bac+6": 767,
+            "bac+7": 861,
+            "bac+8": 864,
+            "du": 544,
+        }
+        level_id = corres_french_level_cite.get(input_str.lower())
+        if level_id:
+            return ScholarLevelDetails(
+                cite_level=level_id,
+                original_scholar_level_name=input_str,
+                original_country="france",
+            )
+        else:
+            return ScholarLevelDetails(
+                cite_level=0,
+                original_scholar_level_name=input_str,
+                original_country="france",
+            )
+
+    def _extract_levels(
+        self, uved_metadata_categorization: list[Category]
+    ) -> list[ScholarLevelDetails]:
+        ret: list[ScholarLevelDetails] = []
+        for category in uved_metadata_categorization:
+            if category.parent and category.parent.uid == 14:
+                level_detail = self._convert_level(category.title)
+                ret.append(level_detail)
+        return ret
+
+    def _extract_metadata(self, uved_document: UVEDMemberItem) -> dict:
+        topics = self._extract_topics(uved_document.categories)
+
+        corres_uved_welearn_db_simple_fields: dict[str, str] = {
+            "Label, Accord": "recognition",
+            "Mentions Licence": "french_licence_references",
+            "Modalités d’apprentissage": "learning_modalities",
+        }
+
+    def _extract_external_sdg_ids(
+        self, uved_metadata_categorization: list[Category]
+    ) -> list[int]:
+        ret: list[int] = []
+        for category in uved_metadata_categorization:
+            if category.parent and category.parent.uid == 90:
+                if category.title.lower() == "Les 17 ODD".lower():
+                    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+            else:
+                try:
+                    sdg_id = int(category.title.split(". ")[0])
+                    ret.append(sdg_id)
+                except ValueError:
+                    logger.warning(f"Cannot convert SDG id '{category.title}' to int.")
+        return ret
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         pass
