@@ -16,6 +16,7 @@ from welearn_database.modules.text_cleaning import clean_text
 from welearn_datastack import constants
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.details_dataclass.scholar_fields import ScholarFieldsDetails
 from welearn_datastack.data.details_dataclass.scholar_institution_type import (
     InstitutionTypeName,
     ScholarInstitutionTypeDetails,
@@ -30,6 +31,7 @@ from welearn_datastack.exceptions import (
     TooMuchLanguages,
     UnauthorizedLicense,
     WrongLangFormat,
+    UnauthorizedState,
 )
 from welearn_datastack.modules.computed_metadata import get_language_detector
 from welearn_datastack.modules.pdf_extractor import (
@@ -135,7 +137,87 @@ class UVEDCollector(IPluginRESTCollector):
                     ret.append(category.title.lower())
         return ret
 
-    def _extract_licence(self, uved_document: UVEDMemberItem) -> str:
+    @staticmethod
+    def _convert_level(input_str) -> ScholarLevelDetails:
+        corres_french_level_cite = {
+            "bac": 344,
+            "bac+1": 541,
+            "bac+2": 641,
+            "bac+3": 665,
+            "bac+4": 761,
+            "bac+5": 766,
+            "bac+6": 767,
+            "bac+7": 861,
+            "bac+8": 864,
+            "du": 544,
+        }
+        level_id = corres_french_level_cite.get(input_str.lower())
+        if level_id:
+            return ScholarLevelDetails(
+                isced_level=level_id,
+                original_scholar_level_name=input_str,
+                original_country="france",
+            )
+        else:
+            return ScholarLevelDetails(
+                isced_level=0,
+                original_scholar_level_name=input_str,
+                original_country="france",
+            )
+
+    @staticmethod
+    def _convert_field_of_education(input_str: str) -> ScholarFieldsDetails:
+        corres_french_field_of_education_cite = {
+            "droit": "0421",  # Law
+            "economie": "0311",  # Economics
+            "gestion": "0410",  # Business and administration (generic)
+            "economie et gestion": "0400",  # Business, administration and law (broad)
+            "science politique": "0312",  # Political science
+            "sciences sanitaires et sociales": "0910",  # Health and welfare (generic)
+            "histoire": "0222",  # History and archaeology
+            "géographie et aménagement": "0319",  # Not specified elsewhere
+            "psychologie": "0313",  # Psychology
+            "sciences de l'éducation": "0111",  # Education science
+            "philosophie": "0223",  # Philosophy and ethics
+            "sciences sociales": "0310",  # Social sciences (generic)
+            "sciences de l’homme, anthropologie, ethnologie": "0314",  # Anthropology and cultural studies
+            "mathématiques": "0541",  # Mathematics
+            "physique": "0533",  # Physics
+            "physique, chimie": "0530",  # Natural sciences (broad)
+            "sciences de la vie": "0511",  # Biology
+            "sciences de la terre": "0532",  # Earth sciences / geology
+            "sciences de la vie et de la terre": "0510",  # Natural sciences (broad)
+            "génie civil": "0732",  # Civil engineering
+            "sciences pour l'ingénieur": "0700",  # Engineering, manufacturing and construction (broad)
+        }
+        field_code = corres_french_field_of_education_cite.get(input_str.lower())
+        if field_code:
+            return ScholarFieldsDetails(
+                isced_field=int(field_code),
+                original_scholar_field_name=input_str,
+                original_country="france",
+            )
+        else:
+            return ScholarFieldsDetails(
+                isced_field=9999,
+                original_scholar_field_name=input_str,
+                original_country="france",
+            )
+
+    def _extract_fields_of_education(
+        self, uved_metadata_categorization: list[Category]
+    ) -> list[ScholarFieldsDetails]:
+        ret: list[ScholarFieldsDetails] = []
+        fields = self._extract_specific_metadata(
+            uved_metadata_categorization, parent_uid=115
+        )
+        for field in fields:
+            field_detail = self._convert_field_of_education(field)
+            ret.append(field_detail)
+        return ret
+
+    @staticmethod
+    def _extract_licence(uved_document: UVEDMemberItem) -> str:
         licence = None
         cats = uved_document.categories
         license_equivalence_uved_cc = {
@@ -216,34 +298,6 @@ class UVEDCollector(IPluginRESTCollector):
                 ret.append(activity_type)
         return ret
 
-    @staticmethod
-    def _convert_level(input_str) -> ScholarLevelDetails:
-        corres_french_level_cite = {
-            "bac": 344,
-            "bac+1": 541,
-            "bac+2": 641,
-            "bac+3": 665,
-            "bac+4": 761,
-            "bac+5": 766,
-            "bac+6": 767,
-            "bac+7": 861,
-            "bac+8": 864,
-            "du": 544,
-        }
-        level_id = corres_french_level_cite.get(input_str.lower())
-        if level_id:
-            return ScholarLevelDetails(
-                isced_level=level_id,
-                original_scholar_level_name=input_str,
-                original_country="france",
-            )
-        else:
-            return ScholarLevelDetails(
-                isced_level=0,
-                original_scholar_level_name=input_str,
-                original_country="france",
-            )
-
     def _extract_levels(
         self, uved_metadata_categorization: list[Category]
     ) -> list[ScholarLevelDetails]:
@@ -320,14 +374,51 @@ class UVEDCollector(IPluginRESTCollector):
 
         return ret
 
-    def _extract_metadata(self, uved_document: UVEDMemberItem) -> dict:
-        topics = self._extract_topics(uved_document.categories)
+    @staticmethod
+    def _check_licence_authorization(_license: str) -> None:
+        if _license not in AUTHORIZED_LICENSES:
+            raise UnauthorizedLicense(f"License '{_license}' is not authorized.")
 
-        corres_uved_welearn_db_simple_fields: dict[str, str] = {
-            "Label, Accord": "recognition",
-            "Mentions Licence": "french_licence_references",
-            "Modalités d’apprentissage": "learning_modalities",
-        }
+    @staticmethod
+    def _check_state_authorization(states: list[str]) -> None:
+        if len(states) != 1:
+            raise ValueError(f"Expected exactly one state, got {len(states)}: {states}")
+        state = states[0]
+        if state != "labellisé":
+            raise UnauthorizedState(f"State '{state}' is not authorized.")
+
+    def _extract_metadata(self, uved_document: UVEDMemberItem) -> dict:
+        # Simple metadata
+        recognition = self._extract_specific_metadata(uved_document.categories, 152)
+        learning_modalities = self._extract_specific_metadata(
+            uved_document.categories, 214
+        )
+        target_audiences = self._extract_specific_metadata(
+            uved_document.categories, 198
+        )
+        used_sources = self._extract_specific_metadata(uved_document.categories, 218)
+        initiative_types = self._extract_specific_metadata(
+            uved_document.categories, 146
+        )
+        types = self._extract_specific_metadata(uved_document.categories, 1)
+        formation_type = self._extract_specific_metadata(uved_document.categories, 204)
+        institution_statut_for_provider = self._extract_specific_metadata(
+            uved_document.categories, 74
+        )
+        state = self._extract_specific_metadata(uved_document.categories, 70)
+
+        # Complex metadata
+        licence = self._extract_licence(uved_document)
+        topics = self._extract_topics(uved_document.categories)
+        levels = self._extract_levels(uved_document.categories)
+        external_sdg_ids = self._extract_external_sdg_ids(uved_document.categories)
+        activities_types = self._extract_activities_types(uved_document.categories)
+        scholar_institution_types = self._extract_scholar_institution_types(
+            uved_document.categories
+        )
+        fields_of_education = self._extract_fields_of_education(
+            uved_document.categories
+        )
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         pass

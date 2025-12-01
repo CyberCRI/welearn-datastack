@@ -40,6 +40,6 @@ class InstitutionTypeName(StrEnum):
 @dataclass
 class ScholarInstitutionTypeDetails:
     taxonomy_name: InstitutionTypeName
-    isced_level_awarded: list[int]
+    isced_level_awarded: list[int]  # ISCED 2011 level codes
     original_institution_type_name: str
     original_country: str

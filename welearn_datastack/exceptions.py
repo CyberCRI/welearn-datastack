@@ -176,3 +176,9 @@ class UnauthorizedPublisher(Exception):
     """
     Raised when the publisher is not authorized
     """
+
+
+class UnauthorizedState(Exception):
+    """
+    Raised when the state is not authorized
+    """

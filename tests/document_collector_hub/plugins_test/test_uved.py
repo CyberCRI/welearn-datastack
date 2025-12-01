@@ -214,6 +214,12 @@ class TestUVEDCollector(unittest.TestCase):
         self.assertTrue(isinstance(activities, list))
         self.assertListEqual(activities, ["course"])
 
+    def test__convert_field_of_education(self):
+        field = self.collector._convert_field_of_education("droit")
+        self.assertEqual(field.isced_field, 421)
+        self.assertEqual(field.original_country, "france")
+        self.assertEqual(field.original_scholar_field_name, "droit")
+
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
     def test_run_multiple_documents(self, mock_session):
         # Should process multiple documents
