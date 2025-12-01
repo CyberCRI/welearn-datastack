@@ -120,6 +120,21 @@ class UVEDCollector(IPluginRESTCollector):
     def _clean_txt_content(self, content: str) -> str:
         return clean_text(content)
 
+    @staticmethod
+    def _extract_specific_metadata(
+        uved_metadata_categorization: list[Category],
+        parent_uid: int,
+        with_uid: bool = False,
+    ) -> list[str] | list[tuple[str, int]]:
+        ret: list[str] = []
+        for category in uved_metadata_categorization:
+            if category.parent and category.parent.uid == parent_uid:
+                if with_uid:
+                    ret.append((category.title.lower(), category.uid))
+                else:
+                    ret.append(category.title.lower())
+        return ret
+
     def _extract_licence(self, uved_document: UVEDMemberItem) -> str:
         licence = None
         cats = uved_document.categories
@@ -147,19 +162,19 @@ class UVEDCollector(IPluginRESTCollector):
         self, uved_metadata_categorization: list[Category]
     ) -> list[TopicDetails]:
         ret: list[TopicDetails] = []
-        for category in uved_metadata_categorization:
-            if (
-                category.parent
-                and category.parent.uid == 31
-                or category.parent.uid == 20
-            ):
+
+        for name, uid in [("Domaines", 31), ("Thèmes", 20)]:
+            topics = self._extract_specific_metadata(
+                uved_metadata_categorization, parent_uid=uid, with_uid=True
+            )
+            for topic, topic_uid in topics:
                 ret.append(
                     TopicDetails(
-                        name=category.title,
+                        name=topic,
                         depth=0,
-                        external_depth_name=category.parent.title,
+                        external_depth_name=name,
                         directly_contained_in=[],
-                        external_id=str(category.uid),
+                        external_id=str(topic_uid),
                     )
                 )
         return ret
@@ -189,19 +204,20 @@ class UVEDCollector(IPluginRESTCollector):
             "Directs": "live session",
         }
         ret: list[str] = []
-        for category in uved_metadata_categorization:
-            if category.parent and category.parent.uid == 10:
-                mapped_value = activity_type_mapping.get(category.title)
-                if mapped_value:
-                    ret.append(mapped_value)
-                else:
-                    logger.warning(
-                        f"Activity type '{category.title}' not found in mapping."
-                    )
-                    ret.append(category.title)
+        activity_types = self._extract_specific_metadata(
+            uved_metadata_categorization, parent_uid=10
+        )
+        for activity_type in activity_types:
+            mapped_value = activity_type_mapping.get(activity_type)
+            if mapped_value:
+                ret.append(mapped_value)
+            else:
+                logger.warning(f"Activity type '{activity_type}' not found in mapping.")
+                ret.append(activity_type)
         return ret
 
-    def _convert_level(self, input_str) -> ScholarLevelDetails:
+    @staticmethod
+    def _convert_level(input_str) -> ScholarLevelDetails:
         corres_french_level_cite = {
             "bac": 344,
             "bac+1": 541,
@@ -232,44 +248,31 @@ class UVEDCollector(IPluginRESTCollector):
         self, uved_metadata_categorization: list[Category]
     ) -> list[ScholarLevelDetails]:
         ret: list[ScholarLevelDetails] = []
-        for category in uved_metadata_categorization:
-            if category.parent and category.parent.uid == 14:
-                level_detail = self._convert_level(category.title)
-                ret.append(level_detail)
+        levels = self._extract_specific_metadata(
+            uved_metadata_categorization, parent_uid=14
+        )
+        for level in levels:
+            level_detail = self._convert_level(level)
+            ret.append(level_detail)
         return ret
-
-    def _extract_specific_metadata(
-        self, uved_metadata_categorization: list[Category], parent_uid: int
-    ) -> list[str]:
-        ret: list[str] = []
-        for category in uved_metadata_categorization:
-            if category.parent and category.parent.uid == parent_uid:
-                ret.append(category.title.lower())
-        return ret
-
-    def _extract_metadata(self, uved_document: UVEDMemberItem) -> dict:
-        topics = self._extract_topics(uved_document.categories)
-
-        corres_uved_welearn_db_simple_fields: dict[str, str] = {
-            "Label, Accord": "recognition",
-            "Mentions Licence": "french_licence_references",
-            "Modalités d’apprentissage": "learning_modalities",
-        }
 
     def _extract_external_sdg_ids(
         self, uved_metadata_categorization: list[Category]
     ) -> list[int]:
         ret: list[int] = []
-        for category in uved_metadata_categorization:
-            if category.parent and category.parent.uid == 90:
-                if category.title.lower() == "Les 17 ODD".lower():
-                    return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+        ids = self._extract_specific_metadata(
+            uved_metadata_categorization, parent_uid=90
+        )
+        for ext_id in ids:
+            if ext_id.lower() == "Les 17 ODD".lower():
+                return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
             else:
                 try:
-                    sdg_id = int(category.title.lower().split(". ")[0])
+                    sdg_id = int(ext_id.lower().split(". ")[0])
                     ret.append(sdg_id)
                 except ValueError:
-                    logger.warning(f"Cannot convert SDG id '{category.title}' to int.")
+                    logger.warning(f"Cannot convert SDG id '{ext_id}' to int.")
+            ret.sort()
         return ret
 
     def _extract_scholar_institution_types(
@@ -316,6 +319,15 @@ class UVEDCollector(IPluginRESTCollector):
             )
 
         return ret
+
+    def _extract_metadata(self, uved_document: UVEDMemberItem) -> dict:
+        topics = self._extract_topics(uved_document.categories)
+
+        corres_uved_welearn_db_simple_fields: dict[str, str] = {
+            "Label, Accord": "recognition",
+            "Mentions Licence": "french_licence_references",
+            "Modalités d’apprentissage": "learning_modalities",
+        }
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         pass

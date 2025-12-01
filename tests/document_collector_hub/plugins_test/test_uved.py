@@ -8,7 +8,7 @@ from welearn_database.data.models import WeLearnDocument
 from welearn_datastack.data.details_dataclass.scholar_institution_type import (
     InstitutionTypeName,
 )
-from welearn_datastack.data.source_models.uved import UVEDMemberItem
+from welearn_datastack.data.source_models.uved import Category, UVEDMemberItem
 from welearn_datastack.plugins.rest_requesters.uved import UVEDCollector
 
 
@@ -134,11 +134,11 @@ class TestUVEDCollector(unittest.TestCase):
         self.assertTrue(len(topics) > 0)
         for topic in topics:
             if topic.external_depth_name == "Domaines":
-                self.assertEqual(topic.name, "Agronomie & Agriculture")
+                self.assertEqual(topic.name, "agronomie & agriculture")
                 self.assertEqual(topic.external_id, "42")
                 self.assertEqual(topic.depth, 0)
             if topic.external_depth_name == "Thèmes":
-                self.assertEqual(topic.name, "Environnement - Santé")
+                self.assertEqual(topic.name, "environnement - santé")
                 self.assertEqual(topic.external_id, "86")
                 self.assertEqual(topic.depth, 0)
 
@@ -154,6 +154,48 @@ class TestUVEDCollector(unittest.TestCase):
         sdg_id = self.collector._extract_external_sdg_id(self.uved_item.categories)
         self.assertTrue(isinstance(sdg_id, str))
         self.assertIn("Objectifs de Développement Durable", sdg_id)
+
+    def test__extract_levels(self):
+        # Should extract levels from categories
+        levels = self.collector._extract_levels(self.uved_item.categories)
+        self.assertTrue(isinstance(levels, list))
+        level = levels[0]
+        self.assertEqual(level.isced_level, 665)
+        self.assertEqual(level.original_country, "france")
+        self.assertEqual(level.original_scholar_level_name, "bac+3")
+
+    def test__extract_external_sdg_ids(self):
+        external_sdgs = self.collector._extract_external_sdg_ids(
+            self.uved_item.categories
+        )
+        self.assertTrue(isinstance(external_sdgs, list))
+        self.assertListEqual([3, 15], external_sdgs)
+
+    def test__extract_external_sdg_ids_17_sdgs(self):
+        item = self.uved_item.model_copy()
+        for cat in item.categories:
+            if cat.parent.uid == 90:
+                item.categories.remove(cat)
+        item.categories.append(
+            Category.model_validate(
+                {
+                    "title": "Les 17 ODD",
+                    "parent": Category.model_validate(
+                        {
+                            "title": "Objectifs de Développement Durable",
+                            "parent": None,
+                            "uid": 90,
+                            "@id": "/api/V1/categories/90",
+                        }
+                    ),
+                    "uid": 143,
+                    "@id": "/api/V1/categories/143",
+                }
+            )
+        )
+        external_sdgs = self.collector._extract_external_sdg_ids(item.categories)
+        self.assertTrue(isinstance(external_sdgs, list))
+        self.assertListEqual(list(range(1, 18)), external_sdgs)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
     def test_run_multiple_documents(self, mock_session):
