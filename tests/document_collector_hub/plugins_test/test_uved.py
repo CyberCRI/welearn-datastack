@@ -197,6 +197,18 @@ class TestUVEDCollector(unittest.TestCase):
         self.assertTrue(isinstance(external_sdgs, list))
         self.assertListEqual(list(range(1, 18)), external_sdgs)
 
+    def test__extract_specific_metadata(self):
+        metadata = self.collector._extract_specific_metadata(
+            self.uved_item.categories, 77
+        )
+        self.assertListEqual(metadata, ["français"])
+
+    def test__extract_specific_metadata_with_uid(self):
+        metadata = self.collector._extract_specific_metadata(
+            self.uved_item.categories, 77, True
+        )
+        self.assertListEqual(metadata, [("français", 80)])
+
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
     def test_run_multiple_documents(self, mock_session):
         # Should process multiple documents
