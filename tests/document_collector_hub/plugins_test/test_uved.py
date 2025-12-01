@@ -209,6 +209,11 @@ class TestUVEDCollector(unittest.TestCase):
         )
         self.assertListEqual(metadata, [("français", 80)])
 
+    def test__extract_activities_types(self):
+        activities = self.collector._extract_activities_types(self.uved_item.categories)
+        self.assertTrue(isinstance(activities, list))
+        self.assertListEqual(activities, ["course"])
+
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
     def test_run_multiple_documents(self, mock_session):
         # Should process multiple documents
