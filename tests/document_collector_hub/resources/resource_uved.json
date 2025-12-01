@@ -110,6 +110,17 @@
       "uid": 42,
       "@id": "/api/V1/categories/42"
     },
+      {
+      "title": "Université",
+      "parent": {
+        "title": "Types d'établissement",
+        "parent": null,
+        "uid": 209,
+        "@id": "/api/V1/categories/209"
+      },
+      "uid": 42,
+      "@id": "/api/V1/categories/42"
+    },
     {
       "title": "Episode de podcast",
       "parent": {

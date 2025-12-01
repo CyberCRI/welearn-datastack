@@ -5,6 +5,9 @@ from unittest.mock import Mock, patch
 
 from welearn_database.data.models import WeLearnDocument
 
+from welearn_datastack.data.details_dataclass.scholar_institution_type import (
+    InstitutionTypeName,
+)
 from welearn_datastack.data.source_models.uved import UVEDMemberItem
 from welearn_datastack.plugins.rest_requesters.uved import UVEDCollector
 
@@ -92,6 +95,18 @@ class TestUVEDCollector(unittest.TestCase):
         mock_session.return_value.get.return_value = MockResponse({}, status_code=500)
         with self.assertRaises(Exception):
             self.collector.run([self.base_doc])
+
+    def test__extract_scholar_institution_types(self):
+        # Should extract correct institution types
+        institution_types = self.collector._extract_scholar_institution_types(
+            self.uved_item.categories
+        )
+        self.assertTrue(isinstance(institution_types, list))
+        institution_type = institution_types[0]
+        self.assertEqual(institution_type.original_institution_type_name, "université")
+        self.assertListEqual(institution_type.isced_level_awarded, [6, 7, 8])
+        self.assertEqual(institution_type.taxonomy_name, InstitutionTypeName.UNI)
+        self.assertEqual(institution_type.original_country, "france")
 
     def test_extract_licence(self):
         # Should extract correct license from categories

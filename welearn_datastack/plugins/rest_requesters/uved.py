@@ -16,6 +16,10 @@ from welearn_database.modules.text_cleaning import clean_text
 from welearn_datastack import constants
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.details_dataclass.scholar_institution_type import (
+    InstitutionTypeName,
+    ScholarInstitutionTypeDetails,
+)
 from welearn_datastack.data.details_dataclass.scholar_level import ScholarLevelDetails
 from welearn_datastack.data.details_dataclass.topics import TopicDetails
 from welearn_datastack.data.source_models.oapen import Metadatum, OapenModel
@@ -213,13 +217,13 @@ class UVEDCollector(IPluginRESTCollector):
         level_id = corres_french_level_cite.get(input_str.lower())
         if level_id:
             return ScholarLevelDetails(
-                cite_level=level_id,
+                isced_level=level_id,
                 original_scholar_level_name=input_str,
                 original_country="france",
             )
         else:
             return ScholarLevelDetails(
-                cite_level=0,
+                isced_level=0,
                 original_scholar_level_name=input_str,
                 original_country="france",
             )
@@ -232,6 +236,15 @@ class UVEDCollector(IPluginRESTCollector):
             if category.parent and category.parent.uid == 14:
                 level_detail = self._convert_level(category.title)
                 ret.append(level_detail)
+        return ret
+
+    def _extract_specific_metadata(
+        self, uved_metadata_categorization: list[Category], parent_uid: int
+    ) -> list[str]:
+        ret: list[str] = []
+        for category in uved_metadata_categorization:
+            if category.parent and category.parent.uid == parent_uid:
+                ret.append(category.title.lower())
         return ret
 
     def _extract_metadata(self, uved_document: UVEDMemberItem) -> dict:
@@ -253,10 +266,55 @@ class UVEDCollector(IPluginRESTCollector):
                     return [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
             else:
                 try:
-                    sdg_id = int(category.title.split(". ")[0])
+                    sdg_id = int(category.title.lower().split(". ")[0])
                     ret.append(sdg_id)
                 except ValueError:
                     logger.warning(f"Cannot convert SDG id '{category.title}' to int.")
+        return ret
+
+    def _extract_scholar_institution_types(
+        self, uved_metadata_categorization: list[Category]
+    ) -> list[ScholarInstitutionTypeDetails]:
+        names = self._extract_specific_metadata(
+            uved_metadata_categorization, parent_uid=209
+        )
+
+        ret: list[ScholarInstitutionTypeDetails] = []
+        for name in names:
+            taxonomy_name: InstitutionTypeName | None = None
+            isced_level_awarded: list[int] | None = None
+            match name.lower():
+                case "grande Ecole, ecole d’ingénieurs":
+                    taxonomy_name = InstitutionTypeName.SEL
+                    isced_level_awarded = [7]
+                case "université":
+                    taxonomy_name = InstitutionTypeName.UNI
+                    isced_level_awarded = [6, 7, 8]
+                case "ecole de commerce":
+                    taxonomy_name = InstitutionTypeName.BUS
+                    isced_level_awarded = [6, 7]
+                case "autre établissement":
+                    taxonomy_name = InstitutionTypeName.OTHER
+                    isced_level_awarded = []
+                case _:
+                    logger.warning(f"Institution type '{name}' not found in mapping.")
+                    continue
+
+            if not taxonomy_name:
+                continue
+
+            if not isced_level_awarded:
+                isced_level_awarded = []
+
+            ret.append(
+                ScholarInstitutionTypeDetails(
+                    taxonomy_name=taxonomy_name,
+                    isced_level_awarded=isced_level_awarded,
+                    original_institution_type_name=name,
+                    original_country="france",
+                )
+            )
+
         return ret
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
