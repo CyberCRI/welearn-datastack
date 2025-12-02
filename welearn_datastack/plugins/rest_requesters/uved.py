@@ -479,7 +479,7 @@ class UVEDCollector(IPluginRESTCollector):
             try:
                 uved_document = self._get_json(document)
             except requests.exceptions.RequestException as e:
-                msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}"
+                msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(

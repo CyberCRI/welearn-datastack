@@ -20,6 +20,10 @@ class MockResponse:
     def json(self):
         return self._json
 
+    @property
+    def content(self):
+        return str(self._json).encode("utf-8")
+
     def raise_for_status(self):
         if self.status_code != 200:
             raise Exception("HTTP Error")
@@ -70,21 +74,29 @@ class TestUVEDCollector(unittest.TestCase):
     def test_run_transcription_file_used_as_full_content(self, mock_session):
         # Transcript is empty, transcriptionFile is present and used
         item = self.uved_item.model_copy()
-        item.transcription = ""
-        item.transcriptionFile["url"] = (
-            "https://www.uved.fr/fileadmin/user_upload/Documents/pdf/Transcriptions/Arbres/MOOC_UVED_Arbres_Transcription_LeCadre_2.pdf"
+        mock_session.return_value.get.return_value = MockResponse(
+            item.model_dump(by_alias=True)
         )
-        mock_session.return_value.get.return_value = MockResponse(item.model_dump())
         with patch(
-            "welearn_datastack.modules.pdf_extractor.extract_txt_from_pdf_with_tika",
-            return_value="PDF extracted content.",
+            "welearn_datastack.plugins.rest_requesters.uved.extract_txt_from_pdf_with_tika",
+            return_value=[
+                [
+                    "PDF extracted content. Lorem ipsum dolor sit amet. Consectetur adipiscing elit."
+                ]
+            ],
         ):
             result = self.collector.run([self.base_doc])
         self.assertEqual(len(result), 1)
+        self.assertIsNone(result[0].error_info)
+        self.assertFalse(result[0].is_error)
         doc = result[0].document
-        self.assertEqual(doc.full_content, "PDF extracted content.")
-        self.assertTrue(doc.title)
-        self.assertTrue(doc.details)
+        self.assertEqual(
+            doc.full_content,
+            "PDF extracted content. Lorem ipsum dolor sit amet. Consectetur adipiscing elit.",
+        )
+        self.assertEqual(doc.title, item.title)
+        self.assertEqual(doc.details["state"], "labellisé")
+        self.assertEqual(doc.details["levels"][0].isced_level, 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
