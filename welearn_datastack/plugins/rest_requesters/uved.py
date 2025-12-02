@@ -9,6 +9,8 @@ from datetime import datetime
 from itertools import batched
 from typing import Dict, Iterable, List
 
+import pydantic
+import requests
 from lingua import Language
 from welearn_database.data.models import WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
@@ -392,10 +394,7 @@ class UVEDCollector(IPluginRESTCollector):
             raise UnauthorizedLicense(f"License '{_license}' is not authorized.")
 
     @staticmethod
-    def _check_state_authorization(states: list[str]) -> None:
-        if len(states) != 1:
-            raise ValueError(f"Expected exactly one state, got {len(states)}: {states}")
-        state = states[0]
+    def _check_state_authorization(state: str) -> None:
         if state != "labellisé":
             raise UnauthorizedState(f"State '{state}' is not authorized.")
 
@@ -425,7 +424,7 @@ class UVEDCollector(IPluginRESTCollector):
         institution_statut_for_provider = self._extract_specific_metadata(
             uved_document.categories, 74
         )
-        state = self._extract_specific_metadata(uved_document.categories, 70)
+        state = self._extract_specific_metadata(uved_document.categories, 70)[0]
         self._check_state_authorization(state)
 
         # Complex metadata
@@ -457,6 +456,7 @@ class UVEDCollector(IPluginRESTCollector):
             "formation_type": formation_type,
             "institution_statut_for_provider": institution_statut_for_provider,
             "licence": licence,
+            "state": state,
             "topics": topics,
             "levels": levels,
             "external_sdg_ids": external_sdg_ids,
@@ -465,5 +465,97 @@ class UVEDCollector(IPluginRESTCollector):
             "fields_of_education": fields_of_education,
         }
 
+    def _get_json(self, document: WeLearnDocument) -> UVEDMemberItem:
+        session = get_new_https_session()
+        forged_url = f"{self.api_base_url}/resources/{document.external_id}"
+        resp = session.get(forged_url)
+        resp.raise_for_status()
+
+        return UVEDMemberItem.model_validate(resp.json())
+
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
-        pass
+        ret: list[WrapperRetrieveDocument] = []
+        for document in documents:
+            try:
+                uved_document = self._get_json(document)
+            except requests.exceptions.RequestException as e:
+                msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        http_error_code=get_http_code_from_exception(e),
+                        error_info=msg,
+                    )
+                )
+                continue
+            except pydantic.ValidationError as e:
+                msg = f"Error while validating uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+
+            try:
+                if not uved_document.description:
+                    raise NoDescriptionFoundError("No description found")
+            except NoDescriptionFoundError as e:
+                msg = f"Error while retrieving description for uved ({document.url}) document : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+
+            description = self._clean_txt_content(uved_document.description)
+
+            if uved_document.transcription and len(uved_document.transcription) > 1:
+                full_content = self._clean_txt_content(uved_document.transcription)
+            elif (
+                uved_document.transcriptionFile
+                and self.pdf_size_file_limit > uved_document.transcriptionFile.file.size
+            ):
+                try:
+                    full_content = self._get_pdf_content(
+                        uved_document.transcriptionFile.url
+                    )
+                    full_content = self._clean_txt_content(full_content)
+                except Exception as e:
+                    msg = f"Error while retrieving PDF content for uved ({document.url}) document from this url {uved_document.transcriptionFile.url} : {e}"
+                    logger.error(msg)
+                    ret.append(
+                        WrapperRetrieveDocument(
+                            document=document,
+                            error_info=msg,
+                            http_error_code=get_http_code_from_exception(e),
+                        )
+                    )
+                    continue
+            else:
+                full_content = description
+
+            document.title = uved_document.title
+            document.description = description
+            document.full_content = full_content
+            try:
+                document.details = self._extract_metadata(uved_document)
+            except Exception as e:
+                msg = f"Error while extracting metadata for uved ({document.url}) document : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+            ret.append(WrapperRetrieveDocument(document=document))
+
+        return ret

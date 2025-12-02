@@ -34,37 +34,15 @@
       "@id": "/api/V1/categories/17"
     },
     {
-      "title": "Partage des conditions à l'identique",
+      "title": "Paternité",
       "parent": {
         "title": "Licence Creative Commons",
         "parent": null,
         "uid": 5,
         "@id": "/api/V1/categories/5"
       },
-      "uid": 6,
-      "@id": "/api/V1/categories/6"
-    },
-    {
-      "title": "Pas d'utilisation commerciale",
-      "parent": {
-        "title": "Licence Creative Commons",
-        "parent": null,
-        "uid": 5,
-        "@id": "/api/V1/categories/5"
-      },
-      "uid": 9,
-      "@id": "/api/V1/categories/9"
-    },
-    {
-      "title": "Pas de modification",
-      "parent": {
-        "title": "Licence Creative Commons",
-        "parent": null,
-        "uid": 5,
-        "@id": "/api/V1/categories/5"
-      },
-      "uid": 13,
-      "@id": "/api/V1/categories/13"
+      "uid": 8,
+      "@id": "/api/V1/categories/8"
     },
     {
       "title": "Cours",

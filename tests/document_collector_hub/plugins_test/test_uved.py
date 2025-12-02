@@ -42,15 +42,28 @@ class TestUVEDCollector(unittest.TestCase):
     def test_run_transcript_used_as_full_content(self, mock_session):
         # Transcript is not empty, should be used as full_content
         item = self.uved_item.model_copy()
-        item.transcription = "Transcript content here."
-        mock_session.return_value.get.return_value = MockResponse(item.model_dump())
+        item.transcription = "Transcript content here. Lorem ipsum dolor sit amet. Consectetur adipiscing elit."
+        mock_session.return_value.get.return_value = MockResponse(
+            item.model_dump(by_alias=True)
+        )
         # Check that the API is called with the correct external_id
         result = self.collector.run([self.base_doc])
         self.assertEqual(len(result), 1)
+        self.assertIsNone(result[0].error_info)
+        self.assertFalse(result[0].is_error)
+
         doc = result[0].document
-        self.assertEqual(doc.full_content, "Transcript content here.")
+        self.assertEqual(
+            doc.full_content,
+            "Transcript content here. Lorem ipsum dolor sit amet. Consectetur adipiscing elit.",
+        )
+        self.assertEqual(
+            mock_session.return_value.get.call_args[0][0],
+            f"{self.collector.api_base_url}/resources/{self.uved_item.uid}",
+        )
         self.assertEqual(doc.title, item.title)
-        self.assertTrue(doc.details)
+        self.assertEqual(doc.details["state"], "labellisé")
+        self.assertEqual(doc.details["levels"][0].isced_level, 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
@@ -112,7 +125,7 @@ class TestUVEDCollector(unittest.TestCase):
         # Should extract correct license from categories
         licence = self.collector._extract_licence(self.uved_item)
         self.assertTrue(isinstance(licence, str))
-        self.assertEqual("https://creativecommons.org/licenses/by-nc-nd/4.0/", licence)
+        self.assertEqual("https://creativecommons.org/licenses/by/4.0/", licence)
 
     def test_clean_txt_content(self):
         # Should clean text content

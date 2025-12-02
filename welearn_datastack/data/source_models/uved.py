@@ -44,8 +44,8 @@ class UVEDMemberItem(BaseModel):
     description: str
     contexte: Optional[str]
     slug: str
-    transcription: Optional[str]
-    transcriptionFile: Optional[TranscriptionFile]
+    transcription: Optional[str] = None
+    transcriptionFile: Optional[TranscriptionFile] = None
     kit: Optional[str]
     contact: Optional[str]
     orignalParent: Optional[str] = None
@@ -65,7 +65,7 @@ class ContributorItem(BaseModel):
     lastName: str
     title: Optional[str]
     uid: int
-    _id: str = Field(..., alias="@id")
+    at_id: str = Field(..., alias="@id")
 
 
 class HydraView(BaseModel):
