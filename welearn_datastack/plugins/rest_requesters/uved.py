@@ -274,7 +274,7 @@ class UVEDCollector(IPluginRESTCollector):
             "animation": "workshop",
             "autoévaluation": "self-assessment",
             "documentaire": "documentary",
-            "étude de cas": "case Study",
+            "étude de cas": "case study",
             "évaluation": "assessment",
             "lecture": "reading",
             "outil": "tool",
