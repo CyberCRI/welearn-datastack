@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from pydantic import BaseModel, Field
+from zope.interface.common import optional
 
 
 class Category(BaseModel):
@@ -37,7 +38,7 @@ class UVEDMemberItem(BaseModel):
     categories: list[Category]
     type: Type
     title: str
-    url: str
+    url: Optional[str]
     date: str
     duration: int
     description: str
@@ -48,13 +49,23 @@ class UVEDMemberItem(BaseModel):
     kit: Optional[str]
     contact: Optional[str]
     orignalParent: Optional[str] = None
-    secondaryInstitutions: Optional[list] = None
+    secondaryInstitutions: Optional[list[Institution]] = None
     rate: int
     star: int
-    mainInstitution: Institution
+    mainInstitution: Optional[Institution]
     keywords: list[Keyword]
     uid: int
     at_id: str = Field(..., alias="@id")
+    contributor: Optional[list[ContributorItem]]
+
+
+class ContributorItem(BaseModel):
+    name: str
+    firstName: str
+    lastName: str
+    title: Optional[str]
+    uid: int
+    _id: str = Field(..., alias="@id")
 
 
 class HydraView(BaseModel):

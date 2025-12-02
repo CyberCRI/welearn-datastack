@@ -16,6 +16,7 @@ from welearn_database.modules.text_cleaning import clean_text
 from welearn_datastack import constants
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.data.details_dataclass.scholar_fields import ScholarFieldsDetails
 from welearn_datastack.data.details_dataclass.scholar_institution_type import (
     InstitutionTypeName,
@@ -30,8 +31,8 @@ from welearn_datastack.exceptions import (
     PDFFileSizeExceedLimit,
     TooMuchLanguages,
     UnauthorizedLicense,
-    WrongLangFormat,
     UnauthorizedState,
+    WrongLangFormat,
 )
 from welearn_datastack.modules.computed_metadata import get_language_detector
 from welearn_datastack.modules.pdf_extractor import (
@@ -375,6 +376,17 @@ class UVEDCollector(IPluginRESTCollector):
         return ret
 
     @staticmethod
+    def _extract_authors(uved_document: UVEDMemberItem) -> list[AuthorDetails]:
+        ret: list[AuthorDetails] = []
+        for contributor in uved_document.contributor:
+            ret.append(
+                AuthorDetails(
+                    name=f"{contributor.firstName} {contributor.lastName}", misc=""
+                )
+            )
+        return ret
+
+    @staticmethod
     def _check_licence_authorization(_license: str) -> None:
         if _license not in AUTHORIZED_LICENSES:
             raise UnauthorizedLicense(f"License '{_license}' is not authorized.")
@@ -389,6 +401,14 @@ class UVEDCollector(IPluginRESTCollector):
 
     def _extract_metadata(self, uved_document: UVEDMemberItem) -> dict:
         # Simple metadata
+        tags = [kw.title.lower() for kw in uved_document.keywords]
+        main_institution = uved_document.mainInstitution.name
+        resource_link = uved_document.url
+
+        dt_format = "%Y-%m-%dT%H:%M:%S"
+        publication_date = datetime.strptime(
+            uved_document.date.split(".")[0], dt_format
+        ).timestamp()
         recognition = self._extract_specific_metadata(uved_document.categories, 152)
         learning_modalities = self._extract_specific_metadata(
             uved_document.categories, 214
@@ -406,9 +426,12 @@ class UVEDCollector(IPluginRESTCollector):
             uved_document.categories, 74
         )
         state = self._extract_specific_metadata(uved_document.categories, 70)
+        self._check_state_authorization(state)
 
         # Complex metadata
         licence = self._extract_licence(uved_document)
+        self._check_licence_authorization(licence)
+
         topics = self._extract_topics(uved_document.categories)
         levels = self._extract_levels(uved_document.categories)
         external_sdg_ids = self._extract_external_sdg_ids(uved_document.categories)
@@ -419,6 +442,28 @@ class UVEDCollector(IPluginRESTCollector):
         fields_of_education = self._extract_fields_of_education(
             uved_document.categories
         )
+
+        return {
+            "tags": tags,
+            "main_institution": main_institution,
+            "resource_link": resource_link,
+            "publication_date": publication_date,
+            "recognition": recognition,
+            "learning_modalities": learning_modalities,
+            "target_audiences": target_audiences,
+            "used_sources": used_sources,
+            "initiative_types": initiative_types,
+            "types": types,
+            "formation_type": formation_type,
+            "institution_statut_for_provider": institution_statut_for_provider,
+            "licence": licence,
+            "topics": topics,
+            "levels": levels,
+            "external_sdg_ids": external_sdg_ids,
+            "activities_types": activities_types,
+            "scholar_institution_types": scholar_institution_types,
+            "fields_of_education": fields_of_education,
+        }
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         pass
