@@ -47,7 +47,7 @@ class UVEDMemberItem(BaseModel):
     transcriptionFile: Optional[TranscriptionFile] = None
     kit: Optional[str] = None
     contact: Optional[str] = None
-    orignalParent: Optional[str] = None
+    originalParent: Optional[str] = None
     secondaryInstitutions: Optional[list[Institution]] = None
     rate: int
     star: int
