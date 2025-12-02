@@ -278,7 +278,7 @@ class UVEDCollector(IPluginRESTCollector):
             "évaluation": "assessment",
             "lecture": "reading",
             "outil": "tool",
-            "parcours de formation": "learning Path",
+            "parcours de formation": "learning path",
             "présentation": "presentation",
             "questionnaire": "quiz",
             "scénario pédagogique": "learning scenario",
