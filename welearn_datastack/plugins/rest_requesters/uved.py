@@ -463,6 +463,7 @@ class UVEDCollector(IPluginRESTCollector):
             "activities_types": activities_types,
             "scholar_institution_types": scholar_institution_types,
             "fields_of_education": fields_of_education,
+            "authors": self._extract_authors(uved_document),
         }
 
     def _get_json(self, document: WeLearnDocument) -> UVEDMemberItem:

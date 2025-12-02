@@ -46,8 +46,8 @@ class UVEDMemberItem(BaseModel):
     slug: str
     transcription: Optional[str] = None
     transcriptionFile: Optional[TranscriptionFile] = None
-    kit: Optional[str]
-    contact: Optional[str]
+    kit: Optional[str] = None
+    contact: Optional[str] = None
     orignalParent: Optional[str] = None
     secondaryInstitutions: Optional[list[Institution]] = None
     rate: int
@@ -56,7 +56,7 @@ class UVEDMemberItem(BaseModel):
     keywords: list[Keyword]
     uid: int
     at_id: str = Field(..., alias="@id")
-    contributor: Optional[list[ContributorItem]]
+    contributor: Optional[list[ContributorItem]] = None
 
 
 class ContributorItem(BaseModel):

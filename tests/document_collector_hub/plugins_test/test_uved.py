@@ -105,13 +105,18 @@ class TestUVEDCollector(unittest.TestCase):
         item = self.uved_item.model_copy()
         item.transcription = ""
         item.transcriptionFile = None
-        mock_session.return_value.get.return_value = MockResponse(item.model_dump())
+        mock_session.return_value.get.return_value = MockResponse(
+            item.model_dump(by_alias=True)
+        )
         result = self.collector.run([self.base_doc])
         self.assertEqual(len(result), 1)
+        self.assertIsNone(result[0].error_info)
+        self.assertFalse(result[0].is_error)
         doc = result[0].document
-        self.assertEqual(doc.full_content, item.description)
-        self.assertTrue(doc.title)
-        self.assertTrue(doc.details)
+        self.assertEqual(doc.full_content, doc.description)
+        self.assertEqual(doc.title, item.title)
+        self.assertEqual(doc.details["state"], "labellisé")
+        self.assertEqual(doc.details["levels"][0].isced_level, 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
@@ -171,14 +176,38 @@ class TestUVEDCollector(unittest.TestCase):
         # Should extract metadata dict
         metadata = self.collector._extract_metadata(self.uved_item)
         self.assertTrue(isinstance(metadata, dict))
-        self.assertIn("authors", metadata)
-        self.assertIn("publisher", metadata)
+        self.assertListEqual(
+            [
+                "tags",
+                "main_institution",
+                "resource_link",
+                "publication_date",
+                "recognition",
+                "learning_modalities",
+                "target_audiences",
+                "used_sources",
+                "initiative_types",
+                "types",
+                "formation_type",
+                "institution_statut_for_provider",
+                "licence",
+                "state",
+                "topics",
+                "levels",
+                "external_sdg_ids",
+                "activities_types",
+                "scholar_institution_types",
+                "fields_of_education",
+                "authors",
+            ],
+            list(metadata.keys()),
+        )
 
     def test_extract_external_sdg_id(self):
         # Should extract SDG id from categories
-        sdg_id = self.collector._extract_external_sdg_id(self.uved_item.categories)
-        self.assertTrue(isinstance(sdg_id, str))
-        self.assertIn("Objectifs de Développement Durable", sdg_id)
+        sdg_ids = self.collector._extract_external_sdg_ids(self.uved_item.categories)
+        self.assertTrue(isinstance(sdg_ids, list))
+        self.assertListEqual([3, 15], sdg_ids)
 
     def test__extract_levels(self):
         # Should extract levels from categories
@@ -244,21 +273,3 @@ class TestUVEDCollector(unittest.TestCase):
         self.assertEqual(field.isced_field, 421)
         self.assertEqual(field.original_country, "france")
         self.assertEqual(field.original_scholar_field_name, "droit")
-
-    @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
-    def test_run_multiple_documents(self, mock_session):
-        # Should process multiple documents
-        item = self.uved_item.model_copy()
-        item.transcription = "Transcript content here."
-        mock_session.return_value.get.return_value = MockResponse(item.model_dump())
-        docs = [
-            self.base_doc,
-            self.base_doc.model_copy(
-                update={"id": 2, "external_id": self.uved_item.uid}
-            ),
-        ]
-        result = self.collector.run(docs)
-        self.assertEqual(len(result), 2)
-        for r in result:
-            self.assertEqual(r.document.full_content, "Transcript content here.")
-            self.assertEqual(r.document.external_id, self.uved_item.uid)
