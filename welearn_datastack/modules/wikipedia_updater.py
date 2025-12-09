@@ -39,7 +39,39 @@ def _get_revision_id(
     return None
 
 
-def compare_with_current_version(document: WeLearnDocument) -> bool:
+def is_redirection(document: WeLearnDocument) -> bool:
+    """
+    Determine if the Wikipedia page is redirection page.
+
+    param document: WeLearnDocument object containing title and lang attributes.
+    return: True if the page is a redirection, False otherwise.
+    raises ValueError: If title or lang attributes are missing.
+    """
+    if not document.title:
+        raise ValueError("Document title is required")
+    if not document.lang:
+        raise ValueError("Document language is required")
+
+    lang = document.lang
+    page_title = document.title
+
+    session = get_new_https_session()
+    url = f"https://{lang}.wikipedia.org/w/rest.php/v1/page/{page_title}/with_html"
+
+    # We use this API : https://www.mediawiki.org/wiki/API:REST_API/Reference#Page_object
+    resp = session.head(url=url, allow_redirects=False)
+    resp.raise_for_status()
+
+    if resp.status_code == 301:
+        resp = session.head(url=resp.headers["location"], allow_redirects=False)
+        resp.raise_for_status()
+
+    if resp.status_code == 307:
+        return True
+    return False
+
+
+def is_too_different(document: WeLearnDocument) -> bool:
     """
     Compares the current version of a Wikipedia document with the one available in WeLearn database
     to determine if the size difference exceeds a 5% threshold.

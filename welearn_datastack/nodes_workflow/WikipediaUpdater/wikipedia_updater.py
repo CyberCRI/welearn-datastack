@@ -4,10 +4,10 @@ from typing import List
 
 from sqlalchemy.orm import Session
 from welearn_database.data.enumeration import Step
-from welearn_database.data.models import ProcessState, WeLearnDocument
+from welearn_database.data.models import ErrorRetrieval, ProcessState, WeLearnDocument
 
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
-from welearn_datastack.modules.wikipedia_updater import compare_with_current_version
+from welearn_datastack.modules.wikipedia_updater import is_redirection, is_too_different
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
 from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
@@ -52,9 +52,27 @@ def main() -> None:
 
     # Comparing documents with current online version
     logger.info("Comparing documents with current online version")
+    wld: WeLearnDocument
     for wld in welearn_documents:
         try:
-            if compare_with_current_version(wld):
+            if is_redirection(wld):
+                logger.info("Document '%s' is a redirection", wld.title)
+                db_session.add(
+                    ProcessState(
+                        document_id=wld.id,
+                        title=Step.DOCUMENT_IS_INVALID.value,
+                    )
+                )
+                db_session.add(
+                    ErrorRetrieval(
+                        document_id=wld.id,
+                        http_error_code=307,
+                        error_info="Wikipedia update determine this document is a redirection, not a content page",
+                    ),
+                )
+                continue
+
+            if is_too_different(wld):
                 logger.info(
                     "Document '%s' has a size difference exceeding 5%%", wld.title
                 )
