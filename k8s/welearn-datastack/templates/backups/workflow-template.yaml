@@ -11,7 +11,7 @@ spec:
     {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
   volumeClaimTemplates:
   - metadata:
-      name: workdir
+      name: tmp
     spec:
       accessModes: [ "ReadWriteOnce" ]
       storageClassName: {{ .workflowTemplate.postgresqlBackup.storageClassName }}
@@ -34,6 +34,8 @@ spec:
               value: {{ printf "%s-%s" $.Values.common.environment $.Values.common.config.nonSensitive.PG_DATABASE | replace "_" "-" }}
             - name: storage_account_name
               value: {{ .storageAccountName }}
+            - name : volume_name
+              value: tmp
 ---
 {{- if and (.cronWorkflowTemplate.postgresqlBackup.enabled) ($.Values.cronWorkflows.enabled) }}
 apiVersion: argoproj.io/v1alpha1
