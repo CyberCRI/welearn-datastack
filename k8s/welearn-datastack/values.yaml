@@ -303,11 +303,11 @@ backups:
       schedule: "0 0 * * *" # every day at midnight
   workflowTemplate:
     postgresqlBackup:
+      storageClassName: managed-csi-lrs-welearn
+      storageSize: 128Gi
       clusterWorkflowTemplate:
         name: postgres-backuper-with-storage
         template: all
-        storageClassName: managed-csi-lrs-welearn
-        storageSize: 128Gi
 
 
 restore:
