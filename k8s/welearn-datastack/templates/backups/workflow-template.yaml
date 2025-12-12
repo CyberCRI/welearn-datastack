@@ -25,6 +25,10 @@ spec:
               value: {{ printf "%s-%s" $.Values.common.environment $.Values.common.config.nonSensitive.PG_DATABASE | replace "_" "-" }}
             - name: storage_account_name
               value: {{ .storageAccountName }}
+            - name: pvc_size
+              value: {{ .workflowTemplate.postgresqlBackup.clusterWorkflowTemplate.storageSize }}
+            - name: pvc_storage_class_name
+              value: {{ .workflowTemplate.postgresqlBackup.clusterWorkflowTemplate.storageClassName }}
 ---
 {{- if and (.cronWorkflowTemplate.postgresqlBackup.enabled) ($.Values.cronWorkflows.enabled) }}
 apiVersion: argoproj.io/v1alpha1

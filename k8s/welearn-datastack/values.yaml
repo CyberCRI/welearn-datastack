@@ -304,8 +304,10 @@ backups:
   workflowTemplate:
     postgresqlBackup:
       clusterWorkflowTemplate:
-        name: postgres-backuper
+        name: postgres-backuper-with-storage
         template: all
+        storageClassName: managed-csi-lrs-welearn
+        storageSize: 128Gi
 
 
 restore:
