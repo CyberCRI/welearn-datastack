@@ -1,5 +1,6 @@
 from typing import List, Type
 
+from welearn_datastack.collectors.uved_collector import UVEDURLCollector
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.plugins.rest_requesters.hal import HALCollector
 from welearn_datastack.plugins.rest_requesters.oapen import OAPenCollector
@@ -15,4 +16,5 @@ plugins_rest_list: List[Type[IPluginRESTCollector]] = [
     OAPenCollector,
     OpenAlexCollector,
     PressBooksCollector,
+    UVEDURLCollector,
 ]
