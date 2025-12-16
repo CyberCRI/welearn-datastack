@@ -374,5 +374,10 @@ spec:
                 name: {{ .name }}
                 template: collect-unccelearn
 
+            - name: uved
+              templateRef:
+                name: {{ .name }}
+                template: collect-uved
+
 {{- end }}
 {{- end }}
