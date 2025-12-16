@@ -41,11 +41,11 @@ def _get_revision_id(
 
 def is_redirection(document: WeLearnDocument) -> bool:
     """
-    Determine if the Wikipedia page is redirection page.
+    Determine if the Wikipedia page is a redirection page.
 
-    param document: WeLearnDocument object containing title and lang attributes.
-    return: True if the page is a redirection, False otherwise.
-    raises ValueError: If title or lang attributes are missing.
+    :param document: WeLearnDocument object containing title and lang attributes.
+    :return: True if the page is a redirection, False otherwise.
+    :raises ValueError: If title or lang attributes are missing.
     """
     if not document.title:
         raise ValueError("Document title is required")
