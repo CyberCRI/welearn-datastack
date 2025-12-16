@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class UVEDURLCollector(URLCollector):
+    related_corpus = "uved"
+
     def __init__(self, corpus: Corpus):
         self.corpus = corpus
 
