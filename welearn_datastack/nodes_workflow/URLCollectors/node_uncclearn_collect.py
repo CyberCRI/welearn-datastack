@@ -3,7 +3,7 @@ import os
 
 from welearn_database.data.models import Corpus
 
-from welearn_datastack.collectors.uved_collector import UVEDURLCollector
+from welearn_datastack.collectors.unccelearn_collector import UNCCeLearnURLCollector
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,
 )
@@ -25,18 +25,18 @@ logger = logging.getLogger(__name__)
 
 
 if __name__ == "__main__":
-    logger.info("UVEDCollector collector starting...")
+    logger.info("UNCCeLearn collector starting...")
     session = create_db_session()
     corpus: Corpus | None = (
-        session.query(Corpus).filter_by(source_name="uved").one_or_none()
+        session.query(Corpus).filter_by(source_name="unccelearn").one_or_none()
     )
 
     if corpus is None:
-        raise ValueError(f"Corpus uved not found")
+        raise ValueError(f"Corpus unccelearn not found")
 
-    uved_collector = UVEDURLCollector(corpus=corpus)
+    unccelearn_collector = UNCCeLearnURLCollector(corpus=corpus)
 
-    urls = uved_collector.collect()
+    urls = unccelearn_collector.collect()
 
     logger.info("URLs retrieved : '%s'", len(urls))
     insert_urls(
@@ -44,4 +44,4 @@ if __name__ == "__main__":
         urls=urls,
     )
 
-    logger.info("UVEDCollector collector ended")
+    logger.info("UNCCeLearn collector ended")
