@@ -38,7 +38,7 @@ class TestUVEDCollector(unittest.TestCase):
         self.uved_item = UVEDMemberItem.model_validate(self.resource_json)
         self.base_doc = WeLearnDocument(
             id=1,
-            url="https://www.uved.fr/ressource/agroforesterie-bien-etre-et-sante-mentale-1",
+            url="https://www.uved.fr/fiche/ressource/agroforesterie-bien-etre-et-sante-mentale-1",
             external_id=self.uved_item.uid,
         )
 

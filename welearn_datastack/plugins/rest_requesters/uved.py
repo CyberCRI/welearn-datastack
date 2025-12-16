@@ -68,7 +68,7 @@ class UVEDCollector(IPluginRESTCollector):
         self.tika_address = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
 
         self.api_base_url = "https://www.uved.fr/api/V1"
-        self.application_base_url = "https://www.uved.fr/ressource/"
+        self.application_base_url = "https://www.uved.fr/fiche/ressource/"
         self.headers = constants.HEADERS
         self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
 

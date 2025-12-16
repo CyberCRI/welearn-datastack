@@ -18,7 +18,7 @@ class UVEDURLCollector(URLCollector):
         self.corpus = corpus
 
         self.api_base_url = "https://www.uved.fr/api/V1"
-        self.application_base_url = "https://www.uved.fr/ressource/"
+        self.application_base_url = "https://www.uved.fr/fiche/ressource/"
         self.headers = constants.HEADERS
 
     def _get_object_uved_api(self) -> RootUVEDModel:

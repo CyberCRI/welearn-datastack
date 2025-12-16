@@ -56,7 +56,7 @@ class TestUVEDCollector(TestCase):
         for i in range(0, len(collected)):
             self.assertEqual(
                 collected[i].url,
-                f"https://www.uved.fr/ressource/{self.slugs[i]}",
+                f"https://www.uved.fr/fiche/ressource/{self.slugs[i]}",
             )
             self.assertEqual(collected[i].external_id, self.external_ids[i])
             self.assertEqual(collected[i].corpus.source_name, "uved")
