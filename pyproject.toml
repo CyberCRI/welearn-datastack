@@ -46,7 +46,7 @@ brotli = "^1.2.0"
 scikit-learn = "~=1.6.1"
 optimum = {extras = ["onnxruntime"], version = "^1.26.1"}
 azure-storage-blob = "^12.26.0"
-welearn-database = "1.0.0"
+welearn-database = "^1.0.0"
 pydantic = "^2.12.3"
 
 [tool.poetry.group.metrics.dependencies]
