@@ -7,6 +7,7 @@ from welearn_database.data.models import WeLearnDocument
 from wikipediaapi import Wikipedia, WikipediaPage, WikipediaPageSection  # type: ignore
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
+from welearn_datastack.exceptions import NoContent
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0"
@@ -90,6 +91,10 @@ class WikipediaCollector(IPluginRESTCollector):
             raise ValueError(
                 f"Failed to retrieve page content for URL: {document} after 5 attempts"
             )
+        is_redirect = "redirects" in page._attributes
+
+        if is_redirect:
+            raise NoContent(f"Page {document.url} is a redirection, not an article")
 
         document.title = page.title
         document.lang = lang

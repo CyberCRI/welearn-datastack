@@ -167,3 +167,31 @@ class TestRestWikipediaPlugin(unittest.TestCase):
         doc_result = result[0].document
         self.assertIn("content11", doc_result.full_content)
         self.assertNotIn("should not appear", doc_result.full_content)
+
+    @patch("welearn_datastack.plugins.rest_requesters.wikipedia.Wikipedia")
+    def test_plugin_run_redirect_page(self, mock_wikipedia):
+        # Simulate a Wikipedia page that is a redirection (should not be scraped)
+        mock_wiki_instance = mock_wikipedia.return_value
+        # Mock a page with _attributes containing 'redirects'
+        redirect_page = MagicMock()
+        redirect_page.title = "RedirectTitle"
+        redirect_page.summary = "This is a redirect."
+        type(redirect_page).sections = unittest.mock.PropertyMock(return_value=[])
+        redirect_page.url = self.doc1.url
+        redirect_page.lang = "en"
+        redirect_page._attributes = {
+            "redirects": {"to": "target", "from": "RedirectTitle"}
+        }
+        # get_sections doit retourner un dict vide pour simuler une page redirection
+        with patch(
+            "welearn_datastack.plugins.rest_requesters.wikipedia.get_sections",
+            return_value={"key": "foo"},
+        ):
+            mock_wiki_instance.page.side_effect = [redirect_page]
+            collector = WikipediaCollector()
+            result = collector.run([self.doc1])
+            self.assertEqual(len(result), 1)
+            self.assertTrue(result[0].is_error)
+            self.assertIsNotNone(result[0].error_info)
+            self.assertIn("redirection", result[0].error_info.lower())
+            self.assertEqual(result[0].document.url, self.doc1.url)
