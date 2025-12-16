@@ -24,6 +24,7 @@ from welearn_database.data.models import (
 from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.enumerations import MLModelsType, URLRetrievalType
 from welearn_datastack.modules.retrieve_data_from_database import (
+    corpus_query_parser,
     retrieve_models,
     retrieve_random_documents_ids_according_process_title,
     retrieve_urls_ids,
@@ -556,3 +557,23 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         )
 
         self.assertEqual(len(res), 0)
+
+    def test_corpus_query_parser(self):
+        corpus_query = "corpus1, corpus2 , corpus3"
+        expected_corpus_list = ["corpus1", "corpus2", "corpus3"]
+        result = corpus_query_parser(corpus_query)
+        self.assertListEqual(result[0], expected_corpus_list)
+        self.assertEqual(len(result[1]), 0)
+
+    def test_corpus_query_parser_with_negative_corpus(self):
+        corpus_query = "corpus1, corpus2 , !corpus3"
+        expected_corpus_list = ["corpus1", "corpus2"]
+        expected_negative_corpus_list = ["corpus3"]
+        result = corpus_query_parser(corpus_query)
+        self.assertListEqual(result[0], expected_corpus_list)
+        self.assertListEqual(result[1], expected_negative_corpus_list)
+
+    def test_corpus_query_parser_star(self):
+        corpus_query = "*"
+        result = corpus_query_parser(corpus_query)
+        self.assertIsNone(result)
