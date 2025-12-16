@@ -8,6 +8,7 @@ from welearn_database.data.models import WeLearnDocument
 from welearn_datastack.data.details_dataclass.scholar_institution_type import (
     InstitutionTypeName,
 )
+from welearn_datastack.data.enumerations import PluginType
 from welearn_datastack.data.source_models.uved import Category, UVEDMemberItem
 from welearn_datastack.plugins.rest_requesters.uved import UVEDCollector
 
@@ -41,6 +42,14 @@ class TestUVEDCollector(unittest.TestCase):
             url="https://www.uved.fr/fiche/ressource/agroforesterie-bien-etre-et-sante-mentale-1",
             external_id=self.uved_item.uid,
         )
+
+    def test_plugin_type(self):
+        # Check plugin type is REST
+        self.assertEqual(PluginType.REST, UVEDCollector.collector_type_name)
+
+    def test_plugin_related_corpus(self):
+        # Check related corpus is 'wikipedia'
+        self.assertEqual(UVEDCollector.related_corpus, "uved")
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
     def test_run_transcript_used_as_full_content(self, mock_session):
