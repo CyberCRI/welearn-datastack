@@ -104,10 +104,36 @@ def _generate_query_size_limit(
         raise ValueError("Generated query goal not recognized")
 
     # Filter on corpus
-    if corpus_name != "*":
-        query = query.join(Corpus).filter(Corpus.source_name == corpus_name)  # type: ignore
+    included_corpus, excluded_corpus = corpus_query_parser(corpus_name) or ([], [])
+    if included_corpus:
+        query = query.join(Corpus).filter(Corpus.source_name.in_(included_corpus))  # type: ignore
+    if excluded_corpus:
+        query = query.join(Corpus).filter(Corpus.source_name.notin_(excluded_corpus))  # type: ignore
 
     return query
+
+
+def corpus_query_parser(corpus_query: str) -> tuple[list[str], list[str]] | None:
+    """
+    Parse corpus query string into included and excluded corpus names
+    :param corpus_query: Corpus query string
+    :return: Tuple of included and excluded corpus names lists or None if star is passed
+    """
+    if corpus_query.strip() == "*":
+        return None
+
+    included_corpus = []
+    excluded_corpus = []
+
+    corpus_items = [item.strip() for item in corpus_query.split(",")]
+
+    for item in corpus_items:
+        if item.startswith("!"):
+            excluded_corpus.append(item[1:])
+        else:
+            included_corpus.append(item)
+
+    return included_corpus, excluded_corpus
 
 
 def retrieve_urls_ids(
