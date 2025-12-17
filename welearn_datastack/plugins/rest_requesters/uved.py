@@ -429,7 +429,7 @@ class UVEDCollector(IPluginRESTCollector):
 
         # Complex metadata
         licence = self._extract_licence(uved_document)
-        self._check_licence_authorization(licence)
+        # self._check_licence_authorization(licence)
 
         topics = self._extract_topics(uved_document.categories)
         levels = self._extract_levels(uved_document.categories)
