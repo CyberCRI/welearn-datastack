@@ -186,6 +186,18 @@ class TestWikipediaUpdater(unittest.TestCase):
         self.assertFalse(is_redirection(doc))
         self.assertEqual(mock_session.head.call_count, 2)
 
-
-if __name__ == "__main__":
-    unittest.main()
+    @patch("welearn_datastack.modules.wikipedia_updater.get_new_https_session")
+    def test_is_redirection_true_with_weird_text(self, mock_get_session):
+        """Should return True if the first HEAD returns 307 (redirection)."""
+        mock_session = MagicMock()
+        mock_response = MagicMock()
+        mock_response.status_code = 307
+        mock_response.raise_for_status.return_value = None
+        mock_session.head.return_value = mock_response
+        mock_get_session.return_value = mock_session
+        doc = WeLearnDocument(title="Bossons/Blécherette", lang="fr")
+        self.assertTrue(is_redirection(doc))
+        self.assertEqual(
+            mock_session.head.call_args[1]["url"],
+            "https://fr.wikipedia.org/w/rest.php/v1/page/Bossons%2FBl%C3%A9cherette/with_html",
+        )
