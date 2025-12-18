@@ -67,7 +67,7 @@ def main() -> None:
                     ErrorRetrieval(
                         document_id=wld.id,
                         http_error_code=307,
-                        error_info="Wikipedia update determine this document is a redirection, not a content page",
+                        error_info="Wikipedia updater determine this document is a redirection, not a content page",
                     ),
                 )
                 continue

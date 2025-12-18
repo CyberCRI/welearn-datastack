@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from urllib.parse import quote_plus
 
 import requests  # type: ignore
 from welearn_database.data.models import WeLearnDocument
@@ -53,7 +54,7 @@ def is_redirection(document: WeLearnDocument) -> bool:
         raise ValueError("Document language is required")
 
     lang = document.lang
-    page_title = document.title
+    page_title = quote_plus(document.title)
 
     session = get_new_https_session()
     url = f"https://{lang}.wikipedia.org/w/rest.php/v1/page/{page_title}/with_html"
