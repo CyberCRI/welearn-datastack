@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: update-materialized-views
+spec:
+  entrypoint: update-materialized-views
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  templates:
+    - name: update-materialized-views
+      steps:
+        - - name: update-qty-document-in-qdrant
+            template: update-materialized-view
+            arguments:
+              parameters:
+                - name: view_name
+                  value: qty_document_in_qdrant
+        - - name: update-qty-document-in-qdrant-per-corpus
+            template: update-materialized-view
+            arguments:
+              parameters:
+                - name: view_name
+                  value: qty_document_in_qdrant_per_corpus
+        - - name: update-qty-document-per-corpus
+            template: update-materialized-view
+            arguments:
+              parameters:
+                - name: view_name
+                  value: qty_document_per_corpus
+    - name: update-materialized-view
+      inputs:
+        parameters:
+          - name: view_name
+      script:
+        image: postgres:15
+        command: ["bash"]
+        source: |
+          #!/bin/bash
+          set -e
+          export DB_NAME="$PG_DATABASE"
+          export DB_USER="$PG_USER"
+          export DB_HOST="$PG_HOST"
+          export DB_PORT="$PG_PORT"
+          export DB_PASSWORD="$PG_PASSWORD"
+          chmod +x /script/update-materialized-view
+          /script/update-materialized-view "$view_name"
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+      volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: CronWorkflow
+metadata:
+  name: update-materialized-views-cron
+spec:
+  schedule: "0 */3 * * *" # Every 3 hours
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
+  workflowSpec:
+    entrypoint: update-materialized-views
+    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+    workflowTemplateRef:
+      name: update-materialized-views
+    ttlStrategy:
+      secondsAfterCompletion: 300
+    podGC:
+      strategy: OnPodCompletion
