@@ -5,6 +5,7 @@ import math
 import os
 import re
 from collections import deque
+from dataclasses import asdict
 from datetime import datetime
 from itertools import batched
 from typing import Dict, Iterable, List
@@ -431,16 +432,18 @@ class UVEDCollector(IPluginRESTCollector):
         licence = self._extract_licence(uved_document)
         # self._check_licence_authorization(licence)
 
-        topics = self._extract_topics(uved_document.categories)
-        levels = self._extract_levels(uved_document.categories)
+        topics = [asdict(o) for o in self._extract_topics(uved_document.categories)]
+        levels = [asdict(o) for o in self._extract_levels(uved_document.categories)]
         external_sdg_ids = self._extract_external_sdg_ids(uved_document.categories)
         activities_types = self._extract_activities_types(uved_document.categories)
-        scholar_institution_types = self._extract_scholar_institution_types(
-            uved_document.categories
-        )
-        fields_of_education = self._extract_fields_of_education(
-            uved_document.categories
-        )
+        scholar_institution_types = [
+            asdict(o)
+            for o in self._extract_scholar_institution_types(uved_document.categories)
+        ]
+        fields_of_education = [
+            asdict(o)
+            for o in self._extract_fields_of_education(uved_document.categories)
+        ]
 
         return {
             "tags": tags,
@@ -463,7 +466,7 @@ class UVEDCollector(IPluginRESTCollector):
             "activities_types": activities_types,
             "scholar_institution_types": scholar_institution_types,
             "fields_of_education": fields_of_education,
-            "authors": self._extract_authors(uved_document),
+            "authors": [asdict(o) for o in self._extract_authors(uved_document)],
         }
 
     def _get_json(self, document: WeLearnDocument) -> UVEDMemberItem:

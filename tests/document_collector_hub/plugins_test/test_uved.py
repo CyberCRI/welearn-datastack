@@ -212,6 +212,10 @@ class TestUVEDCollector(unittest.TestCase):
             list(metadata.keys()),
         )
 
+    def test_serialize_metadata(self):
+        metadata = self.collector._extract_metadata(self.uved_item)
+        json.dumps(metadata)
+
     def test_extract_external_sdg_id(self):
         # Should extract SDG id from categories
         sdg_ids = self.collector._extract_external_sdg_ids(self.uved_item.categories)
