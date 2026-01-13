@@ -76,7 +76,7 @@ class TestUVEDCollector(unittest.TestCase):
         )
         self.assertEqual(doc.title, item.title)
         self.assertEqual(doc.details["state"], "labellisé")
-        self.assertEqual(doc.details["levels"][0].isced_level, 665)
+        self.assertEqual(doc.details["levels"][0]["isced_level"], 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
@@ -105,7 +105,7 @@ class TestUVEDCollector(unittest.TestCase):
         )
         self.assertEqual(doc.title, item.title)
         self.assertEqual(doc.details["state"], "labellisé")
-        self.assertEqual(doc.details["levels"][0].isced_level, 665)
+        self.assertEqual(doc.details["levels"][0]["isced_level"], 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
@@ -125,7 +125,7 @@ class TestUVEDCollector(unittest.TestCase):
         self.assertEqual(doc.full_content, doc.description)
         self.assertEqual(doc.title, item.title)
         self.assertEqual(doc.details["state"], "labellisé")
-        self.assertEqual(doc.details["levels"][0].isced_level, 665)
+        self.assertEqual(doc.details["levels"][0]["isced_level"], 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
