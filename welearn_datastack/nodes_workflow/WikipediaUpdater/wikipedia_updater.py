@@ -2,6 +2,7 @@ import logging
 import os
 from typing import List
 
+import requests.exceptions
 from sqlalchemy.orm import Session
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import ErrorRetrieval, ProcessState, WeLearnDocument
@@ -84,6 +85,16 @@ def main() -> None:
                 )
         except (ValueError, KeyError) as e:
             logger.error("Error while comparing document '%s': %s", wld.title, e)
+            continue
+        except requests.exceptions.HTTPError as e:
+            logger.error("HTTP error while comparing document '%s': %s", wld.title, e)
+            db_session.add(
+                ErrorRetrieval(
+                    document_id=wld.id,
+                    http_error_code=e.response.status_code,
+                    error_info=f"HTTP error occurred: {str(e)} from wikipedia_updater",
+                ),
+            )
             continue
 
     db_session.commit()
