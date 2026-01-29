@@ -340,7 +340,6 @@ class OpenAlexCollector(IPluginRESTCollector):
             "related_works": wrapper.raw_data.related_works,
             "authors": authors,
         }
-
         wrapper.document.title = document_title
         wrapper.document.description = document_desc
         wrapper.document.content = document_content
