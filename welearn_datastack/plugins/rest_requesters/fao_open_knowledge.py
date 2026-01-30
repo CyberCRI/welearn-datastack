@@ -208,7 +208,7 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     fao_document.metadata.get(metadata)
                 )
             except pydantic.ValidationError:
-                logger.warning(f"Cannot parse metadata entry: {metadata.name}")
+                logger.warning(f"Cannot parse metadata entry: {metadata}")
                 continue
         empty_entry = MetadataEntry(
             value="", language="", authority=None, confidence=-1, place=0
@@ -296,6 +296,18 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                         document=document,
                         error_info=f"From Document Hub Collector, unauthorized license: {e}",
                         http_error_code=403,
+                    )
+                )
+                continue
+            except NoContent as e:
+                logger.warning(
+                    f"Document {document.url} skipped due to no content: {e}"
+                )
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=f"From Document Hub Collector, no content: {e}",
+                        http_error_code=204,
                     )
                 )
                 continue
