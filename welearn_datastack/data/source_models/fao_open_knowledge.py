@@ -3,52 +3,20 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
-class Bundles(BaseModel):
-    href: str
-
-
-class MappedCollections(BaseModel):
-    href: str
-
-
-class OwningCollection(BaseModel):
-    href: str
-
-
-class Relationships(BaseModel):
-    href: str
-
-
-class Version(BaseModel):
-    href: str
-
-
-class TemplateItemOf(BaseModel):
-    href: str
-
-
-class Thumbnail(BaseModel):
-    href: str
-
-
-class Relateditemlistconfigs(BaseModel):
-    href: str
-
-
-class Self(BaseModel):
+class Link(BaseModel):
     href: str
 
 
 class _Links(BaseModel):
-    bundles: Bundles
-    mappedCollections: MappedCollections
-    owningCollection: OwningCollection
-    relationships: Relationships
-    version: Version
-    templateItemOf: TemplateItemOf
-    thumbnail: Thumbnail
-    relateditemlistconfigs: Relateditemlistconfigs
-    self: Self
+    bundles: Link
+    mappedCollections: Link
+    owningCollection: Link
+    relationships: Link
+    version: Link
+    templateItemOf: Link
+    thumbnail: Link
+    relateditemlistconfigs: Link
+    self: Link
 
 
 class Item(BaseModel):
@@ -99,3 +67,19 @@ class FaoOKModel(BaseModel):
     embedded: Embedded = Field(..., alias="_embedded")
     links: Links1 = Field(..., alias="_links")
     page: Page
+
+
+class BundleLinksModel(BaseModel):
+    item: Link
+    bitstreams: Link
+    primaryBitstream: Link
+    self: Link
+
+
+class Bundle(BaseModel):
+    uuid: str
+    name: str
+    handle: Any
+    metadata: dict
+    type: str
+    links: BundleLinksModel = Field(..., alias="_links")

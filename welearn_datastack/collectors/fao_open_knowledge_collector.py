@@ -29,7 +29,7 @@ class FAOOpenKnowledgeURLCollector(URLCollector):
         urls: List[WeLearnDocument] = []
         for item in fao_ok_api_response.embedded.items:
             document = WeLearnDocument(
-                url=self.application_base_url + f"items/{item.uuid}",
+                url=self.application_base_url + f"handle/{item.handle}",
                 external_id=item.uuid,
                 corpus=self.corpus,
             )
