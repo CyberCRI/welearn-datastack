@@ -83,3 +83,11 @@ class Bundle(BaseModel):
     metadata: dict
     type: str
     links: BundleLinksModel = Field(..., alias="_links")
+
+
+class MetadataEntry(BaseModel):
+    value: str
+    language: str
+    authority: str | None
+    confidence: int | None
+    place: int

@@ -11,12 +11,17 @@ from welearn_datastack import constants
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
-from welearn_datastack.data.source_models.fao_open_knowledge import Bundle, Item
+from welearn_datastack.data.source_models.fao_open_knowledge import (
+    Bundle,
+    Item,
+    MetadataEntry,
+)
 from welearn_datastack.exceptions import (
     NoContent,
     NoDescriptionFoundError,
     PDFFileSizeExceedLimit,
     UnauthorizedLicense,
+    UnauthorizedState,
 )
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -121,14 +126,33 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         return format_cc_license(messy_licence.replace(" ", "-"))
 
     @staticmethod
-    def _extract_authors(uved_document: UVEDMemberItem) -> list[AuthorDetails]:
-        ret: list[AuthorDetails] = []
-        for contributor in uved_document.contributor:
-            ret.append(
-                AuthorDetails(
-                    name=f"{contributor.firstName} {contributor.lastName}", misc=""
-                )
+    def _extract_embargo_status(fao_item: Item) -> bool:
+        try:
+            md_item = MetadataEntry.model_validate(
+                fao_item.metadata.get("fao.embargo", None)
             )
+        except pydantic.ValidationError:
+            raise ValueError("No embargo status found")
+
+        return md_item.value.lower().strip() != "No"
+
+    @staticmethod
+    def _extract_authors(fao_document: Item) -> list[AuthorDetails]:
+        ret: list[AuthorDetails] = []
+        messy_authors = [
+            MetadataEntry.model_validate(a)
+            for a in fao_document.metadata.get("dc.contributor.author", [])
+        ]
+        if not messy_authors:
+            logger.warning("No authors found.")
+            return ret
+        contributors_names: list[str] = []
+        for contributor_entry in messy_authors:
+            for name in contributor_entry.value.split(";"):
+                contributors_names.append(name.strip())
+
+        for contributor in contributors_names:
+            ret.append(AuthorDetails(name=contributor, misc=""))
         return ret
 
     @staticmethod
@@ -169,6 +193,20 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                 self._check_licence_authorization(
                     self._extract_licence(fao_ok_metadata)
                 )
+                if fao_ok_metadata.withdrawn:
+                    raise UnauthorizedState("Document is withdrawn from source.")
+                is_under_fao_embargo: bool
+
+                try:
+                    is_under_fao_embargo = self._extract_embargo_status(fao_ok_metadata)
+                except ValueError:
+                    is_under_fao_embargo = False
+
+                if is_under_fao_embargo:
+                    raise UnauthorizedState(
+                        f"Document {document.url} is under fao embargo."
+                    )
+
                 bundle_json = self.get_bundle_json(document)
                 pdf_id = self.extract_bitstream_id(bundle_json)
                 if not pdf_id:
@@ -197,6 +235,17 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     WrapperRetrieveDocument(
                         document=document,
                         error_info=f"From Document Hub Collector, unauthorized license: {e}",
+                    )
+                )
+                continue
+            except UnauthorizedState as e:
+                logger.warning(
+                    f"Document {document.url} skipped due to unauthorized state: {e}"
+                )
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=f"From Document Hub Collector, unauthorized state: {e}",
                     )
                 )
                 continue
