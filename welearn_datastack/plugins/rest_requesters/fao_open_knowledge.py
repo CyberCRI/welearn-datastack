@@ -1,6 +1,8 @@
 import io
 import logging
 import os
+from datetime import datetime
+from typing import Any
 
 import pydantic
 import requests
@@ -179,6 +181,63 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         return bundle_json
 
     @staticmethod
+    def _extract_external_sdgs(sdgs_str: list[MetadataEntry]) -> list[int]:
+        ret: list[int] = []
+        for sdg in sdgs_str:
+            sdg_full_title = sdg.value.lower().strip()
+            first_ints_isolate = sdg_full_title.split(" ").pop(0)
+            if not first_ints_isolate.isdigit():
+                logger.warning(f"SDG value is not digit: {sdg_full_title}")
+                continue
+            if first_ints_isolate != "10" and "0" in first_ints_isolate:
+                first_ints_isolate = first_ints_isolate.replace("0", "")
+            try:
+                ret.append(int(first_ints_isolate))
+            except ValueError:
+                logger.warning(
+                    f"SDG value cannot be converted to int: {sdg_full_title}"
+                )
+                continue
+        return ret
+
+    def _extract_details(self, fao_document: Item) -> dict:
+        parsed_metadata: dict[str, MetadataEntry] = {}
+        for metadata in fao_document.metadata:
+            try:
+                parsed_metadata[metadata] = MetadataEntry.model_validate(
+                    fao_document.metadata.get(metadata)
+                )
+            except pydantic.ValidationError:
+                logger.warning(f"Cannot parse metadata entry: {metadata.name}")
+                continue
+        empty_entry = MetadataEntry(
+            value="", language="", authority=None, confidence=-1, place=0
+        )
+        date_format = "yyyy-MM-ddTHH:mm:ssZ"
+        publication_date = parsed_metadata.get("dc.date.available", empty_entry).value
+        update_date = parsed_metadata.get("dc.date.lastModified", empty_entry).value
+        ret: dict[str, Any] = {
+            "publication_date": (
+                None
+                if not publication_date
+                else datetime.strptime(publication_date, date_format).timestamp()
+            ),
+            "update_date": (
+                None
+                if not update_date
+                else datetime.strptime(update_date, date_format).timestamp()
+            ),
+            "isbn": parsed_metadata.get("dc.identifier.isbn", empty_entry).value,
+            "license_url": self._extract_licence(fao_document),
+            "authors": self._extract_authors(fao_document),
+            "external_sdg": self._extract_external_sdgs(fao_document.metadata),
+            "contrent_from_pdf": True,
+            "doi": parsed_metadata.get("dc.identifier.doi", empty_entry).value,
+            "type": parsed_metadata.get("fao.taxonomy.type", empty_entry).value,
+        }
+        return ret
+
+    @staticmethod
     def extract_bitstream_id(bundles: list[Bundle]) -> str | None:
         for bundle in bundles:
             if bundle.name == "ORIGINAL":
@@ -226,6 +285,7 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     raise NoDescriptionFoundError("No description found.")
                 document.description = clean_text(description)
                 document.title = fao_ok_metadata.name
+                document.details = self._extract_details(fao_ok_metadata)
 
             except UnauthorizedLicense as e:
                 logger.warning(
@@ -235,6 +295,7 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     WrapperRetrieveDocument(
                         document=document,
                         error_info=f"From Document Hub Collector, unauthorized license: {e}",
+                        http_error_code=403,
                     )
                 )
                 continue
@@ -246,6 +307,7 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     WrapperRetrieveDocument(
                         document=document,
                         error_info=f"From Document Hub Collector, unauthorized state: {e}",
+                        http_error_code=403,
                     )
                 )
                 continue
@@ -269,7 +331,10 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     WrapperRetrieveDocument(
                         document=document,
                         error_info=f"From Document Hub Collector, HTTP error {http_code}: {e}",
+                        http_error_code=http_code,
                     )
                 )
                 continue
+
+            ret.append(WrapperRetrieveDocument(document=document))
         return ret
