@@ -1,6 +1,7 @@
 import io
 import logging
 import os
+from collections import defaultdict
 from datetime import datetime
 from typing import Any
 
@@ -201,39 +202,46 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         return ret
 
     def _extract_details(self, fao_document: Item) -> dict:
-        parsed_metadata: dict[str, MetadataEntry] = {}
+        parsed_metadata: defaultdict[str, list[MetadataEntry]] = defaultdict(list)
         for metadata in fao_document.metadata:
             try:
-                parsed_metadata[metadata] = MetadataEntry.model_validate(
-                    fao_document.metadata.get(metadata)
+                mds = fao_document.metadata.get(metadata)
+
+                parsed_metadata[metadata].extend(
+                    [MetadataEntry.model_validate(md) for md in mds]
                 )
-            except pydantic.ValidationError:
-                logger.warning(f"Cannot parse metadata entry: {metadata}")
+            except pydantic.ValidationError as e:
+                logger.warning(f"Cannot parse metadata entry: {metadata}: {e}")
                 continue
-        empty_entry = MetadataEntry(
-            value="", language="", authority=None, confidence=-1, place=0
-        )
-        date_format = "yyyy-MM-ddTHH:mm:ssZ"
-        publication_date = parsed_metadata.get("dc.date.available", empty_entry).value
-        update_date = parsed_metadata.get("dc.date.lastModified", empty_entry).value
+        empty_entry = [
+            MetadataEntry(value="", language="", authority=None, confidence=-1, place=0)
+        ]
+        date_format = "%Y-%m-%dT%H:%M:%SZ"
+        [publication_date] = parsed_metadata.get("dc.date.available", empty_entry)
+        [update_date] = parsed_metadata.get("dc.date.lastModified", empty_entry)
+        [isbn] = parsed_metadata.get("dc.identifier.isbn", empty_entry)
+        [doi] = parsed_metadata.get("dc.identifier.doi", empty_entry)
+        [type_] = parsed_metadata.get("fao.taxonomy.type", empty_entry)
         ret: dict[str, Any] = {
             "publication_date": (
                 None
-                if not publication_date
-                else datetime.strptime(publication_date, date_format).timestamp()
+                if not publication_date.value
+                else datetime.strptime(publication_date.value, date_format).timestamp()
             ),
             "update_date": (
                 None
-                if not update_date
-                else datetime.strptime(update_date, date_format).timestamp()
+                if not update_date.value
+                else datetime.strptime(update_date.value, date_format).timestamp()
             ),
-            "isbn": parsed_metadata.get("dc.identifier.isbn", empty_entry).value,
+            "isbn": isbn.value,
             "license_url": self._extract_licence(fao_document),
             "authors": self._extract_authors(fao_document),
-            "external_sdg": self._extract_external_sdgs(fao_document.metadata),
+            "external_sdg": self._extract_external_sdgs(
+                parsed_metadata.get("fao.sdgs", [])
+            ),
             "contrent_from_pdf": True,
-            "doi": parsed_metadata.get("dc.identifier.doi", empty_entry).value,
-            "type": parsed_metadata.get("fao.taxonomy.type", empty_entry).value,
+            "doi": doi.value,
+            "type": type_.value,
         }
         return ret
 

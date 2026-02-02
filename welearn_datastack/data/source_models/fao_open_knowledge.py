@@ -91,3 +91,8 @@ class MetadataEntry(BaseModel):
     authority: str | None
     confidence: int | None
     place: int
+
+
+#
+# class MetadataEntries(BaseModel):
+#     metadata: list[MetadataEntry]

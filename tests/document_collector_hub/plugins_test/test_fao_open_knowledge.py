@@ -32,7 +32,7 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
                         "language": "en",
                         "authority": "FAO",
                         "confidence": 1,
-                        "place": "Rome",
+                        "place": 0,
                     }
                 ],
                 "dc.contributor.author": [
@@ -41,7 +41,7 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
                         "language": "en",
                         "authority": "FAO",
                         "confidence": 1,
-                        "place": "Rome",
+                        "place": 0,
                     }
                 ],
                 "dc.description.abstract": [
@@ -50,7 +50,7 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
                         "language": "en",
                         "authority": "FAO",
                         "confidence": 1,
-                        "place": "Rome",
+                        "place": 0,
                     }
                 ],
                 "dc.identifier.doi": [
@@ -59,7 +59,7 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
                         "language": "en",
                         "authority": "FAO",
                         "confidence": 1,
-                        "place": "Rome",
+                        "place": 0,
                     }
                 ],
                 "dc.date.available": [
@@ -68,7 +68,7 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
                         "language": "en",
                         "authority": "FAO",
                         "confidence": 1,
-                        "place": "Rome",
+                        "place": 0,
                     }
                 ],
                 "dc.date.lastModified": [
@@ -77,7 +77,7 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
                         "language": "en",
                         "authority": "FAO",
                         "confidence": 1,
-                        "place": "Rome",
+                        "place": 0,
                     }
                 ],
                 "fao.taxonomy.type": [
@@ -86,7 +86,7 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
                         "language": "en",
                         "authority": "FAO",
                         "confidence": 1,
-                        "place": "Rome",
+                        "place": 0,
                     }
                 ],
             },
@@ -140,17 +140,22 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
         # Simulate a successful run with valid PDF and metadata
         mock_get_metadata.return_value = self.item
         mock_get_bundle.return_value = [self.bundle]
-        mock_get_pdf.return_value = "PDF content extracted."
+        mock_get_pdf.return_value = "PDF content extracted. Lorem ispum"
         result = self.collector.run([self.doc])
         self.assertEqual(len(result), 1)
         doc_result = result[0]
         self.assertIsNone(doc_result.error_info)
         self.assertIsInstance(doc_result.document, WeLearnDocument)
-        self.assertEqual(doc_result.document.full_content, "PDF content extracted.")
+        self.assertEqual(
+            doc_result.document.full_content, "PDF content extracted. Lorem ispum"
+        )
         self.assertEqual(doc_result.document.title, "FAO Document Title")
         self.assertEqual(doc_result.document.description, "A description.")
         self.assertEqual(doc_result.document.details["doi"], "10.1234/fao.5678")
-        self.assertEqual(doc_result.document.details["license_url"], "cc-by-4.0")
+        self.assertEqual(
+            doc_result.document.details["license_url"],
+            "https://creativecommons.org/licenses/by/4.0/",
+        )
         self.assertEqual(doc_result.document.details["type"], "Report")
         self.assertTrue(
             doc_result.document.details["contrent_from_pdf"]
@@ -237,19 +242,6 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertIn("unauthorized state", result[0].error_info)
         self.assertTrue(result[0].is_error)
-
-    # @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
-    # @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
-    # @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
-    # def test_run_pydantic_validation_error(
-    #     self, mock_get_metadata, mock_get_bundle, mock_get_pdf
-    # ):
-    #     # Simulate pydantic validation error
-    #     mock_get_metadata.side_effect = pydantic.ValidationError([], "error")
-    #     result = self.collector.run([self.doc])
-    #     self.assertEqual(len(result), 1)
-    #     self.assertIn("validation error", result[0].error_info)
-    #     self.assertTrue(result[0].is_error)
 
     @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
     @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
