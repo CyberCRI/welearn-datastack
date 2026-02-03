@@ -89,11 +89,19 @@ def main() -> None:
         except requests.exceptions.HTTPError as e:
             logger.error("HTTP error while comparing document '%s': %s", wld.title, e)
             http_error_code = e.response.status_code if e.response is not None else None
+            response = getattr(e, "response", None)
+            status_code = getattr(response, "status_code", "unknown")
+            request_url = getattr(response, "url", "unknown")
             db_session.add(
                 ErrorRetrieval(
                     document_id=wld.id,
-                    http_error_code=http_error_code,
-                    error_info=f"HTTP error occurred: {str(e)} from wikipedia_updater",
+                    http_error_code=status_code,
+                    error_info=(
+                        f"HTTPError in wikipedia_updater | "
+                        f"status_code={status_code} | "
+                        f"url={request_url} | "
+                        f"detail={e}"
+                    ),
                 ),
             )
             continue
