@@ -7,7 +7,6 @@ from typing import Any
 
 import pydantic
 import requests
-from PIL.MpegImagePlugin import BitStream
 from welearn_database.data.models import WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
 
