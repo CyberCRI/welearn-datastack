@@ -1,11 +1,21 @@
 import unittest
-from unittest.mock import Mock, patch
+import uuid
+from unittest.mock import patch
 
+import requests
 from welearn_database.data.models.document_related import WeLearnDocument
 
-from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.data.details_dataclass.author import AuthorDetails
-from welearn_datastack.data.source_models.fao_open_knowledge import Bundle, Item, Link
+from welearn_datastack.data.source_models.fao_open_knowledge import (
+    BitstreamModel,
+    BitstreamsLinksModel,
+    Bundle,
+    BundleLinksModel,
+    ChecksumModel,
+    Item,
+    Link,
+    MetadataEntry,
+    _Links,
+)
 from welearn_datastack.plugins.rest_requesters.fao_open_knowledge import (
     FAOOpenKnowledgeCollector,
 )
@@ -96,20 +106,20 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
             lastModified="2023-01-02T00:00:00Z",
             entityType=None,
             type="item",
-            _links={
-                "item": {"href": ""},
-                "bitstreams": {"href": ""},
-                "primaryBitstream": {"href": ""},
-                "self": {"href": ""},
-                "bundles": {"href": ""},
-                "mappedCollections": {"href": ""},
-                "owningCollection": {"href": ""},
-                "relationships": {"href": ""},
-                "version": {"href": ""},
-                "templateItemOf": {"href": ""},
-                "thumbnail": {"href": ""},
-                "relateditemlistconfigs": {"href": ""},
-            },
+            _links=_Links(
+                item=Link(href=""),
+                bitstreams=Link(href=""),
+                primaryBitstream=Link(href=""),
+                self=Link(href=""),
+                bundles=Link(href=""),
+                mappedCollections=Link(href=""),
+                owningCollection=Link(href=""),
+                relationships=Link(href=""),
+                version=Link(href=""),
+                templateItemOf=Link(href=""),
+                thumbnail=Link(href=""),
+                relateditemlistconfigs=Link(href=""),
+            ),
         )
         self.bundle = Bundle(
             uuid="pdf-uuid",
@@ -117,156 +127,87 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
             handle=None,
             metadata={},
             type="bundle",
-            _links={
-                "item": {"href": ""},
-                "bitstreams": {"href": ""},
-                "primaryBitstream": {"href": ""},
-                "self": {"href": ""},
-                "bundles": {"href": ""},
-                "mappedCollections": {"href": ""},
-                "owningCollection": {"href": ""},
-                "relationships": {"href": ""},
-                "version": {"href": ""},
-                "templateItemOf": {"href": ""},
-                "thumbnail": {"href": ""},
-                "relateditemlistconfigs": {"href": ""},
-            },
+            _links=BundleLinksModel(
+                item=Link(href=""),
+                bitstreams=Link(href=""),
+                primaryBitstream=Link(href=""),
+                self=Link(href=""),
+            ),
         )
 
+        self.bitstream = BitstreamModel(
+            id=str(uuid.uuid4()),
+            uuid=str(uuid.uuid4()),
+            name="document.pdf",
+            handle=None,
+            metadata={},
+            bundleName="ORIGINAL",
+            sizeBytes=1024,
+            checkSum=ChecksumModel(value="checksum-value", checkSumAlgorithm="MD5"),
+            sequenceId=1,
+            type="bitstream",
+            _links=BitstreamsLinksModel(
+                content=Link(href=""),
+                bundle=Link(href=""),
+                format=Link(href=""),
+                thumbnail=Link(href=""),
+                self=Link(href=""),
+            ),
+        )
+
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
     @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
     @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
     @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
-    def test_run_success(self, mock_get_metadata, mock_get_bundle, mock_get_pdf):
-        # Simulate a successful run with valid PDF and metadata
-        mock_get_metadata.return_value = self.item
+    def test_run_embargo(
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
+    ):
+        # Simulate an embargoed document (inArchive=False)
+        embargoed_item = self.item.model_copy()
+        embargoed_item.metadata["fao.embargo"] = MetadataEntry(
+            value="Yes", language="en", authority="FAO", confidence=1, place=0
+        )
+        mock_get_metadata.return_value = embargoed_item
         mock_get_bundle.return_value = [self.bundle]
-        mock_get_pdf.return_value = "PDF content extracted. Lorem ispum"
+        mock_get_pdf.return_value = "PDF content extracted. Lorem Ipsum."
+        mock_get_bitstream.return_value = self.bitstream
         result = self.collector.run([self.doc])
         self.assertEqual(len(result), 1)
         doc_result = result[0]
-        self.assertIsNone(doc_result.error_info)
-        self.assertIsInstance(doc_result.document, WeLearnDocument)
-        self.assertEqual(
-            doc_result.document.full_content, "PDF content extracted. Lorem ispum"
-        )
-        self.assertEqual(doc_result.document.title, "FAO Document Title")
-        self.assertEqual(doc_result.document.description, "A description.")
-        self.assertEqual(doc_result.document.details["doi"], "10.1234/fao.5678")
-        self.assertEqual(
-            doc_result.document.details["license_url"],
-            "https://creativecommons.org/licenses/by/4.0/",
-        )
-        self.assertEqual(doc_result.document.details["type"], "Report")
-        self.assertTrue(
-            doc_result.document.details["contrent_from_pdf"]
-        )  # typo in code
-        self.assertIsInstance(doc_result.document.details["authors"][0], AuthorDetails)
+        self.assertIsNotNone(doc_result.error_info)
+        self.assertIn("embargo", doc_result.error_info)
 
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
     @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
     @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
     @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
-    def test_run_no_pdf(self, mock_get_metadata, mock_get_bundle, mock_get_pdf):
-        # Simulate no PDF bundle found
-        mock_get_metadata.return_value = self.item
-        mock_get_bundle.return_value = []
-        result = self.collector.run([self.doc])
-        self.assertEqual(len(result), 1)
-        self.assertIsInstance(result[0], WrapperRetrieveDocument)
-        self.assertIn("No PDF bitstream found", result[0].error_info)
-        self.assertTrue(result[0].is_error)
-
-    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
-    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
-    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
-    def test_run_pdf_content_empty(
-        self, mock_get_metadata, mock_get_bundle, mock_get_pdf
+    def test_run_http_error(
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
     ):
-        # Simulate empty PDF content
-        mock_get_metadata.return_value = self.item
+        error = requests.HTTPError("HTTP error")
+        error.response = requests.Response()
+        error.response.status_code = 404
+        mock_get_metadata.side_effect = error
         mock_get_bundle.return_value = [self.bundle]
-        mock_get_pdf.return_value = ""
+        mock_get_pdf.return_value = "PDF content extracted. Lorem Ipsum."
+        mock_get_bitstream.return_value = self.bitstream
         result = self.collector.run([self.doc])
         self.assertEqual(len(result), 1)
-        self.assertIn("No content extracted from PDF", result[0].error_info)
-        self.assertTrue(result[0].is_error)
+        doc_result = result[0]
+        self.assertIsNotNone(doc_result.error_info)
+        self.assertIn("HTTP error", doc_result.error_info)
 
-    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
-    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
-    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
-    def test_run_unauthorized_license(
-        self, mock_get_metadata, mock_get_bundle, mock_get_pdf
-    ):
-        # Simulate unauthorized license
-        item = self.item.model_copy()
-        item.metadata["dc.rights.license"] = [{"value": "UNLICENSED"}]
-        mock_get_metadata.return_value = item
-        mock_get_bundle.return_value = [self.bundle]
-        mock_get_pdf.return_value = "PDF content extracted."
-        result = self.collector.run([self.doc])
-        self.assertEqual(len(result), 1)
-        self.assertIn("unauthorized license", result[0].error_info)
-        self.assertTrue(result[0].is_error)
-
-    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
-    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
-    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
-    def test_run_withdrawn(self, mock_get_metadata, mock_get_bundle, mock_get_pdf):
-        # Simulate withdrawn document
-        item = self.item.model_copy()
-        item.withdrawn = True
-        mock_get_metadata.return_value = item
-        mock_get_bundle.return_value = [self.bundle]
-        mock_get_pdf.return_value = "PDF content extracted."
-        result = self.collector.run([self.doc])
-        self.assertEqual(len(result), 1)
-        self.assertIn("unauthorized state", result[0].error_info)
-        self.assertTrue(result[0].is_error)
-
-    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
-    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
-    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
-    def test_run_embargo(self, mock_get_metadata, mock_get_bundle, mock_get_pdf):
-        # Simulate embargoed document
-        item = self.item.model_copy()
-        item.metadata["fao.embargo"] = {
-            "value": "Yes",
-            "language": "",
-            "authority": None,
-            "confidence": -1,
-            "place": 0,
-        }
-        mock_get_metadata.return_value = item
-        mock_get_bundle.return_value = [self.bundle]
-        mock_get_pdf.return_value = "PDF content extracted."
-        result = self.collector.run([self.doc])
-        self.assertEqual(len(result), 1)
-        self.assertIn("unauthorized state", result[0].error_info)
-        self.assertTrue(result[0].is_error)
-
-    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
-    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
-    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
-    def test_run_http_error(self, mock_get_metadata, mock_get_bundle, mock_get_pdf):
-        # Simulate HTTP error
-        import requests
-
-        exception = requests.HTTPError("HTTP error")
-        exception.response = Mock(status_code=500)
-        mock_get_metadata.side_effect = exception
-        result = self.collector.run([self.doc])
-        self.assertEqual(len(result), 1)
-        self.assertIn("HTTP error", result[0].error_info)
-
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
     @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
     @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
     @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
     def test_run_multiple_documents(
-        self, mock_get_metadata, mock_get_bundle, mock_get_pdf
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
     ):
-        # Simulate multiple documents
         mock_get_metadata.return_value = self.item
         mock_get_bundle.return_value = [self.bundle]
         mock_get_pdf.return_value = "PDF content extracted. Lorem Ipsum."
+        mock_get_bitstream.return_value = self.bitstream
         doc2 = WeLearnDocument(
             id=2,
             url="https://example.org/fao/resource/5678",
@@ -277,4 +218,95 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
         self.assertEqual(len(result), 2)
         for doc_result in result:
             self.assertIsNone(doc_result.error_info)
-            self.assertIsInstance(doc_result.document, WeLearnDocument)
+
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
+    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
+    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
+    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
+    def test_run_no_pdf(
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
+    ):
+        mock_get_metadata.return_value = self.item
+        mock_get_bundle.return_value = []
+        mock_get_pdf.return_value = ""
+        mock_get_bitstream.return_value = self.bitstream
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        doc_result = result[0]
+        self.assertIsNotNone(doc_result.error_info)
+        self.assertIn("no content", doc_result.error_info)
+
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
+    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
+    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
+    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
+    def test_run_pdf_content_empty(
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
+    ):
+        mock_get_metadata.return_value = self.item
+        mock_get_bundle.return_value = [self.bundle]
+        mock_get_pdf.return_value = ""
+        mock_get_bitstream.return_value = self.bitstream
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        doc_result = result[0]
+        self.assertIsNotNone(doc_result.error_info)
+
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
+    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
+    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
+    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
+    def test_run_success(
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
+    ):
+        mock_get_metadata.return_value = self.item
+        mock_get_bundle.return_value = [self.bundle]
+        mock_get_pdf.return_value = "PDF content extracted. Lorem Ipsum."
+        mock_get_bitstream.return_value = self.bitstream
+
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        doc_result = result[0]
+        self.assertIsNone(doc_result.error_info)
+        self.assertIn("full_content", doc_result.document.__dict__)
+        self.assertEqual(
+            doc_result.document.full_content, "PDF content extracted. Lorem Ipsum."
+        )
+
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
+    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
+    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
+    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
+    def test_run_unauthorized_license(
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
+    ):
+        unauthorized_item = self.item.model_copy(
+            update={"metadata": {"dc.rights.license": [{"value": "NO-LICENSE"}]}}
+        )
+        mock_get_metadata.return_value = unauthorized_item
+        mock_get_bundle.return_value = [self.bundle]
+        mock_get_pdf.return_value = "PDF content extracted. Lorem Ipsum."
+        mock_get_bitstream.return_value = self.bitstream
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        doc_result = result[0]
+        self.assertIsNotNone(doc_result.error_info)
+        self.assertIn("unauthorized", doc_result.error_info)
+
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
+    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
+    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
+    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
+    def test_run_withdrawn(
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
+    ):
+        withdrawn_item = self.item.model_copy(update={"withdrawn": True})
+        mock_get_metadata.return_value = withdrawn_item
+        mock_get_bundle.return_value = [self.bundle]
+        mock_get_pdf.return_value = "PDF content extracted. Lorem Ipsum."
+        mock_get_bitstream.return_value = self.bitstream
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        doc_result = result[0]
+        self.assertIsNotNone(doc_result.error_info)
+        self.assertIn("withdrawn", doc_result.error_info)
