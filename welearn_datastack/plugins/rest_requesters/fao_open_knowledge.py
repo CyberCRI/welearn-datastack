@@ -133,7 +133,8 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         contributors_names: list[str] = []
         for contributor_entry in messy_authors:
             for name in contributor_entry.value.split(";"):
-                contributors_names.append(name.strip())
+                if name.strip():
+                    contributors_names.append(name.strip())
 
         for contributor in contributors_names:
             ret.append(AuthorDetails(name=contributor, misc=""))
