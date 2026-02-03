@@ -7,6 +7,7 @@ from typing import Any
 
 import pydantic
 import requests
+from PIL.MpegImagePlugin import BitStream
 from welearn_database.data.models import WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
 
@@ -15,6 +16,7 @@ from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.data.source_models.fao_open_knowledge import (
+    BitstreamModel,
     Bundle,
     Item,
     MetadataEntry,
@@ -64,27 +66,6 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
     def _get_pdf_content(self, url: str) -> str:
         logger.info("Getting PDF content from %s", url)
         client = get_new_https_session(retry_total=0)
-
-        if self.pdf_size_file_limit and self.pdf_size_file_limit < 0:
-            raise ValueError(
-                f"file_size_limit must be positive : {self.pdf_size_file_limit}"
-            )
-
-        if self.pdf_size_file_limit:
-            resp_head = client.head(
-                url, headers=HEADERS, allow_redirects=True, timeout=30
-            )
-            try:
-                content_length = int(resp_head.headers.get("content-length"))
-                logger.info(f"PDF size is {content_length}")
-            except ValueError:
-                raise ValueError(f"Cannot retrieved this pdf size : {url}")
-
-            if content_length > self.pdf_size_file_limit:
-                raise PDFFileSizeExceedLimit(
-                    f"File size is {content_length} and limit is {self.pdf_size_file_limit}"
-                )
-
         response = client.get(url, headers=HEADERS, timeout=300)
         response.raise_for_status()
 
@@ -178,17 +159,34 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         resp = session.get(url=bundle_url, headers=self.headers)
         resp.raise_for_status()
 
-        bundle_json = [Bundle.model_validate(b) for b in resp.json()["_embedded"]]
+        bundle_json = [
+            Bundle.model_validate(b) for b in resp.json()["_embedded"]["bundles"]
+        ]
         return bundle_json
+
+    def get_bitstream_json(self, bitstream_id: str) -> BitstreamModel:
+        session = get_new_https_session()
+        bitstream_url = f"{self.api_base_url}core/bundles/{bitstream_id}/bitstreams"
+        resp = session.get(url=bitstream_url, headers=self.headers)
+        resp.raise_for_status()
+
+        bitstreams: list[BitstreamModel] = [
+            BitstreamModel.model_validate(b)
+            for b in resp.json()["_embedded"]["bitstreams"]
+        ]
+
+        [ret] = bitstreams
+
+        return ret
 
     @staticmethod
     def _extract_external_sdgs(sdgs_str: list[MetadataEntry]) -> list[int]:
         ret: list[int] = []
         for sdg in sdgs_str:
             sdg_full_title = sdg.value.lower().strip()
-            first_ints_isolate = sdg_full_title.split(" ").pop(0)
+            first_ints_isolate = sdg_full_title.split(" ").pop(0).replace(".", "")
             if not first_ints_isolate.isdigit():
-                logger.warning(f"SDG value is not digit: {sdg_full_title}")
+                logger.warning(f"SDG value is not digit: {first_ints_isolate}")
                 continue
             if first_ints_isolate != "10" and "0" in first_ints_isolate:
                 first_ints_isolate = first_ints_isolate.replace("0", "")
@@ -206,10 +204,8 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         for metadata in fao_document.metadata:
             try:
                 mds = fao_document.metadata.get(metadata)
-
-                parsed_metadata[metadata].extend(
-                    [MetadataEntry.model_validate(md) for md in mds]
-                )
+                lst_to_extend = [MetadataEntry.model_validate(md) for md in mds]
+                parsed_metadata[metadata].extend(lst_to_extend)
             except pydantic.ValidationError as e:
                 logger.warning(f"Cannot parse metadata entry: {metadata}: {e}")
                 continue
@@ -249,7 +245,9 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
     def extract_bitstream_id(bundles: list[Bundle]) -> str | None:
         for bundle in bundles:
             if bundle.name == "ORIGINAL":
-                return bundle.uuid
+                return bundle.links.bitstreams.href.replace(
+                    "https://openknowledge.fao.org/server/api/core/bundles/", ""
+                ).replace("/bitstreams", "")
         return None
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
@@ -275,10 +273,9 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     )
 
                 bundle_json = self.get_bundle_json(document)
-                pdf_id = self.extract_bitstream_id(bundle_json)
-                if not pdf_id:
-                    raise NoContent("No PDF bitstream found.")
-                pdf_url = f"{self.api_base_url}core/bitstreams/{pdf_id}/content"
+                bitstream_id = self.extract_bitstream_id(bundle_json)
+                bitstream = self.get_bitstream_json(bitstream_id)
+                pdf_url = bitstream.links.content.href
                 pdf_content = self._get_pdf_content(pdf_url)
                 if not pdf_content or pdf_content.isspace():
                     raise NoContent("No content extracted from PDF.")

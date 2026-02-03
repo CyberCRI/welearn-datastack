@@ -76,6 +76,33 @@ class BundleLinksModel(BaseModel):
     self: Link
 
 
+class ChecksumModel(BaseModel):
+    value: str
+    checkSumAlgorithm: str
+
+
+class BitstreamsLinksModel(BaseModel):
+    content: Link
+    bundle: Link
+    format: Link
+    thumbnail: Link
+    self: Link
+
+
+class BitstreamModel(BaseModel):
+    id: str
+    uuid: str
+    name: str
+    handle: str | None
+    metadata: dict[str, Any]
+    bundleName: str
+    sizeBytes: int
+    checkSum: ChecksumModel
+    sequenceId: int
+    type: str
+    links: BitstreamsLinksModel = Field(..., alias="_links")
+
+
 class Bundle(BaseModel):
     uuid: str
     name: str
@@ -87,7 +114,7 @@ class Bundle(BaseModel):
 
 class MetadataEntry(BaseModel):
     value: str
-    language: str
+    language: str | None
     authority: str | None
     confidence: int | None
     place: int
