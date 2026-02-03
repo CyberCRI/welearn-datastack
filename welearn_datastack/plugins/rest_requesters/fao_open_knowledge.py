@@ -236,7 +236,7 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
             "external_sdg": self._extract_external_sdgs(
                 parsed_metadata.get("fao.sdgs", [])
             ),
-            "contrent_from_pdf": True,
+            "content_from_pdf": True,
             "doi": doi.value,
             "type": type_.value,
         }
