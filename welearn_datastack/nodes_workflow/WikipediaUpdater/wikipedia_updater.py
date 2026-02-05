@@ -88,7 +88,6 @@ def main() -> None:
             continue
         except requests.exceptions.HTTPError as e:
             logger.error("HTTP error while comparing document '%s': %s", wld.title, e)
-            http_error_code = e.response.status_code if e.response is not None else None
             response = getattr(e, "response", None)
             status_code = getattr(response, "status_code", "unknown")
             request_url = getattr(response, "url", "unknown")
