@@ -3,6 +3,7 @@ import math
 import os
 import re
 from collections import deque
+from dataclasses import asdict, is_dataclass
 from functools import cache
 
 from lingua import LanguageDetectorBuilder
@@ -267,4 +268,35 @@ def compute_readability(
     document.details["readability"] = predict_readability(
         document.full_content, document.lang
     )
+    return document
+
+
+def is_dataclass_instance(obj):
+    return is_dataclass(obj) and not isinstance(obj, type)
+
+
+def _inner_serialize_dataclass(value):
+    match value:
+        case list():
+            return [_inner_serialize_dataclass(item) for item in value]
+        case dict():
+            return {k: _inner_serialize_dataclass(v) for k, v in value.items()}
+    if is_dataclass_instance(value):
+        return asdict(value)
+    return value
+
+
+def serialize_dataclass_instance(document: WeLearnDocument) -> WeLearnDocument:
+    for detail_key, detail_value in document.details.items():
+        match detail_value:
+            case list():
+                document.details[detail_key] = [
+                    _inner_serialize_dataclass(item) for item in detail_value
+                ]
+            case dict():
+                for k, v in detail_value.items():
+                    detail_value[k] = _inner_serialize_dataclass(v)
+                document.details[detail_key] = detail_value
+            case _:
+                document.details[detail_key] = _inner_serialize_dataclass(detail_value)
     return document
