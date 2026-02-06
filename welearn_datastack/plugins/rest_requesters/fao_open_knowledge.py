@@ -292,6 +292,18 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                 document.title = fao_ok_metadata.name
                 document.details = self._extract_details(fao_ok_metadata)
 
+            except NoDescriptionFoundError as e:
+                logger.warning(
+                    f"Document {document.url} skipped due to no description: {e}"
+                )
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=f"From Document Hub Collector, no description found: {e}",
+                        http_error_code=204,
+                    )
+                )
+                continue
             except UnauthorizedLicense as e:
                 logger.warning(
                     f"Document {document.url} skipped due to unauthorized license: {e}"
