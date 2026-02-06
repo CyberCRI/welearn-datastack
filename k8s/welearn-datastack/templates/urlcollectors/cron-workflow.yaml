@@ -379,5 +379,10 @@ spec:
                 name: {{ .name }}
                 template: collect-uved
 
+            - name: collect-fao-open-knowledge
+              templateRef:
+                name: {{ .name }}
+                template: collect-fao-open-knowledge
+
 {{- end }}
 {{- end }}
