@@ -27,7 +27,11 @@ class UNESDOCURLCollector(URLCollector):
 
     def _get_unesdoc_url(self) -> list[str]:
         client = get_new_https_session()
-        params = {"order_by": "year DESC", "select": "url"}
+        params = {
+            "order_by": "year DESC",
+            "select": "url",
+            "where": 'search(rights, "by-sa/3.0/igo/")',
+        }
         response = client.get(
             f"{self.api_base_url}",
             params=params,
