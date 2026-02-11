@@ -13,13 +13,7 @@ from welearn_datastack.constants import AUTHORIZED_LICENSES, HAL_URL_BASE
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
 from welearn_datastack.data.source_models.hal import HALModel
 from welearn_datastack.exceptions import NoContent
-from welearn_datastack.modules.pdf_extractor import (
-    delete_accents,
-    delete_non_printable_character,
-    extract_txt_from_pdf_with_tika,
-    remove_hyphens,
-    replace_ligatures,
-)
+from welearn_datastack.modules.pdf_extractor import get_pdf_content
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
@@ -199,7 +193,9 @@ class HALCollector(IPluginRESTCollector):
             desc = abstract.split(".")[0]
             content = abstract
         else:
-            content = self._get_pdf_content(file_addr)  # type: ignore
+            content = get_pdf_content(
+                tika_address=self.tika_address, pdf_url=file_addr
+            )  # type: ignore
             desc = abstract
 
         details = self._get_details_from_dict(json_dict)
@@ -214,35 +210,6 @@ class HALCollector(IPluginRESTCollector):
         logger.info("Document %s successfully scraped", url)
 
         return wrapper.document
-
-    def _get_pdf_content(self, url: str) -> str:
-        logger.info("Getting PDF content from %s", url)
-        client = get_new_https_session()
-        response = client.get(url, headers=HEADERS)
-        response.raise_for_status()
-
-        with io.BytesIO(response.content) as pdf_file:
-            pdf_content = extract_txt_from_pdf_with_tika(
-                pdf_content=pdf_file, tika_base_url=self.tika_address
-            )
-
-            # Delete non printable characters
-            pdf_content = [
-                [delete_non_printable_character(word) for word in page]
-                for page in pdf_content
-            ]
-
-            pages = []
-            for content in pdf_content:
-                page_text = " ".join(content)
-                page_text = replace_ligatures(page_text)
-                page_text = remove_hyphens(page_text)
-                page_text = delete_accents(page_text)
-
-                pages.append(page_text)
-            ret = remove_extra_whitespace(" ".join(pages))
-
-        return ret
 
     def _get_jsons(self, hal_documents: list[WeLearnDocument]) -> List[WrapperRawData]:
         hal_doc_ids = {}

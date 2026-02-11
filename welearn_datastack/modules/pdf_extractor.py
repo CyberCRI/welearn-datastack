@@ -5,8 +5,12 @@ from typing import List
 
 from bs4 import BeautifulSoup
 from refinedoc.refined_document import RefinedDocument
+from requests import Session
 
+from welearn_datastack.constants import HEADERS
+from welearn_datastack.exceptions import PDFFileSizeExceedLimit
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
+from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 
@@ -177,3 +181,73 @@ def _dehyphenate(lines: List[str], line_no: int) -> List[str]:
     lines[line_no] = lines[line_no][:-1] + word_suffix
     lines[line_no + 1] = lines[line_no + 1][len(word_suffix) :]
     return lines
+
+
+def _check_pdf_size_limit(http_client: Session, pdf_url: str, pdf_size_file_limit: int):
+    if pdf_size_file_limit and pdf_size_file_limit < 0:
+        raise ValueError(f"file_size_limit must be positive : {pdf_size_file_limit}")
+
+    if pdf_size_file_limit:
+        resp_head = http_client.head(
+            pdf_url, headers=HEADERS, allow_redirects=True, timeout=30
+        )
+        try:
+            content_length = int(resp_head.headers.get("content-length"))
+            logger.info(f"PDF size is {content_length}")
+        except ValueError:
+            raise ValueError(f"Cannot retrieved this pdf size : {pdf_url}")
+
+        if content_length > pdf_size_file_limit:
+            raise PDFFileSizeExceedLimit(
+                f"File size is {content_length} and limit is {pdf_size_file_limit}"
+            )
+
+
+def get_pdf_content(
+    pdf_url: str, tika_address: str, pdf_size_file_limit: int | None = None
+) -> str:
+    """
+    Get the content of a PDF file from a given URL, using the Tika API to extract the text content.
+     The function first checks the size of the PDF file using a HEAD request, and raises a PDFFileSizeExceedLimit exception if the file size exceeds the limit defined in the environment variable PDF_SIZE_FILE_LIMIT.
+     If the file size is within the limit, it makes a GET request to retrieve the PDF file, and then uses the Tika API to extract the text content from the PDF file.
+     The extracted text content is then cleaned by removing non-printable characters, replacing ligatures, removing hyphens and accents, and removing extra whitespace.
+     Finally, the cleaned text content is returned as a string.
+     :param pdf_url: The URL of the PDF file to retrieve and extract content from.
+     :param pdf_size_file_limit: PDF size limit in bytes.
+     :param tika_address: The base URL of the Tika micro service to use for extracting text content from the PDF file.
+     :return: The cleaned text content extracted from the PDF file.
+     :raises ValueError: If the file size cannot be retrieved or if it exceeds the defined limit.
+     :raises requests.exceptions.RequestException: If there is an error while making the HTTP requests to retrieve the PDF file or its size.
+     :raises Exception: If there is an error while extracting text from the PDF file using Tika or while cleaning the extracted text content.
+    """
+    logger.info("Getting PDF content from %s", pdf_url)
+    client = get_new_https_session(retry_total=0)
+    if pdf_size_file_limit:
+        _check_pdf_size_limit(
+            http_client=client, pdf_url=pdf_url, pdf_size_file_limit=pdf_size_file_limit
+        )
+    response = client.get(pdf_url, headers=HEADERS, timeout=300)
+    response.raise_for_status()
+
+    with io.BytesIO(response.content) as pdf_file:
+        pdf_content = extract_txt_from_pdf_with_tika(
+            pdf_content=pdf_file, tika_base_url=tika_address
+        )
+
+        # Delete non printable characters
+        pdf_content = [
+            [delete_non_printable_character(word) for word in page]
+            for page in pdf_content
+        ]
+
+        pages = []
+        for content in pdf_content:
+            page_text = " ".join(content)
+            page_text = replace_ligatures(page_text)
+            page_text = remove_hyphens(page_text)
+            page_text = delete_accents(page_text)
+
+            pages.append(page_text)
+        ret = remove_extra_whitespace(" ".join(pages))
+
+    return ret

@@ -42,6 +42,7 @@ from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
     extract_txt_from_pdf_with_tika,
+    get_pdf_content,
     remove_hyphens,
     replace_ligatures,
 )
@@ -72,56 +73,6 @@ class UVEDCollector(IPluginRESTCollector):
         self.application_base_url = "https://www.uved.fr/fiche/ressource/"
         self.headers = constants.HEADERS
         self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
-
-    def _get_pdf_content(self, url: str) -> str:
-        logger.info("Getting PDF content from %s", url)
-        client = get_new_https_session(retry_total=0)
-
-        if self.pdf_size_file_limit and self.pdf_size_file_limit < 0:
-            raise ValueError(
-                f"file_size_limit must be positive : {self.pdf_size_file_limit}"
-            )
-
-        if self.pdf_size_file_limit:
-            resp_head = client.head(
-                url, headers=HEADERS, allow_redirects=True, timeout=30
-            )
-            try:
-                content_length = int(resp_head.headers.get("content-length"))
-                logger.info(f"PDF size is {content_length}")
-            except ValueError:
-                raise ValueError(f"Cannot retrieved this pdf size : {url}")
-
-            if content_length > self.pdf_size_file_limit:
-                raise PDFFileSizeExceedLimit(
-                    f"File size is {content_length} and limit is {self.pdf_size_file_limit}"
-                )
-
-        response = client.get(url, headers=HEADERS, timeout=300)
-        response.raise_for_status()
-
-        with io.BytesIO(response.content) as pdf_file:
-            pdf_content = extract_txt_from_pdf_with_tika(
-                pdf_content=pdf_file, tika_base_url=self.tika_address
-            )
-
-            # Delete non printable characters
-            pdf_content = [
-                [delete_non_printable_character(word) for word in page]
-                for page in pdf_content
-            ]
-
-            pages = []
-            for content in pdf_content:
-                page_text = " ".join(content)
-                page_text = replace_ligatures(page_text)
-                page_text = remove_hyphens(page_text)
-                page_text = delete_accents(page_text)
-
-                pages.append(page_text)
-            ret = remove_extra_whitespace(" ".join(pages))
-
-        return ret
 
     def _clean_txt_content(self, content: str) -> str:
         return clean_text(content)
@@ -527,8 +478,10 @@ class UVEDCollector(IPluginRESTCollector):
                 and self.pdf_size_file_limit > uved_document.transcriptionFile.file.size
             ):
                 try:
-                    full_content = self._get_pdf_content(
-                        uved_document.transcriptionFile.url
+                    full_content = get_pdf_content(
+                        pdf_url=uved_document.transcriptionFile.url,
+                        pdf_size_file_limit=self.pdf_size_file_limit,
+                        tika_address=self.tika_address,
                     )
                     full_content = self._clean_txt_content(full_content)
                 except Exception as e:

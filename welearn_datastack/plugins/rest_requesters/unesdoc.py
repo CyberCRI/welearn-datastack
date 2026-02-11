@@ -1,24 +1,16 @@
 import io
 import logging
 import os
-from dataclasses import asdict
-from datetime import datetime
 
 import pydantic
 import requests
-from welearn_database.data.models import Category, WeLearnDocument
+from welearn_database.data.models import WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
 
 from welearn_datastack import constants
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
-from welearn_datastack.data.details_dataclass.scholar_fields import ScholarFieldsDetails
-from welearn_datastack.data.details_dataclass.scholar_institution_type import (
-    InstitutionTypeName,
-    ScholarInstitutionTypeDetails,
-)
-from welearn_datastack.data.details_dataclass.scholar_level import ScholarLevelDetails
 from welearn_datastack.data.details_dataclass.topics import TopicDetails
 from welearn_datastack.data.source_models.unesdoc import (
     UNESDOCItem,
@@ -35,7 +27,6 @@ from welearn_datastack.exceptions import (
     NotExpectedMoreThanOneItem,
     PDFFileSizeExceedLimit,
     UnauthorizedLicense,
-    UnauthorizedState,
     WrongExternalIdFormat,
     WrongFormat,
     WrongLangFormat,
@@ -46,6 +37,7 @@ from welearn_datastack.modules.pdf_extractor import (
     extract_txt_from_pdf_with_tika,
     remove_hyphens,
     replace_ligatures,
+    get_pdf_content,
 )
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginRESTCollector
@@ -53,10 +45,7 @@ from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import (
-    format_cc_license,
-    remove_extra_whitespace,
-)
+from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 
@@ -108,68 +97,6 @@ class UNESDOCCollector(IPluginRESTCollector):
         self.application_base_url = "https://unesdoc.unesco.org/ark:/"
         self.headers = constants.HEADERS
         self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
-
-    def _get_pdf_content(self, url: str) -> str:
-        """
-        Get the content of a PDF file from a given URL, using the Tika API to extract the text content.
-         The function first checks the size of the PDF file using a HEAD request, and raises a PDFFileSizeExceedLimit exception if the file size exceeds the limit defined in the environment variable PDF_SIZE_FILE_LIMIT.
-         If the file size is within the limit, it makes a GET request to retrieve the PDF file, and then uses the Tika API to extract the text content from the PDF file.
-         The extracted text content is then cleaned by removing non-printable characters, replacing ligatures, removing hyphens and accents, and removing extra whitespace.
-         Finally, the cleaned text content is returned as a string.
-         :param url: The URL of the PDF file to retrieve and extract content from.
-         :return: The cleaned text content extracted from the PDF file.
-         :raises ValueError: If the file size cannot be retrieved or if it exceeds the defined limit.
-         :raises requests.exceptions.RequestException: If there is an error while making the HTTP requests to retrieve the PDF file or its size.
-         :raises Exception: If there is an error while extracting text from the PDF file using Tika or while cleaning the extracted text content.
-        """
-        logger.info("Getting PDF content from %s", url)
-        client = get_new_https_session(retry_total=0)
-
-        if self.pdf_size_file_limit and self.pdf_size_file_limit < 0:
-            raise ValueError(
-                f"file_size_limit must be positive : {self.pdf_size_file_limit}"
-            )
-
-        if self.pdf_size_file_limit:
-            resp_head = client.head(
-                url, headers=HEADERS, allow_redirects=True, timeout=30
-            )
-            try:
-                content_length = int(resp_head.headers.get("content-length"))
-                logger.info(f"PDF size is {content_length}")
-            except ValueError:
-                raise ValueError(f"Cannot retrieved this pdf size : {url}")
-
-            if content_length > self.pdf_size_file_limit:
-                raise PDFFileSizeExceedLimit(
-                    f"File size is {content_length} and limit is {self.pdf_size_file_limit}"
-                )
-
-        response = client.get(url, headers=HEADERS, timeout=300)
-        response.raise_for_status()
-
-        with io.BytesIO(response.content) as pdf_file:
-            pdf_content = extract_txt_from_pdf_with_tika(
-                pdf_content=pdf_file, tika_base_url=self.tika_address
-            )
-
-            # Delete non printable characters
-            pdf_content = [
-                [delete_non_printable_character(word) for word in page]
-                for page in pdf_content
-            ]
-
-            pages = []
-            for content in pdf_content:
-                page_text = " ".join(content)
-                page_text = replace_ligatures(page_text)
-                page_text = remove_hyphens(page_text)
-                page_text = delete_accents(page_text)
-
-                pages.append(page_text)
-            ret = remove_extra_whitespace(" ".join(pages))
-
-        return ret
 
     @staticmethod
     def _clean_txt_content(content: str) -> str:
@@ -335,7 +262,11 @@ class UNESDOCCollector(IPluginRESTCollector):
                     )
                 pdf_url = f"https://unesdoc.unesco.org/in/rest/annotationSVC/DownloadWatermarkedAttachment/{pdf_names[0]}"
                 try:
-                    pdf_content = self._get_pdf_content(pdf_url)
+                    pdf_content = get_pdf_content(
+                        pdf_url=pdf_url,
+                        pdf_size_file_limit=self.pdf_size_file_limit,
+                        tika_address=self.tika_address,
+                    )
                 except Exception as e:
                     raise NoContent(
                         f"Cannot retrieve PDF content for document {document.url} : {e}"
