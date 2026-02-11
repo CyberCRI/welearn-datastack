@@ -172,6 +172,7 @@ AUTHORIZED_LICENSES = [
     f"{HTTP_CREATIVE_COMMONS}/licenses/by/4.0/",
     f"{HTTP_CREATIVE_COMMONS}/licenses/by-sa/4.0/",
     f"{HTTP_CREATIVE_COMMONS}/licenses/by-sa/3.0/",
+    f"{HTTP_CREATIVE_COMMONS}/licenses/by-sa/3.0/igo/",
     f"{HTTP_CREATIVE_COMMONS}/publicdomain/zero/1.0/",
     f"{HTTP_CREATIVE_COMMONS}/publicdomain/mark/1.0/",
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by/3.0/",  # At least article #1 is in this license version
@@ -180,6 +181,7 @@ AUTHORIZED_LICENSES = [
     f"{HTTPS_CREATIVE_COMMONS}/publicdomain/mark/1.0/",
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/4.0/",
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/3.0/",
+    f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/3.0/igo/",
 ]
 HEADERS = {
     "Accept": "text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",

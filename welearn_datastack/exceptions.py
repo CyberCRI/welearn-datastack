@@ -72,7 +72,16 @@ class InvalidPluginType(ManagementExceptions):
         super().__init__(msg, *args)
 
 
-class UnauthorizedLicense(Exception):
+class LegalException(ManagementExceptions):
+    """
+    Legal exception, raised when the content is not authorized to be used
+    """
+
+    def __init__(self, msg="This content is not authorized to be used", *args):
+        super().__init__(msg, *args)
+
+
+class UnauthorizedLicense(LegalException):
     """
     License is not authorized
     """
@@ -81,7 +90,7 @@ class UnauthorizedLicense(Exception):
         super().__init__(msg, *args)
 
 
-class ClosedAccessContent(Exception):
+class ClosedAccessContent(LegalException):
     """
     Content is closed access
     """
@@ -96,7 +105,7 @@ class NotEnoughData(ManagementExceptions):
         super().__init__(msg, *args)
 
 
-class LanguageCodeError(BaseException):
+class LanguageCodeError(ManagementExceptions):
     """Raised when an invalid language code is used"""
 
     def __init__(self, message="Invalid language code, must be lower ISO-639-1 code"):
@@ -128,7 +137,7 @@ class NoConnectedCollectionError(BaseException):
         super().__init__(self.message)
 
 
-class NoModelFoundError(Exception):
+class NoModelFoundError(LocalModelsExceptions):
     """Raised when there is no model found"""
 
 
@@ -148,7 +157,7 @@ class NoLimitSet(Exception):
     """"""
 
 
-class TooMuchLanguages(Exception):
+class TooMuchLanguages(ManagementExceptions):
     """Raised when there is too much languages"""
 
 
@@ -172,13 +181,19 @@ class PDFFileSizeExceedLimit(Exception):
     """
 
 
-class UnauthorizedPublisher(Exception):
+class UnauthorizedPublisher(LegalException):
     """
     Raised when the publisher is not authorized
     """
 
 
-class UnauthorizedState(Exception):
+class UnauthorizedState(LegalException):
     """
     Raised when the state is not authorized
+    """
+
+
+class NoLicenseFoundError(LegalException):
+    """
+    Raised when there is no license found
     """

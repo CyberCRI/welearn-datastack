@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pydantic
 import requests
-from welearn_database.data.models import WeLearnDocument
+from welearn_database.data.models import Category, WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
 
 from welearn_datastack import constants
@@ -26,7 +26,9 @@ from welearn_datastack.data.source_models.unesdoc import (
     UNESDOCSources,
 )
 from welearn_datastack.exceptions import (
+    NoContent,
     NoDescriptionFoundError,
+    NoLicenseFoundError,
     PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedState,
@@ -38,6 +40,7 @@ from welearn_datastack.modules.pdf_extractor import (
     remove_hyphens,
     replace_ligatures,
 )
+from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
@@ -138,28 +141,12 @@ class UNESDOCCollector(IPluginRESTCollector):
         return clean_text(content)
 
     @staticmethod
-    def _extract_licence(uved_document: UVEDMemberItem) -> str:
-        licence = None
-        cats = uved_document.categories
-        license_equivalence_uved_cc = {
-            8: "by",  # Attribution
-            6: "sa",  # ShareAlike
-            13: "nd",  # NoDerivatives
-            9: "nc",  # NonCommercial
-        }
-        licence_flag_cc: set[str] = {"by"}
-        for cat in cats:
-            if (
-                cat.uid in license_equivalence_uved_cc.keys()
-            ):  # Authorized licenses uids
-                licence_flag_cc.add(license_equivalence_uved_cc[cat.uid])
-        if "nd" in licence_flag_cc and "sa" in licence_flag_cc:
-            licence_flag_cc.remove(
-                "sa"
-            )  # ND and SA are incompatible, ND takes precedence
-        if licence_flag_cc:
-            licence = "CC-" + "-".join(sorted(licence_flag_cc)) + "-4.0"
-        return format_cc_license(licence)
+    def _extract_licence(unesdoc_document: UNESDOCItem) -> str:
+        rights = unesdoc_document.rights
+        if not rights:
+            raise NoLicenseFoundError("No license found in the document metadata.")
+        [licence_content] = XMLExtractor(rights).extract_content("a")
+        return licence_content.attributes["href"]
 
     def _extract_topics(
         self, uved_metadata_categorization: list[Category]
@@ -182,16 +169,16 @@ class UNESDOCCollector(IPluginRESTCollector):
                 )
         return ret
 
-    @staticmethod
-    def _extract_authors(uved_document: UVEDMemberItem) -> list[AuthorDetails]:
-        ret: list[AuthorDetails] = []
-        for contributor in uved_document.contributor:
-            ret.append(
-                AuthorDetails(
-                    name=f"{contributor.firstName} {contributor.lastName}", misc=""
-                )
-            )
-        return ret
+    # @staticmethod
+    # def _extract_authors(uved_document: UVEDMemberItem) -> list[AuthorDetails]:
+    #     ret: list[AuthorDetails] = []
+    #     for contributor in uved_document.contributor:
+    #         ret.append(
+    #             AuthorDetails(
+    #                 name=f"{contributor.firstName} {contributor.lastName}", misc=""
+    #             )
+    #         )
+    #     return ret
 
     @staticmethod
     def _check_licence_authorization(_license: str) -> None:
@@ -248,88 +235,100 @@ class UNESDOCCollector(IPluginRESTCollector):
         return ret
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
-        ret: list[WrapperRetrieveDocument] = []
-        for document in documents:
-            try:
-                uved_document = self._get_json(document)
-            except requests.exceptions.RequestException as e:
-                msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
-                logger.error(msg)
-                ret.append(
-                    WrapperRetrieveDocument(
-                        document=document,
-                        http_error_code=get_http_code_from_exception(e),
-                        error_info=msg,
-                    )
-                )
-                continue
-            except pydantic.ValidationError as e:
-                msg = f"Error while validating uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
-                logger.error(msg)
-                ret.append(
-                    WrapperRetrieveDocument(
-                        document=document,
-                        error_info=msg,
-                    )
-                )
-                continue
+        pass
 
-            try:
-                if not uved_document.description:
-                    raise NoDescriptionFoundError("No description found")
-            except NoDescriptionFoundError as e:
-                msg = f"Error while retrieving description for uved ({document.url}) document : {e}"
-                logger.error(msg)
-                ret.append(
-                    WrapperRetrieveDocument(
-                        document=document,
-                        error_info=msg,
-                    )
-                )
-                continue
-
-            description = self._clean_txt_content(uved_document.description)
-
-            if uved_document.transcription and len(uved_document.transcription) > 1:
-                full_content = self._clean_txt_content(uved_document.transcription)
-            elif (
-                uved_document.transcriptionFile
-                and self.pdf_size_file_limit > uved_document.transcriptionFile.file.size
-            ):
-                try:
-                    full_content = self._get_pdf_content(
-                        uved_document.transcriptionFile.url
-                    )
-                    full_content = self._clean_txt_content(full_content)
-                except Exception as e:
-                    msg = f"Error while retrieving PDF content for uved ({document.url}) document from this url {uved_document.transcriptionFile.url} : {e}"
-                    logger.error(msg)
-                    ret.append(
-                        WrapperRetrieveDocument(
-                            document=document,
-                            error_info=msg,
-                            http_error_code=get_http_code_from_exception(e),
-                        )
-                    )
-                    continue
-            else:
-                full_content = description
-
-            document.title = uved_document.title
-            document.description = description
-            document.full_content = full_content
-            try:
-                document.details = self._extract_metadata(uved_document)
-            except Exception as e:
-                msg = f"Error while extracting metadata for uved ({document.url}) document : {e}"
-                logger.error(msg)
-                ret.append(
-                    WrapperRetrieveDocument(
-                        document=document,
-                        error_info=msg,
-                    )
-                )
-                continue
-            ret.append(WrapperRetrieveDocument(document=document))
-
-        return ret
+    #
+    # def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
+    #     ret: list[WrapperRetrieveDocument] = []
+    #     for document in documents:
+    #         try:
+    #             metadata = self._get_metadata_json(document=document)
+    #             iid = self._convert_ark_id_to_iid(document.url.split("ark:/")[1])
+    #             pdf_names = self._get_pdf_document_name(iid=iid)
+    #             if len(pdf_names) == 0:
+    #                 raise NoContent(
+    #                     f"No PDF document found for document {document.url}"
+    #                 )
+    #             pdf_url = f"https://unesdoc.unesco.org/in/rest/annotationSVC/DownloadWatermarkedAttachment/{pdf_names[0]}"
+    #             pdf_content = self._get_pdf_content(pdf_url)
+    #         except requests.exceptions.RequestException as e:
+    #             msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
+    #             logger.error(msg)
+    #             ret.append(
+    #                 WrapperRetrieveDocument(
+    #                     document=document,
+    #                     http_error_code=get_http_code_from_exception(e),
+    #                     error_info=msg,
+    #                 )
+    #             )
+    #             continue
+    #         except pydantic.ValidationError as e:
+    #             msg = f"Error while validating uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
+    #             logger.error(msg)
+    #             ret.append(
+    #                 WrapperRetrieveDocument(
+    #                     document=document,
+    #                     error_info=msg,
+    #                 )
+    #             )
+    #             continue
+    #
+    #         try:
+    #             if not uved_document.description:
+    #                 raise NoDescriptionFoundError("No description found")
+    #         except NoDescriptionFoundError as e:
+    #             msg = f"Error while retrieving description for uved ({document.url}) document : {e}"
+    #             logger.error(msg)
+    #             ret.append(
+    #                 WrapperRetrieveDocument(
+    #                     document=document,
+    #                     error_info=msg,
+    #                 )
+    #             )
+    #             continue
+    #
+    #         description = self._clean_txt_content(uved_document.description)
+    #
+    #         if uved_document.transcription and len(uved_document.transcription) > 1:
+    #             full_content = self._clean_txt_content(uved_document.transcription)
+    #         elif (
+    #             uved_document.transcriptionFile
+    #             and self.pdf_size_file_limit > uved_document.transcriptionFile.file.size
+    #         ):
+    #             try:
+    #                 full_content = self._get_pdf_content(
+    #                     uved_document.transcriptionFile.url
+    #                 )
+    #                 full_content = self._clean_txt_content(full_content)
+    #             except Exception as e:
+    #                 msg = f"Error while retrieving PDF content for uved ({document.url}) document from this url {uved_document.transcriptionFile.url} : {e}"
+    #                 logger.error(msg)
+    #                 ret.append(
+    #                     WrapperRetrieveDocument(
+    #                         document=document,
+    #                         error_info=msg,
+    #                         http_error_code=get_http_code_from_exception(e),
+    #                     )
+    #                 )
+    #                 continue
+    #         else:
+    #             full_content = description
+    #
+    #         document.title = uved_document.title
+    #         document.description = description
+    #         document.full_content = full_content
+    #         try:
+    #             document.details = self._extract_metadata(uved_document)
+    #         except Exception as e:
+    #             msg = f"Error while extracting metadata for uved ({document.url}) document : {e}"
+    #             logger.error(msg)
+    #             ret.append(
+    #                 WrapperRetrieveDocument(
+    #                     document=document,
+    #                     error_info=msg,
+    #                 )
+    #             )
+    #             continue
+    #         ret.append(WrapperRetrieveDocument(document=document))
+    #
+    #     return ret
