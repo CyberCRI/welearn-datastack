@@ -14,7 +14,16 @@ class ManagementExceptions(Exception):
     pass
 
 
-class WrongLangFormat(LocalModelsExceptions):
+class WrongFormat(LocalModelsExceptions):
+    """
+    The format of the item is not accepted
+    """
+
+    def __init__(self, msg="The format of the item is not accepted", *args):
+        super().__init__(msg, *args)
+
+
+class WrongLangFormat(WrongFormat):
     """
     Lang must be in ISO-639-1 format and it's not
     """
@@ -23,16 +32,8 @@ class WrongLangFormat(LocalModelsExceptions):
         super().__init__(msg, *args)
 
 
-class NoContent(LocalModelsExceptions):
-    """
-    No content found in this document
-    """
 
-    def __init__(self, msg="No content found in this document", *args):
-        super().__init__(msg, *args)
-
-
-class InvalidURLScheme(LocalModelsExceptions):
+class InvalidURLScheme(WrongFormat):
     """
     Scheme detected in URL is not accepted
     """
@@ -197,3 +198,34 @@ class NoLicenseFoundError(LegalException):
     """
     Raised when there is no license found
     """
+
+
+class NotExpectedAmountOfItems(Exception):
+    """
+    Raised when the amount of items in list is not the expected one
+    """
+
+
+class NotExpectedMoreThanOneItem(NotExpectedAmountOfItems):
+    """
+    Raised when there is more than one item in list but only one is expected
+    """
+
+
+class WrongExternalIdFormat(WrongFormat):
+    """
+    Raised when the external id format is not correct
+    """
+
+    def __init__(self, external_id_name: str, msg: str, *args):
+        super().__init__(msg, *args)
+        msg = f"The external id {external_id_name} format is not correct"
+
+
+class NoContent(NotEnoughData):
+    """
+    No content found in this document
+    """
+
+    def __init__(self, msg="No content found in this document", *args):
+        super().__init__(msg, *args)

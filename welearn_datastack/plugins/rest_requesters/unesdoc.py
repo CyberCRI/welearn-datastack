@@ -26,12 +26,16 @@ from welearn_datastack.data.source_models.unesdoc import (
     UNESDOCSources,
 )
 from welearn_datastack.exceptions import (
+    LegalException,
     NoContent,
     NoDescriptionFoundError,
     NoLicenseFoundError,
+    NotEnoughData,
+    NotExpectedMoreThanOneItem,
     PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedState,
+    WrongExternalIdFormat, WrongFormat, NotExpectedAmountOfItems, WrongLangFormat,
 )
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -164,7 +168,8 @@ class UNESDOCCollector(IPluginRESTCollector):
 
         return ret
 
-    def _clean_txt_content(self, content: str) -> str:
+    @staticmethod
+    def _clean_txt_content(content: str) -> str:
         return clean_text(content)
 
     @staticmethod
@@ -172,10 +177,14 @@ class UNESDOCCollector(IPluginRESTCollector):
         rights = unesdoc_document.rights
         if not rights:
             raise NoLicenseFoundError("No license found in the document metadata.")
-        [licence_content] = XMLExtractor(rights).extract_content("a")
+        try:
+            [licence_content] = XMLExtractor(rights).extract_content("a")
+        except ValueError:
+            raise NoLicenseFoundError("No license found in the document metadata.")
         return licence_content.attributes["href"]
 
-    def _extract_topics(self, metadata: UNESDOCItem) -> list[TopicDetails]:
+    @staticmethod
+    def _extract_topics(metadata: UNESDOCItem) -> list[TopicDetails]:
         ret: list[TopicDetails] = []
 
         for topic in metadata.subject:
@@ -225,7 +234,10 @@ class UNESDOCCollector(IPluginRESTCollector):
          The search query is made on the url field of the unesdoc API, which contains the external_id of the document in the format "ark:/12345/abcde" or "ark:/12345/abcde/lang".
          :param document: WeLearnDocument object containing the external_id to search for in the unesdoc API.
          :return: UNESDOCItem object containing the metadata of the document.
-         :raises ValueError: If no document is found for the given external_id.
+         :raises NotEnoughData: If no document is found for the given external_id.
+         :raises requests.exceptions.RequestException: If there is an error while making the HTTP request to the unesdoc API.
+         :raises pydantic.ValidationError: If there is an error while validating the response from the unesdoc API against the UNESDOCRoot model.
+        :raises ValueError: If there is more ore less results than expected for the given external_id.
         """
         session = get_new_https_session()
         param = {
@@ -238,8 +250,13 @@ class UNESDOCCollector(IPluginRESTCollector):
         root = UNESDOCRoot.model_validate(resp.json())
         results = root.results
         if not results:
-            raise ValueError(f"No document found for url {document.url}")
-        [ret] = results
+            raise NotEnoughData(f"No document found for url {document.url}")
+        try:
+            [ret] = results
+        except ValueError as e:
+            raise NotExpectedMoreThanOneItem(
+                f"Expected one document for url {document.url} but got {len(results)}"
+            )
         return ret
 
     @staticmethod
@@ -261,7 +278,9 @@ class UNESDOCCollector(IPluginRESTCollector):
                 return f"p::usmarcdef_{parts[1]}"
             elif len(parts) == 3:
                 return f"p::usmarcdef_{parts[1]}_{parts[2]}"
-        raise ValueError(f"Invalid ark id format: {ark_id}")
+        raise WrongExternalIdFormat(
+            msg=f"Invalid ark id format: {ark_id}", external_id_name="ark"
+        )
 
     @staticmethod
     def _get_pdf_document_name(iid: str) -> list[str]:
@@ -312,14 +331,18 @@ class UNESDOCCollector(IPluginRESTCollector):
                         f"No PDF document found for document {document.url}"
                     )
                 pdf_url = f"https://unesdoc.unesco.org/in/rest/annotationSVC/DownloadWatermarkedAttachment/{pdf_names[0]}"
-                pdf_content = self._get_pdf_content(pdf_url)
-
+                try:
+                    pdf_content = self._get_pdf_content(pdf_url)
+                except Exception as e:
+                    raise NoContent(f"Cannot retrieve PDF content for document {document.url} : {e}")
                 document.full_content = pdf_content
                 document.description = self._get_description(metadata)
                 document.title = metadata.title
                 document.details = self._extract_metadata(metadata)
-                document.lang = lang_iso3_to_lang_iso2.get(metadata.language[0], None)
-
+                try:
+                    document.lang = lang_iso3_to_lang_iso2.get(metadata.language[0], None)
+                except KeyError:
+                    raise WrongLangFormat(f"Invalid language format {str(metadata.language)} for document {document.url}")
             except requests.exceptions.RequestException as e:
                 msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
                 logger.error(msg)
@@ -333,6 +356,46 @@ class UNESDOCCollector(IPluginRESTCollector):
                 continue
             except pydantic.ValidationError as e:
                 msg = f"Error while validating uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+            except NotEnoughData as e:
+                msg = f"Not enough data to retrieve document {document.url} from unesdoc : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+            except NotExpectedAmountOfItems as e:
+                msg = f"Not expected this amount item for document {document.url} from unesdoc : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+            except LegalException as e:
+                msg = f"Legal exception for document {document.url} from unesdoc : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+            except WrongFormat as e:
+                msg = f"Formatting error in {document.url} from unesdoc : {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
