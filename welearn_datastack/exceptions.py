@@ -32,7 +32,6 @@ class WrongLangFormat(WrongFormat):
         super().__init__(msg, *args)
 
 
-
 class InvalidURLScheme(WrongFormat):
     """
     Scheme detected in URL is not accepted

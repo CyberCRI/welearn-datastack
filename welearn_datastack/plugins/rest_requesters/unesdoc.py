@@ -31,11 +31,14 @@ from welearn_datastack.exceptions import (
     NoDescriptionFoundError,
     NoLicenseFoundError,
     NotEnoughData,
+    NotExpectedAmountOfItems,
     NotExpectedMoreThanOneItem,
     PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedState,
-    WrongExternalIdFormat, WrongFormat, NotExpectedAmountOfItems, WrongLangFormat,
+    WrongExternalIdFormat,
+    WrongFormat,
+    WrongLangFormat,
 )
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
@@ -334,15 +337,21 @@ class UNESDOCCollector(IPluginRESTCollector):
                 try:
                     pdf_content = self._get_pdf_content(pdf_url)
                 except Exception as e:
-                    raise NoContent(f"Cannot retrieve PDF content for document {document.url} : {e}")
+                    raise NoContent(
+                        f"Cannot retrieve PDF content for document {document.url} : {e}"
+                    )
                 document.full_content = pdf_content
                 document.description = self._get_description(metadata)
                 document.title = metadata.title
                 document.details = self._extract_metadata(metadata)
                 try:
-                    document.lang = lang_iso3_to_lang_iso2.get(metadata.language[0], None)
+                    document.lang = lang_iso3_to_lang_iso2.get(
+                        metadata.language[0], None
+                    )
                 except KeyError:
-                    raise WrongLangFormat(f"Invalid language format {str(metadata.language)} for document {document.url}")
+                    raise WrongLangFormat(
+                        f"Invalid language format {str(metadata.language)} for document {document.url}"
+                    )
             except requests.exceptions.RequestException as e:
                 msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
                 logger.error(msg)
