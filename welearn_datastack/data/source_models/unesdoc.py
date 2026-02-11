@@ -5,12 +5,12 @@ from pydantic import BaseModel
 
 class UNESDOCItem(BaseModel):
     url: str
-    year: List[str]
-    language: List[str]
+    year: list[str]
+    language: list[str]
     title: str
-    type: List[str]
+    type: list[str]
     description: str
-    subject: List[str]
+    subject: list[str]
     creator: str
     rights: str
 

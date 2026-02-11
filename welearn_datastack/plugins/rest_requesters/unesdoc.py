@@ -61,12 +61,27 @@ translations = {
     "fra": "Consultez le texte intégral pour plus de détails.",
     "jpn": "詳細については全文をご参照ください。",
     "por": "Consulte o texto completo para mais detalhes.",
-    "ara": "يرجى الرجوع إلى النص الكامل لمزيد من التفاصيل.",
+    "ara": "لمزيد من التفاصيل يرجى الرجوع إلى النص الكامل",
     "ces": "Podrobnosti naleznete v plném znění textu.",
     "ita": "Consulti il testo completo per maggiori dettagli.",
     "kor": "자세한 내용은 전체 본문을 확인하세요.",
     "nld": "Raadpleeg de volledige tekst voor meer details.",
     "zho": "更多详情请参阅全文。",
+}
+
+lang_iso3_to_lang_iso2 = {
+    "eng": "en",
+    "deu": "de",
+    "spa": "es",
+    "fra": "fr",
+    "jpn": "ja",
+    "por": "pt",
+    "ara": "ar",
+    "ces": "cs",
+    "ita": "it",
+    "kor": "ko",
+    "nld": "nl",
+    "zho": "zh",
 }
 
 
@@ -88,6 +103,18 @@ class UNESDOCCollector(IPluginRESTCollector):
         self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
 
     def _get_pdf_content(self, url: str) -> str:
+        """
+        Get the content of a PDF file from a given URL, using the Tika API to extract the text content.
+         The function first checks the size of the PDF file using a HEAD request, and raises a PDFFileSizeExceedLimit exception if the file size exceeds the limit defined in the environment variable PDF_SIZE_FILE_LIMIT.
+         If the file size is within the limit, it makes a GET request to retrieve the PDF file, and then uses the Tika API to extract the text content from the PDF file.
+         The extracted text content is then cleaned by removing non-printable characters, replacing ligatures, removing hyphens and accents, and removing extra whitespace.
+         Finally, the cleaned text content is returned as a string.
+         :param url: The URL of the PDF file to retrieve and extract content from.
+         :return: The cleaned text content extracted from the PDF file.
+         :raises ValueError: If the file size cannot be retrieved or if it exceeds the defined limit.
+         :raises requests.exceptions.RequestException: If there is an error while making the HTTP requests to retrieve the PDF file or its size.
+         :raises Exception: If there is an error while extracting text from the PDF file using Tika or while cleaning the extracted text content.
+        """
         logger.info("Getting PDF content from %s", url)
         client = get_new_https_session(retry_total=0)
 
@@ -148,37 +175,28 @@ class UNESDOCCollector(IPluginRESTCollector):
         [licence_content] = XMLExtractor(rights).extract_content("a")
         return licence_content.attributes["href"]
 
-    def _extract_topics(
-        self, uved_metadata_categorization: list[Category]
-    ) -> list[TopicDetails]:
+    def _extract_topics(self, metadata: UNESDOCItem) -> list[TopicDetails]:
         ret: list[TopicDetails] = []
 
-        for name, uid in [("Domaines", 31), ("Thèmes", 20)]:
-            topics = self._extract_specific_metadata(
-                uved_metadata_categorization, parent_uid=uid, with_uid=True
-            )
-            for topic, topic_uid in topics:
-                ret.append(
-                    TopicDetails(
-                        name=topic,
-                        depth=0,
-                        external_depth_name=name,
-                        directly_contained_in=[],
-                        external_id=str(topic_uid),
-                    )
+        for topic in metadata.subject:
+            ret.append(
+                TopicDetails(
+                    name=topic.lower(),
+                    depth=0,
+                    directly_contained_in=[],
+                    external_id=None,
+                    external_depth_name=None,
                 )
+            )
+
         return ret
 
-    # @staticmethod
-    # def _extract_authors(uved_document: UVEDMemberItem) -> list[AuthorDetails]:
-    #     ret: list[AuthorDetails] = []
-    #     for contributor in uved_document.contributor:
-    #         ret.append(
-    #             AuthorDetails(
-    #                 name=f"{contributor.firstName} {contributor.lastName}", misc=""
-    #             )
-    #         )
-    #     return ret
+    @staticmethod
+    def _extract_authors(metadata: UNESDOCItem) -> list[AuthorDetails]:
+        ret: list[AuthorDetails] = []
+        for creator in metadata.creator:
+            ret.append(AuthorDetails(name=creator, misc=""))
+        return ret
 
     @staticmethod
     def _check_licence_authorization(_license: str) -> None:
@@ -187,10 +205,28 @@ class UNESDOCCollector(IPluginRESTCollector):
 
     def _extract_metadata(self, unesdoc_metdata: UNESDOCItem) -> dict:
         ret_type = unesdoc_metdata.type[0] if unesdoc_metdata.type else None
+        topics = self._extract_topics(unesdoc_metdata)
+        license_url = self._extract_licence(unesdoc_metdata)
+        authors = self._extract_authors(unesdoc_metdata)
 
-        return {"type": ret_type, "topics": [], "licence_url": "", "authors": []}
+        return {
+            "type": ret_type,
+            "topics": topics,
+            "licence_url": license_url,
+            "authors": authors,
+        }
 
     def _get_metadata_json(self, document: WeLearnDocument) -> UNESDOCItem:
+        """
+        Get the metadata of a document from the unesdoc API, using the document external_id as a search query.
+         The metadata is returned as a UNESDOCItem object.
+         If no document is found, a ValueError is raised.
+         If more than one document is found, only the first one is returned and a warning is logged.
+         The search query is made on the url field of the unesdoc API, which contains the external_id of the document in the format "ark:/12345/abcde" or "ark:/12345/abcde/lang".
+         :param document: WeLearnDocument object containing the external_id to search for in the unesdoc API.
+         :return: UNESDOCItem object containing the metadata of the document.
+         :raises ValueError: If no document is found for the given external_id.
+        """
         session = get_new_https_session()
         param = {
             "where": f'search(url, "{document.external_id}")',
@@ -208,6 +244,15 @@ class UNESDOCCollector(IPluginRESTCollector):
 
     @staticmethod
     def _convert_ark_id_to_iid(ark_id: str) -> str:
+        """
+        Convert an ark id like "48223/pf0000389119" to "p::usmarcdef_0000389119" and
+        "48223/pf0000396769/fre" to "p::usmarcdef_0000396769_fre"
+         The ark id is expected to be in the format "12345/abcde" or "12345/abcde/lang", where
+         "12345" is the ark prefix, "abcde" is the document id and "lang" is the language code.
+         :param ark_id: The ark id to convert.
+         :return: The converted iid.
+         :raises ValueError: If the ark id is not in the expected format.
+        """
         # Convert an ark id like "48223/pf0000389119" to "p::usmarcdef_0000389119" and
         # "48223/pf0000396769/fre" to "p::usmarcdef_0000396769_fre"
         if "/" in ark_id:
@@ -220,6 +265,14 @@ class UNESDOCCollector(IPluginRESTCollector):
 
     @staticmethod
     def _get_pdf_document_name(iid: str) -> list[str]:
+        """
+        Get the name of the PDF document associated with a given iid from the unesdoc API.
+         The PDF document name is returned as a list of strings, as there can be multiple PDF documents associated with a given iid.
+         If no PDF document is found, an empty list is returned
+            :param iid: The iid to search for in the unesdoc API.
+            :return: A list of strings containing the names of the PDF documents associated with the given iid.
+            :raises HTTPError: If there is an error while making the request to the unesdoc API.
+        """
         session = get_new_https_session()
         param = {"id": iid, "multiple": True, "multilingual": True}
         resp = session.get(
@@ -234,101 +287,61 @@ class UNESDOCCollector(IPluginRESTCollector):
                 ret.append(s.Document)
         return ret
 
-    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
-        pass
+    def _get_description(self, unesdoc_metadata: UNESDOCItem) -> str:
+        description = unesdoc_metadata.description
+        if not description:
+            lang = unesdoc_metadata.language[0] if unesdoc_metadata.language else None
+            if not lang:
+                raise NoDescriptionFoundError(
+                    "No description found in the document metadata."
+                )
+            return translations.get(lang)
+        return self._clean_txt_content(description)
 
-    #
-    # def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
-    #     ret: list[WrapperRetrieveDocument] = []
-    #     for document in documents:
-    #         try:
-    #             metadata = self._get_metadata_json(document=document)
-    #             iid = self._convert_ark_id_to_iid(document.url.split("ark:/")[1])
-    #             pdf_names = self._get_pdf_document_name(iid=iid)
-    #             if len(pdf_names) == 0:
-    #                 raise NoContent(
-    #                     f"No PDF document found for document {document.url}"
-    #                 )
-    #             pdf_url = f"https://unesdoc.unesco.org/in/rest/annotationSVC/DownloadWatermarkedAttachment/{pdf_names[0]}"
-    #             pdf_content = self._get_pdf_content(pdf_url)
-    #         except requests.exceptions.RequestException as e:
-    #             msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
-    #             logger.error(msg)
-    #             ret.append(
-    #                 WrapperRetrieveDocument(
-    #                     document=document,
-    #                     http_error_code=get_http_code_from_exception(e),
-    #                     error_info=msg,
-    #                 )
-    #             )
-    #             continue
-    #         except pydantic.ValidationError as e:
-    #             msg = f"Error while validating uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
-    #             logger.error(msg)
-    #             ret.append(
-    #                 WrapperRetrieveDocument(
-    #                     document=document,
-    #                     error_info=msg,
-    #                 )
-    #             )
-    #             continue
-    #
-    #         try:
-    #             if not uved_document.description:
-    #                 raise NoDescriptionFoundError("No description found")
-    #         except NoDescriptionFoundError as e:
-    #             msg = f"Error while retrieving description for uved ({document.url}) document : {e}"
-    #             logger.error(msg)
-    #             ret.append(
-    #                 WrapperRetrieveDocument(
-    #                     document=document,
-    #                     error_info=msg,
-    #                 )
-    #             )
-    #             continue
-    #
-    #         description = self._clean_txt_content(uved_document.description)
-    #
-    #         if uved_document.transcription and len(uved_document.transcription) > 1:
-    #             full_content = self._clean_txt_content(uved_document.transcription)
-    #         elif (
-    #             uved_document.transcriptionFile
-    #             and self.pdf_size_file_limit > uved_document.transcriptionFile.file.size
-    #         ):
-    #             try:
-    #                 full_content = self._get_pdf_content(
-    #                     uved_document.transcriptionFile.url
-    #                 )
-    #                 full_content = self._clean_txt_content(full_content)
-    #             except Exception as e:
-    #                 msg = f"Error while retrieving PDF content for uved ({document.url}) document from this url {uved_document.transcriptionFile.url} : {e}"
-    #                 logger.error(msg)
-    #                 ret.append(
-    #                     WrapperRetrieveDocument(
-    #                         document=document,
-    #                         error_info=msg,
-    #                         http_error_code=get_http_code_from_exception(e),
-    #                     )
-    #                 )
-    #                 continue
-    #         else:
-    #             full_content = description
-    #
-    #         document.title = uved_document.title
-    #         document.description = description
-    #         document.full_content = full_content
-    #         try:
-    #             document.details = self._extract_metadata(uved_document)
-    #         except Exception as e:
-    #             msg = f"Error while extracting metadata for uved ({document.url}) document : {e}"
-    #             logger.error(msg)
-    #             ret.append(
-    #                 WrapperRetrieveDocument(
-    #                     document=document,
-    #                     error_info=msg,
-    #                 )
-    #             )
-    #             continue
-    #         ret.append(WrapperRetrieveDocument(document=document))
-    #
-    #     return ret
+    def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
+        ret: list[WrapperRetrieveDocument] = []
+        for document in documents:
+            try:
+                metadata = self._get_metadata_json(document=document)
+                _license = self._extract_licence(metadata)
+                self._check_licence_authorization(_license)
+                iid = self._convert_ark_id_to_iid(document.url.split("ark:/")[1])
+                pdf_names = self._get_pdf_document_name(iid=iid)
+                if len(pdf_names) == 0:
+                    raise NoContent(
+                        f"No PDF document found for document {document.url}"
+                    )
+                pdf_url = f"https://unesdoc.unesco.org/in/rest/annotationSVC/DownloadWatermarkedAttachment/{pdf_names[0]}"
+                pdf_content = self._get_pdf_content(pdf_url)
+
+                document.full_content = pdf_content
+                document.description = self._get_description(metadata)
+                document.title = metadata.title
+                document.details = self._extract_metadata(metadata)
+                document.lang = lang_iso3_to_lang_iso2.get(metadata.language[0], None)
+
+            except requests.exceptions.RequestException as e:
+                msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        http_error_code=get_http_code_from_exception(e),
+                        error_info=msg,
+                    )
+                )
+                continue
+            except pydantic.ValidationError as e:
+                msg = f"Error while validating uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+
+            ret.append(WrapperRetrieveDocument(document=document))
+
+        return ret
