@@ -1,4 +1,3 @@
-import io
 import logging
 import os
 
@@ -8,7 +7,7 @@ from welearn_database.data.models import WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
 
 from welearn_datastack import constants
-from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
+from welearn_datastack.constants import AUTHORIZED_LICENSES
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.data.details_dataclass.topics import TopicDetails
@@ -25,27 +24,18 @@ from welearn_datastack.exceptions import (
     NotEnoughData,
     NotExpectedAmountOfItems,
     NotExpectedMoreThanOneItem,
-    PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     WrongExternalIdFormat,
     WrongFormat,
     WrongLangFormat,
 )
-from welearn_datastack.modules.pdf_extractor import (
-    delete_accents,
-    delete_non_printable_character,
-    extract_txt_from_pdf_with_tika,
-    remove_hyphens,
-    replace_ligatures,
-    get_pdf_content,
-)
+from welearn_datastack.modules.pdf_extractor import get_pdf_content
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 
