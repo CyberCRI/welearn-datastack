@@ -9,7 +9,7 @@ class UNESDOCItem(BaseModel):
     language: list[str]
     title: str
     type: list[str]
-    description: str
+    description: str | None
     subject: list[str]
     creator: str
     rights: str

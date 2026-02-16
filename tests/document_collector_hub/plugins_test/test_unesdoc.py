@@ -8,7 +8,10 @@ from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.source_models.unesdoc import UNESDOCItem
 from welearn_datastack.exceptions import UnauthorizedLicense
-from welearn_datastack.plugins.rest_requesters.unesdoc import UNESDOCCollector
+from welearn_datastack.plugins.rest_requesters.unesdoc import (
+    UNESDOCCollector,
+    translations,
+)
 
 
 class MockResponse:
@@ -186,5 +189,72 @@ class TestUNESDOCCollector(TestCase):
             ret, ["attach_import_155a21be-2a3e-4424-8e8c-2412f8e5d26c"]
         )
 
-    def test_run(self):
-        assert False
+    @patch.object(UNESDOCCollector, "_get_metadata_json")
+    @patch.object(UNESDOCCollector, "_get_pdf_document_name")
+    @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_pdf_content")
+    def test_run_success(
+        self, mock_get_pdf_content, mock_get_pdf_document_name, mock_get_metadata_json
+    ):
+        mock_get_metadata_json.return_value = UNESDOCItem(
+            rights='<a href="https://creativecommons.org/licenses/by-sa/3.0/igo/" target="_blank" title="This license allows readers to share, copy, distribute, adapt and make commercial use of the work as long as it is attributed back to the author and distributed under this or a similar license.">CC BY-SA 3.0 IGO</a>',
+            subject=["Happiness"],
+            year=["2020"],
+            language=["eng"],
+            title="Test",
+            type=["type"],
+            description="desc",
+            creator="UNESCO",
+            url="example.com",
+        )
+        mock_get_pdf_document_name.return_value = [
+            "attach_import_155a21be-2a3e-4424-8e8c-2412f8e5d26c"
+        ]
+        mock_get_pdf_content.return_value = (
+            "PDF content lorem ipsum lorem ipsum lorem ipsum lorem ipsum"
+        )
+        test_doc = WeLearnDocument(
+            url="https://unesdoc.unesco.org/ark:/48223/pf0000397002",
+            external_id="/48223/pf0000397002",
+        )
+        ret = self.collector.run([test_doc])
+        self.assertEqual(len(ret), 1)
+
+        self.assertIsNone(ret[0].error_info)
+        ret_doc = ret[0].document
+        self.assertEqual(ret_doc.title, "Test")
+        self.assertEqual(ret_doc.description, "desc")
+
+    @patch.object(UNESDOCCollector, "_get_metadata_json")
+    @patch.object(UNESDOCCollector, "_get_pdf_document_name")
+    @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_pdf_content")
+    def test_run_success_fr(
+        self, mock_get_pdf_content, mock_get_pdf_document_name, mock_get_metadata_json
+    ):
+        mock_get_metadata_json.return_value = UNESDOCItem(
+            rights='<a href="https://creativecommons.org/licenses/by-sa/3.0/igo/" target="_blank" title="This license allows readers to share, copy, distribute, adapt and make commercial use of the work as long as it is attributed back to the author and distributed under this or a similar license.">CC BY-SA 3.0 IGO</a>',
+            subject=["Happiness"],
+            year=["2020"],
+            language=["fre"],
+            title="Test",
+            type=["type"],
+            description=None,
+            creator="UNESCO",
+            url="example.com",
+        )
+        mock_get_pdf_document_name.return_value = [
+            "attach_import_155a21be-2a3e-4424-8e8c-2412f8e5d26c"
+        ]
+        mock_get_pdf_content.return_value = (
+            "PDF content lorem ipsum lorem ipsum lorem ipsum lorem ipsum"
+        )
+        test_doc = WeLearnDocument(
+            url="https://unesdoc.unesco.org/ark:/48223/pf0000397002",
+            external_id="/48223/pf0000397002",
+        )
+        ret = self.collector.run([test_doc])
+        self.assertEqual(len(ret), 1)
+
+        self.assertIsNone(ret[0].error_info)
+        ret_doc = ret[0].document
+        self.assertEqual(ret_doc.title, "Test")
+        self.assertEqual(ret_doc.description, translations["fre"])
