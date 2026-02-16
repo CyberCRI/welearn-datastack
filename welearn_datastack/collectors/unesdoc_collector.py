@@ -2,11 +2,9 @@ import logging
 from typing import List
 
 import requests  # type: ignore
-
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack import constants
-
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
