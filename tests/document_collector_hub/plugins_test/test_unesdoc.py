@@ -3,7 +3,9 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+import pydantic
 import requests
+from requests import HTTPError, RequestException, Response
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.source_models.unesdoc import UNESDOCItem
@@ -258,3 +260,88 @@ class TestUNESDOCCollector(TestCase):
         ret_doc = ret[0].document
         self.assertEqual(ret_doc.title, "Test")
         self.assertEqual(ret_doc.description, translations["fre"])
+
+    @patch.object(UNESDOCCollector, "_get_metadata_json")
+    @patch.object(UNESDOCCollector, "_get_pdf_document_name")
+    @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_pdf_content")
+    def test_run_request_exception(
+        self, mock_get_pdf_content, mock_get_pdf_document_name, mock_get_metadata_json
+    ):
+        mock_get_metadata_json.return_value = None
+        http_exception = HTTPError()
+        http_exception.response = Mock(status_code=404)
+        mock_get_metadata_json.side_effect = http_exception
+        mock_get_pdf_document_name.return_value = [
+            "attach_import_155a21be-2a3e-4424-8e8c-2412f8e5d26c"
+        ]
+        mock_get_pdf_content.return_value = (
+            "PDF content lorem ipsum lorem ipsum lorem ipsum lorem ipsum"
+        )
+        test_doc = WeLearnDocument(
+            url="https://unesdoc.unesco.org/ark:/48223/pf0000397002",
+            external_id="/48223/pf0000397002",
+        )
+        ret = self.collector.run([test_doc])
+        self.assertEqual(len(ret), 1)
+
+        self.assertIsNotNone(ret[0].error_info)
+        self.assertEqual(ret[0].http_error_code, 404)
+
+    @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_new_https_session")
+    @patch.object(UNESDOCCollector, "_get_pdf_document_name")
+    @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_pdf_content")
+    def test_run_pydantic_exception(
+        self,
+        mock_get_pdf_content,
+        mock_get_pdf_document_name,
+        mock_get_new_https_session,
+    ):
+        session = Mock()
+        # Wrong json
+        session.get.return_value = MockResponse(json_data=self.sources_json_content)
+        mock_get_new_https_session.return_value = session
+
+        mock_get_pdf_document_name.return_value = [
+            "attach_import_155a21be-2a3e-4424-8e8c-2412f8e5d26c"
+        ]
+        mock_get_pdf_content.return_value = (
+            "PDF content lorem ipsum lorem ipsum lorem ipsum lorem ipsum"
+        )
+        test_doc = WeLearnDocument(
+            url="https://unesdoc.unesco.org/ark:/48223/pf0000397002",
+            external_id="/48223/pf0000397002",
+        )
+        ret = self.collector.run([test_doc])
+        self.assertEqual(len(ret), 1)
+
+        self.assertIsNotNone(ret[0].error_info)
+
+    @patch.object(UNESDOCCollector, "_get_metadata_json")
+    @patch.object(UNESDOCCollector, "_get_pdf_document_name")
+    @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_pdf_content")
+    def test_run_no_enough_data(
+        self, mock_get_pdf_content, mock_get_pdf_document_name, mock_get_metadata_json
+    ):
+        mock_get_metadata_json.return_value = UNESDOCItem(
+            rights='<a href="https://creativecommons.org/licenses/by-sa/3.0/igo/" target="_blank" title="This license allows readers to share, copy, distribute, adapt and make commercial use of the work as long as it is attributed back to the author and distributed under this or a similar license.">CC BY-SA 3.0 IGO</a>',
+            subject=["Happiness"],
+            year=["2020"],
+            language=["eng"],
+            title="Test",
+            type=["type"],
+            description="desc",
+            creator="UNESCO",
+            url="example.com",
+        )
+        mock_get_pdf_document_name.return_value = [
+            "attach_import_155a21be-2a3e-4424-8e8c-2412f8e5d26c"
+        ]
+        mock_get_pdf_content.side_effect = Exception()
+        test_doc = WeLearnDocument(
+            url="https://unesdoc.unesco.org/ark:/48223/pf0000397002",
+            external_id="/48223/pf0000397002",
+        )
+        ret = self.collector.run([test_doc])
+        self.assertEqual(len(ret), 1)
+        self.assertIsNotNone(ret[0].error_info)
+        self.assertIn("Not enough data", ret[0].error_info)
