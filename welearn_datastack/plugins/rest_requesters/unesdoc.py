@@ -241,7 +241,12 @@ class UNESDOCCollector(IPluginRESTCollector):
                 raise NoDescriptionFoundError(
                     "No description found in the document metadata."
                 )
-            return translations.get(lang)
+            translated_description = translations.get(lang)
+            if translated_description is None:
+                raise NoDescriptionFoundError(
+                    f"No description found in the document metadata for language '{lang}'."
+                )
+            return translated_description
         return self._clean_txt_content(description)
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
