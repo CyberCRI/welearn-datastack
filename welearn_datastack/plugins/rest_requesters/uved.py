@@ -1,24 +1,16 @@
-import io
-import json
 import logging
-import math
 import os
-import re
-from collections import deque
 from dataclasses import asdict
 from datetime import datetime
-from itertools import batched
-from typing import Dict, Iterable, List
 
 import pydantic
 import requests
-from lingua import Language
 from welearn_database.data.models import WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
 
 from welearn_datastack import constants
-from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
-from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.constants import AUTHORIZED_LICENSES
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.data.details_dataclass.scholar_fields import ScholarFieldsDetails
 from welearn_datastack.data.details_dataclass.scholar_institution_type import (
@@ -27,34 +19,19 @@ from welearn_datastack.data.details_dataclass.scholar_institution_type import (
 )
 from welearn_datastack.data.details_dataclass.scholar_level import ScholarLevelDetails
 from welearn_datastack.data.details_dataclass.topics import TopicDetails
-from welearn_datastack.data.source_models.oapen import Metadatum, OapenModel
 from welearn_datastack.data.source_models.uved import Category, UVEDMemberItem
 from welearn_datastack.exceptions import (
     NoDescriptionFoundError,
-    PDFFileSizeExceedLimit,
-    TooMuchLanguages,
     UnauthorizedLicense,
     UnauthorizedState,
-    WrongLangFormat,
 )
-from welearn_datastack.modules.computed_metadata import get_language_detector
-from welearn_datastack.modules.pdf_extractor import (
-    delete_accents,
-    delete_non_printable_character,
-    extract_txt_from_pdf_with_tika,
-    get_pdf_content,
-    remove_hyphens,
-    replace_ligatures,
-)
+from welearn_datastack.modules.pdf_extractor import get_pdf_content
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import (
-    format_cc_license,
-    remove_extra_whitespace,
-)
+from welearn_datastack.utils_.scraping_utils import format_cc_license
 
 logger = logging.getLogger(__name__)
 
