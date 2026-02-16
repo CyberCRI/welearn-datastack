@@ -291,7 +291,7 @@ class UNESDOCCollector(IPluginRESTCollector):
                         f"Invalid language format {str(metadata.language)} for document {document.url}"
                     ) from e
             except requests.exceptions.RequestException as e:
-                msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
+                msg = f"Error while retrieving UNESDOC ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
@@ -302,7 +302,7 @@ class UNESDOCCollector(IPluginRESTCollector):
                 )
                 continue
             except pydantic.ValidationError as e:
-                msg = f"Error while validating uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
+                msg = f"Error while validating UNESDOC ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
