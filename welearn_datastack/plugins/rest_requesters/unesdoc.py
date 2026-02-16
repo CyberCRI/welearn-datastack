@@ -122,9 +122,7 @@ class UNESDOCCollector(IPluginRESTCollector):
 
     @staticmethod
     def _extract_authors(metadata: UNESDOCItem) -> list[AuthorDetails]:
-        ret: list[AuthorDetails] = []
-        for creator in metadata.creator:
-            ret.append(AuthorDetails(name=creator, misc=""))
+        ret: list[AuthorDetails] = [AuthorDetails(name=metadata.creator, misc="")]
         return ret
 
     @staticmethod

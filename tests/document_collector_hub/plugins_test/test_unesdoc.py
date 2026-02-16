@@ -81,8 +81,8 @@ class TestUNESDOCCollector(TestCase):
             self.collector._check_licence_authorization(tested_licence)
 
     def test__extract_metadata(self):
-        metdata = UNESDOCItem(
-            rights="https://creativecommons.org/licenses/by-sa/3.0/igo/",
+        metadata = UNESDOCItem(
+            rights='<a href="https://creativecommons.org/licenses/by-sa/3.0/igo/" target="_blank" title="This license allows readers to share, copy, distribute, adapt and make commercial use of the work as long as it is attributed back to the author and distributed under this or a similar license.">CC BY-SA 3.0 IGO</a>',
             subject=["Happiness"],
             year=["2020"],
             language=["eng"],
@@ -90,7 +90,17 @@ class TestUNESDOCCollector(TestCase):
             type=["type"],
             description="desc",
             creator="UNESCO",
+            url="example.com",
         )
+        result_metadata = self.collector._extract_metadata(metadata)
+        self.assertEqual(result_metadata["type"], "type")
+        self.assertEqual(result_metadata["topics"][0].name, "happiness")
+        self.assertEqual(result_metadata["topics"][0].depth, 0)
+        self.assertEqual(
+            result_metadata["licence_url"],
+            "https://creativecommons.org/licenses/by-sa/3.0/igo/",
+        )
+        self.assertEqual(result_metadata["authors"][0].name, "UNESCO")
 
     def test__get_metadata_json(self):
         assert False
