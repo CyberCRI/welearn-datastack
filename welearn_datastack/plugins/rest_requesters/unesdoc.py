@@ -155,7 +155,7 @@ class UNESDOCCollector(IPluginRESTCollector):
          :raises NotEnoughData: If no document is found for the given external_id.
          :raises requests.exceptions.RequestException: If there is an error while making the HTTP request to the unesdoc API.
          :raises pydantic.ValidationError: If there is an error while validating the response from the unesdoc API against the UNESDOCRoot model.
-        :raises ValueError: If there is more ore less results than expected for the given external_id.
+        :raises NotExpectedMoreThanOneItem: If there is more or less results than expected for the given external_id.
         """
         session = get_new_https_session()
         param = {
@@ -182,7 +182,7 @@ class UNESDOCCollector(IPluginRESTCollector):
         ret = ""
         for c in str_to_process:
             if c.isalpha():
-                str_to_process.replace(c, "")
+                pass
             else:
                 ret += c
         return ret
@@ -195,7 +195,7 @@ class UNESDOCCollector(IPluginRESTCollector):
          "12345" is the ark prefix, "abcde" is the document id and "lang" is the language code.
          :param ark_id: The ark id to convert.
          :return: The converted iid.
-         :raises ValueError: If the ark id is not in the expected format.
+         :raises WrongExternalIdFormat: If the ark id is not in the expected format.
         """
         # Convert an ark id like "48223/pf0000389119" to "p::usmarcdef_0000389119" and
         # "48223/pf0000396769/fre" to "p::usmarcdef_0000396769_fre"
@@ -217,7 +217,7 @@ class UNESDOCCollector(IPluginRESTCollector):
          If no PDF document is found, an empty list is returned
             :param iid: The iid to search for in the unesdoc API.
             :return: A list of strings containing the names of the PDF documents associated with the given iid.
-            :raises HTTPError: If there is an error while making the request to the unesdoc API.
+            :raises requests.exceptions.HTTPError: If there is an error while making the request to the unesdoc API.
         """
         session = get_new_https_session()
         param = {"id": iid, "multiple": True, "multilingual": True}
@@ -251,7 +251,14 @@ class UNESDOCCollector(IPluginRESTCollector):
                 metadata = self._get_metadata_json(document=document)
                 _license = self._extract_licence(metadata)
                 self._check_licence_authorization(_license)
-                iid = self._convert_ark_id_to_iid(document.url.split("ark:/")[1])
+                ark_marker = "ark:/"
+                url = document.url
+                if not isinstance(url, str) or ark_marker not in url:
+                    raise WrongExternalIdFormat(
+                        f"Invalid external id format in URL {url}"
+                    )
+                ark_part = url.split(ark_marker, 1)[1]
+                iid = self._convert_ark_id_to_iid(ark_part)
                 pdf_names = self._get_pdf_document_name(iid=iid)
                 if len(pdf_names) == 0:
                     raise NoContent(
@@ -273,13 +280,11 @@ class UNESDOCCollector(IPluginRESTCollector):
                 document.title = metadata.title
                 document.details = self._extract_metadata(metadata)
                 try:
-                    document.lang = lang_iso3_to_lang_iso2.get(
-                        metadata.language[0], None
-                    )
-                except KeyError:
+                    document.lang = lang_iso3_to_lang_iso2[metadata.language[0]]
+                except (KeyError, IndexError) as e:
                     raise WrongLangFormat(
                         f"Invalid language format {str(metadata.language)} for document {document.url}"
-                    )
+                    ) from e
             except requests.exceptions.RequestException as e:
                 msg = f"Error while retrieving uved ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
                 logger.error(msg)

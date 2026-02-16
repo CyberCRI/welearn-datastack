@@ -32,7 +32,7 @@ if __name__ == "__main__":
     )
 
     if corpus is None:
-        raise ValueError(f"Corpus unccelearn not found")
+        raise ValueError("Corpus unesdoc not found")
 
     unesdoc_collector = UNESDOCURLCollector(corpus=corpus)
 

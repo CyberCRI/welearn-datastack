@@ -216,9 +216,10 @@ class WrongExternalIdFormat(WrongFormat):
     Raised when the external id format is not correct
     """
 
-    def __init__(self, external_id_name: str, msg: str, *args):
+    def __init__(self, external_id_name: str, msg=None, *args):
+        if msg is None:
+            msg = f"The external id {external_id_name} format is not correct"
         super().__init__(msg, *args)
-        msg = f"The external id {external_id_name} format is not correct"
 
 
 class NoContent(NotEnoughData):
