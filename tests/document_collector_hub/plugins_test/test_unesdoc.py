@@ -319,7 +319,7 @@ class TestUNESDOCCollector(TestCase):
     @patch.object(UNESDOCCollector, "_get_metadata_json")
     @patch.object(UNESDOCCollector, "_get_pdf_document_name")
     @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_pdf_content")
-    def test_run_no_enough_data(
+    def test_run_not_enough_data(
         self, mock_get_pdf_content, mock_get_pdf_document_name, mock_get_metadata_json
     ):
         mock_get_metadata_json.return_value = UNESDOCItem(
