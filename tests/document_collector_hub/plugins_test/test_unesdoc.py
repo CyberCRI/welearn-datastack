@@ -1,14 +1,51 @@
+import json
+from pathlib import Path
 from unittest import TestCase
+from unittest.mock import Mock, patch
+
+import requests
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.source_models.unesdoc import UNESDOCItem
 from welearn_datastack.exceptions import UnauthorizedLicense
 from welearn_datastack.plugins.rest_requesters.unesdoc import UNESDOCCollector
 
 
+class MockResponse:
+    def __init__(self, content=None, json_data=None, status_code=200):
+        self.content = content
+        self._json = json_data
+        self.status_code = status_code
+
+    def json(self):
+        if self._json is None:
+            raise ValueError("No JSON data")
+        return self._json
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            raise requests.exceptions.HTTPError(f"HTTP {self.status_code}")
+
+
 class TestUNESDOCCollector(TestCase):
 
     def setUp(self):
         self.collector = UNESDOCCollector()
+        path_root = (
+            Path(__file__).parent.parent
+            / "resources"
+            / "file_plugin_input"
+            / "root_unesdoc.json"
+        )
+
+        path_sources = (
+            Path(__file__).parent.parent
+            / "resources"
+            / "file_plugin_input"
+            / "sources_unesdoc.json"
+        )
+        self.root_json_content = json.load(path_root.open("r"))
+        self.sources_json_content = json.load(path_sources.open("r"))
 
     def test__extract_licence(self):
         right_to_test = '<a href="https://creativecommons.org/licenses/by-sa/3.0/igo/" target="_blank" title="This license allows readers to share, copy, distribute, adapt and make commercial use of the work as long as it is attributed back to the author and distributed under this or a similar license.">CC BY-SA 3.0 IGO</a>'
@@ -102,14 +139,52 @@ class TestUNESDOCCollector(TestCase):
         )
         self.assertEqual(result_metadata["authors"][0].name, "UNESCO")
 
-    def test__get_metadata_json(self):
-        assert False
+    @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_new_https_session")
+    def test__get_metadata_json(self, mock_get_new_https_session):
+        session = Mock()
+        session.get.return_value = MockResponse(json_data=self.root_json_content)
+        mock_get_new_https_session.return_value = session
+
+        test_doc = WeLearnDocument(
+            url="https://www.example.com/doc001", external_id="doc001"
+        )
+
+        ret_doc = self.collector._get_metadata_json(test_doc)
+
+        self.assertEqual(
+            ret_doc.title,
+            "Mapeo de los sistemas de créditos académicos en América Latina y el Caribe: hacia la armonización regional y la transformación de la educación superior",
+        )
+        self.assertEqual(
+            ret_doc.url, "https://unesdoc.unesco.org/ark:/48223/pf0000397002"
+        )
+
+        session.method_calls[0].kwargs["params"] = {
+            "params": {
+                "limit": 1,
+                "select": "url, year, language, title, type,description, subject,creator,rights",
+                "where": 'search(url, "doc001")',
+            }
+        }
 
     def test__convert_ark_id_to_iid(self):
-        assert False
+        res_iid = self.collector._convert_ark_id_to_iid("48223/pf0000389119")
+        self.assertEqual(res_iid, "p::usmarcdef_0000389119")
 
-    def test__get_pdf_document_name(self):
-        assert False
+    def test__convert_ark_id_to_iid_w_lang(self):
+        res_iid = self.collector._convert_ark_id_to_iid("48223/pf0000389119/fre")
+        self.assertEqual(res_iid, "p::usmarcdef_0000389119_fre")
+
+    @patch("welearn_datastack.plugins.rest_requesters.unesdoc.get_new_https_session")
+    def test__get_pdf_document_name(self, mock_get_new_https_session):
+        session = Mock()
+        session.get.return_value = MockResponse(json_data=self.sources_json_content)
+        mock_get_new_https_session.return_value = session
+
+        ret = self.collector._get_pdf_document_name(iid="48223/pf0000389119")
+        self.assertListEqual(
+            ret, ["attach_import_155a21be-2a3e-4424-8e8c-2412f8e5d26c"]
+        )
 
     def test_run(self):
         assert False

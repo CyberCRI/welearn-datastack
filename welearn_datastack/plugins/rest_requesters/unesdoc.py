@@ -178,7 +178,16 @@ class UNESDOCCollector(IPluginRESTCollector):
         return ret
 
     @staticmethod
-    def _convert_ark_id_to_iid(ark_id: str) -> str:
+    def _remove_letters(str_to_process):
+        ret = ""
+        for c in str_to_process:
+            if c.isalpha():
+                str_to_process.replace(c, "")
+            else:
+                ret += c
+        return ret
+
+    def _convert_ark_id_to_iid(self, ark_id: str) -> str:
         """
         Convert an ark id like "48223/pf0000389119" to "p::usmarcdef_0000389119" and
         "48223/pf0000396769/fre" to "p::usmarcdef_0000396769_fre"
@@ -193,9 +202,9 @@ class UNESDOCCollector(IPluginRESTCollector):
         if "/" in ark_id:
             parts = ark_id.split("/")
             if len(parts) == 2:
-                return f"p::usmarcdef_{parts[1]}"
+                return f"p::usmarcdef_{self._remove_letters(parts[1])}"
             elif len(parts) == 3:
-                return f"p::usmarcdef_{parts[1]}_{parts[2]}"
+                return f"p::usmarcdef_{self._remove_letters(parts[1])}_{parts[2]}"
         raise WrongExternalIdFormat(
             msg=f"Invalid ark id format: {ark_id}", external_id_name="ark"
         )
