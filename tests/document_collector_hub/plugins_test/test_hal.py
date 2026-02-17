@@ -75,21 +75,6 @@ class TestHALCollector(unittest.TestCase):
         details = self.collector._get_details_from_dict(d)
         self.assertEqual(details["authors"], [])
 
-    @patch("welearn_datastack.plugins.rest_requesters.hal.get_new_https_session")
-    def test_get_pdf_content_is_mocked(self, mock_session):
-        mock_client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.content = b"PDFDATA"
-        mock_response.raise_for_status = MagicMock()
-        mock_client.get.return_value = mock_response
-        mock_session.return_value = mock_client
-        with patch(
-            "welearn_datastack.plugins.rest_requesters.hal.extract_txt_from_pdf_with_tika",
-            return_value=[["text", "page2"]],
-        ):
-            result = self.collector._get_pdf_content("https://example.com/fake.pdf")
-            self.assertEqual("text page2", result)
-
     def test_update_welearn_document_no_titles(self):
         raw_data = {
             "halId_s": "hal-00006805",
@@ -133,7 +118,7 @@ class TestHALCollector(unittest.TestCase):
             self.collector._update_welearn_document(wrapper)
 
     @patch(
-        "welearn_datastack.plugins.rest_requesters.hal.HALCollector._get_pdf_content",
+        "welearn_datastack.plugins.rest_requesters.hal.get_pdf_content",
         return_value="PDF content",
     )
     def test_update_welearn_document_pdf_mode(self, mock_pdf):

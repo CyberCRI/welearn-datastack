@@ -79,22 +79,18 @@ class TestUVEDCollector(unittest.TestCase):
         self.assertEqual(doc.details["levels"][0]["isced_level"], 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
+    @patch("welearn_datastack.plugins.rest_requesters.uved.get_pdf_content")
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
-    def test_run_transcription_file_used_as_full_content(self, mock_session):
+    def test_run_transcription_file_used_as_full_content(
+        self, mock_session, mock_get_pdf_content
+    ):
         # Transcript is empty, transcriptionFile is present and used
         item = self.uved_item.model_copy()
         mock_session.return_value.get.return_value = MockResponse(
             item.model_dump(by_alias=True)
         )
-        with patch(
-            "welearn_datastack.plugins.rest_requesters.uved.extract_txt_from_pdf_with_tika",
-            return_value=[
-                [
-                    "PDF extracted content. Lorem ipsum dolor sit amet. Consectetur adipiscing elit."
-                ]
-            ],
-        ):
-            result = self.collector.run([self.base_doc])
+        mock_get_pdf_content.return_value = "PDF extracted content. Lorem ipsum dolor sit amet. Consectetur adipiscing elit."
+        result = self.collector.run([self.base_doc])
         self.assertEqual(len(result), 1)
         self.assertIsNone(result[0].error_info)
         self.assertFalse(result[0].is_error)
