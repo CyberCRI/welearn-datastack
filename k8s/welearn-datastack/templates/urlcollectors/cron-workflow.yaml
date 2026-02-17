@@ -384,5 +384,10 @@ spec:
                 name: {{ .name }}
                 template: collect-fao-open-knowledge
 
+            - name: collect-unesdoc
+              templateRef:
+                name: {{ .name }}
+                template: collect-unesdoc
+
 {{- end }}
 {{- end }}
