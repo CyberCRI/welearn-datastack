@@ -549,7 +549,7 @@ spec:
         args:
           - python
           - "-m"
-          - welearn_datastack.nodes_workflow.URLCollectors.node_unesdoc
+          - welearn_datastack.nodes_workflow.URLCollectors.node_unesdoc_collect
         envFrom:
           - configMapRef:
               name: {{ .name }}
