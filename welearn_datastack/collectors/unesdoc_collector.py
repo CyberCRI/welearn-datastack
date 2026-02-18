@@ -31,7 +31,7 @@ class UNESDOCURLCollector(URLCollector):
             "where": 'search(rights, "by-sa/3.0/igo/")',
         }
         response = client.get(
-            f"{self.api_base_url}",
+            f"{self.api_base_url}/records",
             params=params,
             headers=self.headers,
         )
