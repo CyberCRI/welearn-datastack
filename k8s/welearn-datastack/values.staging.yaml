@@ -3,6 +3,8 @@ common:
   config:
     nonSensitive:
       PG_HOST: dev-lab-projects-backend.postgres.database.azure.com
+      PG_USER: welearn_datastack_staging
+      PG_DATABASE: welearn_datastack_staging
       QDRANT_URL: '{{ .Values.common.qdrant_url }}'
       QDRANT_GRPC_PORT: '{{ .Values.common.config.qdrant_grpc_port }}'
       QDRANT_HTTP_PORT: '{{ .Values.common.config.qdrant_http_port }}'
