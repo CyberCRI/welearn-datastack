@@ -50,10 +50,10 @@ class UNESDOCURLCollector(URLCollector):
         # https://unesdoc.unesco.org/ark:/48223/pf0000396769_fre
         parts = url.split("/")
         if len(parts) >= 5:
-            ark_part = parts[3]  # This should be "ark:12345"
-            doc_part = parts[4]  # This should be "pf0000396769"
+            ark_part = parts[4]  # This should be "ark:12345"
+            doc_part = parts[5]  # This should be "pf0000396769"
             lang_part = (
-                parts[5] if len(parts) > 5 else ""
+                parts[6] if len(parts) > 6 else ""
             )  # This should be "fre" or similar
             if lang_part:
                 return f"{self.application_base_url}{ark_part}/{doc_part}_{lang_part}"
@@ -84,7 +84,7 @@ class UNESDOCURLCollector(URLCollector):
                 ret.append(
                     WeLearnDocument(
                         url=corrected_url,
-                        source=self.corpus,
+                        corpus=self.corpus,
                         external_id=unesdoc_id,
                     )
                 )
