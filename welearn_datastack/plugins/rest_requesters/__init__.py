@@ -9,9 +9,9 @@ from welearn_datastack.plugins.rest_requesters.oapen import OAPenCollector
 from welearn_datastack.plugins.rest_requesters.open_alex import OpenAlexCollector
 from welearn_datastack.plugins.rest_requesters.pressbooks import PressBooksCollector
 from welearn_datastack.plugins.rest_requesters.ted import TEDCollector
+from welearn_datastack.plugins.rest_requesters.unesdoc import UNESDOCCollector
 from welearn_datastack.plugins.rest_requesters.uved import UVEDCollector
 from welearn_datastack.plugins.rest_requesters.wikipedia import WikipediaCollector
-from welearn_datastack.plugins.rest_requesters.unesdoc import UNESDOCCollector
 
 plugins_rest_list: List[Type[IPluginRESTCollector]] = [
     WikipediaCollector,
@@ -22,5 +22,5 @@ plugins_rest_list: List[Type[IPluginRESTCollector]] = [
     PressBooksCollector,
     UVEDCollector,
     FAOOpenKnowledgeCollector,
-    UNESDOCCollector
+    UNESDOCCollector,
 ]
