@@ -43,8 +43,11 @@ spec:
           export DB_HOST="$PG_HOST"
           export DB_PORT="$PG_PORT"
           export DB_PASSWORD="$PG_PASSWORD"
-          chmod +x /script/update-materialized-view
-          /script/update-materialized-view "$view_name"
+          export PGPASSWORD="$DB_PASSWORD"
+
+          psql "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" \
+            -v ON_ERROR_STOP=1 \
+            -c "REFRESH MATERIALIZED VIEW CONCURRENTLY {{inputs.parameters.view_name}};"
         envFrom:
           - configMapRef:
               name: {{ .name }}
