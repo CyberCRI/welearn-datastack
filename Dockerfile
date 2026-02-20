@@ -19,6 +19,10 @@ WORKDIR /app
 RUN apt update && \
     apt install -y --no-install-recommends make
 
+RUN groupadd -g 10000 app && \
+    useradd -m -u 10000 -g 10000 -s /bin/bash app
+
+
 COPY --from=requirements-stage /tmp/requirements.txt ./requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt

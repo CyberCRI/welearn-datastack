@@ -76,25 +76,21 @@ class TestUVEDCollector(unittest.TestCase):
         )
         self.assertEqual(doc.title, item.title)
         self.assertEqual(doc.details["state"], "labellisé")
-        self.assertEqual(doc.details["levels"][0].isced_level, 665)
+        self.assertEqual(doc.details["levels"][0]["isced_level"], 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
+    @patch("welearn_datastack.plugins.rest_requesters.uved.get_pdf_content")
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
-    def test_run_transcription_file_used_as_full_content(self, mock_session):
+    def test_run_transcription_file_used_as_full_content(
+        self, mock_session, mock_get_pdf_content
+    ):
         # Transcript is empty, transcriptionFile is present and used
         item = self.uved_item.model_copy()
         mock_session.return_value.get.return_value = MockResponse(
             item.model_dump(by_alias=True)
         )
-        with patch(
-            "welearn_datastack.plugins.rest_requesters.uved.extract_txt_from_pdf_with_tika",
-            return_value=[
-                [
-                    "PDF extracted content. Lorem ipsum dolor sit amet. Consectetur adipiscing elit."
-                ]
-            ],
-        ):
-            result = self.collector.run([self.base_doc])
+        mock_get_pdf_content.return_value = "PDF extracted content. Lorem ipsum dolor sit amet. Consectetur adipiscing elit."
+        result = self.collector.run([self.base_doc])
         self.assertEqual(len(result), 1)
         self.assertIsNone(result[0].error_info)
         self.assertFalse(result[0].is_error)
@@ -105,7 +101,7 @@ class TestUVEDCollector(unittest.TestCase):
         )
         self.assertEqual(doc.title, item.title)
         self.assertEqual(doc.details["state"], "labellisé")
-        self.assertEqual(doc.details["levels"][0].isced_level, 665)
+        self.assertEqual(doc.details["levels"][0]["isced_level"], 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
@@ -125,7 +121,7 @@ class TestUVEDCollector(unittest.TestCase):
         self.assertEqual(doc.full_content, doc.description)
         self.assertEqual(doc.title, item.title)
         self.assertEqual(doc.details["state"], "labellisé")
-        self.assertEqual(doc.details["levels"][0].isced_level, 665)
+        self.assertEqual(doc.details["levels"][0]["isced_level"], 665)
         self.assertEqual(doc.external_id, self.uved_item.uid)
 
     @patch("welearn_datastack.plugins.rest_requesters.uved.get_new_https_session")
@@ -211,6 +207,10 @@ class TestUVEDCollector(unittest.TestCase):
             ],
             list(metadata.keys()),
         )
+
+    def test_serialize_metadata(self):
+        metadata = self.collector._extract_metadata(self.uved_item)
+        self.assertIsInstance(json.dumps(metadata), str)
 
     def test_extract_external_sdg_id(self):
         # Should extract SDG id from categories

@@ -19,21 +19,6 @@ class TestOAPenCollector(unittest.TestCase):
         self.collector = OAPenCollector()
         self.doc = WeLearnDocument(url="https://library.oapen.org/handle/1234")
 
-    @patch("welearn_datastack.plugins.rest_requesters.oapen.get_new_https_session")
-    @patch(
-        "welearn_datastack.plugins.rest_requesters.oapen.extract_txt_from_pdf_with_tika"
-    )
-    def test_get_pdf_content_success(self, mock_tika, mock_session):
-        mock_client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.content = b"PDFDATA"
-        mock_response.raise_for_status = MagicMock()
-        mock_client.get.return_value = mock_response
-        mock_session.return_value = mock_client
-        mock_tika.return_value = [["page1", "page2"]]
-        result = self.collector._get_pdf_content("https://library.oapen.org/fake.pdf")
-        self.assertEqual("page1 page2", result)
-
     def test_clean_backline_removes_newlines_and_hyphens(self):
         text = "Lin-\nguistique\nLinguistique"
         cleaned = self.collector.clean_backline(text)
@@ -112,7 +97,10 @@ class TestOAPenCollector(unittest.TestCase):
         self.assertEqual(result[0].document, doc)
         self.assertEqual(result[0].raw_data, fake_model)
 
-    @patch.object(OAPenCollector, "_get_pdf_content", return_value="PDF content")
+    @patch(
+        "welearn_datastack.plugins.rest_requesters.oapen.get_pdf_content",
+        return_value="PDF content",
+    )
     def test_update_welearn_document_unauthorized_license(self, mock_get_content_pdf):
         bitstream = Bitstream(
             uuid="u",
@@ -144,7 +132,10 @@ class TestOAPenCollector(unittest.TestCase):
                 WrapperRawData(raw_data=model, document=self.doc)
             )
 
-    @patch.object(OAPenCollector, "_get_pdf_content", return_value="PDF content")
+    @patch(
+        "welearn_datastack.plugins.rest_requesters.oapen.get_pdf_content",
+        return_value="PDF content",
+    )
     def test_update_welearn_document_no_description(self, mock__get_pdf_content):
         bitstream = Bitstream(
             uuid="u",
@@ -176,7 +167,10 @@ class TestOAPenCollector(unittest.TestCase):
                 WrapperRawData(raw_data=model, document=self.doc)
             )
 
-    @patch.object(OAPenCollector, "_get_pdf_content", return_value="PDF content")
+    @patch(
+        "welearn_datastack.plugins.rest_requesters.oapen.get_pdf_content",
+        return_value="PDF content",
+    )
     def test_update_welearn_document_too_many_languages(self, mock__get_pdf_content):
         bitstream = Bitstream(
             uuid="u",
@@ -235,7 +229,10 @@ class TestOAPenCollector(unittest.TestCase):
                     WrapperRawData(raw_data=model, document=self.doc)
                 )
 
-    @patch.object(OAPenCollector, "_get_pdf_content", return_value="PDF content")
+    @patch(
+        "welearn_datastack.plugins.rest_requesters.oapen.get_pdf_content",
+        return_value="PDF content",
+    )
     def test_update_welearn_document_wrong_lang_format(self, mock_pdf_content):
         bitstream = Bitstream(
             uuid="u",

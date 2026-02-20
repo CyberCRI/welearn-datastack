@@ -1,23 +1,16 @@
-import io
-import json
 import logging
-import math
 import os
-import re
-from collections import deque
+from dataclasses import asdict
 from datetime import datetime
-from itertools import batched
-from typing import Dict, Iterable, List
 
 import pydantic
 import requests
-from lingua import Language
 from welearn_database.data.models import WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
 
 from welearn_datastack import constants
-from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
-from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
+from welearn_datastack.constants import AUTHORIZED_LICENSES
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.data.details_dataclass.scholar_fields import ScholarFieldsDetails
 from welearn_datastack.data.details_dataclass.scholar_institution_type import (
@@ -26,33 +19,19 @@ from welearn_datastack.data.details_dataclass.scholar_institution_type import (
 )
 from welearn_datastack.data.details_dataclass.scholar_level import ScholarLevelDetails
 from welearn_datastack.data.details_dataclass.topics import TopicDetails
-from welearn_datastack.data.source_models.oapen import Metadatum, OapenModel
 from welearn_datastack.data.source_models.uved import Category, UVEDMemberItem
 from welearn_datastack.exceptions import (
     NoDescriptionFoundError,
-    PDFFileSizeExceedLimit,
-    TooMuchLanguages,
     UnauthorizedLicense,
     UnauthorizedState,
-    WrongLangFormat,
 )
-from welearn_datastack.modules.computed_metadata import get_language_detector
-from welearn_datastack.modules.pdf_extractor import (
-    delete_accents,
-    delete_non_printable_character,
-    extract_txt_from_pdf_with_tika,
-    remove_hyphens,
-    replace_ligatures,
-)
+from welearn_datastack.modules.pdf_extractor import get_pdf_content
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import (
-    format_cc_license,
-    remove_extra_whitespace,
-)
+from welearn_datastack.utils_.scraping_utils import format_cc_license
 
 logger = logging.getLogger(__name__)
 
@@ -71,56 +50,6 @@ class UVEDCollector(IPluginRESTCollector):
         self.application_base_url = "https://www.uved.fr/fiche/ressource/"
         self.headers = constants.HEADERS
         self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
-
-    def _get_pdf_content(self, url: str) -> str:
-        logger.info("Getting PDF content from %s", url)
-        client = get_new_https_session(retry_total=0)
-
-        if self.pdf_size_file_limit and self.pdf_size_file_limit < 0:
-            raise ValueError(
-                f"file_size_limit must be positive : {self.pdf_size_file_limit}"
-            )
-
-        if self.pdf_size_file_limit:
-            resp_head = client.head(
-                url, headers=HEADERS, allow_redirects=True, timeout=30
-            )
-            try:
-                content_length = int(resp_head.headers.get("content-length"))
-                logger.info(f"PDF size is {content_length}")
-            except ValueError:
-                raise ValueError(f"Cannot retrieved this pdf size : {url}")
-
-            if content_length > self.pdf_size_file_limit:
-                raise PDFFileSizeExceedLimit(
-                    f"File size is {content_length} and limit is {self.pdf_size_file_limit}"
-                )
-
-        response = client.get(url, headers=HEADERS, timeout=300)
-        response.raise_for_status()
-
-        with io.BytesIO(response.content) as pdf_file:
-            pdf_content = extract_txt_from_pdf_with_tika(
-                pdf_content=pdf_file, tika_base_url=self.tika_address
-            )
-
-            # Delete non printable characters
-            pdf_content = [
-                [delete_non_printable_character(word) for word in page]
-                for page in pdf_content
-            ]
-
-            pages = []
-            for content in pdf_content:
-                page_text = " ".join(content)
-                page_text = replace_ligatures(page_text)
-                page_text = remove_hyphens(page_text)
-                page_text = delete_accents(page_text)
-
-                pages.append(page_text)
-            ret = remove_extra_whitespace(" ".join(pages))
-
-        return ret
 
     def _clean_txt_content(self, content: str) -> str:
         return clean_text(content)
@@ -431,16 +360,18 @@ class UVEDCollector(IPluginRESTCollector):
         licence = self._extract_licence(uved_document)
         # self._check_licence_authorization(licence)
 
-        topics = self._extract_topics(uved_document.categories)
-        levels = self._extract_levels(uved_document.categories)
+        topics = [asdict(o) for o in self._extract_topics(uved_document.categories)]
+        levels = [asdict(o) for o in self._extract_levels(uved_document.categories)]
         external_sdg_ids = self._extract_external_sdg_ids(uved_document.categories)
         activities_types = self._extract_activities_types(uved_document.categories)
-        scholar_institution_types = self._extract_scholar_institution_types(
-            uved_document.categories
-        )
-        fields_of_education = self._extract_fields_of_education(
-            uved_document.categories
-        )
+        scholar_institution_types = [
+            asdict(o)
+            for o in self._extract_scholar_institution_types(uved_document.categories)
+        ]
+        fields_of_education = [
+            asdict(o)
+            for o in self._extract_fields_of_education(uved_document.categories)
+        ]
 
         return {
             "tags": tags,
@@ -463,7 +394,7 @@ class UVEDCollector(IPluginRESTCollector):
             "activities_types": activities_types,
             "scholar_institution_types": scholar_institution_types,
             "fields_of_education": fields_of_education,
-            "authors": self._extract_authors(uved_document),
+            "authors": [asdict(o) for o in self._extract_authors(uved_document)],
         }
 
     def _get_json(self, document: WeLearnDocument) -> UVEDMemberItem:
@@ -524,8 +455,10 @@ class UVEDCollector(IPluginRESTCollector):
                 and self.pdf_size_file_limit > uved_document.transcriptionFile.file.size
             ):
                 try:
-                    full_content = self._get_pdf_content(
-                        uved_document.transcriptionFile.url
+                    full_content = get_pdf_content(
+                        pdf_url=uved_document.transcriptionFile.url,
+                        pdf_size_file_limit=self.pdf_size_file_limit,
+                        tika_address=self.tika_address,
                     )
                     full_content = self._clean_txt_content(full_content)
                 except Exception as e:

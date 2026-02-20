@@ -39,6 +39,7 @@ from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
     extract_txt_from_pdf_with_tika,
+    get_pdf_content,
     remove_hyphens,
     replace_ligatures,
 )
@@ -102,54 +103,6 @@ class OpenAlexCollector(IPluginRESTCollector):
             "mailto": self.team_email,
             "select": "title,ids,language,abstract_inverted_index,publication_date,authorships,open_access,best_oa_location,publication_date,type,topics,keywords,referenced_works,related_works,locations",
         }
-
-    def _get_pdf_content(self, url: str, file_size_limit: int | None = None) -> str:
-        logger.info("Getting PDF content from %s", url)
-        client = get_new_https_session(retry_total=0)
-
-        if file_size_limit and file_size_limit < 0:
-            raise ValueError(f"file_size_limit must be positive : {file_size_limit}")
-
-        if file_size_limit:
-            resp_head = client.head(
-                url, headers=HEADERS, allow_redirects=True, timeout=30
-            )
-            try:
-                content_length = int(resp_head.headers.get("content-length"))
-                logger.info(f"PDF size is {content_length}")
-            except ValueError:
-                raise ValueError(f"Cannot retrieved this pdf size : {url}")
-
-            if content_length > file_size_limit:
-                raise PDFFileSizeExceedLimit(
-                    f"File size is {content_length} and limit is {file_size_limit}"
-                )
-
-        response = client.get(url, headers=HEADERS, timeout=300)
-        response.raise_for_status()
-
-        with io.BytesIO(response.content) as pdf_file:
-            pdf_content = extract_txt_from_pdf_with_tika(
-                pdf_content=pdf_file, tika_base_url=self.tika_address
-            )
-
-            # Delete non printable characters
-            pdf_content = [
-                [delete_non_printable_character(word) for word in page]
-                for page in pdf_content
-            ]
-
-            pages = []
-            for content in pdf_content:
-                page_text = " ".join(content)
-                page_text = replace_ligatures(page_text)
-                page_text = remove_hyphens(page_text)
-                page_text = delete_accents(page_text)
-
-                pages.append(page_text)
-            ret = remove_extra_whitespace(" ".join(pages))
-
-        return ret
 
     @staticmethod
     def _transform_topics(topics: list[Topic]) -> list[TopicDetails]:
@@ -276,9 +229,10 @@ class OpenAlexCollector(IPluginRESTCollector):
                 logger.info(
                     f"Getting PDF content from {wrapper.raw_data.best_oa_location.pdf_url}"
                 )
-                document_content = self._get_pdf_content(
-                    wrapper.raw_data.best_oa_location.pdf_url,
-                    file_size_limit=self.pdf_size_file_limit,
+                document_content = get_pdf_content(
+                    pdf_url=wrapper.raw_data.best_oa_location.pdf_url,
+                    pdf_size_file_limit=self.pdf_size_file_limit,
+                    tika_address=self.tika_address,
                 )
                 pdf_flag = True
             except Exception as e:
@@ -340,7 +294,6 @@ class OpenAlexCollector(IPluginRESTCollector):
             "related_works": wrapper.raw_data.related_works,
             "authors": authors,
         }
-
         wrapper.document.title = document_title
         wrapper.document.description = document_desc
         wrapper.document.content = document_content

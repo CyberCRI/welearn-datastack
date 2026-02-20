@@ -199,7 +199,7 @@ class TestOpenAlexCollector(unittest.TestCase):
         self.assertTrue(any(x.external_depth_name == "topic" for x in result))
 
     # Test _update_welearn_document returns a WeLearnDocument with expected values
-    @patch.object(OpenAlexCollector, "_get_pdf_content", return_value="PDF content")
+    @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_pdf_content")
     def test_update_welearn_document_returns_expected_document(self, mock_pdf):
         openalex_result = build_openalex_result()
         wrapper = WrapperRawData(document=self.welearn_doc, raw_data=openalex_result)

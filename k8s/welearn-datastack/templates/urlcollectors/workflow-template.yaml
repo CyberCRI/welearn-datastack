@@ -498,4 +498,77 @@ spec:
           volumeAttributes:
             secretName: {{ $.Values.common.azureShare.secret.name }}
             shareName: {{ $.Values.common.azureShare.name }}
+
+
+    - name: collect-fao-open-knowledge
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_fao_open_knowledge_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+
+
+    - name: collect-unesdoc
+      synchronization:
+        semaphores:
+        - configMapKeyRef:
+            name: {{ .collectorSemaphore.configmapName }}
+            key: {{ .collectorSemaphore.standard.keyName }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ include "common.pods.image" (dict "root" $ "image" (dict "repository" .repository "path" .path "tag" .tag))}}
+      {{- end }}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.URLCollectors.node_unesdoc_collect
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+        - name: azure-share
+          mountPath: {{ $.Values.common.azureShare.mountPath }}
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+      - name: azure-share
+        csi:
+          driver: file.csi.azure.com
+          readOnly: true
+          volumeAttributes:
+            secretName: {{ $.Values.common.azureShare.secret.name }}
+            shareName: {{ $.Values.common.azureShare.name }}
+
 {{- end }}
