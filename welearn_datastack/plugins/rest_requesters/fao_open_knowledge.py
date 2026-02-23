@@ -364,6 +364,14 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     )
                 )
                 continue
+            except ValueError as e:
+                logger.error(f"Document {document.url} skipped due to error: {e}")
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=f"From Document Hub Collector, error: {e}",
+                    )
+                )
 
             ret.append(WrapperRetrieveDocument(document=document))
         return ret
