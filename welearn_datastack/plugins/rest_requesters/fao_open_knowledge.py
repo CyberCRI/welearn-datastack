@@ -183,7 +183,11 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                 f"Unexpected number of bitstreams for bundle '{bitstream_id}': "
                 f"expected 1, got {len(bitstreams)}. Error: {e}"
             )
-            raise NotExpectedMoreThanOneItem
+            message = (
+                f"Expected exactly one bitstream for bundle '{bitstream_id}', "
+                f"but got {len(bitstreams)}."
+            )
+            raise NotExpectedMoreThanOneItem(message) from e
         return ret
 
     @staticmethod
