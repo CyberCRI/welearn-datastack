@@ -383,6 +383,7 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                         error_info=f"From Document Hub Collector, error: {e}",
                     )
                 )
+                continue
 
             ret.append(WrapperRetrieveDocument(document=document))
         return ret
