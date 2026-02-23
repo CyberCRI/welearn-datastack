@@ -23,6 +23,7 @@ from welearn_datastack.data.source_models.fao_open_knowledge import (
 from welearn_datastack.exceptions import (
     NoContent,
     NoDescriptionFoundError,
+    NotExpectedMoreThanOneItem,
     PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedState,
@@ -175,8 +176,11 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
             for b in resp.json()["_embedded"]["bitstreams"]
         ]
 
-        [ret] = bitstreams
-
+        try:
+            [ret] = bitstreams
+        except ValueError as e:
+            logger.warning(f"Too much value: {e}")
+            raise NotExpectedMoreThanOneItem
         return ret
 
     @staticmethod
@@ -364,7 +368,7 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     )
                 )
                 continue
-            except ValueError as e:
+            except NotExpectedMoreThanOneItem as e:
                 logger.error(f"Document {document.url} skipped due to error: {e}")
                 ret.append(
                     WrapperRetrieveDocument(
