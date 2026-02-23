@@ -179,7 +179,10 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         try:
             [ret] = bitstreams
         except ValueError as e:
-            logger.warning(f"Too much value: {e}")
+            logger.warning(
+                f"Unexpected number of bitstreams for bundle '{bitstream_id}': "
+                f"expected 1, got {len(bitstreams)}. Error: {e}"
+            )
             raise NotExpectedMoreThanOneItem
         return ret
 
