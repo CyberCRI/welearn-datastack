@@ -23,6 +23,7 @@ from welearn_datastack.data.source_models.fao_open_knowledge import (
 from welearn_datastack.exceptions import (
     NoContent,
     NoDescriptionFoundError,
+    NotExpectedMoreThanOneItem,
     PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedState,
@@ -175,8 +176,18 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
             for b in resp.json()["_embedded"]["bitstreams"]
         ]
 
-        [ret] = bitstreams
-
+        try:
+            [ret] = bitstreams
+        except ValueError as e:
+            logger.warning(
+                f"Unexpected number of bitstreams for bundle '{bitstream_id}': "
+                f"expected 1, got {len(bitstreams)}. Error: {e}"
+            )
+            message = (
+                f"Expected exactly one bitstream for bundle '{bitstream_id}', "
+                f"but got {len(bitstreams)}."
+            )
+            raise NotExpectedMoreThanOneItem(message) from e
         return ret
 
     @staticmethod
@@ -361,6 +372,15 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                         document=document,
                         error_info=f"From Document Hub Collector, HTTP error {http_code}: {e}",
                         http_error_code=http_code,
+                    )
+                )
+                continue
+            except NotExpectedMoreThanOneItem as e:
+                logger.error(f"Document {document.url} skipped due to error: {e}")
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=f"From Document Hub Collector, error: {e}",
                     )
                 )
                 continue
