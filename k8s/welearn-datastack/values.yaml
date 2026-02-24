@@ -356,3 +356,6 @@ restore:
 updateMaterializedViews:
   enabled: true
   name: update-materialized-views
+  cronWorkflowTemplate:
+    standard:
+      schedule: 0 4 * * *

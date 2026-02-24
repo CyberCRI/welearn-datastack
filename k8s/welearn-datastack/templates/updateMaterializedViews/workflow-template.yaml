@@ -38,12 +38,11 @@ spec:
       {{- with $.Values.image }}
         image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
       {{- end }}
-        command: ["bash"]
-        source: |
-          #!/bin/bash
-          set -e
-          chmod +x /app/script/update-materialized-view
-          /app/script/update-materialized-view {{ print "{{inputs.parameters.view_name}}"}}
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.UpdateMaterializedView.update_materialized_view
+
       volumeMounts:
         - name: secrets
           mountPath: "/secrets"
