@@ -293,7 +293,9 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                 try:
                     document.full_content = self._clean_txt_content(pdf_content)
                 except ValueError as e:
-                    raise NoContent("No content extracted from PDF or incorrect content.")
+                    raise NoContent(
+                        "No content extracted from PDF or incorrect content."
+                    )
                 try:
                     description = fao_ok_metadata.metadata.get(
                         "dc.description.abstract"
