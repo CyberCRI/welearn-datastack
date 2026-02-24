@@ -35,7 +35,9 @@ spec:
         parameters:
           - name: view_name
       script:
-        image: python:3.12-slim
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
         command: ["bash"]
         source: |
           #!/bin/bash
