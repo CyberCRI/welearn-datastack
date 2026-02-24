@@ -43,7 +43,7 @@ spec:
           #!/bin/bash
           set -e
           chmod +x /script/update-materialized-view
-          /script/update-materialized-view {{ print "{{inputs.parameters.view_name}}"}}
+          /app/script/update-materialized-view {{ print "{{inputs.parameters.view_name}}"}}
       volumeMounts:
         - name: secrets
           mountPath: "/secrets"
