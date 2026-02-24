@@ -42,7 +42,7 @@ spec:
         source: |
           #!/bin/bash
           set -e
-          chmod +x /script/update-materialized-view
+          chmod +x /app/script/update-materialized-view
           /app/script/update-materialized-view {{ print "{{inputs.parameters.view_name}}"}}
       volumeMounts:
         - name: secrets
