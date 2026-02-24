@@ -43,8 +43,6 @@ spec:
           chmod +x /scripts/update-materialized-view
           /scripts/update-materialized-view {{ print "{{inputs.parameters.view_name}}"}}
       volumeMounts:
-        - name: scripts
-          mountPath: /scripts
         - name: secrets
           mountPath: "/secrets"
       envFrom:
@@ -55,11 +53,4 @@ spec:
     - name: secrets
       secret:
         secretName: {{ .name }}
-    - name: scripts
-      csi:
-        driver: file.csi.azure.com
-        readOnly: true
-        volumeAttributes:
-          secretName: {{ $.Values.common.azureShare.secret.name }}
-          shareName: {{ $.Values.common.azureShare.name }}
 {{- end }}

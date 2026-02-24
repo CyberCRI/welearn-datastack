@@ -32,6 +32,7 @@ COPY . .
 RUN chown -R 10000:10000 /app
 
 COPY --chown=10000:10000 secrets-entrypoint.sh ./secrets-entrypoint.sh
+COPY --chown=10000:10000 script/update-materialized-view ./script/update-materialized-view
 
 USER 10000
 
