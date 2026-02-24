@@ -351,3 +351,8 @@ restore:
   config:
     sensitive: {}
     nonSensitive: {}
+
+
+updateMaterializedViews:
+  enabled: true
+  name: update-materialized-views
