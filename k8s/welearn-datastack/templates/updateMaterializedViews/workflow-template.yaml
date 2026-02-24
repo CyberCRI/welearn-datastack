@@ -1,7 +1,8 @@
+{{- with .Values.updateMaterializedViews }}
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: update-materialized-views
+  name: {{ .name }}-update-materialized-views
 spec:
   entrypoint: update-materialized-views
   serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
@@ -10,71 +11,55 @@ spec:
   templates:
     - name: update-materialized-views
       steps:
-        - - name: update-qty-document-in-qdrant
-            template: update-materialized-view
+        - - name: refresh-qty-document-in-qdrant
+            template: refresh-view
             arguments:
               parameters:
                 - name: view_name
-                  value: qty_document_in_qdrant
-        - - name: update-qty-document-in-qdrant-per-corpus
-            template: update-materialized-view
+                  value: document_related.qty_document_in_qdrant
+        - - name: refresh-qty-document-in-qdrant-per-corpus
+            template: refresh-view
             arguments:
               parameters:
                 - name: view_name
-                  value: qty_document_in_qdrant_per_corpus
-        - - name: update-qty-document-per-corpus
-            template: update-materialized-view
+                  value: document_related.qty_document_in_qdrant_per_corpus
+        - - name: refresh-qty-document-per-corpus
+            template: refresh-view
             arguments:
               parameters:
                 - name: view_name
-                  value: qty_document_per_corpus
-    - name: update-materialized-view
+                  value: document_related.qty_document_per_corpus
+
+    - name: refresh-view
       inputs:
         parameters:
           - name: view_name
       script:
-        image: postgres:15
+        image: python:3.12-slim
         command: ["bash"]
         source: |
           #!/bin/bash
           set -e
-          export DB_NAME="$PG_DATABASE"
-          export DB_USER="$PG_USER"
-          export DB_HOST="$PG_HOST"
-          export DB_PORT="$PG_PORT"
-          export DB_PASSWORD="$PG_PASSWORD"
-          export PGPASSWORD="$DB_PASSWORD"
-
-          psql "postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME" \
-            -v ON_ERROR_STOP=1 \
-            -c "REFRESH MATERIALIZED VIEW CONCURRENTLY {{inputs.parameters.view_name}};"
-        envFrom:
-          - configMapRef:
-              name: {{ .name }}
+          chmod +x /scripts/update-materialized-view
+          /scripts/update-materialized-view "{{inputs.parameters.view_name}}"
       volumeMounts:
+        - name: scripts
+          mountPath: /scripts
         - name: secrets
           mountPath: "/secrets"
-          readOnly: true
+      envFrom:
+        - configMapRef:
+            name: {{ .name }}
 
-      volumes:
-      - name: secrets
-        secret:
-          secretName: {{ .name }}
----
-apiVersion: argoproj.io/v1alpha1
-kind: CronWorkflow
-metadata:
-  name: update-materialized-views-cron
-spec:
-  schedule: "0 */3 * * *" # Every 3 hours
-  securityContext:
-    {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
-  workflowSpec:
-    entrypoint: update-materialized-views
-    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
-    workflowTemplateRef:
-      name: update-materialized-views
-    ttlStrategy:
-      secondsAfterCompletion: 300
-    podGC:
-      strategy: OnPodCompletion
+  volumes:
+    - name: secrets
+      secret:
+        secretName: {{ .name }}
+    - name: scripts
+      csi:
+        driver: file.csi.azure.com
+        readOnly: true
+        volumeAttributes:
+          secretName: {{ $.Values.common.azureShare.secret.name }}
+          shareName: {{ $.Values.common.azureShare.name }}
+{{- end }}

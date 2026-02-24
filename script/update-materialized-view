@@ -2,13 +2,6 @@
 
 # Script to update a materialized view in PostgreSQL
 
-# Variables are passed as environment variables
-DB_NAME=${DB_NAME}  # PostgreSQL database name
-DB_USER=${DB_USER}  # PostgreSQL user
-DB_HOST=${DB_HOST:-localhost}  # Default to localhost if not set
-DB_PORT=${DB_PORT:-5432}  # Default to 5432 if not set
-DB_PASSWORD=${DB_PASSWORD}  # PostgreSQL password
-
 # Check if the view name is passed as an argument
 if [ -z "$1" ]; then
     echo "Usage: $0 <materialized_view_name>"
@@ -21,7 +14,7 @@ VIEW_NAME=$1
 refresh_view() {
     local view_name=$1
     echo "Refreshing materialized view: $view_name"
-    PGPASSWORD="$DB_PASSWORD" psql -U "$DB_USER" -h "$DB_HOST" -p "$DB_PORT" -d "$DB_NAME" -c "REFRESH MATERIALIZED VIEW CONCURRENTLY $view_name;"
+    PGPASSWORD="$PG_PASSWORD" psql -U "$PG_USER" -h "$PG_HOST" -p "$PG_PORT" -d "$PG_DB" -c "REFRESH MATERIALIZED VIEW $view_name;"
     if [ $? -eq 0 ]; then
         echo "Successfully refreshed $view_name"
     else
