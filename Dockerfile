@@ -19,6 +19,8 @@ WORKDIR /app
 RUN apt update && \
     apt install -y --no-install-recommends make
 
+RUN apt install postgresql
+
 RUN groupadd -g 10000 app && \
     useradd -m -u 10000 -g 10000 -s /bin/bash app
 
