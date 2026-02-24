@@ -42,7 +42,6 @@ spec:
           - python
           - "-m"
           - welearn_datastack.nodes_workflow.UpdateMaterializedView.update_materialized_view
-
       volumeMounts:
         - name: secrets
           mountPath: "/secrets"
