@@ -48,7 +48,7 @@ spec:
           - name: embedding_model_en
             default: {{ $.Values.common.embeddingModelEn }}
           - name: st_backend
-            default: "onnx"
+            default: "torch"
         artifacts:
           - name: batch_ids_csv
             path: >-

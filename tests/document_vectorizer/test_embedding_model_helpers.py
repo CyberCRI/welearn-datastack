@@ -18,7 +18,7 @@ from welearn_datastack.utils_.virtual_environement_utils import (
 class TestEmbeddingHelper(TestCase):
     def setUp(self) -> None:
         get_sub_environ_according_prefix.cache_clear()
-        os.environ["ST_BACKEND"] = "onnx"
+        os.environ["ST_BACKEND"] = "torch"
 
     def tearDown(self) -> None:
         os.environ.clear()
