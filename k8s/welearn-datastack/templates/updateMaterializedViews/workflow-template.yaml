@@ -34,7 +34,7 @@ spec:
       inputs:
         parameters:
           - name: view_name
-      script:
+      container:
       {{- with $.Values.image }}
         image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
       {{- end }}
