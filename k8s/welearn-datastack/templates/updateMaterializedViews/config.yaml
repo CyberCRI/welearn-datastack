@@ -1,6 +1,4 @@
-{{- with .Values.          - python
-          - -m
-          - welearn_datastack.nodes_workflow.UpdateMaterializedView.update_materialized_view }}
+{{- with .Values.updateMaterializedViews }}
 {{- $config := dict}}
 {{- $_ := merge $config $.Values.common.config}}
 {{- $_ := merge $config .config}}
