@@ -4,12 +4,12 @@ kind: WorkflowTemplate
 metadata:
   name: {{ .name }}
 spec:
-  entrypoint: all
+  entrypoint: refresh-view
   serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
   securityContext:
     {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
   templates:
-    - name: refresh_view
+    - name: refresh-view
       inputs:
         parameters:
           - name: view_name
