@@ -8,27 +8,8 @@ spec:
   serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
   securityContext:
     {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
-  {{- if $.Values.common.runOnGpu }}
-  affinity:
-    nodeAffinity:
-      preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 1
-        preference:
-          matchExpressions:
-          - key: gpu-node
-            operator: In
-            values:
-            - "true"
-  tolerations:
-  - key: "Gpu"
-    operator: "Equal"
-    value: "true"
-    effect: "NoSchedule"
-  {{- end }}
   templates:
     - name: refresh_view
-      podSpecPatch: >-
-        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"limits\": {\"memory\": \"{{inputs.parameters.memory}}\"}, \"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
       inputs:
         parameters:
           - name: view_name
