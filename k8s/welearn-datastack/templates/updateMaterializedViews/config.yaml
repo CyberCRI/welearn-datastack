@@ -1,19 +1,13 @@
-{{- with .Values.updateMaterializedViews }}
+{{- with .Values.          - python
+          - -m
+          - welearn_datastack.nodes_workflow.UpdateMaterializedView.update_materialized_view }}
 {{- $config := dict}}
-{{- if $.Values.common.config }}
-  {{- $_ := merge $config $.Values.common.config }}
-{{- end }}
-{{- if .config }}
-  {{- $_ := merge $config .config }}
-{{- end }}
+{{- $_ := merge $config $.Values.common.config}}
+{{- $_ := merge $config .config}}
 
 {{- $commonLabels := dict }}
-{{- if $.Values.common.commonLabels }}
-  {{- $_ := merge $commonLabels $.Values.common.commonLabels }}
-{{- end }}
-{{- if .commonLabels }}
-  {{- $_ := merge $commonLabels .commonLabels }}
-{{- end }}
+{{- $_ := merge $commonLabels $.Values.common.commonLabels}}
+{{- $_ := merge $commonLabels .commonLabels}}
 
 {{- $configGenerator := dict
 "config" $config
