@@ -28,6 +28,9 @@ spec:
         - name: secrets
           mountPath: "/secrets"
           readOnly: true
+        env:
+          - name: VIEW_NAME
+            value: {{ print "{{inputs.parameters.view_name}}" }}
 
       volumes:
       - name: secrets

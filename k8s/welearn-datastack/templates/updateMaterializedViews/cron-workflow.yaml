@@ -1,0 +1,41 @@
+{{- with .Values.updateMaterializedViews }}
+{{- if and (.cronWorkflowTemplate.standard.enabled) ($.Values.cronWorkflows.enabled) }}
+kind: CronWorkflow
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: {{ .name }}-cron
+spec:
+  workflowSpec:
+    securityContext:
+      {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
+    templates:
+      - name: all
+        steps:
+          - - name: refresh-qty-document-in-qdrant
+              templateRef:
+                name: {{ .name }}-run-node
+                template: refresh-view
+              arguments:
+                parameters:
+                  - name: view_name
+                    value: document_related.qty_document_in_qdrant
+            - name: refresh-qty-document-in-qdrant-per-corpus
+              templateRef:
+                name: {{ .name }}-run-node
+                template: refresh-view
+              arguments:
+                parameters:
+                  - name: view_name
+                    value: document_related.qty_document_in_qdrant_per_corpus
+            - name: refresh-qty-document-per-corpus
+              templateRef:
+                name: {{ .name }}-run-node
+                template: refresh-view
+              arguments:
+                parameters:
+                  - name: view_name
+                    value: document_related.qty_document_per_corpus
+    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  schedules: [{{ .cronWorkflowTemplate.standard.schedule }}]
+{{- end }}
+{{- end }}
