@@ -30,7 +30,7 @@ spec:
                 - name: view_name
                   value: document_related.qty_document_per_corpus
 
-    - name: refresh-view
+- name: refresh-view
       inputs:
         parameters:
           - name: view_name
@@ -38,6 +38,9 @@ spec:
       {{- with $.Values.image }}
         image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
       {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
         args:
           - python
           - "-m"
@@ -46,9 +49,6 @@ spec:
         - name: secrets
           mountPath: "/secrets"
           readOnly: true
-      envFrom:
-        - configMapRef:
-            name: {{ .name }}
 
   volumes:
     - name: secrets
