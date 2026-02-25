@@ -12,7 +12,7 @@ spec:
         steps:
           - - name: refresh-qty-document-in-qdrant
               templateRef:
-                name: {{ .name }}-run-node
+                name: {{ .name }}
                 template: refresh-view
               arguments:
                 parameters:
@@ -20,7 +20,7 @@ spec:
                     value: document_related.qty_document_in_qdrant
             - name: refresh-qty-document-in-qdrant-per-corpus
               templateRef:
-                name: {{ .name }}-run-node
+                name: {{ .name }}
                 template: refresh-view
               arguments:
                 parameters:
@@ -28,7 +28,7 @@ spec:
                     value: document_related.qty_document_in_qdrant_per_corpus
             - name: refresh-qty-document-per-corpus
               templateRef:
-                name: {{ .name }}-run-node
+                name: {{ .name }}
                 template: refresh-view
               arguments:
                 parameters:
