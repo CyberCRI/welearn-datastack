@@ -45,6 +45,7 @@ spec:
       volumeMounts:
         - name: secrets
           mountPath: "/secrets"
+          readOnly: true
       envFrom:
         - configMapRef:
             name: {{ .name }}
