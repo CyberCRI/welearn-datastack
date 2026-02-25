@@ -362,3 +362,8 @@ updateMaterializedViews:
   config:
     sensitive: {}
     nonSensitive: {}
+
+  resourcesPrefix: update-materialized-views
+
+  commonLabels:
+    app.kubernetes.io/component: update-materialized-views
