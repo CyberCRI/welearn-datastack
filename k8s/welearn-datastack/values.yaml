@@ -359,3 +359,6 @@ updateMaterializedViews:
   cronWorkflowTemplate:
     standard:
       schedule: 0 4 * * *
+  config:
+    sensitive: {}
+    nonSensitive: {}
