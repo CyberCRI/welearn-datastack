@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 import re
-from typing import List, Optional
+from typing import List
 
 import pydantic
 import requests
@@ -33,7 +33,7 @@ def clean_str(string: str):
 
 
 class IRDLeMagCollector(IPluginScrapeCollector):
-    related_corpus = "ird_le_mag"
+    related_corpus = "ird-le-mag"
 
     def __init__(self):
         super().__init__()

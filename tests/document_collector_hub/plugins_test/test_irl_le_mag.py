@@ -26,7 +26,7 @@ class TestIRDLeMagCollector(TestCase):
         ).read_text()
 
     def test_check_related_corpus(self):
-        self.assertEqual(self.collector.related_corpus, "ird_le_mag")
+        self.assertEqual(self.collector.related_corpus, "ird-le-mag")
 
     def test__extract_content_ok(self):
         start = "Le second métier des femmes pauvres : faire fonctionner l’économie et l’Etat social"
