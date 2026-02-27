@@ -7,7 +7,12 @@ from bs4 import BeautifulSoup
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
-from welearn_datastack.exceptions import NoContent, NoDescriptionFoundError, NoTitle
+from welearn_datastack.exceptions import (
+    NoContent,
+    NoDescriptionFoundError,
+    NotEnoughData,
+    NoTitle,
+)
 from welearn_datastack.plugins.scrapers.ird_le_mag import IRDLeMagCollector
 
 
@@ -131,3 +136,32 @@ class TestIRDLeMagCollector(TestCase):
         }
 
         self.assertDictEqual(details, awaited_details)
+
+    @patch("welearn_datastack.plugins.scrapers.ird_le_mag.IRDLeMagCollector._get_page")
+    def test_run_request_exception(self, mock_get_page):
+        import requests
+
+        mock_get_page.side_effect = requests.exceptions.RequestException(
+            "Network error"
+        )
+        doc = WeLearnDocument(
+            url="https://lemag.ird.fr/fr/le-second-metier-des-femmes-pauvres-faire-fonctionner-leconomie-et-letat-social",
+            corpus_id=uuid.uuid4(),
+        )
+        result = self.collector.run([doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsNotNone(result[0].error_info)
+        self.assertIn("Error while retrieving IRD Le Mag", result[0].error_info)
+
+    @patch("welearn_datastack.plugins.scrapers.ird_le_mag.IRDLeMagCollector._get_page")
+    def test_run_not_enough_data(self, mock_get_page):
+        # Simule une exception NotEnoughData
+        mock_get_page.side_effect = NotEnoughData("Not enough data")
+        doc = WeLearnDocument(
+            url="https://lemag.ird.fr/fr/le-second-metier-des-femmes-pauvres-faire-fonctionner-leconomie-et-letat-social",
+            corpus_id=uuid.uuid4(),
+        )
+        result = self.collector.run([doc])
+        self.assertEqual(len(result), 1)
+        self.assertIsNotNone(result[0].error_info)
+        self.assertIn("Not enough data to retrieve document", result[0].error_info)
