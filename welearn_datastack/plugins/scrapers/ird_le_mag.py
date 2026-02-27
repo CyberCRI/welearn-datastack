@@ -1,42 +1,29 @@
 import datetime
-import io
 import json
 import logging
-import math
 import os
 import re
-import time
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import pydantic
 import requests
 from bs4 import BeautifulSoup, ResultSet  # type: ignore
-from requests.exceptions import RequestException
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
-from welearn_datastack.data.details_dataclass.topics import TopicDetails
 from welearn_datastack.exceptions import (
     NoContent,
     NoDescriptionFoundError,
     NotEnoughData,
     NoTitle,
 )
-from welearn_datastack.modules.pdf_extractor import (
-    delete_accents,
-    delete_non_printable_character,
-    extract_txt_from_pdf_with_tika,
-    remove_hyphens,
-    replace_ligatures,
-)
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 
