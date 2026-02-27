@@ -65,3 +65,16 @@ class TestIRDLeMagCollector(TestCase):
             BeautifulSoup(self.html_page.replace("info-item name", "toto"))
         )
         self.assertListEqual(awaited_result, return_value)
+
+    def test___extract_publication_date(self):
+        awaited_result = self.collector._extract_publication_date(
+            BeautifulSoup(self.html_page)
+        )
+        self.assertEqual(awaited_result, 1772110501)
+
+    def test___extract_publication_date_no_date(self):
+        awaited_result = None
+        return_value = self.collector._extract_publication_date(
+            BeautifulSoup(self.html_page.replace("time", "toto"))
+        )
+        self.assertEqual(awaited_result, return_value)
