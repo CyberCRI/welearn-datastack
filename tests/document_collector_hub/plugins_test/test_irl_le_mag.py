@@ -78,7 +78,7 @@ class TestIRDLeMagCollector(TestCase):
         awaited_result = self.collector._extract_publication_date(
             BeautifulSoup(self.html_page)
         )
-        self.assertEqual(awaited_result, 1772110501)
+        self.assertEqual(awaited_result, 1772114101)
 
     def test___extract_publication_date_no_date(self):
         awaited_result = None
@@ -130,7 +130,7 @@ class TestIRDLeMagCollector(TestCase):
             "authors": [
                 AuthorDetails(name="Olivier Blot", misc=""),
             ],
-            "publication_date": 1772110501,
+            "publication_date": 1772114101,
             "license_url": "https://lemag.ird.fr/fr/mentions-legales-0",
             "type": "article",
         }

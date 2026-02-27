@@ -110,6 +110,7 @@ class IRDLeMagCollector(IPluginScrapeCollector):
             t_format = "%Y-%m-%dT%H:%M:%SZ"
             pub_date_tag = soup.find("time", class_="datetime")
             dt = datetime.datetime.strptime(pub_date_tag["datetime"], t_format)
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
             ret = int(dt.timestamp())
         except Exception as e:
             logger.exception(
