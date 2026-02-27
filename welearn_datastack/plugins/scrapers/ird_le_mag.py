@@ -33,23 +33,11 @@ def clean_str(string: str):
     return ret
 
 
-def format_news_keywords(raw_news_keywords: Optional[str]) -> List[str]:
-    if raw_news_keywords is None:
-        return []
-    elif "," in raw_news_keywords:
-        keywords = raw_news_keywords.split(",")
-        return [keyword.strip() for keyword in keywords]
-    else:
-        return [raw_news_keywords.strip()]
-
-
 class IRDLeMagCollector(IPluginScrapeCollector):
     related_corpus = "ird_le_mag"
 
     def __init__(self):
         super().__init__()
-        self.timeout = int(os.environ.get("SCRAPING_TIMEOUT", 60))
-        self.tika_address = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
 
     @staticmethod
     def _get_page(url: str) -> str:
@@ -95,11 +83,13 @@ class IRDLeMagCollector(IPluginScrapeCollector):
     @staticmethod
     def _extract_title(soup: BeautifulSoup) -> str:
         title_tag = soup.find("meta", property="og:title")
+        if not title_tag:
+            raise NoTitle
         try:
             title = title_tag["content"]
         except KeyError as e:
             raise NoTitle from e
-        return title
+        return clean_str(title)
 
     @staticmethod
     def _extract_authors(soup: BeautifulSoup) -> list[AuthorDetails | None]:
@@ -111,6 +101,7 @@ class IRDLeMagCollector(IPluginScrapeCollector):
         content_author_info = author_info.text
         if content_author_info.startswith(prefix):
             content_author_info = content_author_info.replace(prefix, "")
+        content_author_info = content_author_info.strip()
         ret.append(AuthorDetails(name=content_author_info, misc=""))
         return ret
 
