@@ -1,7 +1,10 @@
+import uuid
 from pathlib import Path
 from unittest import TestCase
+from unittest.mock import patch
 
 from bs4 import BeautifulSoup
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.exceptions import NoContent, NoDescriptionFoundError, NoTitle
@@ -97,3 +100,34 @@ class TestIRDLeMagCollector(TestCase):
             self.collector._extract_description(
                 BeautifulSoup(self.html_page.replace("meta", "toto"))
             )
+
+    @patch("welearn_datastack.plugins.scrapers.ird_le_mag.IRDLeMagCollector._get_page")
+    def test_run(self, mock_get_page):
+        awaited_title = "Le second métier des femmes pauvres : faire fonctionner l’économie et l’Etat social | IRD le Mag'"
+        awaited_description = "Accéder à une aide sociale, un logement ou des soins exige un travail invisible, surtout assumé par les femmes. Une inégalité méconnue."
+
+        mock_get_page.return_value = self.html_page
+        doc = WeLearnDocument(
+            url="https://lemag.ird.fr/fr/le-second-metier-des-femmes-pauvres-faire-fonctionner-leconomie-et-letat-social",
+            corpus_id=uuid.uuid4(),
+        )
+        return_values = self.collector.run([doc])
+        self.assertEqual(1, len(return_values))
+        ret = return_values[0]
+        self.assertEqual(ret.document.title, awaited_title)
+        self.assertEqual(ret.document.description, awaited_description)
+        self.assertEqual(
+            ret.document.url,
+            "https://lemag.ird.fr/fr/le-second-metier-des-femmes-pauvres-faire-fonctionner-leconomie-et-letat-social",
+        )
+        details = ret.document.details
+        awaited_details = {
+            "authors": [
+                AuthorDetails(name="Olivier Blot", misc=""),
+            ],
+            "publication_date": 1772110501,
+            "license_url": "https://lemag.ird.fr/fr/mentions-legales-0",
+            "type": "article",
+        }
+
+        self.assertDictEqual(details, awaited_details)
