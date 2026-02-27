@@ -4,7 +4,7 @@ from unittest import TestCase
 from bs4 import BeautifulSoup
 
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
-from welearn_datastack.exceptions import NoContent, NoTitle
+from welearn_datastack.exceptions import NoContent, NoDescriptionFoundError, NoTitle
 from welearn_datastack.plugins.scrapers.ird_le_mag import IRDLeMagCollector
 
 
@@ -78,3 +78,22 @@ class TestIRDLeMagCollector(TestCase):
             BeautifulSoup(self.html_page.replace("time", "toto"))
         )
         self.assertEqual(awaited_result, return_value)
+
+    def test__extract_description(self):
+        awaited_result = "Accéder à une aide sociale, un logement ou des soins exige un travail invisible, surtout assumé par les femmes. Une inégalité méconnue."
+        return_value = self.collector._extract_description(
+            BeautifulSoup(self.html_page)
+        )
+        self.assertEqual(awaited_result, return_value)
+
+    def test__extract_description_nok(self):
+        with self.assertRaises(NoDescriptionFoundError):
+            self.collector._extract_description(
+                BeautifulSoup(self.html_page.replace("content", "toto"))
+            )
+
+    def test__extract_description_nok2(self):
+        with self.assertRaises(NoDescriptionFoundError):
+            self.collector._extract_description(
+                BeautifulSoup(self.html_page.replace("meta", "toto"))
+            )

@@ -122,6 +122,8 @@ class IRDLeMagCollector(IPluginScrapeCollector):
     @staticmethod
     def _extract_description(soup: BeautifulSoup) -> str:
         desc_tag = soup.find("meta", property="og:description")
+        if not desc_tag:
+            raise NoDescriptionFoundError
         try:
             desc = desc_tag["content"]
         except KeyError as e:
