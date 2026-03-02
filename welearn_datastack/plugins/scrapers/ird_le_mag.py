@@ -6,7 +6,7 @@ from typing import List
 
 import pydantic
 import requests
-from bs4 import BeautifulSoup, ResultSet  # type: ignore
+from bs4 import BeautifulSoup  # type: ignore
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import HEADERS
@@ -112,9 +112,9 @@ class IRDLeMagCollector(IPluginScrapeCollector):
             dt = datetime.datetime.strptime(pub_date_tag["datetime"], t_format)
             dt = dt.replace(tzinfo=datetime.timezone.utc)
             ret = int(dt.timestamp())
-        except Exception as e:
+        except (AttributeError, KeyError, TypeError, ValueError) as e:
             logger.exception(
-                f"Exception happen when publication date is collected: {e}"
+                f"An exception occurred while the publication date was being collected: {e}"
             )
             return None
         return ret
@@ -150,7 +150,7 @@ class IRDLeMagCollector(IPluginScrapeCollector):
                 }
                 ret.append(WrapperRetrieveDocument(document=document))
             except requests.exceptions.RequestException as e:
-                msg = f"Error while retrieving IRD Le Mag ({document.url}) document from this url : {e}"
+                msg = f"Error while retrieving IRD Le Mag document ({document.url}): {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
@@ -161,7 +161,7 @@ class IRDLeMagCollector(IPluginScrapeCollector):
                 )
                 continue
             except pydantic.ValidationError as e:
-                msg = f"Error while validating IRD Le Mag  ({document.url}) : {e}"
+                msg = f"Error while validating IRD Le Mag ({document.url}) : {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(

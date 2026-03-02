@@ -389,7 +389,7 @@ spec:
                   - name: rss_url
                     value: https://rss.diffbot.com/rss?url=https://lemag.ird.fr/fr/recherche
                   - name: corpus_name
-                    value: ird_le_mag
+                    value: ird-le-mag
                   - name: corpus_fix
                     value: "true"
 
