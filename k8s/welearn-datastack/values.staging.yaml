@@ -14,4 +14,4 @@ common:
     qdrant_url: http://qdrant-grpc.qdrant
 
 cronWorkflows:
-  enabled: true
+  enabled: false
