@@ -150,7 +150,9 @@ class IRDLeMagCollector(IPluginScrapeCollector):
                 }
                 ret.append(WrapperRetrieveDocument(document=document))
             except requests.exceptions.RequestException as e:
-                msg = f"Error while retrieving IRD Le Mag document ({document.url}): {e}"
+                msg = (
+                    f"Error while retrieving IRD Le Mag document ({document.url}): {e}"
+                )
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
