@@ -1,4 +1,5 @@
 {{- with .Values.updateMaterializedViews }}
+{{- if and (.cronWorkflowTemplate.standard.enabled) ($.Values.cronWorkflows.enabled) }}
 kind: CronWorkflow
 apiVersion: argoproj.io/v1alpha1
 metadata:
@@ -36,4 +37,5 @@ spec:
                     value: document_related.qty_document_per_corpus
     serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
   schedules: [{{ .cronWorkflowTemplate.standard.schedule }}]
+{{- end }}
 {{- end }}
