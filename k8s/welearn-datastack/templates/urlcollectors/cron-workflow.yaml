@@ -360,15 +360,6 @@ spec:
                   - name: corpus_fix
                     value: "true"
 
-            - name: pressbooks
-              templateRef:
-                name: {{ .name }}
-                template: collect-pressbooks
-              arguments:
-                parameters:
-                  - name: pb_app_id
-                    value: K0SNCQLM4A
-
             - name: unccelearn
               templateRef:
                 name: {{ .name }}
@@ -388,6 +379,20 @@ spec:
               templateRef:
                 name: {{ .name }}
                 template: collect-unesdoc
+
+            - name: ird-le-mag
+              templateRef:
+                name: {{ .name }}
+                template: collect-rss
+              arguments:
+                parameters:
+                  - name: rss_url
+                    value: https://rss.diffbot.com/rss?url=https://lemag.ird.fr/fr/recherche
+                  - name: corpus_name
+                    value: ird-le-mag
+                  - name: corpus_fix
+                    value: "true"
+
 
 {{- end }}
 {{- end }}

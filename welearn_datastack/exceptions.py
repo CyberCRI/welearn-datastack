@@ -165,10 +165,6 @@ class NoCorpusFoundInDb(Exception):
     """Raise when there is no corpus found in database"""
 
 
-class NoDescriptionFoundError(Exception):
-    """Raised when there is no description found"""
-
-
 class PDFPagesSizeExceedLimit(Exception):
     """
     Raised when the PDF pages are too big
@@ -229,3 +225,16 @@ class NoContent(NotEnoughData):
 
     def __init__(self, msg="No content found in this document", *args):
         super().__init__(msg, *args)
+
+
+class NoTitle(NotEnoughData):
+    """
+    No title found in this document
+    """
+
+    def __init__(self, msg="No title found in this document", *args):
+        super().__init__(msg, *args)
+
+
+class NoDescriptionFoundError(NotEnoughData):
+    """Raised when there is no description found"""
