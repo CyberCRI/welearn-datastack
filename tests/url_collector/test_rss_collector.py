@@ -40,3 +40,34 @@ class Test(TestCase):
             self.assertEqual(collected[i].url, f"https://www.example.com/article{i+1}")
             self.assertEqual(collected[i].corpus.source_name, "test")
             self.assertEqual(collected[i].corpus.is_fix, False)
+
+    @patch("welearn_datastack.collectors.rss_collector.get_new_https_session")
+    def test_rss_urlcollector_different_domain(self, mock_get_new_https_session):
+        """
+        Test the collect method of the RSSURLCollector class, on a rss file with 3 rows
+        """
+
+        mock_session = Mock()
+        mock_response = Mock()
+        mock_get_new_https_session.return_value = mock_session
+        mock_session.ok.return_value = True
+        mock_session.get.return_value = mock_response
+
+        localmock_corpus = Corpus(
+            source_name="test_org", is_fix=True, main_url="https://www.example.org"
+        )
+
+        local_rss = self.rss_content.replace("example.com", "example.org")
+
+        mock_response.content = local_rss.encode("utf-8")
+
+        rss_collector = RssURLCollector(
+            feed_url="https://www.example.com", corpus=localmock_corpus
+        )
+        collected = rss_collector.collect()
+        self.assertEqual(3, len(collected))
+
+        for i in range(0, len(collected)):
+            self.assertEqual(collected[i].url, f"https://www.example.org/article{i+1}")
+            self.assertEqual(collected[i].corpus.source_name, "test_org")
+            self.assertEqual(collected[i].corpus.is_fix, True)
