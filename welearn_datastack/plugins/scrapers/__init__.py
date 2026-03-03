@@ -2,6 +2,7 @@ from typing import List, Type
 
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.plugins.scrapers.conversation import ConversationCollector
+from welearn_datastack.plugins.scrapers.ird_le_mag import IRDLeMagCollector
 from welearn_datastack.plugins.scrapers.oe_books import OpenEditionBooksCollector
 from welearn_datastack.plugins.scrapers.peerj import PeerJCollector
 from welearn_datastack.plugins.scrapers.plos import PlosCollector
@@ -13,4 +14,5 @@ plugins_scrape_list: List[Type[IPluginScrapeCollector]] = [
     PlosCollector,
     OpenEditionBooksCollector,
     UNCCeLearnCollector,
+    IRDLeMagCollector,
 ]
