@@ -10,7 +10,9 @@ from welearn_datastack.collectors.atom_collector import AtomURLCollector
 class Test(TestCase):
     def setUp(self) -> None:
         self.rss_file_path = Path(__file__).parent / "resources" / "atom_file.xml"
-        self.mock_corpus = Corpus(source_name="test", is_fix=True)
+        self.mock_corpus = Corpus(
+            source_name="test", is_fix=True, main_url="https://www.example.com"
+        )
         with self.rss_file_path.open(mode="r") as f:
             self.rss_content = f.read()
 

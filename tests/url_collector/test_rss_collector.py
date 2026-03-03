@@ -9,7 +9,9 @@ from welearn_datastack.collectors.rss_collector import RssURLCollector
 
 class Test(TestCase):
     def setUp(self) -> None:
-        self.mock_corpus = Corpus(source_name="test", is_fix=False)
+        self.mock_corpus = Corpus(
+            source_name="test", is_fix=False, main_url="https://www.example.com"
+        )
         self.rss_file_path = Path(__file__).parent / "resources" / "rss_file.rss"
         with self.rss_file_path.open(mode="r") as f:
             self.rss_content = f.read()
