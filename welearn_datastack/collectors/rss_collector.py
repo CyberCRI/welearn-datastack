@@ -22,7 +22,7 @@ class RssURLCollector(URLCollector):
         self.corpus = corpus
 
     def collect(self) -> List[WeLearnDocument]:
-        domain = "https://" + urlparse(self.feed_url).netloc
+        domain = "https://" + urlparse(self.corpus.main_url).netloc
         client = get_new_https_session()
         res = client.get(url=self.feed_url, headers=HEADERS)
         content = res.content.decode("utf-8")
