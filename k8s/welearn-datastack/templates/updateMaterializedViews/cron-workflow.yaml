@@ -3,7 +3,7 @@
 kind: CronWorkflow
 apiVersion: argoproj.io/v1alpha1
 metadata:
-  name: {{ .name }}-cron
+  name: cron-{{ .name }}
 spec:
   workflowSpec:
     securityContext:
