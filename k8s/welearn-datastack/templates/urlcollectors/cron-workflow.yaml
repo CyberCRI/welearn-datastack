@@ -387,7 +387,7 @@ spec:
               arguments:
                 parameters:
                   - name: rss_url
-                    value: https://rss.diffbot.com/rss?url=https://lemag.ird.fr/fr/recherche
+                    value: https://politepaul.com/fd/sAwe7MlKNr2j.xml
                   - name: corpus_name
                     value: ird-le-mag
                   - name: corpus_fix
