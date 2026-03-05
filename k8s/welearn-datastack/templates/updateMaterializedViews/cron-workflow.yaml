@@ -35,5 +35,6 @@ spec:
                   - name: view_name
                     value: document_related.qty_document_per_corpus
     serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+    entrypoint: all
   schedules: [{{ .cronWorkflowTemplate.standard.schedule }}]
 {{- end }}
