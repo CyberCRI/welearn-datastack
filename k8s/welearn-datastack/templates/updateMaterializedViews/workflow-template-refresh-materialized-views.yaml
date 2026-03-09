@@ -20,6 +20,10 @@ spec:
         envFrom:
           - configMapRef:
               name: {{ .name }}
+        env:
+          - name: VIEW_NAME
+            value: >-
+              {{ print "{{inputs.parameters.view_name}}" }}
         args:
           - python
           - -m
