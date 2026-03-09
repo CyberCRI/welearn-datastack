@@ -45,7 +45,7 @@ def update_materialized_view(view_name: str) -> None:
 
 
 def main():
-    view_name = os.getenv("VIEW_NAME", "document_related.qty_document_in_qdrant")
+    view_name = os.getenv("VIEW_NAME", None)
     if not view_name:
         logger.error("VIEW_NAME environment variable is not set.")
         raise ValueError("VIEW_NAME environment variable is required.")
