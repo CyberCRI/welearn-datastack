@@ -297,6 +297,41 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
     @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
     @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
     @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
+    def test_run_fao_copyright(
+        self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
+    ):
+        fao_authorized_item = self.item.model_copy()
+        del fao_authorized_item.metadata["dc.rights.license"]
+        fao_authorized_item.metadata["dc.rights.copyright"] = [
+            {
+                "value": "FAO",
+                "language": None,
+                "authority": None,
+                "confidence": -1,
+                "place": 0,
+            }
+        ]
+        mock_get_metadata.return_value = fao_authorized_item
+        mock_get_bundle.return_value = [self.bundle]
+        mock_get_pdf.return_value = "PDF content extracted. Lorem Ipsum."
+        mock_get_bitstream.return_value = self.bitstream
+        result = self.collector.run([self.doc])
+        self.assertEqual(len(result), 1)
+        doc_result = result[0]
+        self.assertIsNone(doc_result.error_info)
+        self.assertIn("full_content", doc_result.document.__dict__)
+        self.assertEqual(
+            doc_result.document.full_content, "PDF content extracted. Lorem Ipsum."
+        )
+        self.assertEqual(
+            doc_result.document.details.get("license_url"),
+            "https://openknowledge.fao.org/3/i9461en/online/i9461en.html",
+        )
+
+    @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
+    @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")
+    @patch.object(FAOOpenKnowledgeCollector, "get_bundle_json")
+    @patch.object(FAOOpenKnowledgeCollector, "get_metadata_json")
     def test_run_withdrawn(
         self, mock_get_metadata, mock_get_bundle, mock_get_pdf, mock_get_bitstream
     ):

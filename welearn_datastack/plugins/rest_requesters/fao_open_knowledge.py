@@ -24,7 +24,6 @@ from welearn_datastack.exceptions import (
     NoContent,
     NoDescriptionFoundError,
     NotExpectedMoreThanOneItem,
-    PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedState,
 )
@@ -100,12 +99,19 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         md_item = fao_item.metadata.get("dc.rights.license", None)
 
         if not md_item:
+            # Trying to get old copyrights
+            md_item = fao_item.metadata.get("dc.rights.copyright", None)
+
+        if not md_item:
             raise UnauthorizedLicense("No license found.")
 
         try:
-            messy_licence = md_item[0]["value"]
+            messy_licence: str = md_item[0]["value"]
         except (KeyError, IndexError, TypeError):
             raise UnauthorizedLicense("No license found.")
+
+        if messy_licence.lower() == "fao":
+            return "https://openknowledge.fao.org/3/i9461en/online/i9461en.html"
 
         return format_cc_license(messy_licence.replace(" ", "-"))
 

@@ -182,6 +182,7 @@ AUTHORIZED_LICENSES = [
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/4.0/",
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/3.0/",
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/3.0/igo/",
+    "https://openknowledge.fao.org/3/i9461en/online/i9461en.html",
 ]
 HEADERS = {
     "Accept": "text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
