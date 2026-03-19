@@ -118,7 +118,15 @@ def main() -> None:
                 key_external_sdg in s.document.details
                 and s.document.details[key_external_sdg]
             )
-            if bi_classify_slice(slice_=s, classifier_model_name=bi_model_name):
+            if externaly_classified_flag:
+                logger.info(f"Document {key_doc_id} is externally classified ")
+
+            if externaly_classified_flag or bi_classify_slice(
+                slice_=s, classifier_model_name=bi_model_name
+            ):
+                logger.info(
+                    f"Document {key_doc_id} is classified as SDG by bi-classifier"
+                )
                 specific_sdg = n_classify_slice(
                     _slice=s,
                     classifier_model_name=n_model_name,
@@ -132,6 +140,9 @@ def main() -> None:
                 )
                 if not specific_sdg:
                     continue
+                logger.info(
+                    f"Document {key_doc_id} is classified as SDG {specific_sdg.sdg_n} by n-classifier"
+                )
                 specific_sdgs.append(specific_sdg)
                 sdg_docs_ids.add(key_doc_id)
 
