@@ -51,6 +51,7 @@ def n_classify_slice(
     bi_classifier_id: uuid.UUID,
     n_classifier_id: uuid.UUID,
     forced_sdg: None | list = None,
+    is_forced_corpus: bool = False,
 ) -> Sdg | None:
     """
     n classifier for welearn sliced containers to classify them into one of the 17 SDGs
@@ -59,12 +60,13 @@ def n_classify_slice(
     :param bi_classifier_id: The id of the bi-classifier model used to classify the slice as SDG or not, to keep track of the models used for classification
     :param n_classifier_id: The id of the n-classifier model used to classify the slice into one of the 17 SDGs, to keep track of the models used for classification
     :param forced_sdg: If not None, list of SDG numbers to force the classification on, if None, all SDGs are possible
+    :param is_forced_corpus: If True, the classification is forced even if the bi-classifier does not classify the slice as SDG, to keep track of the corpus that are forced classified
 
     :return: Sdg object if classified as one of the SDGs, None otherwise
     :raises ValueError: If the embedding of the slice is not of type bytes
     """
     # By default every SDGs are equally possible
-    is_forced = bool(forced_sdg)
+    is_forced_sdg_classif = bool(forced_sdg)
     if not forced_sdg:
         forced_sdg = [sdg_n + 1 for sdg_n in range(0, 17)]
 
@@ -105,7 +107,7 @@ def n_classify_slice(
     best_sdg, best_score = proba_lst[0]
 
     # If there is no forced SDG and no SDGs with more than 0.5 threshold
-    if not is_forced and best_score <= 0.5:
+    if not (is_forced_corpus or is_forced_sdg_classif) and best_score <= 0.5:
         return None
 
     logger.debug(
