@@ -51,9 +51,35 @@ def n_classify_slice(
     bi_classifier_id: uuid.UUID,
     n_classifier_id: uuid.UUID,
     forced_sdg: None | list = None,
+    is_forced_corpus: bool = False,
 ) -> Sdg | None:
+    """
+    n classifier for welearn sliced containers to classify them into one of the 17 SDGs
+    :param classifier_model_name: The name of the classifier model, which also the name of the file
+    :param _slice: Input of welearn sliced container
+    :param bi_classifier_id: The id of the bi-classifier model used to classify the slice as SDG or not, to keep track of the models used for classification
+    :param n_classifier_id: The id of the n-classifier model used to classify the slice into one of the 17 SDGs, to keep track of the models used for classification
+    :param forced_sdg: If not None, list of SDG numbers to force the classification on, if None, all SDGs are possible
+    :param is_forced_corpus: If True, the classification is forced even if the bi-classifier does not classify the slice as SDG, to keep track of the corpus that are forced classified
+
+    :return: Sdg object if classified as one of the SDGs, None otherwise
+    :raises ValueError: If the embedding of the slice is not of type bytes
+    """
+    # By default every SDGs are equally possible
+    is_forced_sdg_classif = bool(forced_sdg)
     if not forced_sdg:
         forced_sdg = [sdg_n + 1 for sdg_n in range(0, 17)]
+
+    # If there is only one forced sdg return it
+    if len(forced_sdg) == 1:
+        [sdg_number] = forced_sdg
+        return Sdg(
+            slice_id=_slice.id,
+            sdg_number=sdg_number,
+            id=uuid.uuid4(),
+            bi_classifier_model_id=bi_classifier_id,
+            n_classifier_model_id=n_classifier_id if not forced_sdg else None,
+        )
 
     logger.debug("Loading multiclass classifier model %s", classifier_model_name)
     classifier_path = generate_ml_models_path(
@@ -78,19 +104,19 @@ def n_classify_slice(
     ]
     proba_lst.sort(key=lambda x: x[1], reverse=True)
 
-    # If the score is superior to 0.5
-    sdg_number = proba_lst[0][0] if proba_lst[0][1] > 0.5 else None
-    if sdg_number:
-        logger.debug(
-            f"Slice {_slice.id} is labelized with SDG {proba_lst[0][0]} with {proba_lst[0][1]} score"
-        )
-        # Create Sdg object, associating it with the slice and classifiers except if forced_sdg is provided because
-        # in this case we assume classification was done outside the pipeline
-        return Sdg(
-            slice_id=_slice.id,
-            sdg_number=sdg_number,
-            id=uuid.uuid4(),
-            bi_classifier_model_id=bi_classifier_id,
-            n_classifier_model_id=n_classifier_id if not forced_sdg else None,
-        )
-    return None
+    best_sdg, best_score = proba_lst[0]
+
+    # If there is no forced SDG and no SDGs with more than 0.5 threshold
+    if not (is_forced_corpus or is_forced_sdg_classif) and best_score <= 0.5:
+        return None
+
+    logger.debug(
+        f"Slice {_slice.id} is labelized with SDG {best_sdg} with {best_score} score"
+    )
+    return Sdg(
+        slice_id=_slice.id,
+        sdg_number=best_sdg,
+        id=uuid.uuid4(),
+        bi_classifier_model_id=bi_classifier_id,
+        n_classifier_model_id=n_classifier_id if not forced_sdg else None,
+    )

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import DocumentSlice, ProcessState, Sdg
 
+from welearn_datastack.constants import FORCED_CORPUS_CLASSIFIED
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.modules.retrieve_data_from_database import retrieve_models
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
@@ -84,7 +85,11 @@ def main() -> None:
         slices_per_docs, lambda x: x.document_id
     ):
         doc_slices: List[DocumentSlice] = list(group_doc_slices)  # type: ignore
-
+        corpus_name = doc_slices[0].document.corpus.source_name
+        is_forced_corpus = corpus_name in FORCED_CORPUS_CLASSIFIED
+        logger.info(
+            f"Classifying document {key_doc_id} from corpus {corpus_name} with {len(doc_slices)} slices"
+        )
         bi_model_name = bi_model_by_docid.get(key_doc_id, dict()).get("model_name")
         bi_model_id: UUID = bi_model_by_docid.get(key_doc_id, dict()).get("model_id")
         if not bi_model_name and not isinstance(bi_model_name, str):
@@ -118,7 +123,17 @@ def main() -> None:
                 key_external_sdg in s.document.details
                 and s.document.details[key_external_sdg]
             )
-            if bi_classify_slice(slice_=s, classifier_model_name=bi_model_name):
+            if externaly_classified_flag:
+                logger.info(f"Document {key_doc_id} is externally classified ")
+
+            if (
+                externaly_classified_flag
+                or is_forced_corpus
+                or bi_classify_slice(slice_=s, classifier_model_name=bi_model_name)
+            ):
+                logger.info(
+                    f"Document {key_doc_id} is classified as SDG by bi-classifier"
+                )
                 specific_sdg = n_classify_slice(
                     _slice=s,
                     classifier_model_name=n_model_name,
@@ -129,9 +144,13 @@ def main() -> None:
                     ),
                     bi_classifier_id=bi_model_id,
                     n_classifier_id=n_model_id,
+                    is_forced_corpus=is_forced_corpus,
                 )
                 if not specific_sdg:
                     continue
+                logger.info(
+                    f"Document {key_doc_id} is classified as SDG {specific_sdg.sdg_number} by n-classifier"
+                )
                 specific_sdgs.append(specific_sdg)
                 sdg_docs_ids.add(key_doc_id)
 

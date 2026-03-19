@@ -26,6 +26,7 @@ from welearn_datastack.data.enumerations import (
     URLRetrievalType,
     WeighedScope,
 )
+from welearn_datastack.exceptions import NoModelFoundError
 from welearn_datastack.types import QuerySizeLimitDocument, QuerySizeLimitSlice
 
 logger = logging.getLogger(__name__)
@@ -416,3 +417,40 @@ def retrieve_slices_sdgs(
     )
 
     return {s[0]: s[1] for s in slices_sdgs}
+
+
+def get_model_classification_model_by_id(
+    db_session, model_id: UUID
+) -> BiClassifierModel | NClassifierModel | EmbeddingModel:
+    """
+    Retrieve a model from the database by its ID, and return it as the correct type (BiClassifierModel, NClassifierModel or EmbeddingModel)
+
+    :param db_session: Database session
+    :param model_id: Model ID to retrieve
+    :return: The model retrieved from the database, as the correct type
+    """
+    model = (
+        db_session.query(BiClassifierModel)
+        .filter(BiClassifierModel.id == model_id)
+        .first()
+    )
+    if model:
+        return model
+
+    model = (
+        db_session.query(NClassifierModel)
+        .filter(NClassifierModel.id == model_id)
+        .first()
+    )
+    if model:
+        return model
+
+    model = (
+        db_session.query(EmbeddingModel).filter(EmbeddingModel.id == model_id).first()
+    )
+    if model:
+        return model
+
+    raise NoModelFoundError(
+        f"Model not found in the database according this id : {model_id}"
+    )

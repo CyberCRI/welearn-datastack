@@ -35,6 +35,7 @@ def main() -> None:
     parallelism_max: int = int(os.getenv("PARALLELISM_URL_MAX", 15))
     batch_urls_directory: str = os.getenv("BATCH_URLS_DIRECTORY", "batch_urls")
     qty_max_str: str | None = os.getenv("PICK_QTY_MAX", None)
+    corpus_name: str = os.getenv("PICK_CORPUS_NAME", "*")
     size_limit_str: str | None = os.getenv("SIZE_TOTAL_LIMIT", None)
 
     qty_max: int | None = None
@@ -69,6 +70,7 @@ def main() -> None:
             process_titles=[Step.DOCUMENT_SCRAPED],
             size_total_max=size_limit,
             weighed_scope=WeighedScope.DOCUMENT,
+            corpus_name=corpus_name,
         )
     )
     logger.info("'%s' Docsids were retrieved", len(ids_to_batch))
