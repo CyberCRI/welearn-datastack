@@ -156,6 +156,28 @@ def clean_text(content: str) -> str:
     return remove_extra_whitespace(remove_html_stuff(content)).strip()
 
 
+def add_space_after_closing_sign(string: str) -> str:
+    """
+    Add a space after a closing sign if there is not already one
+    Args:
+        string (str): the string to clean
+    Returns:
+        str: the cleaned string
+    """
+    return re.sub(r"([.»)\]}])(?=[^\s.,;:!?)»\]}])", r"\1 ", string)
+
+
+def add_space_before_capital_letter(string: str) -> str:
+    """
+    Add a space before a capital letter if there is not already one
+    Args:
+        string (str): the string to clean
+    Returns:
+        str: the cleaned string
+    """
+    return re.sub(r"([a-zàâäéèêëîïôöùûüÿç])([A-ZÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ])", r"\1 \2", string)
+
+
 def get_url_without_hal_like_versionning(url: str) -> str:
     """
     Get the URL without the versionning part

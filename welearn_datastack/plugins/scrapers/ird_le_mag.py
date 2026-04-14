@@ -23,6 +23,12 @@ from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
+from welearn_datastack.utils_.scraping_utils import (
+    add_space_after_closing_sign,
+    clean_return_to_line,
+    clean_text,
+    add_space_before_capital_letter,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -130,6 +136,18 @@ class IRDLeMagCollector(IPluginScrapeCollector):
             raise NoDescriptionFoundError from e
         return desc
 
+    @staticmethod
+    def correct_text_syntax(content: str) -> str:
+        """
+            The content of the page is not well formatted, we need to clean it and add spaces after closing signs and before capital letters
+
+        :param content: the content of the page as a string
+        :return: the content of the page with the correct syntax
+        """
+        return add_space_before_capital_letter(
+            add_space_after_closing_sign(clean_return_to_line(clean_text(content)))
+        )
+
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running IRDLeMagCollector plugin")
         ret: List[WrapperRetrieveDocument] = []
@@ -139,9 +157,13 @@ class IRDLeMagCollector(IPluginScrapeCollector):
                 soup = BeautifulSoup(page, "html.parser")
                 if not page:
                     raise NoContent
-                document.full_content = self._extract_content(page)
+                document.full_content = self.correct_text_syntax(
+                    self._extract_content(page)
+                )
                 document.title = self._extract_title(soup)
-                document.description = self._extract_description(soup)
+                document.description = self.correct_text_syntax(
+                    self._extract_description(soup)
+                )
                 document.details = {
                     "authors": self._extract_authors(soup),
                     "type": "article",
