@@ -1,5 +1,6 @@
 import logging
 import re
+import unicodedata
 from html import unescape
 from html.parser import HTMLParser
 
@@ -50,6 +51,7 @@ def remove_html_stuff(text: str) -> str:
     remover.feed(text + "\n")
     txt = remover.get_text()
     ret = unescape(txt)
+    ret = unicodedata.normalize("NFKD", ret)
     return ret
 
 
@@ -134,7 +136,7 @@ def add_space_after_closing_sign(string: str) -> str:
     Returns:
         str: the cleaned string
     """
-    return re.sub(r"([.»)\]}])(?=[^\s.,;:!?)»\]}])", r"\1 ", string)
+    return re.sub(r"([.»\")\]}])(?=[^\s.,;:!?)»\]}])", r"\1 ", string)
 
 
 def add_space_before_capital_letter(string: str) -> str:
