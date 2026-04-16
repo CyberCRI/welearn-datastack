@@ -25,9 +25,9 @@ from welearn_datastack.utils_.http_client_utils import (
 )
 from welearn_datastack.utils_.scraping_utils import (
     add_space_after_closing_sign,
+    add_space_before_capital_letter,
     clean_return_to_line,
     clean_text,
-    add_space_before_capital_letter,
 )
 
 logger = logging.getLogger(__name__)
