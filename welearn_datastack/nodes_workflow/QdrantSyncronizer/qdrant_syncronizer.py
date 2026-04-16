@@ -25,6 +25,7 @@ from welearn_datastack.modules.retrieve_data_from_database import (
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
+from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
 
 log_level: int = logging.getLevelName(os.getenv("LOG_LEVEL", "INFO"))
 log_format: str = os.getenv(
@@ -230,4 +231,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    load_dotenv_local()
     main()

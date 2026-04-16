@@ -109,7 +109,7 @@ class TestIRDLeMagCollector(TestCase):
     @patch("welearn_datastack.plugins.scrapers.ird_le_mag.IRDLeMagCollector._get_page")
     def test_run(self, mock_get_page):
         awaited_title = "Le second métier des femmes pauvres : faire fonctionner l’économie et l’Etat social | IRD le Mag'"
-        awaited_description = "Accéder à une aide sociale, un logement ou des soins exige un travail invisible, surtout assumé par les femmes. Une inégalité méconnue."
+        awaited_description = "Accéder à une aide sociale, un logement ou des soins exige un travail invisible, surtout assumé par les femmes. Une inégalité méconnue."
 
         mock_get_page.return_value = self.html_page
         doc = WeLearnDocument(
