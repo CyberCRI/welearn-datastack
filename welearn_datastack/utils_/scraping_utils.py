@@ -51,7 +51,6 @@ def remove_html_stuff(text: str) -> str:
     remover.feed(text + "\n")
     txt = remover.get_text()
     ret = unescape(txt)
-    # ret = unicodedata.normalize("NFC", ret)
     return ret
 
 
