@@ -158,12 +158,12 @@ class IRDLeMagCollector(IPluginScrapeCollector):
         for i, document in enumerate(documents):
             if i > 0:
                 logger.info(
-                    "Waiting for %s seconds before scraping the next page to avoid being blocked by the server",
+                    f"Waiting for {self.page_delay} seconds before scraping the next page to avoid being blocked by the server",
                 )
                 time.sleep(self.page_delay)
                 if i % 10 == 0:
                     logger.info(
-                        "Waiting for %s seconds before scraping the next batch of pages to avoid being blocked by the server",
+                        f"Waiting for {self.batch_delay - self.page_delay} seconds before scraping the next batch of pages to avoid being blocked by the server",
                     )
                     time.sleep(self.batch_delay - self.page_delay)
             try:
