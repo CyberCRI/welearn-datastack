@@ -1,7 +1,9 @@
 import datetime
 import json
 import logging
+import os
 import re
+import time
 from typing import List
 
 import pydantic
@@ -43,6 +45,8 @@ class IRDLeMagCollector(IPluginScrapeCollector):
 
     def __init__(self):
         super().__init__()
+        self.page_delay = int(os.environ.get("PAGE_DELAY", 2))
+        self.batch_delay = int(os.environ.get("BATCH_DELAY", 10))
 
     @staticmethod
     def _get_page(url: str) -> str:
@@ -151,7 +155,17 @@ class IRDLeMagCollector(IPluginScrapeCollector):
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running IRDLeMagCollector plugin")
         ret: List[WrapperRetrieveDocument] = []
-        for document in documents:
+        for i, document in enumerate(documents):
+            if i > 0:
+                logger.info(
+                    "Waiting for %s seconds before scraping the next page to avoid being blocked by the server",
+                )
+                time.sleep(self.page_delay)
+                if i % 10 == 0:
+                    logger.info(
+                        "Waiting for %s seconds before scraping the next batch of pages to avoid being blocked by the server",
+                    )
+                    time.sleep(self.batch_delay - self.page_delay)
             try:
                 page = self._get_page(document.url)
                 soup = BeautifulSoup(page, "html.parser")

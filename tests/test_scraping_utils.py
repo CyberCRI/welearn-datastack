@@ -18,8 +18,8 @@ class TestScrapingUtils(TestCase):
         self.assertEqual(ret, awaited_str)
 
     def test_remove_html_stuff(self):
-        input_str = "<p>Lorem&nbspipsum</p>"
-        awaited_str = "Lorem ipsum\n"
+        input_str = "<p>Lorem&nbsp;ipsum</p>"
+        awaited_str = "Lorem ipsum\n"
         ret = remove_html_stuff(input_str)
         self.assertEqual(awaited_str, ret)
 

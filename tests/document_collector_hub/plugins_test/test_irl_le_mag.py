@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
+import requests
 from bs4 import BeautifulSoup
 from welearn_database.data.models import WeLearnDocument
 
@@ -109,7 +110,7 @@ class TestIRDLeMagCollector(TestCase):
     @patch("welearn_datastack.plugins.scrapers.ird_le_mag.IRDLeMagCollector._get_page")
     def test_run(self, mock_get_page):
         awaited_title = "Le second métier des femmes pauvres : faire fonctionner l’économie et l’Etat social | IRD le Mag'"
-        awaited_description = "Accéder à une aide sociale, un logement ou des soins exige un travail invisible, surtout assumé par les femmes. Une inégalité méconnue."
+        awaited_description = "Accéder à une aide sociale, un logement ou des soins exige un travail invisible, surtout assumé par les femmes. Une inégalité méconnue."
 
         mock_get_page.return_value = self.html_page
         doc = WeLearnDocument(
@@ -139,7 +140,6 @@ class TestIRDLeMagCollector(TestCase):
 
     @patch("welearn_datastack.plugins.scrapers.ird_le_mag.IRDLeMagCollector._get_page")
     def test_run_request_exception(self, mock_get_page):
-        import requests
 
         mock_get_page.side_effect = requests.exceptions.RequestException(
             "Network error"
