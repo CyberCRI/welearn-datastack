@@ -143,7 +143,7 @@ class IRDLeMagCollector(IPluginScrapeCollector):
     @staticmethod
     def correct_text_syntax(content: str) -> str:
         """
-            The content of the page is not well formatted, we need to clean it and add spaces after closing signs and before capital letters
+        The content of the page is not well formatted, we need to clean it and add spaces after closing signs and before capital letters
 
         :param content: the content of the page as a string
         :return: the content of the page with the correct syntax

@@ -30,7 +30,7 @@ class TestScrapingUtils(TestCase):
         self.assertEqual(ret, awaited_str)
 
     def test_clean_return_to_line(self):
-        input_str = "Lorem." "Ipsum"
+        input_str = "Lorem.\nIpsum"
 
         awaited_str = "Lorem.Ipsum"
         ret = clean_return_to_line(input_str)

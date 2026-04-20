@@ -135,6 +135,8 @@ def add_space_after_closing_sign(string: str) -> str:
     Returns:
         str: the cleaned string
     """
+    if not isinstance(string, str):
+        return string
     return re.sub(r"([.»\")\]}])(?=[^\s.,;:!?)»\]}])", r"\1 ", string)
 
 
@@ -146,6 +148,8 @@ def add_space_before_capital_letter(string: str) -> str:
     Returns:
         str: the cleaned string
     """
+    if not isinstance(string, str):
+        return string
     return re.sub(r"([a-zàâäéèêëîïôöùûüÿç])([A-ZÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ])", r"\1 \2", string)
 
 
