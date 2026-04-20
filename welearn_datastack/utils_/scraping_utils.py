@@ -1,5 +1,6 @@
 import logging
 import re
+import unicodedata
 from html import unescape
 from html.parser import HTMLParser
 
@@ -70,36 +71,6 @@ def format_cc_license(license: str) -> str:
     )
 
 
-def get_url_license_from_dc_format(soup: BeautifulSoup) -> str:
-    """
-    Extract the license of the document from the DC.rights meta tag.
-    :param soup: BeautifulSoup object of the document.
-    :return: License of the document well formated.
-    """
-    soup_license = soup.find("meta", {"name": "DC.rights"})
-    license = soup_license["content"]  # type: ignore
-
-    en_license_name = "OpenEdition Books License".lower().split()
-    fr_license_name = "Licence OpenEdition Books".lower().split()
-    en_license_name.sort()
-    fr_license_name.sort()
-    other_known_licenses = [en_license_name, fr_license_name]
-
-    license_split_n_sort = license.lower().split()  # type: ignore
-    license_split_n_sort.sort()
-
-    if license.startswith("Creative Commons"):  # type: ignore
-        # It's a CC license
-        full_cc_code = license.split(" - ")[-1].strip()  # type: ignore
-        rights_code = full_cc_code.split(" ")[1].strip()
-        version = full_cc_code.split(" ")[2].strip()
-        well_formated_license = f"https://creativecommons.org/licenses/{rights_code.lower()}/{version.lower()}/"
-        return well_formated_license
-    elif license_split_n_sort in other_known_licenses:
-        return "https://www.openedition.org/12554"
-    return license  # type: ignore
-
-
 def extract_property_from_html(
     soup_find: Tag | NavigableString | None,
     mandatory: bool = True,
@@ -154,6 +125,32 @@ def clean_text(content: str) -> str:
     if not isinstance(content, str):
         return content
     return remove_extra_whitespace(remove_html_stuff(content)).strip()
+
+
+def add_space_after_closing_sign(string: str) -> str:
+    """
+    Add a space after a closing sign if there is not already one
+    Args:
+        string (str): the string to clean
+    Returns:
+        str: the cleaned string
+    """
+    if not isinstance(string, str):
+        return string
+    return re.sub(r"([.»\")\]}])(?=[^\s.,;:!?)»\]}])", r"\1 ", string)
+
+
+def add_space_before_capital_letter(string: str) -> str:
+    """
+    Add a space before a capital letter if there is not already one
+    Args:
+        string (str): the string to clean
+    Returns:
+        str: the cleaned string
+    """
+    if not isinstance(string, str):
+        return string
+    return re.sub(r"([a-zàâäéèêëîïôöùûüÿç])([A-ZÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ])", r"\1 \2", string)
 
 
 def get_url_without_hal_like_versionning(url: str) -> str:

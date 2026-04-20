@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
+import requests
 from bs4 import BeautifulSoup
 from welearn_database.data.models import WeLearnDocument
 
@@ -139,7 +140,6 @@ class TestIRDLeMagCollector(TestCase):
 
     @patch("welearn_datastack.plugins.scrapers.ird_le_mag.IRDLeMagCollector._get_page")
     def test_run_request_exception(self, mock_get_page):
-        import requests
 
         mock_get_page.side_effect = requests.exceptions.RequestException(
             "Network error"

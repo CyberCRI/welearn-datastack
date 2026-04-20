@@ -1,7 +1,9 @@
 import datetime
 import json
 import logging
+import os
 import re
+import time
 from typing import List
 
 import pydantic
@@ -23,6 +25,12 @@ from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
+from welearn_datastack.utils_.scraping_utils import (
+    add_space_after_closing_sign,
+    add_space_before_capital_letter,
+    clean_return_to_line,
+    clean_text,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +45,8 @@ class IRDLeMagCollector(IPluginScrapeCollector):
 
     def __init__(self):
         super().__init__()
+        self.page_delay = int(os.environ.get("PAGE_DELAY", 2))
+        self.batch_delay = int(os.environ.get("BATCH_DELAY", 10))
 
     @staticmethod
     def _get_page(url: str) -> str:
@@ -130,18 +140,44 @@ class IRDLeMagCollector(IPluginScrapeCollector):
             raise NoDescriptionFoundError from e
         return desc
 
+    @staticmethod
+    def correct_text_syntax(content: str) -> str:
+        """
+        The content of the page is not well formatted, we need to clean it and add spaces after closing signs and before capital letters
+
+        :param content: the content of the page as a string
+        :return: the content of the page with the correct syntax
+        """
+        return add_space_before_capital_letter(
+            add_space_after_closing_sign(clean_return_to_line(clean_text(content)))
+        )
+
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running IRDLeMagCollector plugin")
         ret: List[WrapperRetrieveDocument] = []
-        for document in documents:
+        for i, document in enumerate(documents):
+            if i > 0:
+                logger.info(
+                    f"Waiting for {self.page_delay} seconds before scraping the next page to avoid being blocked by the server",
+                )
+                time.sleep(self.page_delay)
+                if i % 10 == 0:
+                    logger.info(
+                        f"Waiting for {self.batch_delay - self.page_delay} seconds before scraping the next batch of pages to avoid being blocked by the server",
+                    )
+                    time.sleep(self.batch_delay - self.page_delay)
             try:
                 page = self._get_page(document.url)
                 soup = BeautifulSoup(page, "html.parser")
                 if not page:
                     raise NoContent
-                document.full_content = self._extract_content(page)
+                document.full_content = self.correct_text_syntax(
+                    self._extract_content(page)
+                )
                 document.title = self._extract_title(soup)
-                document.description = self._extract_description(soup)
+                document.description = self.correct_text_syntax(
+                    self._extract_description(soup)
+                )
                 document.details = {
                     "authors": self._extract_authors(soup),
                     "type": "article",
