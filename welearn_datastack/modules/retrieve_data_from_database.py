@@ -27,7 +27,7 @@ from welearn_datastack.data.enumerations import (
     WeighedScope,
 )
 from welearn_datastack.exceptions import NoModelFoundError
-from welearn_datastack.types import QuerySizeLimitDocument, QuerySizeLimitSlice
+from welearn_datastack.local_types import QuerySizeLimitDocument, QuerySizeLimitSlice
 
 logger = logging.getLogger(__name__)
 
