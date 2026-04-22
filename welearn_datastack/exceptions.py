@@ -113,7 +113,7 @@ class LanguageCodeError(ManagementExceptions):
         super().__init__(self.message)
 
 
-class VersionNumberError(BaseException):
+class VersionNumberError(Exception):
     """Raised when an invalid version number is used"""
 
     def __init__(self, message="Invalid version number, must be an integer"):
@@ -121,7 +121,7 @@ class VersionNumberError(BaseException):
         super().__init__(self.message)
 
 
-class NoPreviousCollectionError(BaseException):
+class NoPreviousCollectionError(Exception):
     """Raised when there is no previous collection"""
 
     def __init__(self, message="No previous collection found"):
@@ -129,7 +129,7 @@ class NoPreviousCollectionError(BaseException):
         super().__init__(self.message)
 
 
-class NoConnectedCollectionError(BaseException):
+class NoConnectedCollectionError(Exception):
     """Raised when there is no connected collection"""
 
     def __init__(self, message="No connected collection found"):
@@ -238,3 +238,7 @@ class NoTitle(NotEnoughData):
 
 class NoDescriptionFoundError(NotEnoughData):
     """Raised when there is no description found"""
+
+
+class NoDOIFoundError(NotEnoughData):
+    """Raised when there is no DOI found"""
