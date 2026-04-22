@@ -54,6 +54,8 @@ class TestScrapePeerJPlugin(unittest.TestCase):
         self.assertTrue(doc_result.document.title)
         self.assertTrue(doc_result.document.description)
         self.assertTrue(doc_result.document.full_content)
+        self.assertEqual(doc_result.document.external_id, "10.7717/peerj.12713")
+        self.assertEqual(doc_result.document.external_id_type, "doi")
         self.assertIsInstance(doc_result.document.details, dict)
         self.assertIn("license_url", doc_result.document.details)
         self.assertIn("authors", doc_result.document.details)
