@@ -8,6 +8,7 @@ from urllib.parse import urlparse, urlunparse
 import requests  # type: ignore
 from bs4 import BeautifulSoup, Tag  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import ANTI_URL_REGEX, AUTHORIZED_LICENSES
@@ -70,11 +71,11 @@ class PlosCollector(IPluginScrapeCollector):
 
         authors = self._get_authors(article_meta)
 
-        doi_extract = article_meta.find("article-id", {"pub-id-type": "doi"})
+        doi = self.extract_doi(article_meta)
+
         published_id_extract = article_meta.find(
             "article-id", {"pub-id-type": "publisher-id"}
         )
-        doi = "" if not isinstance(doi_extract, Tag) else doi_extract.text
         published_id = (
             ""
             if not isinstance(published_id_extract, Tag)
@@ -82,7 +83,7 @@ class PlosCollector(IPluginScrapeCollector):
         )
 
         journal_extract = journal_meta.find("journal-title")
-        journal = "" if not isinstance(journal_extract, Tag) else journal_extract.text
+        journal = self.extract_property(journal_extract)
 
         article_type = self._get_article_type(article_meta)
 
@@ -92,7 +93,7 @@ class PlosCollector(IPluginScrapeCollector):
             publication_date = self._generate_timestamp_from_html(pubdate_extract)
 
         issn_extract = journal_meta.find("issn")
-        issn = "" if not isinstance(issn_extract, Tag) else issn_extract.text
+        issn = self.extract_property(issn_extract)
 
         pub_name_extract = journal_meta.find("publisher-name")
         pub_loc_extract = journal_meta.find("publisher-loc")
@@ -117,6 +118,18 @@ class PlosCollector(IPluginScrapeCollector):
             "publisher": publisher,
         }
         return ret
+
+    def extract_doi(self, article_meta: BeautifulSoup) -> str:
+        doi_extract = article_meta.find("article-id", {"pub-id-type": "doi"})
+        doi = self.extract_property(doi_extract)
+        if doi.startswith("https://doi.org/"):
+            doi = doi.replace("https://doi.org/", "")
+        return doi
+
+    @staticmethod
+    def extract_property(doi_extract: BeautifulSoup | None) -> str:
+        doi = "" if not isinstance(doi_extract, Tag) else doi_extract.text
+        return doi
 
     @staticmethod
     def _handle_license(article_meta):
@@ -172,7 +185,7 @@ class PlosCollector(IPluginScrapeCollector):
             for name_part in name_tag.children:
                 if name_part.text != "\n":
                     name += name_part.text + " "
-            name.strip()
+            name = name.strip()
             author["name"] = clean_return_to_line(name)
 
             # Misc
@@ -259,6 +272,8 @@ class PlosCollector(IPluginScrapeCollector):
         document.description = clean_return_to_line(doc_desc)
         document.full_content = clean_doc_content
         document.details = self._get_document_details(soup=soup)
+        document.external_id = self.extract_doi(article_meta)
+        document.external_id_type = ExternalIdType.DOI
 
         return document
 
