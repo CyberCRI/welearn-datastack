@@ -6,6 +6,8 @@ from html.parser import HTMLParser
 
 from bs4 import BeautifulSoup, NavigableString, Tag  # type: ignore
 
+from welearn_datastack.regular_expression import BACKLINES_REGEX
+
 logger = logging.getLogger(__name__)
 
 
@@ -108,7 +110,7 @@ def extract_property_from_html(
 def clean_return_to_line(string: str):
     if not isinstance(string, str):
         return string
-    ret = re.sub(r"([\n\t\r])", "", string).strip()
+    ret = re.sub(BACKLINES_REGEX, "", string).strip()
     return ret
 
 

@@ -3,9 +3,8 @@ import io
 import logging
 import math
 import os
-import re
 import time
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from bs4 import BeautifulSoup, ResultSet  # type: ignore
 from requests.exceptions import RequestException
@@ -29,11 +28,6 @@ from welearn_datastack.utils_.http_client_utils import (
 from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
-
-
-def clean_str(string: str):
-    ret = re.sub(r"(\n|\t|\r)", "", string).strip()
-    return ret
 
 
 def format_news_keywords(raw_news_keywords: Optional[str]) -> List[str]:

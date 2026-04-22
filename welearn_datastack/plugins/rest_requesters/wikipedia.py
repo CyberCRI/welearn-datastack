@@ -9,6 +9,7 @@ from wikipediaapi import Wikipedia, WikipediaPage, WikipediaPageSection  # type:
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import NoContent
 from welearn_datastack.plugins.interface import IPluginRESTCollector
+from welearn_datastack.regular_expression import LANG_CODE_IN_URL_REGEX
 
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Gecko/20100101 Firefox/89.0"
 
@@ -70,7 +71,7 @@ class WikipediaCollector(IPluginRESTCollector):
         """
         logger.info("Getting text content for url : '%s'", document)
 
-        lang = re.match(r"https://([a-z]{2})", document.url)[0][-2:]  # type: ignore
+        lang = re.match(LANG_CODE_IN_URL_REGEX, document.url)[0][-2:]  # type: ignore
         wiki_wiki = Wikipedia(USER_AGENT, lang)
 
         page: WikipediaPage | None = None

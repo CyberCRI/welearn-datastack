@@ -4,6 +4,7 @@ import re
 
 from sqlalchemy import text
 
+from welearn_datastack.regular_expression import ALPHANUMERIC_DOT_REGEX
 from welearn_datastack.utils_.database_utils import create_db_session
 
 # Set up logging configuration
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 def update_materialized_view(view_name: str) -> None:
     logger.info(f"Starting refresh of materialized view: {view_name}")
     # Security check: only allow alphanumeric, underscore, and dot
-    if not re.match(r"^[\w.]+$", view_name):
+    if not re.match(ALPHANUMERIC_DOT_REGEX, view_name):
         logger.error(f"Unsafe view name detected: {view_name}")
         raise ValueError(f"Unsafe view name: {view_name}")
     db_session = create_db_session()

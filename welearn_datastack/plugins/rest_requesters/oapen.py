@@ -31,6 +31,11 @@ from welearn_datastack.modules.pdf_extractor import (
     replace_ligatures,
 )
 from welearn_datastack.plugins.interface import IPluginRESTCollector
+from welearn_datastack.regular_expression import (
+    BLANK_CHARACTERS_SEQUENCE_REGEX,
+    SOFT_LINE_BREAK_REGEX,
+    WORD_CUT_BY_BACKLINES_REGEX,
+)
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
@@ -84,16 +89,16 @@ class OAPenCollector(IPluginRESTCollector):
     @staticmethod
     def clean_backline(text):
         # "Lin-\nguistique" → "Linguistique"
-        text = re.sub(r"-\s*\n\s*", "", text)
+        text = re.sub(WORD_CUT_BY_BACKLINES_REGEX, "", text)
 
         # Merge lines who must be
-        text = re.sub(r"(?<![\.\:\?\!])\s*\n\s*", " ", text)
+        text = re.sub(SOFT_LINE_BREAK_REGEX, " ", text)
 
         # Delete other backlines
         text = text.replace("\n", " ")
 
         # Delete double spaces
-        text = re.sub(r"\s+", " ", text)
+        text = re.sub(BLANK_CHARACTERS_SEQUENCE_REGEX, " ", text)
 
         return text.strip()
 

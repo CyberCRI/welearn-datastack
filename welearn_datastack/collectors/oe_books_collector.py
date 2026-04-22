@@ -32,12 +32,6 @@ class OpenEditionBooksURLCollector(URLCollector):
         self.feed_url = feed_url
         self.corpus = corpus
 
-    def _check_research(self, start_tag, end_tag, xml_str):
-        pre_ret = re.search(f"{start_tag}(.*?){end_tag}", xml_str, re.DOTALL)
-        if pre_ret:
-            return pre_ret.group(1)
-        return None
-
     @staticmethod
     def _get_descriptive_metadata_sections(xml_content: str) -> List[Dict[str, str]]:
         """
