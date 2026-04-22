@@ -33,7 +33,7 @@ from welearn_datastack.plugins.rest_requesters.open_alex import OpenAlexCollecto
 
 def build_openalex_result(
     url: str = "https://openalex.org/W123",
-    doi: str = "10.1234/example",
+    doi: str = "https://doi.org/10.1234/example",
     title: str = "Sample Title",
 ):
     ids = Ids(openalex=url, doi=doi, mag="", pmid="", pmcid="")
@@ -216,6 +216,8 @@ class TestOpenAlexCollector(unittest.TestCase):
             doc.details["authors"][0]["name"],
             openalex_result.authorships[0].author.display_name,
         )
+        self.assertEqual(doc.external_id, "10.1234/example")
+        self.assertEqual(doc.external_id_type, "doi")
 
     # Test _update_welearn_document raises on closed access
     @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_new_https_session")
