@@ -302,7 +302,8 @@ class OpenAlexCollector(IPluginRESTCollector):
         document_desc = self._remove_useless_first_word(
             string_to_clear=self._invert_abstract(
                 wrapper.raw_data.abstract_inverted_index
-            ),
+            )
+            or "",
             useless_words=["background", "abstract", "introduction"],
         )
         return document_desc
