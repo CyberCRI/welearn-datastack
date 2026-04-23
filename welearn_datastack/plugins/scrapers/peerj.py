@@ -6,11 +6,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import requests  # type: ignore
 from bs4 import BeautifulSoup, Tag  # type: ignore
 from requests.adapters import HTTPAdapter  # type: ignore
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.exceptions import UnauthorizedLicense
+from welearn_datastack.exceptions import NoDOIFoundError, UnauthorizedLicense
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
@@ -235,6 +236,11 @@ class PeerJCollector(IPluginScrapeCollector):
         document.description = description
         document.full_content = content_bs_txt
         document.details = self._get_document_details(soup=soup)
+        doi = document.details.get("doi", None)
+        if not doi:
+            raise NoDOIFoundError(f"No DOI found for '{document.url}'")
+        document.external_id = doi
+        document.external_id_type = ExternalIdType.DOI
 
         return document
 
