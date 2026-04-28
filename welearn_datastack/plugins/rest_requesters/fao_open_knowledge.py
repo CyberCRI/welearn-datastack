@@ -7,6 +7,7 @@ from typing import Any
 
 import pydantic
 import requests
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import WeLearnDocument
 from welearn_database.modules.text_cleaning import clean_text
 
@@ -24,7 +25,6 @@ from welearn_datastack.exceptions import (
     NoContent,
     NoDescriptionFoundError,
     NotExpectedMoreThanOneItem,
-    PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedState,
 )
@@ -227,7 +227,7 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
         [publication_date] = parsed_metadata.get("dc.date.available", empty_entry)
         [update_date] = parsed_metadata.get("dc.date.lastModified", empty_entry)
         [isbn] = parsed_metadata.get("dc.identifier.isbn", empty_entry)
-        [doi] = parsed_metadata.get("dc.identifier.doi", empty_entry)
+        [doi] = parsed_metadata.get("fao.identifier.doi", empty_entry)
         [type_] = parsed_metadata.get("fao.taxonomy.type", empty_entry)
         ret: dict[str, Any] = {
             "publication_date": (
@@ -307,6 +307,8 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                 document.description = clean_text(description)
                 document.title = fao_ok_metadata.name
                 document.details = self._extract_details(fao_ok_metadata)
+                document.external_id = document.details.get("doi")
+                document.external_id_type = ExternalIdType.DOI
 
             except NoDescriptionFoundError as e:
                 logger.warning(
