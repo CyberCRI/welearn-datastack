@@ -148,7 +148,6 @@ class WikipediaURLCollector(URLCollector):
         return ret
 
     def collect(self, batch_id: int | None = None) -> List[WeLearnDocument]:
-
         portals_to_process: List[WikipediaContainer]
         categories_to_process: List[WikipediaContainer]
 
