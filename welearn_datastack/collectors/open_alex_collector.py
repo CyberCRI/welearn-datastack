@@ -6,10 +6,12 @@ from datetime import datetime
 from typing import Dict, List
 from zoneinfo import ZoneInfo
 
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.constants import OPEN_ALEX_BASE_URL, PUBLISHERS_TO_AVOID
 from welearn_datastack.data.url_collector import URLCollector
+from welearn_datastack.modules.url_utils import extract_url_parts_post_netloc
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
 logger = logging.getLogger(__name__)
@@ -138,7 +140,14 @@ class OpenAlexURLCollector(URLCollector, ABC):
         for i in range(0, iteration_quantity):
             logger.info(f"Iteration {i+1}/{iteration_quantity}")
             for work in json_from_oa["results"]:
-                ret.append(WeLearnDocument(url=work["id"], corpus=self.corpus))
+                ret.append(
+                    WeLearnDocument(
+                        url=work["id"],
+                        corpus=self.corpus,
+                        external_id=extract_url_parts_post_netloc(work["id"]),
+                        external_id_type=ExternalIdType.API_ID,
+                    )
+                )
 
             if json_from_oa["meta"]["next_cursor"]:
                 params["cursor"] = json_from_oa["meta"]["next_cursor"]
