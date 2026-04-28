@@ -160,7 +160,6 @@ FLESCH_KINCAID_CONSTANTS = {
     },
 }
 
-ANTI_URL_REGEX = r"\(?((www)|((https?|ftp|file):\/\/))[-A-Za-z0-9+&@#/%?=~_|!:,.;]*[-A-Za-z0-9+&@#/%=~_|]\)?"
 
 CREATIVE_COMMONS_BASE_URL = "creativecommons.org"
 

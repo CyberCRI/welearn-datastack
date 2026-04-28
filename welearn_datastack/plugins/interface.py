@@ -1,16 +1,14 @@
-import csv
 import logging
 import os
 import re
-import sys
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import List
 
-from welearn_database.data.models import ErrorRetrieval, WeLearnDocument
+from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.enumerations import PluginType
+from welearn_datastack.regular_expression import BACKLINES_REGEX
 from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
 
 logger = logging.getLogger(__name__)
@@ -57,4 +55,4 @@ class IPluginScrapeCollector(IPlugin, ABC):
         :param string: String to clean
         :return: Cleaned string
         """
-        return re.sub(r"([\n\t\r])", "", string).strip()
+        return re.sub(BACKLINES_REGEX, "", string).strip()

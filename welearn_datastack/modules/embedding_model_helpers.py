@@ -12,6 +12,10 @@ from welearn_database.data.models import DocumentSlice, WeLearnDocument
 
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.exceptions import NoContent
+from welearn_datastack.regular_expression import (
+    WHITESPACE_SEQUENCE_REGEX,
+    BACKLINE_SEQUENCE_REGEX,
+)
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
 
 logger = logging.getLogger(__name__)
@@ -122,7 +126,11 @@ def _split_by_word_respecting_sent_boundary(
     :return: Slices of text with a maximum of slice_length words
     """
     logger.info("Splitting document into slices of %d words", slice_length)
-    text = re.sub(" +", " ", re.sub(r"\n+", " ", document_content)).strip()
+    text = re.sub(
+        WHITESPACE_SEQUENCE_REGEX,
+        " ",
+        re.sub(BACKLINE_SEQUENCE_REGEX, " ", document_content),
+    ).strip()
 
     nlp_model = _load_spacy_model()
     spacy_doc = nlp_model(text)

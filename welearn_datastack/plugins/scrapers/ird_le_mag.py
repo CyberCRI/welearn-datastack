@@ -2,7 +2,6 @@ import datetime
 import json
 import logging
 import os
-import re
 import time
 from typing import List
 
@@ -33,11 +32,6 @@ from welearn_datastack.utils_.scraping_utils import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-def clean_str(string: str):
-    ret = re.sub(r"(\n|\t|\r)", "", string).strip()
-    return ret
 
 
 class IRDLeMagCollector(IPluginScrapeCollector):
@@ -98,7 +92,7 @@ class IRDLeMagCollector(IPluginScrapeCollector):
             title = title_tag["content"]
         except KeyError as e:
             raise NoTitle from e
-        return clean_str(title)
+        return clean_return_to_line(title)
 
     @staticmethod
     def _extract_authors(soup: BeautifulSoup) -> list[AuthorDetails | None]:
