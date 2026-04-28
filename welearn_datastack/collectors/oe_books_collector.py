@@ -2,6 +2,7 @@ import logging
 import re
 from typing import Dict, List
 
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.collectors.rss_collector import RssURLCollector
@@ -119,20 +120,39 @@ class OpenEditionBooksURLCollector(URLCollector):
                         # Weird case where there is no chapters
                         logger.warning("No chapters found for book: %s", book_url.url)
                         ret.append(
-                            WeLearnDocument(url=book_url.url, corpus=self.corpus)
+                            WeLearnDocument(
+                                url=book_url.url,
+                                corpus=self.corpus,
+                                external_id=md_id,
+                                external_id_type=ExternalIdType.SLUG,
+                            )
                         )
                         continue
                     else:
                         for chapter_url in chapters_urls:
                             logger.info("--Collecting chapter: %s", chapter_url)
                             ret.append(
-                                WeLearnDocument(url=chapter_url, corpus=self.corpus)
+                                WeLearnDocument(
+                                    url=chapter_url,
+                                    corpus=self.corpus,
+                                    external_id=extract_url_parts_post_netloc(
+                                        chapter_url
+                                    ),
+                                    external_id_type=ExternalIdType.SLUG,
+                                )
                             )
                 else:
                     logger.info(
                         "Book chapters are not legally usable : %s", book_url.url
                     )
-                    ret.append(WeLearnDocument(url=book_url.url, corpus=self.corpus))
+                    ret.append(
+                        WeLearnDocument(
+                            url=book_url.url,
+                            corpus=self.corpus,
+                            external_id=md_id,
+                            external_id_type=ExternalIdType.SLUG,
+                        )
+                    )
                     continue
             else:
                 logger.info("Book is not open access: %s", book_url.url)
