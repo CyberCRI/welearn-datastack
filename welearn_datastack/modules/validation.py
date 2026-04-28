@@ -36,6 +36,6 @@ def validate_doi(s: str, resolve_doi: bool = True) -> bool:
         try:
             r = requests.get(f"https://doi.org/api/handles/{s}", timeout=5)
             return r.status_code == 200
-        except requests.RequestException as e:
+        except requests.RequestException:
             return False
     return True
