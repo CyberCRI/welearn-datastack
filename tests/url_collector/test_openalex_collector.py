@@ -6,6 +6,7 @@ from unittest import TestCase
 from unittest.mock import MagicMock, Mock, patch
 from zoneinfo import ZoneInfo
 
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.collectors.open_alex_collector import OpenAlexURLCollector
@@ -79,6 +80,11 @@ class TestOpenAlexURLCollector(TestCase):
 
         full_content = self.content_json1["results"] + self.content_json2["results"]
         awaited_urls = [v["id"] for v in full_content]
+        awaited_external_ids = [v["id"].split("/")[-1] for v in full_content]
 
         self.assertListEqual(returned_urls, awaited_urls)
         self.assertEqual(len(returned_urls), 400)
+        for wldoc, awaited_external_id in zip(returned_wldoc, awaited_external_ids):
+            self.assertEqual(wldoc.corpus, self.mock_corpus)
+            self.assertEqual(wldoc.external_id, awaited_external_id)
+            self.assertEqual(wldoc.external_id_type, ExternalIdType.API_ID)

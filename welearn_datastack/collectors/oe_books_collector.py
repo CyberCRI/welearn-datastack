@@ -2,6 +2,7 @@ import logging
 import re
 from typing import Dict, List
 
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.collectors.rss_collector import RssURLCollector
@@ -11,6 +12,7 @@ from welearn_datastack.constants import (
     MD_OE_BOOKS_BASE_URL,
 )
 from welearn_datastack.data.url_collector import URLCollector
+from welearn_datastack.modules.url_utils import extract_url_parts_post_netloc
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
@@ -81,7 +83,7 @@ class OpenEditionBooksURLCollector(URLCollector):
         client = get_new_https_session()
         for book_url in rss_urls:
             logger.info("Collecting book: %s", book_url)
-            md_id = book_url.url.replace("https://books.openedition.org/", "")
+            md_id = extract_url_parts_post_netloc(book_url.url)
             md_url = MD_OE_BOOKS_BASE_URL.replace("<md_id>", md_id)
 
             md_res = client.get(url=md_url, headers=HEADERS)
@@ -112,20 +114,39 @@ class OpenEditionBooksURLCollector(URLCollector):
                         # Weird case where there is no chapters
                         logger.warning("No chapters found for book: %s", book_url.url)
                         ret.append(
-                            WeLearnDocument(url=book_url.url, corpus=self.corpus)
+                            WeLearnDocument(
+                                url=book_url.url,
+                                corpus=self.corpus,
+                                external_id=md_id,
+                                external_id_type=ExternalIdType.SLUG,
+                            )
                         )
                         continue
                     else:
                         for chapter_url in chapters_urls:
                             logger.info("--Collecting chapter: %s", chapter_url)
                             ret.append(
-                                WeLearnDocument(url=chapter_url, corpus=self.corpus)
+                                WeLearnDocument(
+                                    url=chapter_url,
+                                    corpus=self.corpus,
+                                    external_id=extract_url_parts_post_netloc(
+                                        chapter_url
+                                    ),
+                                    external_id_type=ExternalIdType.SLUG,
+                                )
                             )
                 else:
                     logger.info(
                         "Book chapters are not legally usable : %s", book_url.url
                     )
-                    ret.append(WeLearnDocument(url=book_url.url, corpus=self.corpus))
+                    ret.append(
+                        WeLearnDocument(
+                            url=book_url.url,
+                            corpus=self.corpus,
+                            external_id=md_id,
+                            external_id_type=ExternalIdType.SLUG,
+                        )
+                    )
                     continue
             else:
                 logger.info("Book is not open access: %s", book_url.url)

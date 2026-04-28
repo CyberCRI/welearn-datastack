@@ -5,11 +5,13 @@ from typing import Any, Dict, List, Tuple
 
 from bs4 import BeautifulSoup  # type: ignore
 from requests import Session  # type: ignore
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, MD_OE_BOOKS_BASE_URL
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import ClosedAccessContent
+from welearn_datastack.modules.url_utils import extract_url_parts_post_netloc
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.utils_.http_client_utils import (
@@ -85,8 +87,12 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
             case "book":
                 details["type"] = "book"
                 if not root_extractor:
-                    logger.warning("Weird case, cannot accessed to API before :%s", url)
-                    md_id, mets_api_res = self._get_mets_metadata(https_session, url)
+                    logger.warning(
+                        "Weird case, cannot accessed to API before :%s", document.url
+                    )
+                    md_id, mets_api_res = self._get_mets_metadata(
+                        https_session, document.url
+                    )
                     root_extractor = XMLExtractor(mets_api_res.content.decode("utf-8"))
 
                 if not self._is_open_access(root_extractor):
@@ -353,7 +359,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
         :param url:  The url of the book
         :return: The md_id and the response of the API
         """
-        md_id = url.replace("https://books.openedition.org/", "")
+        md_id = extract_url_parts_post_netloc(url)
         md_url = MD_OE_BOOKS_BASE_URL.replace("<md_id>", md_id)
         mets_api_res = https_session.get(url=md_url, timeout=self.timeout)
         return md_id, mets_api_res

@@ -10,6 +10,7 @@ from itertools import batched
 from typing import Dict, Iterable, List
 
 from lingua import Language
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS

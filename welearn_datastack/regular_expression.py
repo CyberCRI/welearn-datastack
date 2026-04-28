@@ -75,6 +75,13 @@ SENTENCE_REGEX = r"\b[^.!?]+[.!?]*"
 # limit: Treats underscores as word characters and does not handle hyphenated words or contractions as single tokens.
 WORDS_REGEX = r"\w+"
 
+# description: Matches a DOI (Digital Object Identifier) in its standard format, starting with "10." followed by a numeric prefix and a suffix.
+# example: "10.1000/xyz123" -> matches "10.1000/xyz123"
+# limit: The regex is quite permissive in the suffix part, allowing any
+# non-whitespace characters except quotes and angle brackets, which may lead to false positives in some contexts.
+# Source : https://stackoverflow.com/a/10324802/31019364
+DOI_REGEX = r"\b(10[.][0-9]{4,}(?:[.][0-9]+)*/(?:(?![\"&\'<>])\S)+)"
+
 
 def simple_xml_tag_format_regex(tag: str) -> str:
     """
@@ -86,3 +93,8 @@ def simple_xml_tag_format_regex(tag: str) -> str:
     :return: A regular expression string to match the specified XML tag.
     """
     return rf"<{tag}([^>]*)>(.*?)</{tag}>"
+
+
+def simple_xml_tag_format_regex_autoclosing(tag: str) -> str:
+
+    return rf"<{tag}([^>]*)(.*?)/>"

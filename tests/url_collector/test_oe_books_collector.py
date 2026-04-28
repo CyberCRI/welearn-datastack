@@ -2,9 +2,11 @@ import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.collectors.oe_books_collector import OpenEditionBooksURLCollector
+from welearn_datastack.modules.url_utils import extract_url_parts_post_netloc
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.scrapers import OpenEditionBooksCollector
 
@@ -122,6 +124,8 @@ class TestOpenEditionBooksURLCollector(unittest.TestCase):
 
         self.assertEqual(len(collected), 1)
         self.assertEqual(collected[0].url, self.url_list[0])
+        self.assertEqual(collected[0].external_id, "examplepub0/0")
+        self.assertEqual(collected[0].external_id_type, ExternalIdType.SLUG)
 
     @patch("welearn_datastack.collectors.oe_books_collector.get_new_https_session")
     @patch("welearn_datastack.collectors.oe_books_collector.RssURLCollector.collect")
@@ -151,6 +155,8 @@ class TestOpenEditionBooksURLCollector(unittest.TestCase):
 
         self.assertEqual(len(collected), 1)
         self.assertEqual(collected[0].url, self.url_list[0])
+        self.assertEqual(collected[0].external_id, "examplepub0/0")
+        self.assertEqual(collected[0].external_id_type, ExternalIdType.SLUG)
 
     @patch("welearn_datastack.collectors.oe_books_collector.get_new_https_session")
     @patch("welearn_datastack.collectors.oe_books_collector.RssURLCollector.collect")
@@ -185,6 +191,16 @@ class TestOpenEditionBooksURLCollector(unittest.TestCase):
             "https://books.openedition.org/examplepub0/8088",
         ]
 
+        wanted_external_ids = [
+            extract_url_parts_post_netloc(url) for url in wanted_urls
+        ]
+        collected_external_ids = [doc.external_id for doc in collected]
+        wanted_external_ids.sort()
+        collected_external_ids.sort()
+
         collected_url.sort()
         wanted_urls.sort()
         self.assertListEqual(collected_url, wanted_urls)
+        self.assertListEqual(collected_external_ids, wanted_external_ids)
+        for doc in collected:
+            self.assertEqual(doc.external_id_type, ExternalIdType.SLUG)
