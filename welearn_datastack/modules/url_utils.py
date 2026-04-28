@@ -70,7 +70,12 @@ def extract_doi_number(url: str) -> str:
     :return: The extracted DOI number as a string, or an empty string if no DOI number is found
     """
     path = urlparse(url).path
-    if path.startswith("/10."):
-        return path[1:]
+    if path.startswith("/"):
+        ret = path[1:]
+    else:
+        return ""
+
+    if ret.startswith("10."):
+        return ret
     else:
         return ""
