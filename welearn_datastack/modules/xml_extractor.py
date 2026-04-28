@@ -4,6 +4,10 @@ from pathlib import Path
 from typing import List
 
 from welearn_datastack.data.xml_data import XMLData
+from welearn_datastack.regular_expression import (
+    SIMPLE_XML_ATTRIBUTE_REGEX,
+    simple_xml_tag_format_regex,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -55,15 +59,13 @@ class XMLExtractor:
 
         :return: A list of XMLData containing the content and attributes of the tag.
         """
-
-        # Pattern to capture the tag, its content and attributes
-        pattern = rf"<{tag}([^>]*)>(.*?)</{tag}>"
-
         # Pattern to capture the attributes of the tag in the form of key="value"
-        attr_pattern = re.compile(r'([\w:]+)="([^"]*)"')
+        attr_pattern = re.compile(SIMPLE_XML_ATTRIBUTE_REGEX)
 
         # Find all matches of the pattern in the XML raw data
-        matches = re.findall(pattern, self.xml_raw_data, re.DOTALL)
+        matches = re.findall(
+            simple_xml_tag_format_regex(tag), self.xml_raw_data, re.DOTALL
+        )
         logger.info("Found %d matches for tag %s", len(matches), tag)
 
         ret = []

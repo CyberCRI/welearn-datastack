@@ -9,18 +9,17 @@ from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
+from welearn_datastack.regular_expression import SINGLE_QUOTED_WORD_REGEX
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import extract_property_from_html
+from welearn_datastack.utils_.scraping_utils import (
+    clean_return_to_line,
+    extract_property_from_html,
+)
 
 logger = logging.getLogger(__name__)
-
-
-def clean_str(string: str):
-    ret = re.sub(r"(\n|\t|\r)", "", string).strip()
-    return ret
 
 
 def format_news_keywords(raw_news_keywords: Optional[str]) -> List[str]:
@@ -43,11 +42,10 @@ class ConversationCollector(IPluginScrapeCollector):
     @staticmethod
     def _retrieve_lang_from_js_script(scripts: ResultSet) -> str:
         script_key = "content_language"
-        pattern = r"'([A-Za-z]+)'"
         for script in scripts:
             script_text = script.text
             if script_key in script_text:
-                matches = re.findall(pattern, script_text)
+                matches = re.findall(SINGLE_QUOTED_WORD_REGEX, script_text)
                 if len(matches) > 0:
                     return matches[0]
         return ""
@@ -59,11 +57,14 @@ class ConversationCollector(IPluginScrapeCollector):
         for raw_author_data in authors_data:
             author_name = raw_author_data.find("span").text
 
-            author_role_data = clean_str(
+            author_role_data = clean_return_to_line(
                 raw_author_data.find("p", {"class": "role"}).text
             ).strip()
 
-            author_data = {"name": clean_str(author_name), "misc": author_role_data}
+            author_data = {
+                "name": clean_return_to_line(author_name),
+                "misc": author_role_data,
+            }
 
             authors.append(author_data)
         if soup.find("meta", {"name": "news_keywords"}):

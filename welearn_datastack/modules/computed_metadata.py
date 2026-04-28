@@ -14,6 +14,12 @@ from welearn_datastack.constants import (
     DICT_READING_SPEEDS_LANG,
     FLESCH_KINCAID_CONSTANTS,
 )
+from welearn_datastack.regular_expression import (
+    NON_ALPHANUMERIC_CHARACTER_REGEX,
+    NON_CONTRACTION_APOSTROPHE_REGEX,
+    SENTENCE_REGEX,
+    WORDS_REGEX,
+)
 
 log_level: int = logging.getLevelName(os.getenv("LOG_LEVEL", "INFO"))
 log_format: str = os.getenv(
@@ -52,9 +58,9 @@ def remove_punctuation(text: str) -> str:
     Returns:
         str: text without punctuation
     """
-    text = re.sub(r"\'(?![tsd]\b|ve\b|ll\b|re\b)", '"', text)
+    text = re.sub(NON_CONTRACTION_APOSTROPHE_REGEX, '"', text)
     # remove all punctuation except apostrophes
-    punctuation_regex = r"[^\w\s'\.,]|(?<!\d)[.,](?!\d)"
+    punctuation_regex = NON_ALPHANUMERIC_CHARACTER_REGEX
 
     text = re.sub(punctuation_regex, "", text)
     return text
@@ -84,7 +90,8 @@ def sentence_count(text: str) -> int:
         int: number of sentences in text
     """
     ignore_count = 0
-    sentences = re.findall(r"\b[^.!?]+[.!?]*", text, re.UNICODE)
+    # TODO: replace with sentencex library to avoid regex issues with sentence splitting, especially for non english languages
+    sentences = re.findall(SENTENCE_REGEX, text, re.UNICODE)
     for sentence in sentences:
         if lexicon_count(sentence) <= 2:
             ignore_count += 1
@@ -184,8 +191,7 @@ def predict_duration(text: str, lang: str) -> str:
     Returns:
         int: number of seconds necessary to read text
     """
-    pattern = r"\w+"
-    n_words = len(re.findall(pattern, text))
+    n_words = len(re.findall(WORDS_REGEX, text))
     speed = DICT_READING_SPEEDS_LANG.get(
         lang, 184
     )  # 184 is the average of reading speeds from https://irisreading.com/average-reading-speed-in-various-languages/
