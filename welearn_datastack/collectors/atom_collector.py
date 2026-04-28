@@ -8,6 +8,7 @@ from welearn_datastack.collectors.helpers.feed_helpers import (
     lines_to_url,
 )
 from welearn_datastack.data.url_collector import URLCollector
+from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
 url_illegal_characters = ['"', "<", ">"]
@@ -36,18 +37,18 @@ class AtomURLCollector(URLCollector):
         res = client.get(url=self.feed_url, headers=headers)
         content = res.content.decode("utf-8")
 
-        flag = False
-        link_lines: List[str] = []
-        for line in content.split("\n"):
-            # If we are in the entry section and we find a link
-            # The definition, especially "rel" part is empirical
-            if flag and line.strip().startswith('<link rel="alternate"'):
-                link_lines.append(line.strip())
-            if line.strip().startswith("<entry>"):
-                flag = True
-
-        urls = lines_to_url(domain, link_lines)
-
-        ret = extracted_url_to_url_datastore(urls=urls, corpus=self.corpus)
-
+        ret: list[WeLearnDocument] = []
+        entries = XMLExtractor(content).extract_content("entry")
+        for entry in entries:
+            entry_extractor = XMLExtractor(entry.content)
+            link = entry_extractor.extract_content_attribute_filter(
+                tag="link",
+                attribute_name="rel",
+                attribute_value="alternate",
+            )
+            if len(link) == 0:
+                continue
+            link_url = link[0].attributes["href"]
+            if link_url.startswith(domain):
+                ret.append(WeLearnDocument(url=link_url, corpus=self.corpus))
         return ret

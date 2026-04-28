@@ -7,6 +7,7 @@ from welearn_datastack.data.xml_data import XMLData
 from welearn_datastack.regular_expression import (
     SIMPLE_XML_ATTRIBUTE_REGEX,
     simple_xml_tag_format_regex,
+    simple_xml_tag_format_regex_autoclosing,
 )
 
 logger = logging.getLogger(__name__)
@@ -63,9 +64,11 @@ class XMLExtractor:
         attr_pattern = re.compile(SIMPLE_XML_ATTRIBUTE_REGEX)
 
         # Find all matches of the pattern in the XML raw data
-        matches = re.findall(
-            simple_xml_tag_format_regex(tag), self.xml_raw_data, re.DOTALL
-        )
+        pattern = simple_xml_tag_format_regex(tag)
+        autoclosing_pattern = simple_xml_tag_format_regex_autoclosing(tag)
+        matches = re.findall(pattern, self.xml_raw_data, re.DOTALL)
+        if len(matches) == 0:
+            matches = re.findall(autoclosing_pattern, self.xml_raw_data, re.DOTALL)
         logger.info("Found %d matches for tag %s", len(matches), tag)
 
         ret = []

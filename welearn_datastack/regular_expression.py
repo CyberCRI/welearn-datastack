@@ -93,3 +93,8 @@ def simple_xml_tag_format_regex(tag: str) -> str:
     :return: A regular expression string to match the specified XML tag.
     """
     return rf"<{tag}([^>]*)>(.*?)</{tag}>"
+
+
+def simple_xml_tag_format_regex_autoclosing(tag: str) -> str:
+
+    return rf"<{tag}([^>]*)(.*?)/>"
