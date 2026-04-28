@@ -7,7 +7,10 @@ from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.data.url_collector import URLCollector
-from welearn_datastack.modules.url_utils import extract_url_parts_post_netloc
+from welearn_datastack.modules.url_utils import (
+    extract_doi_number,
+    extract_url_parts_post_netloc,
+)
 from welearn_datastack.modules.validation import validate_doi
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
@@ -78,6 +81,7 @@ class AtomURLCollector(URLCollector):
                     logger.info(
                         f"External ID {external_id} is a valid DOI for URL {link_url}"
                     )
+                    external_id = extract_doi_number(external_id)
                     external_id_type = ExternalIdType.DOI
                 else:
                     # Otherwise, we can use the part of the URL after the domain as the external ID and set the type to SLUG

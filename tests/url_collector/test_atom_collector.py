@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus
 
 from welearn_datastack.collectors.atom_collector import AtomURLCollector
@@ -10,11 +11,16 @@ from welearn_datastack.collectors.atom_collector import AtomURLCollector
 class Test(TestCase):
     def setUp(self) -> None:
         self.rss_file_path = Path(__file__).parent / "resources" / "atom_file.xml"
+        self.rss_file_path_doi = (
+            Path(__file__).parent / "resources" / "atom_file_doi.xml"
+        )
         self.mock_corpus = Corpus(
             source_name="test", is_fix=True, main_url="https://www.example.com"
         )
         with self.rss_file_path.open(mode="r") as f:
             self.rss_content = f.read()
+        with self.rss_file_path_doi.open(mode="r") as f:
+            self.rss_content_doi = f.read()
 
     @patch("welearn_datastack.collectors.atom_collector.get_new_https_session")
     def test_atom_urlcollector(self, mock_get_new_https_session):
@@ -39,6 +45,35 @@ class Test(TestCase):
         for i in range(0, len(collected)):
             self.assertEqual(collected[i].url, f"https://www.example.com/entry{i+1}")
             self.assertEqual(collected[i].corpus.source_name, "test")
+            self.assertEqual(collected[i].external_id, f"entry{i+1}")
+            self.assertEqual(collected[i].external_id_type, ExternalIdType.SLUG)
+            self.assertEqual(collected[i].corpus.is_fix, True)
+
+    @patch("welearn_datastack.collectors.atom_collector.get_new_https_session")
+    def test_atom_urlcollector_with_id_doi(self, mock_get_new_https_session):
+        """
+        Test the collect method of the AtomURLCollector class, on a rss file with 3 rows
+        """
+        mock_session = Mock()
+        mock_response = Mock()
+        mock_get_new_https_session.return_value = mock_session
+        mock_session.ok.return_value = True
+        mock_session.get.return_value = mock_response
+
+        mock_response.content = self.rss_content_doi.encode("utf-8")
+
+        rss_collector = AtomURLCollector(
+            feed_url="https://www.example.com",
+            corpus=self.mock_corpus,
+        )
+        collected = rss_collector.collect()
+        self.assertEqual(3, len(collected))
+
+        for i in range(0, len(collected)):
+            self.assertEqual(collected[i].url, f"https://www.example.com/entry{i+1}")
+            self.assertEqual(collected[i].corpus.source_name, "test")
+            self.assertEqual(collected[i].external_id, f"10.1234/entry{i+1}")
+            self.assertEqual(collected[i].external_id_type, ExternalIdType.DOI)
             self.assertEqual(collected[i].corpus.is_fix, True)
 
     @patch("welearn_datastack.collectors.atom_collector.get_new_https_session")
@@ -55,7 +90,7 @@ class Test(TestCase):
         localmock_corpus = Corpus(
             source_name="test_org", is_fix=True, main_url="https://www.example.org"
         )
-        local_atom = self.rss_content.replace("example.com", "example.org")
+        local_atom = self.rss_content_.replace("example.com", "example.org")
 
         mock_response.content = local_atom.encode("utf-8")
 

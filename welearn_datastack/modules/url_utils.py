@@ -63,7 +63,7 @@ def extract_url_parts_post_netloc(url: str, remove_start_slash: bool = True) -> 
     return ret
 
 
-def extract_doi_number(url: str) -> str:
+def extract_doi_number(url: str, strict: bool = False) -> str:
     """
     Extract the DOI number from a URL if it exists. The DOI number is expected to be in the format "10.xxxx/xxxxx".
     :param url: The URL to extract the DOI number from
@@ -73,9 +73,9 @@ def extract_doi_number(url: str) -> str:
     if path.startswith("/"):
         ret = path[1:]
     else:
-        return ""
+        return "" if strict else path
 
     if ret.startswith("10."):
         return ret
     else:
-        return ""
+        return "" if strict else path
