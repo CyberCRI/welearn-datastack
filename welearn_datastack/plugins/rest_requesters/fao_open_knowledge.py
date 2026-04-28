@@ -307,8 +307,6 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                 document.description = clean_text(description)
                 document.title = fao_ok_metadata.name
                 document.details = self._extract_details(fao_ok_metadata)
-                document.external_id = document.details.get("doi")
-                document.external_id_type = ExternalIdType.DOI
 
             except NoDescriptionFoundError as e:
                 logger.warning(
