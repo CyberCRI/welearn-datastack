@@ -264,8 +264,6 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
         document.description = desc
         document.full_content = content
         document.details = details
-        document.external_id = doi
-        document.external_id_type = ExternalIdType.DOI
 
         return document
 

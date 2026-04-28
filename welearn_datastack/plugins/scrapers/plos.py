@@ -273,8 +273,6 @@ class PlosCollector(IPluginScrapeCollector):
         document.description = clean_return_to_line(doc_desc)
         document.full_content = clean_doc_content
         document.details = self._get_document_details(soup=soup)
-        document.external_id = self.extract_doi(article_meta)
-        document.external_id_type = ExternalIdType.DOI
 
         return document
 

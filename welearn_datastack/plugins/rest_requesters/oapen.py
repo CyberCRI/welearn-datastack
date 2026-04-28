@@ -326,8 +326,6 @@ class OAPenCollector(IPluginRESTCollector):
         wrapper.document.content = content
         wrapper.document.description = desc
         wrapper.document.details = document_details
-        wrapper.document.external_id_type = ExternalIdType.DOI
-        wrapper.document.external_id = doi
 
         return wrapper.document
 
