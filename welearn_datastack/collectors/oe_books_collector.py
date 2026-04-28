@@ -11,6 +11,7 @@ from welearn_datastack.constants import (
     MD_OE_BOOKS_BASE_URL,
 )
 from welearn_datastack.data.url_collector import URLCollector
+from welearn_datastack.modules.url_utils import extract_url_parts_post_netloc
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
@@ -87,7 +88,7 @@ class OpenEditionBooksURLCollector(URLCollector):
         client = get_new_https_session()
         for book_url in rss_urls:
             logger.info("Collecting book: %s", book_url)
-            md_id = book_url.url.replace("https://books.openedition.org/", "")
+            md_id = extract_url_parts_post_netloc(book_url.url)
             md_url = MD_OE_BOOKS_BASE_URL.replace("<md_id>", md_id)
 
             md_res = client.get(url=md_url, headers=HEADERS)

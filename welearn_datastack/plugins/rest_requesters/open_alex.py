@@ -44,6 +44,7 @@ from welearn_datastack.modules.pdf_extractor import (
     remove_hyphens,
     replace_ligatures,
 )
+from welearn_datastack.modules.url_utils import extract_doi_number
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
@@ -242,7 +243,7 @@ class OpenAlexCollector(IPluginRESTCollector):
     def _get_doi(wrapper: WrapperRawData) -> str | None:
         doi = wrapper.raw_data.ids.doi
         if doi.startswith("https://doi.org/"):
-            doi = doi.replace("https://doi.org/", "")
+            doi = extract_doi_number(doi)
         return doi
 
     @staticmethod
