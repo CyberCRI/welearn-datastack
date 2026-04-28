@@ -10,6 +10,7 @@ from itertools import batched
 from typing import Dict, Iterable, List
 
 from lingua import Language
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
@@ -325,6 +326,8 @@ class OAPenCollector(IPluginRESTCollector):
         wrapper.document.content = content
         wrapper.document.description = desc
         wrapper.document.details = document_details
+        wrapper.document.external_id_type = ExternalIdType.DOI
+        wrapper.document.external_id = doi
 
         return wrapper.document
 
