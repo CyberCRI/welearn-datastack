@@ -63,9 +63,6 @@ spec:
           - name: BATCH_URLS_DIRECTORY
             value: >-
                {{ print "{{inputs.parameters.batch_urls_directory}}" }}
-          - name: PICK_QTY_MAX
-            value: >-
-               {{ print "{{inputs.parameters.pick_qty_max }}" }}
           - name: LOG_LEVEL
             value: >-
               {{ print "{{inputs.parameters.log_level}}" }}
