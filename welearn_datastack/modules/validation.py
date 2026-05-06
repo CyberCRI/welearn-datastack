@@ -9,3 +9,14 @@ def validate_non_null_fields_document(doc: WeLearnDocument) -> bool:
     is_desc_empty = not doc.description or doc.description.strip() == ""
     is_content_empty = not doc.full_content or doc.full_content.strip() == ""
     return not (is_desc_empty or is_content_empty)
+
+def validate_sql_query_param(sql_query: str, query_param: str) -> bool:
+    """
+    Validate if a SQL query has correct parameters.
+    :param sql_query: SQL query to validate
+    :param query_param: Parameter to check in the SQL query
+    """
+    if not query_param.startswith(':'):
+        query_param = ':' + query_param
+
+    return query_param in sql_query
