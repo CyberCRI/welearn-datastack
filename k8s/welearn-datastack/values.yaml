@@ -353,6 +353,28 @@ restore:
     nonSensitive: {}
 
 
+backfilling:
+  name: backfilling
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: backfilling
+
+  commonLabels:
+    app.kubernetes.io/component: backfilling
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 20M
+        cpu: 1
+      limits:
+        cpu: 1
+
 updateMaterializedViews:
   enabled: true
   name: update-materialized-views

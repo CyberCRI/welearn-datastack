@@ -65,6 +65,7 @@ def main() -> None:
     logger.info("DB Query executed")
     rows = res.fetchall()
     ids_to_batch = [row[0] for row in rows]
+
     # Create batch
     logger.info("Create batch")
     batch_generator.create_ids_batch(ids_to_batch)
