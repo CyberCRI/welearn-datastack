@@ -199,7 +199,7 @@ spec:
             parameters:
               - name: log_level
                 value: >-
-                {{ print "{{inputs.parameters.log_level}}" }}
+                  {{ print "{{inputs.parameters.log_level}}" }}
               - name: parallelism_treshold
                 value: >-
                   {{ print "{{inputs.parameters.parallelism_treshold}}" }}
@@ -235,7 +235,7 @@ spec:
               parameters:
                 - name: log_level
                   value: >-
-                  {{ print "{{inputs.parameters.log_level}}" }}
+                    {{ print "{{inputs.parameters.log_level}}" }}
                 - name: urls_input_filename
                   value: >-
                     {{ print "{{inputs.parameters.batch_urls_ids_file_name}}" }}
