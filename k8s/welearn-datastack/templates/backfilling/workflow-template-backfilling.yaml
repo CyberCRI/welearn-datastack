@@ -191,7 +191,7 @@ spec:
           - name: batch_size
             default: 10
       steps:
-      - - name: generate-to-collect-backfilling
+        - name: generate-to-collect-backfilling
           templateRef:
             name: {{ .name }}-backfilling
             template: generate-to-collect-backfilling
@@ -227,28 +227,28 @@ spec:
               - name: batch_size
                 value: >-
                   {{ print "{{inputs.parameters.batch_size}}" }}
-        - - name: run-backfilling
-            templateRef:
-              name: {{ .name }}-backfilling
-              template: run-backfilling
-            arguments:
-              parameters:
-                - name: log_level
-                  value: >-
-                    {{ print "{{inputs.parameters.log_level}}" }}
-                - name: urls_input_filename
-                  value: >-
-                    {{ print "{{inputs.parameters.batch_urls_ids_file_name}}" }}
-                - name: urls_directory
-                  value: >-
-                    {{ print "{{inputs.parameters.batch_urls_directory}}" }}
-                - name: memory
-                  value: >-
-                    {{ print "{{inputs.parameters.memory}}" }}
-                - name: query_name
-                  value: >-
-                    {{ print "{{inputs.parameters.query_name_run_backfilling}}" }}
-                - name: revision_id
-                  value: >-
-                    {{ print "{{inputs.parameters.revision_id}}" }}
+        - name: run-backfilling
+          templateRef:
+            name: {{ .name }}-backfilling
+            template: run-backfilling
+          arguments:
+            parameters:
+              - name: log_level
+                value: >-
+                  {{ print "{{inputs.parameters.log_level}}" }}
+              - name: urls_input_filename
+                value: >-
+                  {{ print "{{inputs.parameters.batch_urls_ids_file_name}}" }}
+              - name: urls_directory
+                value: >-
+                  {{ print "{{inputs.parameters.batch_urls_directory}}" }}
+              - name: memory
+                value: >-
+                  {{ print "{{inputs.parameters.memory}}" }}
+              - name: query_name
+                value: >-
+                  {{ print "{{inputs.parameters.query_name_run_backfilling}}" }}
+              - name: revision_id
+                value: >-
+                  {{ print "{{inputs.parameters.revision_id}}" }}
 {{- end }}
