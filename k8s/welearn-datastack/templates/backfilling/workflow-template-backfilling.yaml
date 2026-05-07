@@ -252,9 +252,9 @@ spec:
             artifacts:
               - name: batch_ids_csv
                 from: >-
-                {{ print "{{steps.generate-to-collect-backfilling.outputs.artifacts.batch_ids_csv}}" }}
+                  {{ print "{{steps.generate-to-collect-backfilling.outputs.artifacts.batch_ids_csv}}" }}
             withSequence:
               count: >-
-              {{ print "{{steps.generate-to-collect-backfilling.outputs.parameters.url_batches_count}}" }}
+                {{ print "{{steps.generate-to-collect-backfilling.outputs.parameters.url_batches_count}}" }}
 
 {{- end }}
