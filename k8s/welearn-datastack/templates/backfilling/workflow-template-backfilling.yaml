@@ -213,8 +213,8 @@ spec:
             synchronization:
               semaphores:
               - configMapKeyRef:
-                  name: {{ .collectorSemaphore.configmapName }}
-                  key: {{ .collectorSemaphore.standard.keyName }}
+                  name: {{ .backfillingSemaphore.configmapName }}
+                  key: {{ .backfillingSemaphore.standard.keyName }}
             templateRef:
               name: {{ .name }}-backfilling
               template: run-backfilling
