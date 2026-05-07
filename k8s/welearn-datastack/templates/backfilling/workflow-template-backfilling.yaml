@@ -210,6 +210,11 @@ spec:
                     {{ print "{{inputs.parameters.batch_size}}" }}
 
         - - name: run-backfilling
+            synchronization:
+              semaphores:
+              - configMapKeyRef:
+                  name: {{ .collectorSemaphore.configmapName }}
+                  key: {{ .collectorSemaphore.standard.keyName }}
             templateRef:
               name: {{ .name }}-backfilling
               template: run-backfilling

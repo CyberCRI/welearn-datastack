@@ -262,8 +262,6 @@ urlSanitaryCrawler:
       enabled: true
       schedule: 40 */1 * * *
 
-
-
 qdrantSyncronizer:
   name: qdrant-synchronizer
   config:
@@ -358,6 +356,12 @@ backfilling:
   config:
     sensitive: {}
     nonSensitive: {}
+
+  backfillingSemaphore:
+    configmapName: backfilling-semaphore
+    standard:
+      keyName: standard-tokens
+      tokensCount: 3
 
   resourcesPrefix: backfilling
 

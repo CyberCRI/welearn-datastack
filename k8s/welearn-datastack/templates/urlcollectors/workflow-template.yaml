@@ -79,8 +79,8 @@ spec:
       synchronization:
         semaphores:
         - configMapKeyRef:
-            name: {{ .collectorSemaphore.configmapName }}
-            key: {{ .collectorSemaphore.standard.keyName }}
+            name: {{ .backfillingSemaphore.configmapName }}
+            key: {{ .backfillingSemaphore.standard.keyName }}
       inputs:
         parameters:
         - name: atom_url
