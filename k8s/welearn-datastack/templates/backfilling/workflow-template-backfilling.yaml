@@ -251,8 +251,10 @@ spec:
                     {{ print "{{inputs.parameters.revision_id}}" }}
             artifacts:
               - name: batch_ids_csv
-                from: {{ "{{steps.generate-to-collect-backfilling.outputs.artifacts.batch_ids_csv}}" }}
+                from: >-
+                {{ print "{{steps.generate-to-collect-backfilling.outputs.artifacts.batch_ids_csv}}" }}
             withSequence:
-              count: {{ "{{steps.generate-to-collect-backfilling.outputs.parameters.url_batches_count}}" }}
+              count: >-
+              {{ print "{{steps.generate-to-collect-backfilling.outputs.parameters.url_batches_count}}" }}
 
 {{- end }}
