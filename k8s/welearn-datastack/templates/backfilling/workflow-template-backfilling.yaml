@@ -94,6 +94,11 @@ spec:
           secretName: {{ .name }}
 
     - name: run-backfilling
+      synchronization:
+        semaphores:
+          - configMapKeyRef:
+              name: {{ .backfillingSemaphore.configmapName }}
+              key: {{ .backfillingSemaphore.standard.keyName }}
       podSpecPatch: >-
         {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"},\"limits\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
       inputs:
@@ -210,11 +215,6 @@ spec:
                     {{ print "{{inputs.parameters.batch_size}}" }}
 
         - - name: run-backfilling
-            synchronization:
-              semaphores:
-              - configMapKeyRef:
-                  name: {{ .backfillingSemaphore.configmapName }}
-                  key: {{ .backfillingSemaphore.standard.keyName }}
             templateRef:
               name: {{ .name }}-backfilling
               template: run-backfilling
