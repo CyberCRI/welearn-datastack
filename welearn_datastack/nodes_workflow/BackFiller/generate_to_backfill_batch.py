@@ -42,14 +42,14 @@ def main() -> None:
         batch_size = int(batch_size_str)
 
     logger.info("Environment variables loaded")
-    # Gestion dynamique du chemin absolu pour le dossier des requêtes
+
     queries_folder_env = os.getenv("QUERY_FOLDER_PATH", None)
     if queries_folder_env:
         queries_folder = Path(queries_folder_env).resolve()
     else:
         queries_folder = Path(__file__).parent / "batch_generator_queries"
         queries_folder = queries_folder.resolve()
-    logger.info(f"Chemin du dossier de requêtes utilisé : {queries_folder}")
+    logger.info(f"Query path used : {queries_folder}")
 
     batch_generator = BatchGenerator(
         parallelism_threshold=parallelism_threshold,

@@ -56,7 +56,13 @@ def main() -> None:
     db_session: Session = create_db_session()
     logger.info("DB session created")
 
-    queries_folder = Path("back_filling_queries/")
+    queries_folder_env = os.getenv("QUERY_FOLDER_PATH", None)
+    if queries_folder_env:
+        queries_folder = Path(queries_folder_env).resolve()
+    else:
+        queries_folder = Path(__file__).parent / "batch_generator_queries"
+        queries_folder = queries_folder.resolve()
+    logger.info(f"Query path used : {queries_folder}")
     stmt = resolve_query_on_given_ids(ids_urls, queries_folder, query_name, revision_id)
     res = db_session.execute(stmt)
     db_session.commit()  # N'oublie pas de commit pour une mise à jour !
