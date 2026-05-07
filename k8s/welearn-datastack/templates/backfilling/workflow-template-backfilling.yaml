@@ -92,13 +92,6 @@ spec:
       - name: secrets
         secret:
           secretName: {{ .name }}
-      - name: azure-share
-        csi:
-          driver: file.csi.azure.com
-          readOnly: true
-          volumeAttributes:
-            secretName: {{ $.Values.common.azureShare.secret.name }}
-            shareName: {{ $.Values.common.azureShare.name }}
 
     - name: run-backfilling
       podSpecPatch: >-
@@ -109,7 +102,7 @@ spec:
             default: "INFO"
           - name: urls_input_filename
           - name: urls_directory
-            default: "urls"
+            default: "batch_urls"
           - name: memory
             default: {{ .workflowTemplates.runNode.requests.memory }}
           - name: query_name
@@ -155,13 +148,7 @@ spec:
       - name: secrets
         secret:
           secretName: {{ .name }}
-      - name: azure-share
-        csi:
-          driver: file.csi.azure.com
-          readOnly: true
-          volumeAttributes:
-            secretName: {{ $.Values.common.azureShare.secret.name }}
-            shareName: {{ $.Values.common.azureShare.name }}
+
     - name: all
       inputs:
         parameters:
@@ -233,7 +220,7 @@ spec:
                     {{ print "{{inputs.parameters.log_level}}" }}
                 - name: urls_input_filename
                   value: >-
-                    {{ print "{{inputs.parameters.batch_urls_ids_file_name}}" }}
+                    {{ print "{{item}}_{{inputs.parameters.batch_urls_ids_file_name}}" }}
                 - name: urls_directory
                   value: >-
                     {{ print "{{inputs.parameters.batch_urls_directory}}" }}

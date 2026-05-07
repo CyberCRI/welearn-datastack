@@ -60,7 +60,7 @@ def main() -> None:
     if queries_folder_env:
         queries_folder = Path(queries_folder_env).resolve()
     else:
-        queries_folder = Path(__file__).parent / "batch_generator_queries"
+        queries_folder = Path(__file__).parent / "back_filling_queries"
         queries_folder = queries_folder.resolve()
     logger.info(f"Query path used : {queries_folder}")
     stmt = resolve_query_on_given_ids(ids_urls, queries_folder, query_name, revision_id)
