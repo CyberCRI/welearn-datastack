@@ -87,8 +87,6 @@ spec:
         - name: secrets
           mountPath: "/secrets"
           readOnly: true
-        - name: azure-share
-          mountPath: {{ .pluginsFolderRoot }}
 
       volumes:
       - name: secrets
@@ -152,8 +150,7 @@ spec:
         - name: secrets
           mountPath: "/secrets"
           readOnly: true
-        - name: azure-share
-          mountPath: {{ .pluginsFolderRoot }}
+
       volumes:
       - name: secrets
         secret:
