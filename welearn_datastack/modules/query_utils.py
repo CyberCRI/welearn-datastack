@@ -91,7 +91,11 @@ def resolve_query_on_given_ids(
     """
     params = (
         bindparam("revision_id", value=revision_id),
-        bindparam("ids", value=given_ids, expanding=True),
+        bindparam(
+            "ids",
+            value=given_ids,
+            type_=postgresql.ARRAY(postgresql.UUID(as_uuid=True)),
+        ),
     )
     mandatory_params = ["ids", "revision_id"]
     return _resolve_query_util(queries_folder, query_name, params, mandatory_params)
