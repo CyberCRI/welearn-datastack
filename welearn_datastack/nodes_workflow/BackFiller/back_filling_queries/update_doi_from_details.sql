@@ -7,7 +7,7 @@ SET
 	doi = REPLACE((details ->> 'doi'), 'https://doi.org/', '')
 WHERE
 	-- Only process the provided document IDs
-	wd.id = ANY(:ids::uuid[])
+	wd.id = ANY(:ids)
 	-- Safety check: ensure the migration revision is applied
 	AND EXISTS (
 	SELECT
@@ -32,7 +32,7 @@ WHERE
 -- All skipped documents are considered duplicates since :ids only contains documents with a DOI.
 skipped AS (
 SELECT
-	UNNEST(:ids::uuid[]) AS id
+	UNNEST(:ids) AS id
 	EXCEPT
 	SELECT
 		id
