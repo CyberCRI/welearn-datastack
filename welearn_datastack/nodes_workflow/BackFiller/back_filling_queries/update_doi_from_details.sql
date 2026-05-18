@@ -7,7 +7,7 @@ SET
 	doi = REPLACE((details ->> 'doi'), 'https://doi.org/', '')
 WHERE
 	-- Only process the provided document IDs
-	wd.id IN :ids
+	wd.id = ANY(:ids::uuid[])
 	-- Safety check: ensure the migration revision is applied
 	AND EXISTS (
 	SELECT
@@ -33,17 +33,17 @@ WHERE
 skipped AS (
 SELECT
 	UNNEST(:ids::uuid[]) AS id
-EXCEPT
-SELECT
-	id
-FROM
-	updated
+	EXCEPT
+	SELECT
+		id
+	FROM
+		updated
 )
 -- Track the status of each document in the tmp table.
 -- On conflict, update the status in case the document was reprocessed.
 INSERT
 	INTO
-	tmp_document_doi_status (document_id,
+	document_related.tmp_document_doi_status (document_id,
 	is_duplicate)
 SELECT
 	id,
