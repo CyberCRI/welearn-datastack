@@ -4,9 +4,17 @@ FROM
 	document_related.welearn_document
 WHERE
 	details ->> 'doi' IS NOT NULL
+	AND NOT EXISTS (
+	SELECT
+		1
+	FROM
+		document_related.tmp_document_doi_status t
+	WHERE
+		t.document_id = document_related.welearn_document.id
+    )
 	AND doi IS DISTINCT
 FROM
-	(details ->> 'doi')
+	REPLACE((details ->> 'doi'), 'https://doi.org/', '')
 	AND details ->> 'doi' IS DISTINCT
 FROM
 	''
