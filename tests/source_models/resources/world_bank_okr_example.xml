@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="static/style.xsl"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+    <responseDate>2026-05-26T13:45:30Z</responseDate>
+    <request verb="GetRecord" identifier="oai:openknowledge.worldbank.org:10986/3284" metadataPrefix="mets">https://openknowledge.worldbank.org/server/oai/request</request>
+    <GetRecord>
+        <record>
+            <header>
+                <identifier>oai:openknowledge.worldbank.org:10986/3284</identifier>
+                <datestamp>2026-04-01T11:46:55Z</datestamp>
+                <setSpec>com_10986_8</setSpec>
+                <setSpec>col_10986_9</setSpec>
+                <setSpec>innovation_policy</setSpec>
+                <setSpec>LACEA</setSpec>
+                <setSpec>Legal</setSpec>
+                <setSpec>intelligo_health</setSpec>
+                <setSpec>china_energy</setSpec>
+                <setSpec>Carbon_Pricing_and_Emission_Trading</setSpec>
+                <setSpec>HNP</setSpec>
+                <setSpec>Africa_All</setSpec>
+                <setSpec>linking_to_D_R</setSpec>
+                <setSpec>africa_health</setSpec>
+                <setSpec>AfricaRegion</setSpec>
+                <setSpec>32367</setSpec>
+                <setSpec>cct</setSpec>
+                <setSpec>ECACE_Working_papers_2020_2025</setSpec>
+                <setSpec>rural_roads_2</setSpec>
+                <setSpec>land</setSpec>
+                <setSpec>OCLC_request</setSpec>
+                <setSpec>external_journal_articles_dec</setSpec>
+                <setSpec>test_new_filter</setSpec>
+                <setSpec>philippines</setSpec>
+                <setSpec>Nigeria</setSpec>
+                <setSpec>porewopa</setSpec>
+                <setSpec>Aptara</setSpec>
+                <setSpec>SURGP</setSpec>
+                <setSpec>bangladesh_microfinance</setSpec>
+                <setSpec>intelligo_poverty</setSpec>
+                <setSpec>rural_roads</setSpec>
+                <setSpec>dec_external_journal_articles</setSpec>
+                <setSpec>transport</setSpec>
+                <setSpec>india_energy</setSpec>
+                <setSpec>Fix_PRWPs_DOIs</setSpec>
+                <setSpec>china_research</setSpec>
+                <setSpec>tanzania_agribusiness</setSpec>
+                <setSpec>trade</setSpec>
+                <setSpec>isbn_field_to_fix</setSpec>
+                <setSpec>Labor_Law_Brazil</setSpec>
+                <setSpec>climate_change</setSpec>
+                <setSpec>trade_isbn</setSpec>
+                <setSpec>demo_austria</setSpec>
+                <setSpec>AgroKnow</setSpec>
+                <setSpec>31989</setSpec>
+            </header>
+            <metadata>
+                <mets xmlns="http://www.loc.gov/METS/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:doc="http://www.lyncode.com/xoai" ID="&#xa;&#x9;&#x9;&#x9;&#x9;DSpace_ITEM_10986-3284" TYPE="DSpace ITEM" PROFILE="DSpace METS SIP Profile 1.0" xsi:schemaLocation="http://www.loc.gov/METS/ http://www.loc.gov/standards/mets/mets.xsd" OBJID="&#xa;&#x9;&#x9;&#x9;&#x9;hdl:10986/3284">
+                    <metsHdr CREATEDATE="2026-05-26T13:45:30Z">
+                        <agent ROLE="CUSTODIAN" TYPE="ORGANIZATION">
+                            <name>Open Knowledge Repository</name>
+                        </agent>
+                    </metsHdr>
+                    <dmdSec ID="DMD_10986_3284">
+                        <mdWrap MDTYPE="MODS">
+                            <xmlData xmlns:mods="http://www.loc.gov/mods/v3" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-1.xsd">
+                                <mods:mods xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-1.xsd">
+                                    <mods:name>
+                                        <mods:role>
+                                            <mods:roleTerm type="text">author</mods:roleTerm>
+                                        </mods:role>
+                                        <mods:namePart>Blankespoor, Brian</mods:namePart>
+                                    </mods:name>
+                                    <mods:name>
+                                        <mods:role>
+                                            <mods:roleTerm type="text">author</mods:roleTerm>
+                                        </mods:role>
+                                        <mods:namePart>Basist, Alan</mods:namePart>
+                                    </mods:name>
+                                    <mods:name>
+                                        <mods:role>
+                                            <mods:roleTerm type="text">author</mods:roleTerm>
+                                        </mods:role>
+                                        <mods:namePart>Dinar, Ariel</mods:namePart>
+                                    </mods:name>
+                                    <mods:name>
+                                        <mods:role>
+                                            <mods:roleTerm type="text">author</mods:roleTerm>
+                                        </mods:role>
+                                        <mods:namePart>Dinar, Shlomi</mods:namePart>
+                                    </mods:name>
+                                    <mods:extension>
+                                        <mods:dateAccessioned encoding="iso8601">2012-03-19T17:29:42Z</mods:dateAccessioned>
+                                    </mods:extension>
+                                    <mods:extension>
+                                        <mods:dateAvailable encoding="iso8601">2012-03-19T17:29:42Z</mods:dateAvailable>
+                                    </mods:extension>
+                                    <mods:originInfo>
+                                        <mods:dateIssued encoding="iso8601">2012-03-01</mods:dateIssued>
+                                    </mods:originInfo>
+                                    <mods:identifier type="none"/>
+                                    <mods:identifier type="uri">https://hdl.handle.net/10986/3284</mods:identifier>
+                                    <mods:identifier type="doi">10.1596/1813-9450-5996</mods:identifier>
+                                    <mods:abstract>International river basins will likely&#xd;
+            face higher hydrologic variability due to climate change.&#xd;
+            Increased floods and droughts would have economic and&#xd;
+            political consequences. Riparians of transboundary basins&#xd;
+            governed by water treaties could experience non-compliance&#xd;
+            and inter-state tensions if flow falls below levels presumed&#xd;
+            in a treaty. Flow information is essential to cope with&#xd;
+            these challenges through water storage, allocation, and use.&#xd;
+            This paper demonstrates a simple yet robust method, which&#xd;
+            measures gauge station runoff with wetness values derived&#xd;
+            from satellite data (1988-2010), for expanding sub-basin&#xd;
+            stream flow information to the entire river basin where&#xd;
+            natural flow information is limited. It demonstrates the&#xd;
+            approach with flow level data that provide estimates of&#xd;
+            monthly runoff in near real time in two international river&#xd;
+            basins: Zambezi and Mekong. The paper includes an economic&#xd;
+            framework incorporating information on existing institutions&#xd;
+            to assess potential economic and political impacts and to&#xd;
+            inform policy on conflict and cooperation between riparians.&#xd;
+            The authors conclude that satellite data modeled with gauge&#xd;
+            station runoff reduce the uncertainty inherent in&#xd;
+            negotiating an international water agreement under increased&#xd;
+            hydrological variability, and thus can assist policy makers&#xd;
+            to devise more efficient institutional apparatus.</mods:abstract>
+                                    <mods:language>
+                                        <mods:languageTerm authority="rfc3066"/>
+                                    </mods:language>
+                                    <mods:accessCondition type="useAndReproduction">CC BY 3.0 IGO</mods:accessCondition>
+                                    <mods:subject>
+                                        <mods:topic>ADVERSE IMPACTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>AGRICULTURE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ALLOCATION OF WATER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ARID AREAS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ARID REGIONS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>BASINS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CASE STUDIES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CATCHMENT</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CATCHMENT AREA</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CATCHMENTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CLASSIFICATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CLIMATE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CLIMATE CHANGE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CLIMATE VARIABILITY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CLIMATIC CONDITIONS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>COAST</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>COASTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CONFLICT RESOLUTION MECHANISMS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CONSTRUCTION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>DAMS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>DATA COLLECTION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>DECISION MAKING</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>DISCHARGE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>DOWNSTREAM COUNTRIES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>DROUGHT</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ECOLOGY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ENDANGERED SPECIES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ENFORCEMENT MECHANISM</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ENGINEERING</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ENVIRONMENTAL CONDITIONS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ENVIRONMENTAL IMPACTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>ENVIRONMENTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FISHERIES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FLOOD CONTROL</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FLOOD DAMAGE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FLOOD EVENTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FLOOD FORECASTING</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FLOOD FREQUENCY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FLOODING</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FLOODS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FLOW REGULATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FRESHWATER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>FRESHWATER RESOURCES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>GEOGRAPHIC INFORMATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>GEOGRAPHIC INFORMATION SYSTEM</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>HYDROELECTRIC POWER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>HYDROGRAPHY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>HYDROLOGIC CYCLE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>HYDROLOGICAL CYCLE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>HYDROLOGY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>IMPOUNDMENTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>INTERNATIONAL RIVER BASINS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>INTERNATIONAL WATER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>IRRIGATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>IRRIGATION WATER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>LAKES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>LAND USE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>MEASUREMENTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>METEOROLOGICAL DATA</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>MITIGATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>MUNICIPAL WATER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>NATURAL RESOURCES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>OPEN ACCESS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>POPULATION DENSITY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>POWER GENERATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>PRECIPITATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>PRECIPITATION DATA</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>PRECIPITATION INTENSITY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>PRESSURE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RAIN</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RAINFALL</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RANGES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>REMOTE SENSING</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RESERVOIR</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RESERVOIRS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RIPARIAN COUNTRIES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RIPARIAN STATES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RIVER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RIVER BASIN</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RIVER BASINS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RIVER FLOW</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RIVER SYSTEMS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RIVERS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>RUNOFF</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SAMPLE SIZE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SATELLITE DATA</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SNOW</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SNOW MELT</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SNOWMELT</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SOIL</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SOIL MOISTURE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>STREAM</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>STREAMFLOW</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SURFACE WATER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SUSTAINABLE USE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SWAMPS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>TOPOGRAPHY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>TRANSBOUNDARY WATERS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>TREATIES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>USE OF WATER</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>VALUABLE INFORMATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>VEGETATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER ALLOCATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER ALLOCATION ISSUES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER AVAILABILITY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER DEVELOPMENT</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER FLOWS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER INFRASTRUCTURE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER MANAGEMENT</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER MANAGEMENT STRATEGIES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER POLICY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER POLLUTION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER PROVIDERS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER QUALITY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER QUANTITY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER REGULATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER REQUIREMENTS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER RESOURCES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER RESOURCES DEVELOPMENT</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER SCARCITY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER STORAGE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER SUPPLY</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER USAGE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER USE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATER WITHDRAWALS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATERS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATERSHED</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WATERSHEDS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WAVES</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WETLANDS</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>WILDLIFE</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>CLEAN WATER AND SANITATION</mods:topic>
+                                    </mods:subject>
+                                    <mods:subject>
+                                        <mods:topic>SDG 6</mods:topic>
+                                    </mods:subject>
+                                    <mods:titleInfo>
+                                        <mods:title>Accessing Economic and Political Impacts of Hydrological Variability on Treaties : Case Studies on the Zambezi and Mekong Basins</mods:title>
+                                    </mods:titleInfo>
+                                    <mods:genre/>
+                                </mods:mods>
+                            </xmlData>
+                        </mdWrap>
+                    </dmdSec>
+                    <amdSec ID="TMD_10986_3284">
+                        <rightsMD ID="RIG_10986_3284">
+                            <mdWrap MIMETYPE="text/plain" MDTYPE="OTHER" OTHERMDTYPE="DSpaceDepositLicense">
+                                <binData>Tk9URTogUExBQ0UgWU9VUiBPV04gTElDRU5TRSBIRVJFClRoaXMgc2FtcGxlIGxpY2Vuc2UgaXMgcHJvdmlkZWQgZm9yIGluZm9ybWF0aW9uYWwgcHVycG9zZXMgb25seS4KCk5PTi1FWENMVVNJVkUgRElTVFJJQlVUSU9OIExJQ0VOU0UKCkJ5IHNpZ25pbmcgYW5kIHN1Ym1pdHRpbmcgdGhpcyBsaWNlbnNlLCB5b3UgKHRoZSBhdXRob3Iocykgb3IgY29weXJpZ2h0Cm93bmVyKSBncmFudHMgdG8gRFNwYWNlIFVuaXZlcnNpdHkgKERTVSkgdGhlIG5vbi1leGNsdXNpdmUgcmlnaHQgdG8gcmVwcm9kdWNlLAp0cmFuc2xhdGUgKGFzIGRlZmluZWQgYmVsb3cpLCBhbmQvb3IgZGlzdHJpYnV0ZSB5b3VyIHN1Ym1pc3Npb24gKGluY2x1ZGluZwp0aGUgYWJzdHJhY3QpIHdvcmxkd2lkZSBpbiBwcmludCBhbmQgZWxlY3Ryb25pYyBmb3JtYXQgYW5kIGluIGFueSBtZWRpdW0sCmluY2x1ZGluZyBidXQgbm90IGxpbWl0ZWQgdG8gYXVkaW8gb3IgdmlkZW8uCgpZb3UgYWdyZWUgdGhhdCBEU1UgbWF5LCB3aXRob3V0IGNoYW5naW5nIHRoZSBjb250ZW50LCB0cmFuc2xhdGUgdGhlCnN1Ym1pc3Npb24gdG8gYW55IG1lZGl1bSBvciBmb3JtYXQgZm9yIHRoZSBwdXJwb3NlIG9mIHByZXNlcnZhdGlvbi4KCllvdSBhbHNvIGFncmVlIHRoYXQgRFNVIG1heSBrZWVwIG1vcmUgdGhhbiBvbmUgY29weSBvZiB0aGlzIHN1Ym1pc3Npb24gZm9yCnB1cnBvc2VzIG9mIHNlY3VyaXR5LCBiYWNrLXVwIGFuZCBwcmVzZXJ2YXRpb24uCgpZb3UgcmVwcmVzZW50IHRoYXQgdGhlIHN1Ym1pc3Npb24gaXMgeW91ciBvcmlnaW5hbCB3b3JrLCBhbmQgdGhhdCB5b3UgaGF2ZQp0aGUgcmlnaHQgdG8gZ3JhbnQgdGhlIHJpZ2h0cyBjb250YWluZWQgaW4gdGhpcyBsaWNlbnNlLiBZb3UgYWxzbyByZXByZXNlbnQKdGhhdCB5b3VyIHN1Ym1pc3Npb24gZG9lcyBub3QsIHRvIHRoZSBiZXN0IG9mIHlvdXIga25vd2xlZGdlLCBpbmZyaW5nZSB1cG9uCmFueW9uZSdzIGNvcHlyaWdodC4KCklmIHRoZSBzdWJtaXNzaW9uIGNvbnRhaW5zIG1hdGVyaWFsIGZvciB3aGljaCB5b3UgZG8gbm90IGhvbGQgY29weXJpZ2h0LAp5b3UgcmVwcmVzZW50IHRoYXQgeW91IGhhdmUgb2J0YWluZWQgdGhlIHVucmVzdHJpY3RlZCBwZXJtaXNzaW9uIG9mIHRoZQpjb3B5cmlnaHQgb3duZXIgdG8gZ3JhbnQgRFNVIHRoZSByaWdodHMgcmVxdWlyZWQgYnkgdGhpcyBsaWNlbnNlLCBhbmQgdGhhdApzdWNoIHRoaXJkLXBhcnR5IG93bmVkIG1hdGVyaWFsIGlzIGNsZWFybHkgaWRlbnRpZmllZCBhbmQgYWNrbm93bGVkZ2VkCndpdGhpbiB0aGUgdGV4dCBvciBjb250ZW50IG9mIHRoZSBzdWJtaXNzaW9uLgoKSUYgVEhFIFNVQk1JU1NJT04gSVMgQkFTRUQgVVBPTiBXT1JLIFRIQVQgSEFTIEJFRU4gU1BPTlNPUkVEIE9SIFNVUFBPUlRFRApCWSBBTiBBR0VOQ1kgT1IgT1JHQU5JWkFUSU9OIE9USEVSIFRIQU4gRFNVLCBZT1UgUkVQUkVTRU5UIFRIQVQgWU9VIEhBVkUKRlVMRklMTEVEIEFOWSBSSUdIVCBPRiBSRVZJRVcgT1IgT1RIRVIgT0JMSUdBVElPTlMgUkVRVUlSRUQgQlkgU1VDSApDT05UUkFDVCBPUiBBR1JFRU1FTlQuCgpEU1Ugd2lsbCBjbGVhcmx5IGlkZW50aWZ5IHlvdXIgbmFtZShzKSBhcyB0aGUgYXV0aG9yKHMpIG9yIG93bmVyKHMpIG9mIHRoZQpzdWJtaXNzaW9uLCBhbmQgd2lsbCBub3QgbWFrZSBhbnkgYWx0ZXJhdGlvbiwgb3RoZXIgdGhhbiBhcyBhbGxvd2VkIGJ5IHRoaXMKbGljZW5zZSwgdG8geW91ciBzdWJtaXNzaW9uLgo=</binData>
+                            </mdWrap>
+                        </rightsMD>
+                    </amdSec>
+                    <amdSec ID="FO_10986_3284_1">
+                        <techMD ID="TECH_O_10986_3284_1">
+                            <mdWrap MDTYPE="PREMIS">
+                                <xmlData xmlns:premis="http://www.loc.gov/standards/premis" xsi:schemaLocation="http://www.loc.gov/standards/premis http://www.loc.gov/standards/premis/PREMIS-v1-0.xsd">
+                                    <premis:premis>
+                                        <premis:object>
+                                            <premis:objectIdentifier>
+                                                <premis:objectIdentifierType>URL</premis:objectIdentifierType>
+                                                <premis:objectIdentifierValue>https://openknowledge.worldbank.org/bitstreams/c8e7b950-9cf2-5b99-bfaf-15f947aba30a/download</premis:objectIdentifierValue>
+                                            </premis:objectIdentifier>
+                                            <premis:objectCategory>File</premis:objectCategory>
+                                            <premis:objectCharacteristics>
+                                                <premis:fixity>
+                                                    <premis:messageDigestAlgorithm>MD5</premis:messageDigestAlgorithm>
+                                                    <premis:messageDigest>f46188cac96db9c02278da1b36cdd6c9</premis:messageDigest>
+                                                </premis:fixity>
+                                                <premis:size>1593788</premis:size>
+                                                <premis:format>
+                                                    <premis:formatDesignation>
+                                                        <premis:formatName>application/pdf</premis:formatName>
+                                                    </premis:formatDesignation>
+                                                </premis:format>
+                                            </premis:objectCharacteristics>
+                                            <premis:originalName>WPS5996.pdf</premis:originalName>
+                                        </premis:object>
+                                    </premis:premis>
+                                </xmlData>
+                            </mdWrap>
+                        </techMD>
+                    </amdSec>
+                    <amdSec ID="FO_10986_3284_2">
+                        <techMD ID="TECH_O_10986_3284_2">
+                            <mdWrap MDTYPE="PREMIS">
+                                <xmlData xmlns:premis="http://www.loc.gov/standards/premis" xsi:schemaLocation="http://www.loc.gov/standards/premis http://www.loc.gov/standards/premis/PREMIS-v1-0.xsd">
+                                    <premis:premis>
+                                        <premis:object>
+                                            <premis:objectIdentifier>
+                                                <premis:objectIdentifierType>URL</premis:objectIdentifierType>
+                                                <premis:objectIdentifierValue>https://openknowledge.worldbank.org/bitstreams/e189cde3-ebf4-5360-a248-2ea3e05fa5d6/download</premis:objectIdentifierValue>
+                                            </premis:objectIdentifier>
+                                            <premis:objectCategory>File</premis:objectCategory>
+                                            <premis:objectCharacteristics>
+                                                <premis:fixity>
+                                                    <premis:messageDigestAlgorithm>MD5</premis:messageDigestAlgorithm>
+                                                    <premis:messageDigest>d28412c47be65e6aeeb128db05e95c2d</premis:messageDigest>
+                                                </premis:fixity>
+                                                <premis:size>134999</premis:size>
+                                                <premis:format>
+                                                    <premis:formatDesignation>
+                                                        <premis:formatName>text/plain</premis:formatName>
+                                                    </premis:formatDesignation>
+                                                </premis:format>
+                                            </premis:objectCharacteristics>
+                                            <premis:originalName>WPS5996.txt</premis:originalName>
+                                        </premis:object>
+                                    </premis:premis>
+                                </xmlData>
+                            </mdWrap>
+                        </techMD>
+                    </amdSec>
+                    <fileSec>
+                        <fileGrp USE="ORIGINAL">
+                            <file ID="BITSTREAM_ORIGINAL_10986_3284_1" MIMETYPE="application/pdf" SEQ="1" SIZE="1593788" CHECKSUM="f46188cac96db9c02278da1b36cdd6c9" CHECKSUMTYPE="MD5" ADMID="FO_10986_3284_1" GROUPID="GROUP_BITSTREAM_10986_3284_1">
+                                <FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="https://openknowledge.worldbank.org/bitstreams/c8e7b950-9cf2-5b99-bfaf-15f947aba30a/download"/>
+                            </file>
+                            <file ID="BITSTREAM_ORIGINAL_10986_3284_2" MIMETYPE="text/plain" SEQ="2" SIZE="134999" CHECKSUM="d28412c47be65e6aeeb128db05e95c2d" CHECKSUMTYPE="MD5" ADMID="FO_10986_3284_2" GROUPID="GROUP_BITSTREAM_10986_3284_2">
+                                <FLocat LOCTYPE="URL" xlink:type="simple" xlink:href="https://openknowledge.worldbank.org/bitstreams/e189cde3-ebf4-5360-a248-2ea3e05fa5d6/download"/>
+                            </file>
+                        </fileGrp>
+                    </fileSec>
+                    <structMap LABEL="DSpace Object" TYPE="LOGICAL">
+                        <div TYPE="DSpace Object Contents" ADMID="DMD_10986_3284">
+                            <div TYPE="DSpace BITSTREAM">
+                                <fptr FILEID="BITSTREAM_ORIGINAL_10986_3284_1"/>
+                            </div>
+                            <div TYPE="DSpace BITSTREAM">
+                                <fptr FILEID="BITSTREAM_ORIGINAL_10986_3284_2"/>
+                            </div>
+                        </div>
+                    </structMap>
+                </mets>
+            </metadata>
+        </record>
+    </GetRecord>
+</OAI-PMH>
