@@ -1,16 +1,13 @@
 import io
-import json
 import logging
-import math
 import os
 import re
 import time
-from collections import deque
 from datetime import datetime
-from itertools import batched
-from typing import Dict, Iterable, List
+from typing import List
 
-from lingua import Language
+import pydantic
+import requests
 from requests import Session
 from welearn_database.data.models import WeLearnDocument
 
@@ -18,38 +15,22 @@ from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.data.details_dataclass.topics import TopicDetails
-from welearn_datastack.data.source_models.oapen import Metadatum, OapenModel
 from welearn_datastack.data.source_models.world_bank_okr import WorldBankOKRRecord
-from welearn_datastack.exceptions import (
-    NoDescriptionFoundError,
-    TooMuchLanguages,
-    UnauthorizedLicense,
-    WrongLangFormat,
-)
-from welearn_datastack.modules.computed_metadata import get_language_detector
+from welearn_datastack.exceptions import LegalException, NoContent, UnauthorizedLicense
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
     extract_txt_from_pdf_with_tika,
-    get_pdf_content,
     remove_hyphens,
     replace_ligatures,
 )
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginRESTCollector
-from welearn_datastack.regular_expression import (
-    BLANK_CHARACTERS_SEQUENCE_REGEX,
-    SOFT_LINE_BREAK_REGEX,
-    WORD_CUT_BY_BACKLINES_REGEX,
-)
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import (
-    format_cc_license,
-    remove_extra_whitespace,
-)
+from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 
@@ -79,29 +60,6 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
         okr_resp.raise_for_status()
 
         return WorldBankOKRRecord.model_validate(XMLExtractor(okr_resp.text))
-
-    def _retrieve_records_from_oai(
-        self, documents: list[WeLearnDocument]
-    ) -> list[WrapperRawData]:
-        client = get_new_https_session()
-        ret = []
-        for doc in documents:
-            try:
-                ret.append(
-                    WrapperRawData(
-                        document=doc,
-                        raw_data=self._retrieve_record_from_oai(
-                            doc.external_id, client
-                        ),
-                    )
-                )
-            except Exception as e:
-                logger.error(
-                    "Error while retrieving record with oai_id %s: %s",
-                    doc.external_id,
-                    str(e),
-                )
-        return ret
 
     @staticmethod
     def _process_authors(authors_str: list[str]) -> list[AuthorDetails]:
@@ -152,11 +110,66 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
             "authors": authors,
             "topics": topics,
             "publication_date": publication_date,
+            "doi": raw_data.identifiers.doi,
         }
 
         return details
 
+    def _extract_full_content(self, record: WorldBankOKRRecord) -> tuple[str, bool]:
+        if len(record.fileGrp) == 0:
+            raise NoContent("No file group found in the record")
+
+        txt_address = None
+        pdf_address = None
+
+        for grp in record.fileGrp:
+            if grp.mimetype == "application/pdf":
+                pdf_address = grp.flocat.href
+            elif grp.mimetype == "text/plain":
+                txt_address = grp.flocat.href
+
+        is_txt = False
+
+        # TXT will be used as fallback because it's more difficult to clean
+        if pdf_address:
+            logger.info("Getting PDF content from %s", pdf_address)
+            client = get_new_https_session(retry_total=0)
+            response = client.get(pdf_address, headers=HEADERS, timeout=300)
+            response.raise_for_status()
+
+            with io.BytesIO(response.content) as pdf_file:
+                pdf_content = extract_txt_from_pdf_with_tika(
+                    pdf_content=pdf_file, tika_base_url=self.tika_address
+                )
+            # Delete non printable characters
+            pdf_content = [
+                [delete_non_printable_character(word) for word in page]
+                for page in pdf_content
+            ]
+
+            pages = []
+            for content in pdf_content:
+                page_text = " ".join(content)
+                page_text = replace_ligatures(page_text)
+                page_text = remove_hyphens(page_text)
+                page_text = delete_accents(page_text)
+
+                pages.append(page_text)
+            ret = remove_extra_whitespace(" ".join(pages))
+        elif txt_address:
+            is_txt = True
+            logger.info("Getting TXT content from %s", txt_address)
+            client = get_new_https_session(retry_total=0)
+            response = client.get(txt_address, headers=HEADERS, timeout=300)
+            ret = response.text
+        else:
+            raise NoContent("Can't find content address for this document")
+        return ret, is_txt
+
     def _update_welearn_document(self, wrapper: WrapperRawData) -> WeLearnDocument:
+        """
+        Update the WeLearnDocument with the data from the WorldBankOKRRecord.
+        """
         licence = self._extract_licence(wrapper.raw_data)
         if licence not in AUTHORIZED_LICENSES:
             raise UnauthorizedLicense(
@@ -167,10 +180,88 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
         doc.title = wrapper.raw_data.title
         doc.doi = wrapper.raw_data.identifiers.doi
         doc.description = wrapper.raw_data.abstract
+        full_content, is_txt = self._extract_full_content(wrapper.raw_data)
+        doc.full_content = full_content
+        details = self._build_details(wrapper.raw_data)
+        details.update(
+            {
+                "content_from_pdf": not is_txt,
+                "content_from_txt": is_txt,
+                "licence": licence,
+            }
+        )
+        doc.details = details
+        return doc
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running WorldBankOKR plugin")
         ret: List[WrapperRetrieveDocument] = []
 
-        for document in documents:
-            pass
+        client = get_new_https_session()
+        for doc in documents:
+            try:
+                ret_doc = WrapperRawData(
+                    document=doc,
+                    raw_data=self._retrieve_record_from_oai(doc.external_id, client),
+                )
+            except requests.exceptions.RequestException as e:
+                msg = f"Error while retrieving World bank OKR document ({doc.url}) document from this url {self.api_base_url}/?verb=GetRecord&identifier={doc.external_id}: {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=doc,
+                        http_error_code=get_http_code_from_exception(e),
+                        error_info=msg,
+                    )
+                )
+                continue
+            except pydantic.ValidationError as e:
+                msg = f"Error while validating World bank OKR document ({doc.url}) document from this url {self.api_base_url}/?verb=GetRecord&identifier={doc.external_id}: {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=doc,
+                        error_info=msg,
+                    )
+                )
+                continue
+
+            try:
+                doc = WrapperRetrieveDocument(
+                    document=self._update_welearn_document(ret_doc),
+                )
+            except LegalException as e:
+                msg = f"Legal exception for document {doc.url} from unesdoc : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=doc,
+                        error_info=msg,
+                    )
+                )
+                continue
+            except requests.exceptions.RequestException as e:
+                msg = f"Error while retrieving World bank OKR content ({ret_doc.document.url}) document from this url {self.api_base_url}/?verb=GetRecord&identifier={ret_doc.document.external_id}: {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=ret_doc.document,
+                        http_error_code=get_http_code_from_exception(e),
+                        error_info=msg,
+                    )
+                )
+                continue
+            except NoContent as e:
+                msg = f"No content found for document {ret_doc.document.url}: {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=ret_doc.document,
+                        error_info=msg,
+                    )
+                )
+                continue
+
+            ret.append(doc)
+
+        return ret
