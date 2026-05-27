@@ -55,6 +55,32 @@ def _parse_tika_content(tika_content: dict) -> list[list[str]]:
     return res
 
 
+def _compute_parse_precision(
+    chars_per_page: list[int], total_unmapped_unicode_chars: int
+) -> float:
+    """
+    Compute the parse precision of the Tika micro service for a PDF document
+    :param chars_per_page: the number of characters per page of the PDF document
+    :param total_unmapped_unicode_chars: the total number of unmapped unicode characters in the PDF document
+    :return: the parse precision as a float between 0 and 1
+    """
+    total_chars = sum(chars_per_page)
+    if total_chars == 0:
+        return 0.0
+    return (total_chars - total_unmapped_unicode_chars) / total_chars
+
+
+def _compute_parse_precision_from_tika_content(tika_content: dict) -> float:
+    """
+    Compute the parse precision of the Tika micro service for a PDF document from the content returned by Tika micro service
+    :param tika_content: the content returned by Tika micro service
+    :return: the parse precision as a float between 0 and 1
+    """
+    chars_per_page = tika_content.get("pdf:charsPerPage", [])
+    total_unmapped_unicode_chars = tika_content.get("pdf:totalUnmappedUnicodeChars", 0)
+    return _compute_parse_precision(chars_per_page, total_unmapped_unicode_chars)
+
+
 def extract_txt_from_pdf_with_tika(
     pdf_content: io.BytesIO, tika_base_url: str, with_metadata: bool = False
 ) -> List[List[str]] | tuple[List[List[str]], dict]:
@@ -70,6 +96,7 @@ def extract_txt_from_pdf_with_tika(
     """
     tika_content = _send_pdf_to_tika(pdf_content, tika_base_url)
     pdf_content = _parse_tika_content(tika_content)
+    parsing_precision = _compute_parse_precision_from_tika_content(tika_content)
 
     refined_pdf_content = RefinedDocument(content=pdf_content)
 
