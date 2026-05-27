@@ -64,6 +64,7 @@ def format_cc_license(license: str) -> str:
     """
     if not isinstance(license, str):
         return license
+
     splitted_elements = license.split("-")
     version = splitted_elements[-1].strip()
     rights_code = "-".join(splitted_elements[1:-1]).strip().lower()
