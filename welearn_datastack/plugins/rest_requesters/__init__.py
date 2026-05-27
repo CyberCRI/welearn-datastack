@@ -12,6 +12,9 @@ from welearn_datastack.plugins.rest_requesters.ted import TEDCollector
 from welearn_datastack.plugins.rest_requesters.unesdoc import UNESDOCCollector
 from welearn_datastack.plugins.rest_requesters.uved import UVEDCollector
 from welearn_datastack.plugins.rest_requesters.wikipedia import WikipediaCollector
+from welearn_datastack.plugins.rest_requesters.world_bank_okr import (
+    WorldBankOpenKnowledgeRepository,
+)
 
 plugins_rest_list: List[Type[IPluginRESTCollector]] = [
     WikipediaCollector,
@@ -23,4 +26,5 @@ plugins_rest_list: List[Type[IPluginRESTCollector]] = [
     UVEDCollector,
     FAOOpenKnowledgeCollector,
     UNESDOCCollector,
+    WorldBankOpenKnowledgeRepository,
 ]
