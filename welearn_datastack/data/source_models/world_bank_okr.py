@@ -1,8 +1,7 @@
-from typing import Any, List, Optional
+from typing import Any, Optional
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, model_validator
 
-from welearn_datastack.data.xml_data import XMLData
 from welearn_datastack.exceptions import NoDescriptionFoundError, NoTitle
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 
@@ -53,7 +52,6 @@ class WorldBankOKRRecord(BaseModel):
         for f in XMLExtractor(file_grp).extract_content(tag="file"):
             f_ret = {k.lower(): v for k, v in f.attributes.items()}
             flocat_xml = XMLExtractor(f.content).extract_content(tag="FLocat")
-            print(0)
             flocat_ret = {
                 k.lower().replace("xlink:", ""): v
                 for k, v in flocat_xml[0].attributes.items()
@@ -79,15 +77,14 @@ class WorldBankOKRRecord(BaseModel):
 
     @classmethod
     def _extract_identifiers(cls, value: XMLExtractor) -> dict[str, str | None]:
-        ret = {
-            "uri": value.extract_content_attribute_filter(
-                tag="mods:identifier", attribute_name="type", attribute_value="uri"
-            )[0].content,
-            "doi": value.extract_content_attribute_filter(
-                tag="mods:identifier", attribute_name="type", attribute_value="doi"
-            )[0].content,
-        }
-        return ret
+        uri = value.extract_content_attribute_filter(
+            tag="mods:identifier", attribute_name="type", attribute_value="uri"
+        )[0].content
+        doi_items = value.extract_content_attribute_filter(
+            tag="mods:identifier", attribute_name="type", attribute_value="doi"
+        )
+        doi = doi_items[0].content if doi_items else None
+        return {"uri": uri, "doi": doi}
 
     @model_validator(mode="before")
     @classmethod

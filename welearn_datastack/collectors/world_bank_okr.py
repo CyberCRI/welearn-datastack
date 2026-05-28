@@ -3,16 +3,13 @@ from datetime import datetime
 from typing import List
 from zoneinfo import ZoneInfo
 
-import requests  # type: ignore
-from requests.adapters import HTTPAdapter  # type: ignore
 from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack import constants
-from welearn_datastack.data.source_models.fao_open_knowledge import FaoOKModel
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.data.xml_data import XMLData
-from welearn_datastack.exceptions import NoDOIFoundError, NotEnoughData, NoUrl
+from welearn_datastack.exceptions import NotEnoughData, NoUrl
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
@@ -83,7 +80,7 @@ class WorldBankOpenKnowledgeRepositoryCollector(URLCollector):
         ret = full_record.extract_content_attribute_filter(
             tag="header", attribute_name="status", attribute_value="deleted"
         )
-        return not bool(ret)
+        return len(ret) == 0
 
     def _extract_world_bank_okr_document(
         self, world_bank_okr_api_response: XMLExtractor

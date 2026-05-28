@@ -246,7 +246,7 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
                     document=self._update_welearn_document(ret_doc),
                 )
             except LegalException as e:
-                msg = f"Legal exception for document {doc.url} from unesdoc : {e}"
+                msg = f"Legal exception for document {doc.url} from world bank OKR: {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(

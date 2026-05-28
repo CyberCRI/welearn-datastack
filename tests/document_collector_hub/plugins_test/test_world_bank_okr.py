@@ -18,21 +18,6 @@ from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.rest_requesters import WorldBankOpenKnowledgeRepository
 
 
-class MockResponse:
-    def __init__(self, content=None, json_data=None, status_code=200):
-        self.content = content
-        self._json = json_data
-        self.status_code = status_code
-
-    def json(self):
-        if self._json is None:
-            raise ValueError("No JSON data")
-        return self._json
-
-    def raise_for_status(self):
-        if self.status_code >= 400:
-            raise requests.exceptions.HTTPError(f"HTTP {self.status_code}")
-
 
 class TestWorldBankOpenKnowledgeRepository(TestCase):
 
