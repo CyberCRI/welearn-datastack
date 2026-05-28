@@ -42,7 +42,7 @@ if __name__ == "__main__":
         raise ValueError("Corpus world-bank-open-knowledge-repository not found")
 
     collector = WorldBankOpenKnowledgeRepositoryCollector(
-        Corpus(source_name="world-bank-open-knowledge-repository"),
+        corpus,
         date_last_insert=int(date_a_week_ago.timestamp()),
     )
 
