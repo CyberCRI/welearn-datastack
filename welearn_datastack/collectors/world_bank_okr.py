@@ -46,7 +46,8 @@ class WorldBankOpenKnowledgeRepositoryCollector(URLCollector):
 
         return ret
 
-    def _extract_doi(self, xml_input: XMLData) -> str | None:
+    @staticmethod
+    def _extract_doi(xml_input: XMLData) -> str | None:
         full_record = XMLExtractor(xml_input.content)
         identifiers = full_record.extract_content_attribute_filter(
             tag="mods:identifier", attribute_name="type", attribute_value="doi"
@@ -63,7 +64,8 @@ class WorldBankOpenKnowledgeRepositoryCollector(URLCollector):
 
         return doi.content
 
-    def _extract_external_id(self, xml_input: XMLData) -> str:
+    @staticmethod
+    def _extract_external_id(xml_input: XMLData) -> str:
         full_record = XMLExtractor(xml_input.content)
         try:
             oai_pmh_id = (
@@ -75,12 +77,18 @@ class WorldBankOpenKnowledgeRepositoryCollector(URLCollector):
             raise NotEnoughData("No identifier found in header of record")
         return oai_pmh_id
 
-    def _is_deleted(self, xml_input: XMLData) -> bool:
+    @staticmethod
+    def _is_deleted(xml_input: XMLData) -> bool:
+        """
+        Check if this record is flagged deleted
+        :param xml_input: Record from OAI PMH
+        :return: True if it's flagged as deleted, false otherwise
+        """
         full_record = XMLExtractor(xml_input.content)
         ret = full_record.extract_content_attribute_filter(
             tag="header", attribute_name="status", attribute_value="deleted"
         )
-        return len(ret) == 0
+        return len(ret) > 0
 
     def _extract_world_bank_okr_document(
         self, world_bank_okr_api_response: XMLExtractor
@@ -89,7 +97,7 @@ class WorldBankOpenKnowledgeRepositoryCollector(URLCollector):
         records = world_bank_okr_api_response.extract_content(tag="record")
         for record in records:
             external_id = self._extract_external_id(record)
-            if not self._is_deleted(record):
+            if self._is_deleted(record):
                 logger.info(
                     "Record with external id %s is marked as deleted, skipping.",
                     external_id,
