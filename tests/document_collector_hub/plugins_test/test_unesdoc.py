@@ -3,9 +3,8 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
-import pydantic
 import requests
-from requests import HTTPError, RequestException, Response
+from requests import HTTPError
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.source_models.unesdoc import UNESDOCItem
@@ -113,7 +112,6 @@ class TestUNESDOCCollector(TestCase):
     def test__check_licence_authorization_good(self):
         tested_licence = "https://creativecommons.org/licenses/by-sa/3.0/igo/"
         self.collector._check_licence_authorization(tested_licence)
-        self.assertTrue(True)
 
     def test__check_licence_authorization_bad(self):
         tested_licence = (

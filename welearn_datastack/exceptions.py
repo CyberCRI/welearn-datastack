@@ -236,9 +236,22 @@ class NoTitle(NotEnoughData):
         super().__init__(msg, *args)
 
 
+class NoUrl(NotEnoughData):
+    """
+    No url found in this document
+    """
+
+    def __init__(self, msg="No url found in this document", *args):
+        super().__init__(msg, *args)
+
+
 class NoDescriptionFoundError(NotEnoughData):
     """Raised when there is no description found"""
 
 
 class NoDOIFoundError(NotEnoughData):
     """Raised when there is no DOI found"""
+
+
+class FileTypeUnsupported(WrongFormat):
+    """Raised when the file type is not supported"""

@@ -1,4 +1,5 @@
 # Regular expressions for data cleaning and preprocessing in the WeLearn Datastack project.
+import re
 
 # description: Matches backline characters (newline, tab, carriage return) for removal or replacement.
 # example: "Hello\n\tWorld" -> matches "\n" and "\t"
@@ -85,4 +86,5 @@ def simple_xml_tag_format_regex(tag: str) -> str:
     :param tag: The name of the XML tag to match.
     :return: A regular expression string to match the specified XML tag.
     """
-    return rf"<{tag}([^>]*)>(.*?)</{tag}>"
+    escaped_tag = re.escape(tag)
+    return rf"<{escaped_tag}\b([^>]*?)(?:\s*/>|>(.*?)</{escaped_tag}>)"

@@ -393,6 +393,10 @@ spec:
                   - name: corpus_fix
                     value: "true"
 
+            - name: collect-world-bank-okr
+              templateRef:
+                name: {{ .name }}
+                template: collect-world-bank-okr
 
 {{- end }}
 {{- end }}
