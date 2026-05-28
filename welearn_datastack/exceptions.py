@@ -251,3 +251,7 @@ class NoDescriptionFoundError(NotEnoughData):
 
 class NoDOIFoundError(NotEnoughData):
     """Raised when there is no DOI found"""
+
+
+class FileTypeUnsupported(WrongFormat):
+    """Raised when the file type is not supported"""
