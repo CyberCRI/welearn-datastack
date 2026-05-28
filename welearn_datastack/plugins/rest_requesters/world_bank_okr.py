@@ -20,6 +20,7 @@ from welearn_datastack.exceptions import (
     FileTypeUnsupported,
     LegalException,
     NoContent,
+    NoLicenseFoundError,
     UnauthorizedLicense,
 )
 from welearn_datastack.modules.pdf_extractor import (
@@ -79,6 +80,10 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
 
     @staticmethod
     def _extract_licence(record: WorldBankOKRRecord) -> str:
+        if not record.accessCondition:
+            raise NoLicenseFoundError(
+                "No licence found in the record: %", record.identifiers.uri
+            )
         messy_licence = record.accessCondition.lower()
         s = messy_licence.strip().lower()
 
