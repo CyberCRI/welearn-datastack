@@ -4828,20 +4828,20 @@ test = ["pytest", "websockets"]
 
 [[package]]
 name = "welearn-database"
-version = "1.3.0"
+version = "1.4.4"
 description = "All stuff related to relationnal database from the WeLearn project"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "welearn_database-1.3.0-py3-none-any.whl", hash = "sha256:37e76fb0c6dd4d5b8f1529118e61f1daeaedfba267e42365627471b99b604746"},
-    {file = "welearn_database-1.3.0.tar.gz", hash = "sha256:055c32a411f932b340b03c717da06a1dc087b3f1543912e2700d5ad6f2c913f6"},
+    {file = "welearn_database-1.4.4-py3-none-any.whl", hash = "sha256:c0c07cb74c86c7af96bca2816139ba676bd1eaa1c4045808f8d0d19ae1962987"},
+    {file = "welearn_database-1.4.4.tar.gz", hash = "sha256:4daa81d494a08da68d64e64c7bad52eeae485ac08e0f41fe8064dabacfeac67e"},
 ]
 
 [package.dependencies]
 alembic = ">=1.16.5,<2.0.0"
 psycopg2-binary = ">=2.9.11,<3.0.0"
-python-dotenv = ">=1.1.1,<2.0.0"
+python-dotenv = ">=1.2.2,<2.0.0"
 sqlalchemy = ">=2.0.43,<3.0.0"
 
 [[package]]
@@ -5091,4 +5091,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.13"
-content-hash = "acd4dfdd234c0c7a8bf3ec17e3f628b6bb3c7b683a18cfef971558664e78c7df"
+content-hash = "28b57d17ad4dc1afa9b3ab98b240aba8795ca1777a341cb04912ce5a9cc28131"

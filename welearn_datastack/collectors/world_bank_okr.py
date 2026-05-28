@@ -57,8 +57,7 @@ class WorldBankOpenKnowledgeRepositoryCollector(URLCollector):
             [doi] = identifiers
         except ValueError:
             logger.warning(
-                "No identifier with type 'doi' found in record, skipping. Record content: %s",
-                xml_input.content,
+                "No identifier with type 'doi' found in record, skipping.",
             )
             return None
 
