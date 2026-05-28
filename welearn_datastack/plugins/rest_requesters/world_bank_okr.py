@@ -16,7 +16,12 @@ from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDoc
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.data.details_dataclass.topics import TopicDetails
 from welearn_datastack.data.source_models.world_bank_okr import WorldBankOKRRecord
-from welearn_datastack.exceptions import LegalException, NoContent, UnauthorizedLicense
+from welearn_datastack.exceptions import (
+    FileTypeUnsupported,
+    LegalException,
+    NoContent,
+    UnauthorizedLicense,
+)
 from welearn_datastack.modules.pdf_extractor import (
     delete_accents,
     delete_non_printable_character,
@@ -67,7 +72,9 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
         for author in authors_str:
             first_name = remove_extra_whitespace(author.split()[1])
             last_name = remove_extra_whitespace(author.split()[0])
-            ret.append(AuthorDetails(name=f"{first_name} {last_name}", misc=""))
+            name = f"{first_name} {last_name}"
+            name = name.replace(",", "")
+            ret.append(AuthorDetails(name=name, misc=""))
         return ret
 
     @staticmethod
@@ -121,12 +128,20 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
 
         txt_address = None
         pdf_address = None
+        unsupported_file_type_flag = False
 
         for grp in record.fileGrp:
             if grp.mimetype == "application/pdf":
                 pdf_address = grp.flocat.href
             elif grp.mimetype == "text/plain":
                 txt_address = grp.flocat.href
+            else:
+                unsupported_file_type_flag = True
+
+        if unsupported_file_type_flag and not (txt_address and pdf_address):
+            raise FileTypeUnsupported(
+                f"No supported file type found in the record: {record.identifiers.uri}"
+            )
 
         is_txt = False
 
@@ -261,7 +276,16 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
                     )
                 )
                 continue
-
+            except FileTypeUnsupported as e:
+                msg = f"FileTypeUnsupported exception for document {ret_doc.document.url}: {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=ret_doc.document,
+                        error_info=msg,
+                    )
+                )
+                continue
             ret.append(doc)
 
         return ret
