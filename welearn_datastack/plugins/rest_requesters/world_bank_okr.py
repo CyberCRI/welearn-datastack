@@ -51,7 +51,7 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
         self.tika_address = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
         self.api_base_url = "https://openknowledge.worldbank.org/server/oai/request"
         self.application_base_url = "https://openknowledge.worldbank.org/handle/"
-        self.oai_metadata_prefix = "xoai"
+        self.oai_metadata_prefix = "mets"
         self.headers = HEADERS
 
     def _retrieve_record_from_oai(
