@@ -181,6 +181,7 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
             logger.info("Getting TXT content from %s", txt_address)
             client = get_new_https_session(retry_total=0)
             response = client.get(txt_address, headers=HEADERS, timeout=300)
+            response.raise_for_status()
             ret = response.text
         else:
             raise NoContent("Can't find content address for this document")
