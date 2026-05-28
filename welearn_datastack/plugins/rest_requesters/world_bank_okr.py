@@ -103,10 +103,20 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
     ) -> dict[str, list[AuthorDetails] | list[TopicDetails] | str | int]:
         publication_date = None
         if raw_data.dates.dateAvailable:
-            fmt = "%Y-%m-%dT%H:%M:%SZ"
-            publication_date = time.mktime(
-                datetime.strptime(raw_data.dates.dateAvailable, fmt).timetuple()
-            )
+            try:
+                fmt = "%Y-%m-%dT%H:%M:%SZ"
+                publication_date = time.mktime(
+                    datetime.strptime(raw_data.dates.dateAvailable, fmt).timetuple()
+                )
+            except ValueError:
+                try:
+                    fmt = "%Y-%m-%d"
+                    publication_date = time.mktime(
+                        datetime.strptime(raw_data.dates.dateAvailable, fmt).timetuple()
+                    )
+                except Exception as e:
+                    logger.warning(str(e))
+
         authors = self._process_authors(raw_data.authors)
         topics = [
             TopicDetails(
@@ -154,7 +164,9 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
         if pdf_address:
             logger.info("Getting PDF content from %s", pdf_address)
             client = get_new_https_session(retry_total=0)
-            response = client.get(pdf_address, headers=HEADERS, timeout=300)
+            # Removing header because world bank servers don't like when you tell them which data you want
+            client.headers = {}
+            response = client.get(pdf_address, timeout=300, allow_redirects=True)
             response.raise_for_status()
 
             with io.BytesIO(response.content) as pdf_file:
