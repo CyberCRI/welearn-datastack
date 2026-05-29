@@ -18,7 +18,6 @@ from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.rest_requesters import WorldBankOpenKnowledgeRepository
 
 
-
 class TestWorldBankOpenKnowledgeRepository(TestCase):
 
     def setUp(self):
@@ -36,11 +35,11 @@ class TestWorldBankOpenKnowledgeRepository(TestCase):
         )
 
     def test__process_authors(self):
-        input_lst = ["Good, Alice", "Foo, Bob"]
+        input_lst = ["Good, Alice", "Foo, Bob", "De Loin Sur Perdu, Alain"]
         ret = self.collector._process_authors(input_lst)
         for a in ret:
             self.assertIsInstance(a, AuthorDetails)
-            self.assertIn(a.name, ["Alice Good", "Bob Foo"])
+            self.assertIn(a.name, ["Alice Good", "Bob Foo", "Alain De Loin Sur Perdu"])
             self.assertEqual(a.misc, "")
 
     def test__extract_licence(self):
