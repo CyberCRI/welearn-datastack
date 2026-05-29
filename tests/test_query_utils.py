@@ -55,8 +55,14 @@ class TestQueryUtils(unittest.TestCase):
     def test_missing_revision_id_raises(self):
         sql = "SELECT * FROM table WHERE id=:revision_id"
         sql_path = create_temp_sql_file(sql)
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             resolve_query(sql_path.parent, sql_path.name, None)
+
+    def test_missing_revision_id_raises_without_param(self):
+        sql = "SELECT * FROM table"
+        sql_path = create_temp_sql_file(sql)
+        with self.assertRaises(ValueError):
+            resolve_query(sql_path.parent, sql_path.name, "abc")
 
     def test_resolve_query_on_given_ids(self):
         sql = "SELECT * FROM table WHERE id IN :ids AND revision_id = :revision_id"

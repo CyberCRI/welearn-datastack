@@ -111,6 +111,9 @@ def resolve_query(
     :param query_name: Name of the query
     :param revision_id: Revision id needed for the execution of the query
     """
+    if not revision_id:
+        raise TypeError("Revision id cannot be None")
+
     params = (bindparam("revision_id", value=revision_id),)
     mandatory_params = ["revision_id"]
     return _resolve_query_util(queries_folder, query_name, params, mandatory_params)
