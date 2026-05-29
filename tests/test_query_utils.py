@@ -77,5 +77,5 @@ class TestQueryUtils(unittest.TestCase):
             dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
         )
         self.assertIn(f"revision_id = '{revision_id}'", str(compiled))
-        txt_lst = str(ids).replace("[", "(").replace("]", ")")
+        txt_lst = f"ARRAY{str([str(i) for i in ids])}"
         self.assertIn(f"id IN {txt_lst}", str(compiled))
