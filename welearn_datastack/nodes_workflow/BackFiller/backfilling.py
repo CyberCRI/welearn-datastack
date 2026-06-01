@@ -70,6 +70,8 @@ def main() -> None:
     logger.info("DB query executed")
     logger.info(f"{nb_modifies} rows were modified")
 
+    db_session.close()
+
 
 if __name__ == "__main__":
     load_dotenv_local()
