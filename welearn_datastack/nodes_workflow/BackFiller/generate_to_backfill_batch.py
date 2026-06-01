@@ -35,7 +35,12 @@ def main() -> None:
     batch_urls_directory: str = os.getenv("BATCH_URLS_DIRECTORY", "batch_urls")
     batch_size_str: str | None = os.getenv("BATCH_SIZE", None)
     revision_id: str | None = os.getenv("REVISION_ID", None)
-    query_name = os.getenv("QUERY_NAME", None)
+    query_name: str | None = os.getenv("QUERY_NAME", None)
+
+    if not revision_id:
+        raise ValueError("Missing required environment variable: REVISION_ID")
+    if not query_name:
+        raise ValueError("Missing required environment variable: QUERY_NAME")
 
     batch_size: int | None = None
     if batch_size_str is not None:
