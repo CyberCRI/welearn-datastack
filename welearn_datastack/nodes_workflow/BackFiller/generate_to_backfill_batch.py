@@ -89,6 +89,7 @@ def main() -> None:
     batch_generator.write_quantity_to_file()
     logger.info("Quantity written")
     logger.info(f"{__name__} generate batch ids finished")
+    db_session.close()
 
 
 if __name__ == "__main__":
