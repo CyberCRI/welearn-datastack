@@ -272,6 +272,7 @@ class TestFAOOpenKnowledgeCollector(unittest.TestCase):
         self.assertEqual(
             doc_result.document.full_content, "PDF content extracted. Lorem Ipsum."
         )
+        self.assertEqual(doc_result.document.doi, "10.1234/fao.5678")
 
     @patch.object(FAOOpenKnowledgeCollector, "get_bitstream_json")
     @patch.object(FAOOpenKnowledgeCollector, "_get_pdf_content")

@@ -306,7 +306,9 @@ class FAOOpenKnowledgeCollector(IPluginRESTCollector):
                     raise NoDescriptionFoundError("No description found.")
                 document.description = clean_text(description)
                 document.title = fao_ok_metadata.name
-                document.details = self._extract_details(fao_ok_metadata)
+                details = self._extract_details(fao_ok_metadata)
+                document.doi = details.get("doi", "")
+                document.details = details
 
             except NoDescriptionFoundError as e:
                 logger.warning(
