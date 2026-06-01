@@ -217,6 +217,7 @@ class TestOpenAlexCollector(unittest.TestCase):
             openalex_result.authorships[0].author.display_name,
         )
         self.assertEqual(doc.external_id, "10.1234/example")
+        self.assertEqual(doc.doi, "10.1234/example")
         self.assertEqual(doc.external_id_type, "doi")
 
     # Test _update_welearn_document raises on closed access

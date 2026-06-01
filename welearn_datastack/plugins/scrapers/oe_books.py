@@ -45,7 +45,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
         resource_type = ""
         title = None
         desc = None
-
+        doi = None
         # Root extractor is the full XML file from the METS api, it's opposed to the
         # local_dmd which is the XML file of the chapter
         root_extractor: XMLExtractor | None = None
@@ -258,6 +258,7 @@ class OpenEditionBooksCollector(IPluginScrapeCollector):
         document.description = desc
         document.full_content = content
         document.details = details
+        document.doi = doi
 
         return document
 

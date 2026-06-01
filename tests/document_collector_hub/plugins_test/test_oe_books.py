@@ -155,6 +155,7 @@ class TestOpenEditionBooksCollector(unittest.TestCase):
             "publication_date",
         }
         self.assertTrue(set(details.keys()).issubset(allowed_keys))
+        self.assertEqual(oe_doc.document.doi, "10.4000/books.ariadnaediciones.8043")
 
     @patch("welearn_datastack.plugins.scrapers.oe_books.get_new_https_session")
     def test_run_chapter_success(self, mock_get_new_https_session):

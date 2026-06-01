@@ -1,4 +1,3 @@
-import io
 import json
 import logging
 import os
@@ -13,7 +12,6 @@ from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import (
     AUTHORIZED_LICENSES,
-    HEADERS,
     HTTPS_CREATIVE_COMMONS,
     OPEN_ALEX_BASE_URL,
     PUBLISHERS_TO_AVOID,
@@ -31,25 +29,16 @@ from welearn_datastack.exceptions import (
     ClosedAccessContent,
     ManagementExceptions,
     NotEnoughData,
-    PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedPublisher,
     UnknownURL,
 )
-from welearn_datastack.modules.pdf_extractor import (
-    delete_accents,
-    delete_non_printable_character,
-    extract_txt_from_pdf_with_tika,
-    get_pdf_content,
-    remove_hyphens,
-    replace_ligatures,
-)
+from welearn_datastack.modules.pdf_extractor import get_pdf_content
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 
@@ -200,6 +189,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         wrapper.document.content = document_content
         wrapper.document.details = document_details
         wrapper.document.external_id = self._get_doi(wrapper)
+        wrapper.document.doi = self._get_doi(wrapper)
         wrapper.document.external_id_type = ExternalIdType.DOI
 
         return wrapper.document
