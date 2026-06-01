@@ -10,6 +10,7 @@ from welearn_datastack.modules.query_utils import (
     resolve_query,
     resolve_query_on_given_ids,
 )
+from welearn_datastack.modules.validation import validate_sql_query_param
 
 
 def create_temp_sql_file(content: str) -> Path:
@@ -79,3 +80,15 @@ class TestQueryUtils(unittest.TestCase):
         self.assertIn(f"revision_id = '{revision_id}'", str(compiled))
         txt_lst = f"ARRAY{str([str(i) for i in ids])}"
         self.assertIn(f"id IN {txt_lst}", str(compiled))
+
+    def test_validate_sql_param_ok(self):
+        sql = "SELECT * FROM table WHERE id IN :ids AND revision_id = :revision_id"
+        res = validate_sql_query_param(sql, "revision_id")
+
+        self.assertTrue(res)
+
+    def test_valide_sql_param_nok(self):
+        sql = "SELECT * FROM table WHERE id IN :ids AND revision_id = :revision_id"
+        res = validate_sql_query_param(sql, "revision_id_not")
+
+        self.assertFalse(res)
