@@ -62,10 +62,10 @@ class XMLExtractor:
         # Pattern to capture the attributes of the tag in the form of key="value"
         attr_pattern = re.compile(SIMPLE_XML_ATTRIBUTE_REGEX)
 
+        re_tag = simple_xml_tag_format_regex(tag)
+
         # Find all matches of the pattern in the XML raw data
-        matches = re.findall(
-            simple_xml_tag_format_regex(tag), self.xml_raw_data, re.DOTALL
-        )
+        matches = re.findall(re_tag, self.xml_raw_data, re.DOTALL)
         logger.info("Found %d matches for tag %s", len(matches), tag)
 
         ret = []

@@ -65,7 +65,7 @@ def main() -> None:
     logger.info("Qdrant Prefers GRPC: %s", qdrant_prefers_grpc)
     logger.info("Qdrant chunk Size: %s", qdrant_chunk_size)
 
-    input_directory, local_artifcat_output = setup_local_path()
+    input_directory, _ = setup_local_path()
 
     docids = retrieve_ids_from_csv(
         input_artifact=input_artifact, input_directory=input_directory
@@ -146,6 +146,7 @@ def main() -> None:
                 )
                 continue
 
+            logger.info("Checking process state for documents")
             ids_doc_need_to_insert = check_process_state_for_documents(
                 db_session=db_session,
                 documents_ids=list(documents_per_collection[collection_name]),

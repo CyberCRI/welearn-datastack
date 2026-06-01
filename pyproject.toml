@@ -23,42 +23,41 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
-sqlalchemy = "^2.0.46"
-numpy = "^2.4.2"
-requests = "^2.33.0"
-wikipedia-api = "^0.9.0"
+sqlalchemy = "^2.0.50"
+numpy = "^2.4.6"
+requests = "^2.34.2"
+wikipedia-api = "^0.15.0"
 sentence-transformers = "^5.2.2"
 spacy = "^3.8.11"
 refinedoc = "^1.0.0"
-qdrant-client = "1.16.2"
+qdrant-client = "1.18.0"
 python-dotenv = "^1.2.2"
 beautifulsoup4 = "^4.14.3"
 pyphen = "^0.17.2"
-ijson = "^3.4.0"
 keybert = "^0.9.0"
-torch = {version="^2.10.0+cpu", source = "pytorch_cpu"}
-torchvision = {version="^0.25.0+cpu", source = "pytorch_cpu"}
+torch = {version="^2.12.0+cpu", source = "pytorch_cpu"}
+torchvision = {version="^0.27.0+cpu", source = "pytorch_cpu"}
 xx_sent_ud_sm = {url = "https://github.com/explosion/spacy-models/releases/download/xx_sent_ud_sm-3.8.0/xx_sent_ud_sm-3.8.0-py3-none-any.whl"}
 
-lingua-language-detector = "^2.1.1"
-psycopg2-binary = "^2.9.10"
+lingua-language-detector = "^2.2.0"
+psycopg2-binary = "^2.9.12"
 brotli = "^1.2.0"
 scikit-learn = "~=1.7.0"
 optimum = {extras = ["onnxruntime"], version = "^2.1.0"}
 azure-storage-blob = "^12.28.0"
 welearn-database = "^1.4.4"
 pydantic = "^2.12.5"
+pydantic = "^2.13.4"
 
 [tool.poetry.group.metrics.dependencies]
-alembic = "^1.18.3"
 locust = "^2.43.2"
 
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.19.1"
-bandit = "^1.9.3"
-isort = "^7.0.0"
-black = "^26.3.1"
+mypy = "^2.1.0"
+bandit = "^1.9.4"
+isort = "^8.0.1"
+black = "^26.5.1"
 
 [build-system]
 requires = ["poetry-core"]

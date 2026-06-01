@@ -13,8 +13,8 @@ from welearn_database.data.models import DocumentSlice, WeLearnDocument
 from welearn_datastack.data.enumerations import MLModelsType
 from welearn_datastack.exceptions import NoContent
 from welearn_datastack.regular_expression import (
-    WHITESPACE_SEQUENCE_REGEX,
     BACKLINE_SEQUENCE_REGEX,
+    WHITESPACE_SEQUENCE_REGEX,
 )
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
 

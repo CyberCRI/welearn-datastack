@@ -181,6 +181,7 @@ AUTHORIZED_LICENSES = [
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/4.0/",
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/3.0/",
     f"{HTTPS_CREATIVE_COMMONS}/licenses/by-sa/3.0/igo/",
+    f"{HTTPS_CREATIVE_COMMONS}/licenses/by/3.0/igo/",
 ]
 HEADERS = {
     "Accept": "text/html,application/json,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
