@@ -65,6 +65,7 @@ class TestScrapePeerJPlugin(unittest.TestCase):
         self.assertIn("issn", doc_result.document.details)
         self.assertIn("publisher", doc_result.document.details)
         self.assertIn("publication_date", doc_result.document.details)
+        self.assertEqual(doc_result.document.details["doi"], "10.7717/peerj.12713")
 
     @patch("welearn_datastack.plugins.scrapers.peerj.get_new_https_session")
     def test_plugin_run_http_error(self, mock_get_session):

@@ -240,6 +240,7 @@ class PeerJCollector(IPluginScrapeCollector):
         if not doi:
             raise NoDOIFoundError(f"No DOI found for '{document.url}'")
         document.external_id = doi
+        document.doi = doi
         document.external_id_type = ExternalIdType.DOI
 
         return document

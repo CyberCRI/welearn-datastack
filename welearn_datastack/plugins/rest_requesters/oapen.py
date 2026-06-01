@@ -330,6 +330,7 @@ class OAPenCollector(IPluginRESTCollector):
         wrapper.document.content = content
         wrapper.document.description = desc
         wrapper.document.details = document_details
+        wrapper.document.doi = doi
 
         return wrapper.document
 
