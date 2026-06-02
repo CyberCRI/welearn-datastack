@@ -38,7 +38,7 @@ def lines_to_url(domain: str, link_lines: List[str]) -> List[str]:
     return urls
 
 
-def remove_illegal_character(text: str):
+def remove_illegal_character(text: str) -> str:
     illegal_char_pos = [
         text.find(x) for x in url_illegal_characters if text.find(x) >= 0
     ]

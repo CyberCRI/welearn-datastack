@@ -59,15 +59,20 @@ class AtomURLCollector(URLCollector):
             links = XMLExtractor(entry.content).extract_content_attribute_filter(
                 tag="link", attribute_name="rel", attribute_value="alternate"
             )
-            try:
-                [link] = links
-                link_lines.append(link.attributes.get("href", ""))
-            except ValueError:
+            if not links:
                 logger.warning(
                     "No link found for entry, skipping entry. Entry content: %s",
                     entry.content,
                 )
                 continue
+
+            if len(links) > 1:
+                logger.warning(
+                    "Multiple rel='alternate' links found for entry; using the first. Entry content: %s",
+                    entry.content,
+                )
+
+            link_lines.append(links[0].attributes.get("href", ""))
 
         urls = lines_to_url(domain, link_lines)
 
