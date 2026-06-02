@@ -1,4 +1,5 @@
 from typing import List
+from urllib.parse import urlparse, urlunparse
 
 from welearn_database.data.models import Corpus, WeLearnDocument
 
@@ -13,21 +14,40 @@ def lines_to_url(domain: str, link_lines: List[str]) -> List[str]:
     :return: The list of URL
     """
     urls: List[str] = []
+    scheme = "https"
     # Refine lines to get URL
     for line in link_lines:
-        scheme = "https://"
-        https_place = line.find(scheme)
-        cursor = line[https_place:]
-        illegal_char_pos = [
-            cursor.find(x) for x in url_illegal_characters if cursor.find(x) >= 0
-        ]
-        end_place = min(illegal_char_pos)
-        url = cursor[:end_place]
-        url = url.strip()
+        line = remove_illegal_character(line)
+        parsed = urlparse(line)
+        if parsed.netloc == urlparse(domain).netloc or parsed.netloc.endswith(
+            f".{urlparse(domain).netloc}"
+        ):
+            urls.append(
+                urlunparse(
+                    [
+                        scheme,
+                        parsed.netloc,
+                        parsed.path,
+                        parsed.params,
+                        parsed.query,
+                        parsed.fragment,
+                    ]
+                )
+            )
 
-        if url.startswith(domain):
-            urls.append(url)
     return urls
+
+
+def remove_illegal_character(text: str) -> str:
+    illegal_char_pos = [
+        text.find(x) for x in url_illegal_characters if text.find(x) >= 0
+    ]
+    if illegal_char_pos:
+        end_place = min(illegal_char_pos)
+        url = text[:end_place]
+    else:
+        url = text
+    return url.strip()
 
 
 def extracted_url_to_url_datastore(
