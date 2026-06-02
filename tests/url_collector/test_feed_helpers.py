@@ -1,14 +1,9 @@
-from pathlib import Path
 from unittest import TestCase
-from unittest.mock import Mock, patch
-
-from welearn_database.data.models import Corpus
 
 from welearn_datastack.collectors.helpers.feed_helpers import (
     lines_to_url,
     remove_illegal_character,
 )
-from welearn_datastack.collectors.rss_collector import RssURLCollector
 
 
 class TestFeedHelpers(TestCase):
