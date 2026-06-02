@@ -135,18 +135,13 @@ class TestExtractNCollectDocs(TestCase):
             WrapperRetrieveDocument(document=self.doc_valid),
         ]
 
-        (
-            extracted_docs,
-            error_docs,
-            process_states,
-        ) = document_collector.extract_data_from_urls(
-            welearn_documents=[self.doc_valid, self.doc_invalid]
+        extracted_docs = document_collector.extract_data_from_urls(
+            welearn_documents=[self.doc_valid]
         )
 
-        self.assertEqual(len(extracted_docs), 0)
-        self.assertEqual(len(error_docs), 1)
-        self.assertEqual(error_docs[0].document_id, self.doc_valid.id)
-        self.assertEqual(len(process_states), 1)
+        self.assertEqual(len(extracted_docs), 1)
+        self.assertEqual(extracted_docs[0].document.id, self.doc_valid.id)
+        self.assertTrue(extracted_docs[0].is_error)
 
     @patch(
         "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.collector_selector"

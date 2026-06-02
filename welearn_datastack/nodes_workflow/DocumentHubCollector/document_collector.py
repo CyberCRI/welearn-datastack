@@ -204,6 +204,7 @@ def extract_data_from_urls(
         # Get data
         corpus_collector = corpus_plugin[corpus_name]
         documents = corpus_collector.run(documents=batch_docs[corpus_name])  # type: ignore
+
         ret_docs.extend(documents)
         logger.info(
             f"'{len(documents)}/{len(welearn_documents)}' documents were processed"
