@@ -39,17 +39,14 @@ def lines_to_url(domain: str, link_lines: List[str]) -> List[str]:
 
 
 def remove_illegal_character(text: str):
-    scheme = "https://"
-    https_place = text.find(scheme)
-    cursor = text[https_place:]
     illegal_char_pos = [
-        cursor.find(x) for x in url_illegal_characters if cursor.find(x) >= 0
+        text.find(x) for x in url_illegal_characters if text.find(x) >= 0
     ]
     if illegal_char_pos:
         end_place = min(illegal_char_pos)
-        url = cursor[:end_place]
+        url = text[:end_place]
     else:
-        url = cursor
+        url = text
     return url.strip()
 
 
