@@ -1,0 +1,8 @@
+{{- with .Values.backfilling.backfillingSemaphore }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .configmapName }}
+data:
+  {{ .standard.keyName }}: {{ .standard.tokensCount | quote }}
+{{- end }}

@@ -262,8 +262,6 @@ urlSanitaryCrawler:
       enabled: true
       schedule: 40 */1 * * *
 
-
-
 qdrantSyncronizer:
   name: qdrant-synchronizer
   config:
@@ -352,6 +350,34 @@ restore:
     sensitive: {}
     nonSensitive: {}
 
+
+backfilling:
+  name: backfilling
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  backfillingSemaphore:
+    configmapName: backfilling-semaphore
+    standard:
+      keyName: standard-tokens
+      tokensCount: 3
+
+  resourcesPrefix: backfilling
+
+  commonLabels:
+    app.kubernetes.io/component: backfilling
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 20M
+        cpu: 1
+      limits:
+        cpu: 1
 
 updateMaterializedViews:
   enabled: true

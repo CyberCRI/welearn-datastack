@@ -1,6 +1,7 @@
 import logging
 import math
 import os
+import sys
 from typing import Any, List
 
 from sqlalchemy import URL, create_engine
@@ -9,6 +10,11 @@ from sqlalchemy.orm import sessionmaker
 from welearn_datastack.utils_.virtual_environement_utils import load_dotenv_local
 
 logger = logging.getLogger(__name__)
+
+
+def get_main_script_name() -> str:
+    """Retourne le nom du fichier principal exécuté."""
+    return os.path.basename(sys.argv[0])
 
 
 def create_db_session():
@@ -33,7 +39,9 @@ def create_sqlalchemy_engine():
         port=pg_port,
         database=pg_db,
     )
-    engine = create_engine(url_object)
+    engine = create_engine(
+        url_object, connect_args={"application_name": get_main_script_name()}
+    )
     return engine
 
 
