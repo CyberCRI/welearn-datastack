@@ -53,7 +53,7 @@ class WrapperRetrieveDocument(Wrapper):
         )
         is_valid = not (is_desc_empty or is_content_empty)
         if self.error_info is not None:
-            self.error_info.error_info = "Mandatory fields are missing after extraction"
+            self.error_info = "Mandatory fields are missing after extraction"
         return is_valid
 
 
