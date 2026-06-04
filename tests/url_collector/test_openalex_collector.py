@@ -52,7 +52,7 @@ class TestOpenAlexURLCollector(TestCase):
         )
         self.assertEqual(filter_as_dict["is_retracted"], "false")
         self.assertEqual(filter_as_dict["language"], "languages/en|languages/fr")
-        self.assertEqual(filter_as_dict["open_access.oa_status"], "gold")
+        self.assertEqual(filter_as_dict["open_access.oa_status"], "gold|diamond")
         self.assertEqual(
             filter_as_dict["primary_location.source.id"],
             "!s202381698|s4306402512|s1983995261|s4210178049|s4210220408|s4210231901|s4220651631|s4220650797|s4210221150|s4220651226|s86033158|s154343897|s103870658|s197939330|s4404663781|s46544255|s2004986",
