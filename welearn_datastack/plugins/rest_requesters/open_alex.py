@@ -273,7 +273,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         Get the full content of the document. If the PDF is available and can be retrieved, extract the content from the PDF. Otherwise, use the description as the content.
         :param document_desc: Description of the document to use as content if the PDF is not available or cannot be retrieved
         :param wrapper: WrapperRawData containing the raw data of the document to get the content from
-        :return: tuple containing a flag indicating if the content is from the PDF and the content of the document
+        :return: tuple containing the content of the document and a flag indicating if the content is from the PDF
         """
         document_content = document_desc
 

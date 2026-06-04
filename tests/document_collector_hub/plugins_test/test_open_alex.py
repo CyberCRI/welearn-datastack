@@ -302,3 +302,39 @@ class TestOpenAlexCollector(unittest.TestCase):
         self.assertIn(
             "Error while trying to get contents from OpenAlex API", result[0].error_info
         )
+
+    @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_pdf_content")
+    def test__resolve_full_content_from_pdf(self, mock_get_pdf_content):
+        mock_get_pdf_content.return_value = "content of the document from a fake PDF"
+        openalex_result = build_openalex_result()
+        wrapper = WrapperRawData(document=self.welearn_doc, raw_data=openalex_result)
+        description = "fake description"
+        result = self.collector._resolve_full_content(
+            document_desc=description, wrapper=wrapper
+        )
+        self.assertEqual(result[0], "content of the document from a fake PDF")
+        self.assertTrue(result[1])
+
+    @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_pdf_content")
+    def test__resolve_full_content_from_desc(self, mock_get_pdf_content):
+        openalex_result = build_openalex_result()
+        wrapper = WrapperRawData(document=self.welearn_doc, raw_data=openalex_result)
+        wrapper.raw_data.best_oa_location.pdf_url = None  # Simulate no PDF available
+        description = "fake description"
+        result = self.collector._resolve_full_content(
+            document_desc=description, wrapper=wrapper
+        )
+        self.assertEqual(result[0], description)
+        self.assertFalse(result[1])
+
+    @patch("welearn_datastack.plugins.rest_requesters.open_alex.get_pdf_content")
+    def test__resolve_full_content_exception_from_pdf_get(self, mock_get_pdf_content):
+        mock_get_pdf_content.side_effect = Exception("PDF download error")
+        openalex_result = build_openalex_result()
+        wrapper = WrapperRawData(document=self.welearn_doc, raw_data=openalex_result)
+        description = "fake description"
+        result = self.collector._resolve_full_content(
+            document_desc=description, wrapper=wrapper
+        )
+        self.assertEqual(result[0], description)
+        self.assertFalse(result[1])
