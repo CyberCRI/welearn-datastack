@@ -197,7 +197,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         document_details = self._build_details(document_url, pdf_flag, wrapper)
         wrapper.document.title = wrapper.raw_data.title
         wrapper.document.description = document_desc
-        wrapper.document.content = document_content
+        wrapper.document.full_content = document_content
         wrapper.document.details = document_details
         wrapper.document.external_id = self._get_doi(wrapper)
         wrapper.document.external_id_type = ExternalIdType.DOI
@@ -268,12 +268,12 @@ class OpenAlexCollector(IPluginRESTCollector):
 
     def _resolve_full_content(
         self, document_desc: str | Any, wrapper: WrapperRawData
-    ) -> tuple[bool, str | Any]:
+    ) -> tuple[str, bool]:
         """
         Get the full content of the document. If the PDF is available and can be retrieved, extract the content from the PDF. Otherwise, use the description as the content.
         :param document_desc: Description of the document to use as content if the PDF is not available or cannot be retrieved
         :param wrapper: WrapperRawData containing the raw data of the document to get the content from
-        :return: tuple containing a flag indicating if the content is from the PDF and the content of the document
+        :return: tuple containing the content of the document and a flag indicating if the content is from the PDF
         """
         document_content = document_desc
 
