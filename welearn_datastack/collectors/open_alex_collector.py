@@ -49,7 +49,7 @@ class OpenAlexURLCollector(URLCollector, ABC):
 
         # Gold because it's better https://u-paris.fr/bibliotheques/wp-content/uploads/sites/34/2021/02/06-OPEN-ACCESS.pdf
         # But could be extended to hybrid
-        oa_status = "gold"
+        oa_status = "gold|diamond"
 
         # Open Alex code for source we aldready have
         # In this order :
