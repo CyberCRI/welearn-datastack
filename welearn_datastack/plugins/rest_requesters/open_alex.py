@@ -1,4 +1,3 @@
-import io
 import json
 import logging
 import os
@@ -13,7 +12,6 @@ from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.constants import (
     AUTHORIZED_LICENSES,
-    HEADERS,
     HTTPS_CREATIVE_COMMONS,
     OPEN_ALEX_BASE_URL,
     PUBLISHERS_TO_AVOID,
@@ -31,25 +29,16 @@ from welearn_datastack.exceptions import (
     ClosedAccessContent,
     ManagementExceptions,
     NotEnoughData,
-    PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     UnauthorizedPublisher,
     UnknownURL,
 )
-from welearn_datastack.modules.pdf_extractor import (
-    delete_accents,
-    delete_non_printable_character,
-    extract_txt_from_pdf_with_tika,
-    get_pdf_content,
-    remove_hyphens,
-    replace_ligatures,
-)
+from welearn_datastack.modules.pdf_extractor import get_pdf_content
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 
@@ -406,7 +395,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         ret: list[WrapperRetrieveDocument] = []
         page_length = 50
         sub_batches: batched[WeLearnDocument] = batched(documents, page_length)
-        http_client = get_new_https_session()
+        http_client = get_new_https_session(retry_total=2)
 
         for sub_batch in sub_batches:
             urls_docs = {d.url: d for d in sub_batch}
