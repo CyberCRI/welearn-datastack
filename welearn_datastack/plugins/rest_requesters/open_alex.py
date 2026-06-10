@@ -395,7 +395,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         ret: list[WrapperRetrieveDocument] = []
         page_length = 50
         sub_batches: batched[WeLearnDocument] = batched(documents, page_length)
-        http_client = get_new_https_session()
+        http_client = get_new_https_session(retry_total=2)
 
         for sub_batch in sub_batches:
             urls_docs = {d.url: d for d in sub_batch}
