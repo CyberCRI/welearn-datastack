@@ -30,7 +30,7 @@ from welearn_datastack.modules.pdf_extractor import (
     remove_hyphens,
     replace_ligatures,
 )
-from welearn_datastack.modules.scraping_utils import remove_extra_whitespace
+from welearn_datastack.modules.scraping_utils import clean_doi, remove_extra_whitespace
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
@@ -101,6 +101,7 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
         self, raw_data: WorldBankOKRRecord
     ) -> dict[str, list[AuthorDetails] | list[TopicDetails] | str | int]:
         publication_date = None
+        collected_doi = raw_data.identifiers.doi
         if raw_data.dates.dateAvailable:
             try:
                 fmt = "%Y-%m-%dT%H:%M:%SZ"
@@ -131,7 +132,7 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
             "authors": authors,
             "topics": topics,
             "publication_date": publication_date,
-            "doi": raw_data.identifiers.doi,
+            "doi": clean_doi(collected_doi),
         }
 
         return details
@@ -210,7 +211,7 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
 
         doc = wrapper.document
         doc.title = wrapper.raw_data.title
-        doc.doi = wrapper.raw_data.identifiers.doi
+        doc.doi = clean_doi(wrapper.raw_data.identifiers.doi)
         doc.description = wrapper.raw_data.abstract
         full_content, is_txt = self._extract_full_content(wrapper.raw_data)
         doc.full_content = full_content

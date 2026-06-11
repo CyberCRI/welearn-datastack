@@ -14,7 +14,7 @@ from welearn_database.data.models import WeLearnDocument
 from welearn_datastack.constants import AUTHORIZED_LICENSES
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import UnauthorizedLicense
-from welearn_datastack.modules.scraping_utils import clean_return_to_line
+from welearn_datastack.modules.scraping_utils import clean_doi, clean_return_to_line
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.regular_expression import ANTI_URL_REGEX
 from welearn_datastack.utils_.http_client_utils import (
@@ -123,9 +123,7 @@ class PlosCollector(IPluginScrapeCollector):
     def extract_doi(self, article_meta: BeautifulSoup) -> str:
         doi_extract = article_meta.find("article-id", {"pub-id-type": "doi"})
         doi = self.extract_property(doi_extract)
-        if doi.startswith("https://doi.org/"):
-            doi = doi.replace("https://doi.org/", "")
-        return doi
+        return clean_doi(doi)
 
     @staticmethod
     def extract_property(doi_extract: BeautifulSoup | None) -> str:
