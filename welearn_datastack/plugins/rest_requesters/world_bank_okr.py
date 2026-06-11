@@ -71,9 +71,12 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
     def _process_authors(authors_str: list[str]) -> list[AuthorDetails]:
         ret = []
         for author in authors_str:
-            first_name = remove_extra_whitespace(author.split(",")[1])
-            last_name = remove_extra_whitespace(author.split(",")[0])
-            name = f"{first_name} {last_name}"
+            if "," in author:
+                first_name = remove_extra_whitespace(author.split(",")[1])
+                last_name = remove_extra_whitespace(author.split(",")[0])
+                name = f"{first_name} {last_name}"
+            else:
+                name = remove_extra_whitespace(author)
             ret.append(AuthorDetails(name=name, misc=""))
         return ret
 
