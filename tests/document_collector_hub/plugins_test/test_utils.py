@@ -71,14 +71,14 @@ class TestUtils(unittest.TestCase):
         )
 
     def test_clean_doi_success(self):
-        inout_str = "https://doi.org/10.1000/182"
+        input_str = "https://doi.org/10.1000/182"
         expected_output = "10.1000/182"
         self.assertEqual(
-            clean_doi(inout_str),
+            clean_doi(input_str),
             expected_output,
         )
 
-    def test_clean_doi_aldready_correct(self):
+    def test_clean_doi_already_correct(self):
         input_str = "10.1000/182"
         expected_output = "10.1000/182"
         self.assertEqual(
