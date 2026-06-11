@@ -6,7 +6,9 @@ from unittest.mock import patch
 from welearn_database.data.models import Corpus
 
 from welearn_datastack.collectors.hal_collector import HALURLCollector
-from welearn_datastack.utils_.scraping_utils import get_url_without_hal_like_versionning
+from welearn_datastack.modules.scraping_utils import (
+    get_url_without_hal_like_versionning,
+)
 
 
 class TestHALURLCollector(TestCase):

@@ -1,4 +1,3 @@
-import io
 import json
 import logging
 import math
@@ -23,12 +22,8 @@ from welearn_datastack.exceptions import (
 )
 from welearn_datastack.modules.computed_metadata import get_language_detector
 from welearn_datastack.modules.pdf_extractor import (
-    delete_accents,
     delete_non_printable_character,
-    extract_txt_from_pdf_with_tika,
     get_pdf_content,
-    remove_hyphens,
-    replace_ligatures,
 )
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.regular_expression import (
@@ -40,7 +35,6 @@ from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 

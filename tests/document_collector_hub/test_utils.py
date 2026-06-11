@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import bs4  # type: ignore
 
-from welearn_datastack.utils_.scraping_utils import (
+from welearn_datastack.modules.scraping_utils import (
     extract_property_from_html,
     format_cc_license,
 )

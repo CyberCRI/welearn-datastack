@@ -34,6 +34,7 @@ from welearn_datastack.exceptions import (
     UnknownURL,
 )
 from welearn_datastack.modules.pdf_extractor import get_pdf_content
+from welearn_datastack.modules.scraping_utils import clean_doi
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
@@ -230,9 +231,7 @@ class OpenAlexCollector(IPluginRESTCollector):
     @staticmethod
     def _get_doi(wrapper: WrapperRawData) -> str | None:
         doi = wrapper.raw_data.ids.doi
-        if doi.startswith("https://doi.org/"):
-            doi = doi.replace("https://doi.org/", "")
-        return doi
+        return clean_doi(doi)
 
     @staticmethod
     def _build_authors_list(wrapper: WrapperRawData) -> list[Any]:

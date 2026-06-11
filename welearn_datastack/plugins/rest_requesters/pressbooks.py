@@ -17,12 +17,12 @@ from welearn_datastack.data.source_models.pressbooks import (
     PressBooksModel,
 )
 from welearn_datastack.exceptions import UnauthorizedLicense
+from welearn_datastack.modules.scraping_utils import clean_text
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import clean_text
 
 logger = logging.getLogger(__name__)
 

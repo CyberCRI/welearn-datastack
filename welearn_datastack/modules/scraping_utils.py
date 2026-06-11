@@ -168,3 +168,16 @@ def get_url_without_hal_like_versionning(url: str) -> str:
         return url
     uri = re.sub(r"v\d+$", "", url)
     return uri.strip()
+
+
+def clean_doi(input_str: str) -> str:
+    """
+    Clean the DOI, "https://doi.org/10.1596/1813-9450-3633" -> "10.1596/1813-9450-3633"
+    :param input_str: input string
+    :return: cleaned string
+    """
+    if not isinstance(input_str, str):
+        return input_str
+    if input_str.startswith("https://doi.org/"):
+        return input_str.replace("https://doi.org/", "")
+    return input_str

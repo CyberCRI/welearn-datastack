@@ -1,7 +1,7 @@
 import logging
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from bs4 import BeautifulSoup  # type: ignore
 from requests import Session  # type: ignore
@@ -10,13 +10,13 @@ from welearn_database.data.models import WeLearnDocument
 from welearn_datastack.constants import AUTHORIZED_LICENSES, MD_OE_BOOKS_BASE_URL
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import ClosedAccessContent
+from welearn_datastack.modules.scraping_utils import extract_property_from_html
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import extract_property_from_html
 
 logger = logging.getLogger(__name__)
 
