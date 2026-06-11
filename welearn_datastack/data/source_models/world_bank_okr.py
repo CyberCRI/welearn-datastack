@@ -48,15 +48,23 @@ class WorldBankOKRRecord(BaseModel):
     @classmethod
     def _extract_file_grp(cls, value: XMLExtractor) -> list[dict]:
         ret = []
-        file_grp = value.extract_content(tag="fileGrp")[0].content
+        try:
+            file_grp = value.extract_content(tag="fileGrp")[0].content
+        except IndexError:
+            raise ValueError("There is no fileGrp in this document")
         for f in XMLExtractor(file_grp).extract_content(tag="file"):
             f_ret = {k.lower(): v for k, v in f.attributes.items()}
             flocat_xml = XMLExtractor(f.content).extract_content(tag="FLocat")
-            flocat_ret = {
-                k.lower().replace("xlink:", ""): v
-                for k, v in flocat_xml[0].attributes.items()
-            }
-            f_ret["flocat"] = flocat_ret
+            try:
+                flocat_ret = {
+                    k.lower().replace("xlink:", ""): v
+                    for k, v in flocat_xml[0].attributes.items()
+                }
+                f_ret["flocat"] = flocat_ret
+            except IndexError:
+                raise ValueError(
+                    "There is no flocat in this document, so can't find address"
+                )
             ret.append(f_ret)
         return ret
 
@@ -77,9 +85,12 @@ class WorldBankOKRRecord(BaseModel):
 
     @classmethod
     def _extract_identifiers(cls, value: XMLExtractor) -> dict[str, str | None]:
-        uri = value.extract_content_attribute_filter(
-            tag="mods:identifier", attribute_name="type", attribute_value="uri"
-        )[0].content
+        try:
+            uri = value.extract_content_attribute_filter(
+                tag="mods:identifier", attribute_name="type", attribute_value="uri"
+            )[0].content
+        except IndexError:
+            raise ValueError("No URI in this document")
         doi_items = value.extract_content_attribute_filter(
             tag="mods:identifier", attribute_name="type", attribute_value="doi"
         )
@@ -95,7 +106,7 @@ class WorldBankOKRRecord(BaseModel):
             try:
                 title = value.extract_content(tag="mods:title")[0].content
             except IndexError:
-                raise NoTitle
+                raise ValueError("No title in this document")
 
             _authors = [a.content for a in value.extract_content(tag="mods:namePart")]
             _subjects = [s.content for s in value.extract_content(tag="mods:topic")]
@@ -109,7 +120,7 @@ class WorldBankOKRRecord(BaseModel):
             try:
                 _abstract = value.extract_content(tag="mods:abstract")[0].content
             except IndexError:
-                raise NoDescriptionFoundError
+                raise ValueError("No abstract in this document")
 
             ret = {
                 "authors": _authors,
