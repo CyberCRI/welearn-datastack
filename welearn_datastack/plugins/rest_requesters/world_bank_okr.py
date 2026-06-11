@@ -30,13 +30,13 @@ from welearn_datastack.modules.pdf_extractor import (
     remove_hyphens,
     replace_ligatures,
 )
+from welearn_datastack.modules.scraping_utils import remove_extra_whitespace
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 

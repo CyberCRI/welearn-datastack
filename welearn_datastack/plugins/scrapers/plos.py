@@ -2,7 +2,7 @@ import logging
 import os
 import re
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, urlunparse
 
 import requests  # type: ignore
@@ -14,13 +14,13 @@ from welearn_database.data.models import WeLearnDocument
 from welearn_datastack.constants import AUTHORIZED_LICENSES
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import UnauthorizedLicense
+from welearn_datastack.modules.scraping_utils import clean_return_to_line
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
 from welearn_datastack.regular_expression import ANTI_URL_REGEX
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
 )
-from welearn_datastack.utils_.scraping_utils import clean_return_to_line
 
 logger = logging.getLogger(__name__)
 

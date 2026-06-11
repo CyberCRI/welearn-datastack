@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from welearn_datastack.utils_.scraping_utils import (
+from welearn_datastack.modules.scraping_utils import (
     add_space_after_closing_sign,
     add_space_before_capital_letter,
     clean_return_to_line,

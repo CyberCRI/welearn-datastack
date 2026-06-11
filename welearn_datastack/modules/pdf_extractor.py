@@ -8,8 +8,8 @@ from requests import Session
 
 from welearn_datastack.constants import HEADERS
 from welearn_datastack.exceptions import PDFFileSizeExceedLimit
+from welearn_datastack.modules.scraping_utils import remove_extra_whitespace
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
-from welearn_datastack.utils_.scraping_utils import remove_extra_whitespace
 
 logger = logging.getLogger(__name__)
 

@@ -19,16 +19,16 @@ from welearn_datastack.exceptions import (
     NotEnoughData,
     NoTitle,
 )
-from welearn_datastack.plugins.interface import IPluginScrapeCollector
-from welearn_datastack.utils_.http_client_utils import (
-    get_http_code_from_exception,
-    get_new_https_session,
-)
-from welearn_datastack.utils_.scraping_utils import (
+from welearn_datastack.modules.scraping_utils import (
     add_space_after_closing_sign,
     add_space_before_capital_letter,
     clean_return_to_line,
     clean_text,
+)
+from welearn_datastack.plugins.interface import IPluginScrapeCollector
+from welearn_datastack.utils_.http_client_utils import (
+    get_http_code_from_exception,
+    get_new_https_session,
 )
 
 logger = logging.getLogger(__name__)

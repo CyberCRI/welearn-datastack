@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, tzinfo
+from datetime import datetime
 from typing import List
 from zoneinfo import ZoneInfo
 
@@ -10,7 +10,9 @@ from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.constants import HAL_SEARCH_URL, HAL_URL_BASE
 from welearn_datastack.data.url_collector import URLCollector
-from welearn_datastack.utils_.scraping_utils import get_url_without_hal_like_versionning
+from welearn_datastack.modules.scraping_utils import (
+    get_url_without_hal_like_versionning,
+)
 
 logger = logging.getLogger(__name__)
 

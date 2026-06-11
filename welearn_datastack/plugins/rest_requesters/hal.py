@@ -1,4 +1,3 @@
-import io
 import json
 import logging
 import os
@@ -14,14 +13,13 @@ from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDoc
 from welearn_datastack.data.source_models.hal import HALModel
 from welearn_datastack.exceptions import NoContent
 from welearn_datastack.modules.pdf_extractor import get_pdf_content
+from welearn_datastack.modules.scraping_utils import (
+    get_url_without_hal_like_versionning,
+)
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
-)
-from welearn_datastack.utils_.scraping_utils import (
-    get_url_without_hal_like_versionning,
-    remove_extra_whitespace,
 )
 
 logger = logging.getLogger(__name__)
