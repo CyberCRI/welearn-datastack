@@ -1,8 +1,8 @@
 import unittest
 
 import welearn_datastack.modules.computed_metadata
-import welearn_datastack.modules.scraping_utils
 import welearn_datastack.utils_.text_stat_utils
+from welearn_datastack.modules.scraping_utils import clean_doi
 
 
 class TestUtils(unittest.TestCase):
@@ -68,4 +68,28 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(
             welearn_datastack.modules.scraping_utils.clean_text(html_text),
             "Hello, World! Isn't it a beautiful day?",
+        )
+
+    def test_clean_doi_success(self):
+        inout_str = "https://doi.org/10.1000/182"
+        expected_output = "10.1000/182"
+        self.assertEqual(
+            clean_doi(inout_str),
+            expected_output,
+        )
+
+    def test_clean_doi_aldready_correct(self):
+        input_str = "10.1000/182"
+        expected_output = "10.1000/182"
+        self.assertEqual(
+            clean_doi(input_str),
+            expected_output,
+        )
+
+    def test_clean_doi_wrong_input_type(self):
+        input_str = 1
+        expected_output = 1
+        self.assertEqual(
+            clean_doi(input_str),
+            expected_output,
         )
