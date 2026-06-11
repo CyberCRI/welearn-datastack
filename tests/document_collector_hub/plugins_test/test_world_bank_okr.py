@@ -42,6 +42,14 @@ class TestWorldBankOpenKnowledgeRepository(TestCase):
             self.assertIn(a.name, ["Alice Good", "Bob Foo", "Alain De Loin Sur Perdu"])
             self.assertEqual(a.misc, "")
 
+    def test__process_authors_one_author(self):
+        input_lst = ["World Bank"]
+        ret = self.collector._process_authors(input_lst)
+        for a in ret:
+            self.assertIsInstance(a, AuthorDetails)
+            self.assertIn(a.name, ["World Bank"])
+            self.assertEqual(a.misc, "")
+
     def test__extract_licence(self):
         ret = self.collector._extract_licence(self.example_record)
         awaited = "https://creativecommons.org/licenses/by/3.0/igo/"
