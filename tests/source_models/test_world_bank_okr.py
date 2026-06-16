@@ -67,7 +67,7 @@ class TestWorldBankOKRModel(unittest.TestCase):
                 XMLExtractor(self.example_content.replace("fileGrp", "toto"))
             )
 
-    def test_model_with_empty_filegrp(self):
+    def test_model_without_flocat(self):
         with self.assertRaises(ValidationError):
             WorldBankOKRRecord.model_validate(
                 XMLExtractor(self.example_content.replace("FLocat", "toto"))

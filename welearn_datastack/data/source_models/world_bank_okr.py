@@ -60,11 +60,17 @@ class WorldBankOKRRecord(BaseModel):
                     k.lower().replace("xlink:", ""): v
                     for k, v in flocat_xml[0].attributes.items()
                 }
-                f_ret["flocat"] = flocat_ret
-            except IndexError:
+            except IndexError as e:
                 raise ValueError(
-                    "There is no flocat in this document, so can't find address"
+                    "Missing <FLocat> tag in <file>; cannot determine file address"
+                ) from e
+
+            if not flocat_ret.get("href"):
+                raise ValueError(
+                    "Missing xlink:href on <FLocat>; cannot determine file address"
                 )
+
+            f_ret["flocat"] = flocat_ret
             ret.append(f_ret)
         return ret
 
@@ -89,8 +95,11 @@ class WorldBankOKRRecord(BaseModel):
             uri = value.extract_content_attribute_filter(
                 tag="mods:identifier", attribute_name="type", attribute_value="uri"
             )[0].content
-        except IndexError:
-            raise ValueError("No URI in this document")
+        except IndexError as e:
+            raise ValueError('Missing <mods:identifier type="uri"> in document') from e
+
+        if not uri:
+            raise ValueError('Empty <mods:identifier type="uri"> in document')
         doi_items = value.extract_content_attribute_filter(
             tag="mods:identifier", attribute_name="type", attribute_value="doi"
         )
