@@ -50,8 +50,8 @@ class WorldBankOKRRecord(BaseModel):
         ret = []
         try:
             file_grp = value.extract_content(tag="fileGrp")[0].content
-        except IndexError:
-            raise ValueError("There is no fileGrp in this document")
+        except IndexError as e:
+            raise ValueError("Missing <fileGrp> tag in document") from e
         for f in XMLExtractor(file_grp).extract_content(tag="file"):
             f_ret = {k.lower(): v for k, v in f.attributes.items()}
             flocat_xml = XMLExtractor(f.content).extract_content(tag="FLocat")
