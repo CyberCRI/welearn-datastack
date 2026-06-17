@@ -114,8 +114,8 @@ class WorldBankOKRRecord(BaseModel):
 
             try:
                 title = value.extract_content(tag="mods:title")[0].content
-            except IndexError:
-                raise ValueError("No title in this document")
+            except IndexError as e:
+                raise ValueError("No title in this document") from e
 
             _authors = [a.content for a in value.extract_content(tag="mods:namePart")]
             _subjects = [s.content for s in value.extract_content(tag="mods:topic")]
@@ -128,8 +128,8 @@ class WorldBankOKRRecord(BaseModel):
 
             try:
                 _abstract = value.extract_content(tag="mods:abstract")[0].content
-            except IndexError:
-                raise ValueError("No abstract in this document")
+            except IndexError as e:
+                raise ValueError("No abstract in this document") from e
 
             ret = {
                 "authors": _authors,
