@@ -2,7 +2,6 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, model_validator
 
-from welearn_datastack.exceptions import NoDescriptionFoundError, NoTitle
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 
 
