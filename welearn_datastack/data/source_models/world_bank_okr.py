@@ -2,7 +2,6 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, model_validator
 
-from welearn_datastack.exceptions import NoDescriptionFoundError, NoTitle
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 
 
@@ -48,14 +47,28 @@ class WorldBankOKRRecord(BaseModel):
     @classmethod
     def _extract_file_grp(cls, value: XMLExtractor) -> list[dict]:
         ret = []
-        file_grp = value.extract_content(tag="fileGrp")[0].content
+        try:
+            file_grp = value.extract_content(tag="fileGrp")[0].content
+        except IndexError as e:
+            raise ValueError("Missing <fileGrp> tag in document") from e
         for f in XMLExtractor(file_grp).extract_content(tag="file"):
             f_ret = {k.lower(): v for k, v in f.attributes.items()}
             flocat_xml = XMLExtractor(f.content).extract_content(tag="FLocat")
-            flocat_ret = {
-                k.lower().replace("xlink:", ""): v
-                for k, v in flocat_xml[0].attributes.items()
-            }
+            try:
+                flocat_ret = {
+                    k.lower().replace("xlink:", ""): v
+                    for k, v in flocat_xml[0].attributes.items()
+                }
+            except IndexError as e:
+                raise ValueError(
+                    "Missing <FLocat> tag in <file>; cannot determine file address"
+                ) from e
+
+            if not flocat_ret.get("href"):
+                raise ValueError(
+                    "Missing xlink:href on <FLocat>; cannot determine file address"
+                )
+
             f_ret["flocat"] = flocat_ret
             ret.append(f_ret)
         return ret
@@ -77,9 +90,15 @@ class WorldBankOKRRecord(BaseModel):
 
     @classmethod
     def _extract_identifiers(cls, value: XMLExtractor) -> dict[str, str | None]:
-        uri = value.extract_content_attribute_filter(
-            tag="mods:identifier", attribute_name="type", attribute_value="uri"
-        )[0].content
+        try:
+            uri = value.extract_content_attribute_filter(
+                tag="mods:identifier", attribute_name="type", attribute_value="uri"
+            )[0].content
+        except IndexError as e:
+            raise ValueError('Missing <mods:identifier type="uri"> in document') from e
+
+        if not uri:
+            raise ValueError('Empty <mods:identifier type="uri"> in document')
         doi_items = value.extract_content_attribute_filter(
             tag="mods:identifier", attribute_name="type", attribute_value="doi"
         )
@@ -94,8 +113,8 @@ class WorldBankOKRRecord(BaseModel):
 
             try:
                 title = value.extract_content(tag="mods:title")[0].content
-            except IndexError:
-                raise NoTitle
+            except IndexError as e:
+                raise ValueError("No title in this document") from e
 
             _authors = [a.content for a in value.extract_content(tag="mods:namePart")]
             _subjects = [s.content for s in value.extract_content(tag="mods:topic")]
@@ -108,8 +127,8 @@ class WorldBankOKRRecord(BaseModel):
 
             try:
                 _abstract = value.extract_content(tag="mods:abstract")[0].content
-            except IndexError:
-                raise NoDescriptionFoundError
+            except IndexError as e:
+                raise ValueError("No abstract in this document") from e
 
             ret = {
                 "authors": _authors,

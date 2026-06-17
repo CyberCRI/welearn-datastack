@@ -1,6 +1,8 @@
 import unittest
 from pathlib import Path
 
+from pydantic import ValidationError
+
 from welearn_datastack.data.source_models.world_bank_okr import WorldBankOKRRecord
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 
@@ -58,3 +60,33 @@ class TestWorldBankOKRModel(unittest.TestCase):
             model.fileGrp[1].flocat.href,
             "https://openknowledge.worldbank.org/bitstreams/e189cde3-ebf4-5360-a248-2ea3e05fa5d6/download",
         )
+
+    def test_model_without_filegrp(self):
+        with self.assertRaises(ValidationError):
+            WorldBankOKRRecord.model_validate(
+                XMLExtractor(self.example_content.replace("fileGrp", "toto"))
+            )
+
+    def test_model_without_flocat(self):
+        with self.assertRaises(ValidationError):
+            WorldBankOKRRecord.model_validate(
+                XMLExtractor(self.example_content.replace("FLocat", "toto"))
+            )
+
+    def test_model_with_empty_identifiers(self):
+        with self.assertRaises(ValidationError):
+            WorldBankOKRRecord.model_validate(
+                XMLExtractor(self.example_content.replace("identifier", "toto"))
+            )
+
+    def test_model_without_title(self):
+        with self.assertRaises(ValidationError):
+            WorldBankOKRRecord.model_validate(
+                XMLExtractor(self.example_content.replace("title", "toto"))
+            )
+
+    def test_model_without_abstract(self):
+        with self.assertRaises(ValidationError):
+            WorldBankOKRRecord.model_validate(
+                XMLExtractor(self.example_content.replace("abstract", "toto"))
+            )
