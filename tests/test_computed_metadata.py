@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 
 from welearn_database.data.models import WeLearnDocument
 
-from welearn_datastack.data.details_dataclass.author import AuthorDetails
 from welearn_datastack.modules import computed_metadata
 
 
