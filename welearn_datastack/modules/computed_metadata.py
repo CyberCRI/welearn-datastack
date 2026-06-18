@@ -4,6 +4,7 @@ import os
 import re
 from collections import deque
 from dataclasses import asdict, is_dataclass
+from datetime import date, datetime
 from functools import cache
 
 from lingua import LanguageDetectorBuilder
