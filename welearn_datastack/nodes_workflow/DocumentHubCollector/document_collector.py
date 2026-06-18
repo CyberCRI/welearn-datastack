@@ -93,7 +93,6 @@ def main() -> None:
         identify_document_language(doc)
         compute_duration(doc)
         compute_readability(doc)
-        serialize_dataclass_instance(doc)
         flag_modified(doc, "details")
 
     db_session.add_all(states)
