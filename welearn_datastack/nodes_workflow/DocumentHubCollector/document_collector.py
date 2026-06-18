@@ -2,7 +2,6 @@ import csv
 import logging
 import os
 import uuid
-from dataclasses import asdict
 from typing import Dict, List, Tuple
 from uuid import UUID
 
@@ -17,7 +16,6 @@ from welearn_datastack.modules.computed_metadata import (
     compute_duration,
     compute_readability,
     identify_document_language,
-    serialize_dataclass_instance,
 )
 from welearn_datastack.modules.validation import validate_non_null_fields_document
 from welearn_datastack.plugins.interface import IPlugin
@@ -93,7 +91,6 @@ def main() -> None:
         identify_document_language(doc)
         compute_duration(doc)
         compute_readability(doc)
-        serialize_dataclass_instance(doc)
         flag_modified(doc, "details")
 
     db_session.add_all(states)
@@ -135,7 +132,7 @@ def extract_data_from_urls(
             current_plugin = collector_selector.select_collector(corpus=corpus_name)
         except PluginNotFoundError as e:
             logger.exception(e)
-            logger.warning("This corpus '%s" " will be ignored", corpus_name)
+            logger.warning("This corpus '%s' will be ignored", corpus_name)
             error_corpus_name.append(corpus_name)
             continue
         corpus_plugin[corpus_name] = current_plugin
