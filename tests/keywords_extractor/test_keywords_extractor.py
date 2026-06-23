@@ -9,6 +9,8 @@ from welearn_datastack.modules.keywords_extractor import extract_keywords
 
 class TestKeywordsExtractor(unittest.TestCase):
 
+    @patch("welearn_datastack.modules.keywords_extractor._load_model")
+    @patch("welearn_datastack.modules.keywords_extractor.pipeline")
     @patch("welearn_datastack.modules.keywords_extractor.load_embedding_model")
     @patch("welearn_datastack.modules.keywords_extractor.generate_ml_models_path")
     @patch("welearn_datastack.modules.keywords_extractor.KeyBERT")
@@ -17,12 +19,23 @@ class TestKeywordsExtractor(unittest.TestCase):
         mock_KeyBERT,
         mock_generate_ml_models_path,
         mock_load_embedding_model,
+        mock_pipeline,
+        mock_load_model,
     ):
         # Mock the return values
         mock_generate_ml_models_path.return_value.as_posix.return_value = "mock_path"
-        mock_load_embedding_model.return_value = "mock_embedding_model"
-        mock_nlp_model = MagicMock()
-        mock_nlp_model.return_value = MagicMock()
+        mock_load_embedding_model.return_value = (
+            "mock_embedding_model",
+            "mock_tokenizer",
+        )
+        mock_pipeline.return_value = MagicMock()
+
+        mock_token = MagicMock()
+        mock_token.text = "test"
+        mock_token.is_stop = False
+        mock_doc = [mock_token]
+        mock_load_model.return_value.return_value = mock_doc
+
         mock_kw_model = mock_KeyBERT.return_value
         mock_kw_model.extract_keywords.return_value = [
             ("keyword1", 0.6),
@@ -48,7 +61,10 @@ class TestKeywordsExtractor(unittest.TestCase):
         )
 
         # Call the function
-        keywords = extract_keywords(mock_document, embedding_model_from_db.title)
+        keywords = extract_keywords(
+            mock_document,
+            embedding_model_from_db.title,
+        )
 
         # Assertions
         mock_generate_ml_models_path.assert_called_once()
