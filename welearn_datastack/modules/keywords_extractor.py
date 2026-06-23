@@ -4,16 +4,16 @@ from typing import List
 
 import spacy
 from keybert import KeyBERT  # type: ignore
-from sentence_transformers import SentenceTransformer  # type: ignore
+from transformers.pipelines import pipeline  # type: ignore
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.enumerations import MLModelsType
-from welearn_datastack.modules.embedding_model_helpers import load_embedding_model
+from welearn_datastack.modules.embedding_model_helpers import (
+    load_embedding_model,
+)
 from welearn_datastack.utils_.path_utils import generate_ml_models_path
 
 logger = logging.getLogger(__name__)
-
-loaded_models: dict[str, SentenceTransformer] = {}
 
 
 @cache
@@ -32,8 +32,13 @@ def extract_keywords(
         model_name=embedding_model_name_from_db,
         extension="",
     )
-    embedding_model = load_embedding_model(ml_path.as_posix())
-    kw_model = KeyBERT(model=embedding_model)
+    embedding_model, _ = load_embedding_model(ml_path.as_posix())
+    kw_model = KeyBERT(
+        model=pipeline(
+            "feature-extraction",
+            model=embedding_model,
+        )
+    )
 
     nlp_model = _load_model()
     doc = nlp_model(str(document.description))
