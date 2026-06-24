@@ -96,7 +96,7 @@ def create_content_slices(
 
     slices: List[DocumentSlice] = []
 
-    embeddings = _compute_embeddings(
+    embeddings: np.ndarray = _compute_embeddings(
         embedding_model,
         tokenizer,
         text_content_slices,
