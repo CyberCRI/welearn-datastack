@@ -1,10 +1,14 @@
 import os
 import uuid
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import numpy
-from welearn_database.data.models import Corpus, EmbeddingModel, WeLearnDocument
+from welearn_database.data.models import (
+    Corpus,
+    EmbeddingModel,
+    WeLearnDocument,
+)
 
 from welearn_datastack.modules.embedding_model_helpers import (
     _split_by_word_respecting_sent_boundary,
@@ -23,17 +27,32 @@ class TestEmbeddingHelper(TestCase):
     def tearDown(self) -> None:
         os.environ.clear()
 
-    @patch("welearn_datastack.modules.embedding_model_helpers.SentenceTransformer")
-    def test_create_content_slices(self, mock_sentence_transformer):
+    @patch("welearn_datastack.modules.embedding_model_helpers." "_compute_embeddings")
+    @patch("welearn_datastack.modules.embedding_model_helpers." "load_embedding_model")
+    @patch(
+        "welearn_datastack.modules.embedding_model_helpers."
+        "_split_by_word_respecting_sent_boundary"
+    )
+    def test_create_content_slices(
+        self,
+        mock_split_by_sent_boundary,
+        mock_load_embedding_model,
+        mock_compute_embeddings,
+    ):
         os.environ["MODELS_PATH_ROOT"] = "test"
 
         embedding_1 = numpy.random.uniform(low=-1, high=1, size=(50,))
         embedding_2 = numpy.random.uniform(low=-1, high=1, size=(50,))
-        mock_sentence_transformer.return_value.get_max_seq_length.side_effect = [5]
-        mock_sentence_transformer.return_value.encode.side_effect = [
-            embedding_1,
-            embedding_2,
+
+        fake_model = MagicMock()
+        fake_tokenizer = MagicMock()
+        fake_tokenizer.model_max_length = 5
+        mock_load_embedding_model.return_value = (fake_model, fake_tokenizer)
+        mock_split_by_sent_boundary.return_value = [
+            "This is a sentence.",
+            "This is another sentence.",
         ]
+        mock_compute_embeddings.return_value = numpy.array([embedding_1, embedding_2])
 
         test_document = WeLearnDocument(
             id=uuid.uuid4(),
@@ -73,12 +92,23 @@ class TestEmbeddingHelper(TestCase):
         self.assertEqual("This is another sentence.", slices[1].body)
         self.assertEqual(embedding_2.all(), ret_emb1)
         self.assertEqual(emb_m_id, slices[1].embedding_model_id)
+        mock_load_embedding_model.assert_called_once()
+        mock_compute_embeddings.assert_called_once_with(
+            fake_model,
+            fake_tokenizer,
+            ["This is a sentence.", "This is another sentence."],
+        )
 
     def test__split_by_word_respecting_sent_boundary(self):
         """
-        Test that the text is correctly split by word respecting sentence boundary
+        Test that the text is correctly split by word
+        respecting sentence boundary
         """
-        text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        text = (
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. "
+            "Sed do eiusmod tempor incididunt ut labore et dolore "
+            "magna aliqua."
+        )
         sents = _split_by_word_respecting_sent_boundary(
             slice_length=4,
             document_content=text,

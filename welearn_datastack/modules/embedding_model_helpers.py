@@ -6,8 +6,10 @@ from functools import cache
 from typing import List
 from uuid import UUID
 
+import numpy as np
 import spacy
-from sentence_transformers import SentenceTransformer  # type: ignore
+import torch
+from transformers import AutoModel, AutoTokenizer
 from welearn_database.data.models import DocumentSlice, WeLearnDocument
 
 from welearn_datastack.data.enumerations import MLModelsType
@@ -20,7 +22,8 @@ from welearn_datastack.utils_.path_utils import generate_ml_models_path
 
 logger = logging.getLogger(__name__)
 
-loaded_models: dict[str, SentenceTransformer] = {}
+loaded_models: dict[str, (AutoModel, AutoTokenizer)] = {}
+HF_LOCAL_MODEL_REVISION = "main"
 
 
 @cache
@@ -28,8 +31,39 @@ def _load_spacy_model():
     return spacy.load("xx_sent_ud_sm")
 
 
+def _compute_embeddings(model, tokenizer, inputs: list[str]) -> np.ndarray:
+    """Compute normalized CLS embeddings for a batch of input texts.
+
+    :param model: A pretrained transformer model used for inference.
+    :param tokenizer: Tokenizer matching the provided model.
+    :param inputs: List of text inputs to embed.
+    :return: A NumPy array of L2-normalized embeddings.
+    """
+    with torch.no_grad():
+        tokenized_inputs = tokenizer(
+            inputs,
+            padding=True,
+            truncation=True,
+            return_tensors="pt",
+        )
+        model_device = next(model.parameters()).device
+        tokenized_inputs = {
+            key: value.to(model_device) for key, value in tokenized_inputs.items()
+        }
+        # Compute embeddings using the model
+        model_output = model(**tokenized_inputs)
+        # Perform pooling. granite-embedding-107m-multilingual uses CLS Pooling
+        embeddings = model_output[0][:, 0]
+        embeddings = (
+            torch.nn.functional.normalize(embeddings, dim=1).detach().cpu().numpy()
+        )
+    return embeddings
+
+
 def create_content_slices(
-    document: WeLearnDocument, embedding_model_name: str, embedding_model_id: UUID
+    document: WeLearnDocument,
+    embedding_model_name: str,
+    embedding_model_id: UUID,
 ) -> List[DocumentSlice]:
     """
     Creates slices of the document content and embeds them.
@@ -44,7 +78,7 @@ def create_content_slices(
     if not document.full_content:
         raise NoContent(f"This document is empty {document.id}")
 
-    embedding_model = load_embedding_model(ml_path.as_posix())
+    embedding_model, tokenizer = load_embedding_model(ml_path.as_posix())
     n_splits = math.ceil(
         len(document.full_content) / 1000000
     )  # 1M character is the limit from SpaCy
@@ -53,15 +87,19 @@ def create_content_slices(
     text_content_slices = []
     for i in range(0, n_splits):
         text_content_slices += _split_by_word_respecting_sent_boundary(
-            slice_length=embedding_model.get_max_seq_length(),  # type: ignore
-            document_content=document.full_content[i * split_size : (i + 1) * split_size],  # type: ignore
+            slice_length=tokenizer.model_max_length,  # type: ignore
+            document_content=document.full_content[
+                i * split_size : (i + 1) * split_size
+            ],  # type: ignore
             document_lang=document.lang,  # type: ignore
         )
 
     slices: List[DocumentSlice] = []
 
-    embeddings = embedding_model.encode(
-        text_content_slices, device=os.environ.get("ST_DEVICE", "")
+    embeddings: np.ndarray = _compute_embeddings(
+        embedding_model,
+        tokenizer,
+        text_content_slices,
     )
 
     # Create Slices objects
@@ -79,37 +117,45 @@ def create_content_slices(
     return slices
 
 
-def load_embedding_model(str_path: str) -> SentenceTransformer:
+def load_embedding_model(str_path: str) -> tuple[AutoModel, AutoTokenizer]:
     """
     Loads the embedding model for the document language
     :param str_path: The path to the embedding model
-    :return: The embedding model
+    :return: The embedding model and tokenizer
     """
     logger.info("Loading embedding model from %s", str_path)
 
+    if not os.path.isdir(str_path):
+        raise FileNotFoundError(
+            f"Embedding model path must be a local directory: {str_path}"
+        )
+
     device = os.environ.get("ST_DEVICE", None)
-    backend = os.environ.get("ST_BACKEND", None)
     logger.info("ST_DEVICE: %s", device)
-    logger.info("ST_BACKEND: %s", backend)
 
     if device not in ["cpu", "cuda", None]:
         raise ValueError("ST_DEVICE must be one of 'cpu', 'cuda' or None")
 
-    if backend not in ["torch", "onnx", "openvino"]:
-        raise ValueError("ST_BACKEND must be one of 'torch', 'onnx' or 'openvino'")
-
-    model = loaded_models.get(str_path, None)
-    if model is not None:
+    model, tokenizer = loaded_models.get(str_path, (None, None))
+    if (model, tokenizer) != (None, None):
         logger.info("%s Model already loaded", str_path)
-        return model
+        return model, tokenizer
 
     logger.info("%s Model not loaded yet", str_path)
-    loaded_models[str_path] = SentenceTransformer(
-        model_name_or_path=str_path,
-        device=device,
-        backend=backend,  # type: ignore
+    model = AutoModel.from_pretrained(
+        str_path,
+        revision=HF_LOCAL_MODEL_REVISION,
+        local_files_only=True,
     )
-    return loaded_models[str_path]
+    tokenizer = AutoTokenizer.from_pretrained(
+        str_path,
+        revision=HF_LOCAL_MODEL_REVISION,
+        local_files_only=True,
+    )
+    model.eval()
+    model.to(device)
+    loaded_models[str_path] = (model, tokenizer)
+    return model, tokenizer
 
 
 def _split_by_word_respecting_sent_boundary(
@@ -118,7 +164,8 @@ def _split_by_word_respecting_sent_boundary(
     slice_length: int,
 ) -> List[str]:
     """
-    Splits the text into slices of slice_length words while respecting sentence boundaries.
+    Splits the text into slices of slice_length words while
+    respecting sentence boundaries.
 
     :param document_content: The text to split into slices
     :param lang: The language of the text in format 'en', 'fr', 'es', etc.
@@ -144,12 +191,14 @@ def _split_by_word_respecting_sent_boundary(
         word_count_sen = len(sentence.split())
 
         if word_count_sen > slice_length:
-            # Number of words in a single sentence exceeds slice_length -> truncate sentence
+            # A single sentence exceeds slice_length,
+            # so truncate the sentence.
             sentence = " ".join(sentence.split()[: slice_length - 1]) + "..."
             word_count_sen = len(sentence.split())
 
         if word_count_slice + word_count_sen > slice_length:
-            # Number of words exceeds slice_length -> save current slice and start a new one
+            # Number of words exceeds slice_length ->
+            # save current slice and start a new one
             if current_slice:
                 list_slices.append(current_slice)
             current_slice = []

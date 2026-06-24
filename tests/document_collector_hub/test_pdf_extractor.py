@@ -56,14 +56,12 @@ class TestPDFExtractor(unittest.TestCase):
         self.assertEqual(result, {"X-TIKA:content": "<html>Mock Content</html>"})
 
     def test_parse_tika_content(self):
-        tika_content = {
-            "X-TIKA:content": """
+        tika_content = {"X-TIKA:content": """
             <html>
                 <div class="page">Page 1 content</div>
                 <div class="page">Page 2 content</div>
             </html>
-            """
-        }
+            """}
 
         result = _parse_tika_content(tika_content)
 
