@@ -32,6 +32,13 @@ def _load_spacy_model():
 
 
 def _compute_embeddings(model, tokenizer, inputs: list[str]) -> np.ndarray:
+    """Compute normalized CLS embeddings for a batch of input texts.
+
+    :param model: A pretrained transformer model used for inference.
+    :param tokenizer: Tokenizer matching the provided model.
+    :param inputs: List of text inputs to embed.
+    :return: A NumPy array of L2-normalized embeddings.
+    """
     with torch.no_grad():
         tokenized_inputs = tokenizer(
             inputs,
