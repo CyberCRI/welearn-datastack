@@ -50,7 +50,9 @@ def _compute_embeddings(model, tokenizer, inputs: list[str]) -> np.ndarray:
         tokenized_inputs = {
             key: value.to(model_device) for key, value in tokenized_inputs.items()
         }
+        # Compute embeddings using the model
         model_output = model(**tokenized_inputs)
+        # Perform pooling. granite-embedding-107m-multilingual uses CLS Pooling
         embeddings = model_output[0][:, 0]
         embeddings = (
             torch.nn.functional.normalize(embeddings, dim=1).detach().cpu().numpy()
