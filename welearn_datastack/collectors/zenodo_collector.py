@@ -98,3 +98,6 @@ class ZenodoCollector(URLCollector):
         zenodo_ret = session.get(self.api_base_url, params=search_parameters)
 
         zenodo_ret.raise_for_status()
+
+        urls = self._convert_hits_to_documents(zenodo_ret)
+        return urls
