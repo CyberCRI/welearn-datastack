@@ -23,6 +23,7 @@ from welearn_datastack.utils_.path_utils import generate_ml_models_path
 logger = logging.getLogger(__name__)
 
 loaded_models: dict[str, (AutoModel, AutoTokenizer)] = {}
+HF_LOCAL_MODEL_REVISION = "main"
 
 
 @cache
@@ -134,10 +135,12 @@ def load_embedding_model(str_path: str) -> tuple[AutoModel, AutoTokenizer]:
     logger.info("%s Model not loaded yet", str_path)
     model = AutoModel.from_pretrained(
         str_path,
+        revision=HF_LOCAL_MODEL_REVISION,
         local_files_only=True,
     )
     tokenizer = AutoTokenizer.from_pretrained(
         str_path,
+        revision=HF_LOCAL_MODEL_REVISION,
         local_files_only=True,
     )
     model.eval()
