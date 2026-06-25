@@ -216,9 +216,7 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
         doc.title = wrapper.raw_data.title
         doc.doi = clean_doi(wrapper.raw_data.identifiers.doi)
         doc.description = wrapper.raw_data.abstract
-        full_content = (
-            doc.description
-        )  # We switch on abstract for these document since world bank don't let us scrape their PDF
+        full_content = doc.description  # Use description (abstract) as full content; PDF/TXT scraping is not permitted for this source.
         doc.full_content = full_content
         details = self._build_details(wrapper.raw_data)
         details.update(
