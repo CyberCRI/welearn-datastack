@@ -216,13 +216,16 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
         doc.title = wrapper.raw_data.title
         doc.doi = clean_doi(wrapper.raw_data.identifiers.doi)
         doc.description = wrapper.raw_data.abstract
-        full_content, is_txt = self._extract_full_content(wrapper.raw_data)
+        full_content = (
+            doc.description
+        )  # We switch on abstract for these document since world bank don't let us scrape their PDF
         doc.full_content = full_content
         details = self._build_details(wrapper.raw_data)
         details.update(
             {
-                "content_from_pdf": not is_txt,
-                "content_from_txt": is_txt,
+                "content_from_pdf": False,
+                "content_from_txt": False,
+                "content_from_description": True,
                 "licence": licence,
             }
         )
@@ -240,6 +243,7 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
                     document=doc,
                     raw_data=self._retrieve_record_from_oai(doc.external_id, client),
                 )
+
             except requests.exceptions.RequestException as e:
                 msg = f"Error while retrieving World bank OKR document ({doc.url}) document from this url {self.api_base_url}/?verb=GetRecord&identifier={doc.external_id}: {e}"
                 logger.error(msg)
