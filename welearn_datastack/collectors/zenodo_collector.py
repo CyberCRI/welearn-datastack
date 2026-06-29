@@ -2,6 +2,7 @@ import logging
 
 from welearn_database.data.models import Corpus, WeLearnDocument
 
+from welearn_datastack.constants import ZENODO_API_BASE_URL, ZENODO_APPLICATION_BASE_URL
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.exceptions import (
     NoDOIFoundError,
@@ -17,8 +18,8 @@ class ZenodoCollector(URLCollector):
     def __init__(self, corpus: Corpus):
         self.corpus = corpus
 
-        self.api_base_url = "https://zenodo.org/api/records"
-        self.application_base_url = "https://zenodo.org/record/"
+        self.api_base_url = ZENODO_API_BASE_URL
+        self.application_base_url = ZENODO_APPLICATION_BASE_URL
 
     @staticmethod
     def _compute_search_parameters(

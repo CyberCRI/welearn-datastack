@@ -202,6 +202,10 @@ YEAR_FIRST_DATE_FORMAT = "%Y-%m-%d"
 
 WIKIPEDIA_BASE_URL = "https://<lang>.wikipedia.org/"
 
+ZENODO_API_BASE_URL = "https://zenodo.org/api/records/"
+
+ZENODO_APPLICATION_BASE_URL = "https://zenodo.org/record/"
+
 # Open Alex code publishers we don't want to retrieve (According to https://www.predatoryjournals.org/the-list/publishers)
 # In this order :
 # Canadian Center of Science and Education, Academic Journals, Lectito Journals, Pulsus Group, Business Perspectives,

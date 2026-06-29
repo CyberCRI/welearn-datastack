@@ -4,33 +4,29 @@ import os
 import pydantic
 import requests
 from welearn_database.data.models import WeLearnDocument
-from welearn_database.modules.text_cleaning import clean_text
 
 from welearn_datastack import constants
-from welearn_datastack.constants import AUTHORIZED_LICENSES
+from welearn_datastack.constants import (
+    AUTHORIZED_LICENSES,
+    ZENODO_API_BASE_URL,
+    ZENODO_APPLICATION_BASE_URL,
+)
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.data.details_dataclass.author import AuthorDetails
-from welearn_datastack.data.details_dataclass.topics import TopicDetails
-from welearn_datastack.data.source_models.IPBES import (
-    IPBESItem,
-    IPBESRoot,
-    IPBESSources,
+from welearn_datastack.data.generic_converter.zenodo_rest_response_converter import (
+    ZenodoRestResponseConverter,
 )
+from welearn_datastack.data.source_models.zenodo import ZenodoRecord
 from welearn_datastack.exceptions import (
+    ClosedAccessContent,
     LegalException,
-    NoContent,
-    NoDescriptionFoundError,
-    NoLicenseFoundError,
     NotEnoughData,
     NotExpectedAmountOfItems,
-    NotExpectedMoreThanOneItem,
     UnauthorizedLicense,
-    WrongExternalIdFormat,
     WrongFormat,
-    WrongLangFormat,
 )
 from welearn_datastack.modules.pdf_extractor import get_pdf_content
-from welearn_datastack.modules.xml_extractor import XMLExtractor
+from welearn_datastack.modules.scraping_utils import clean_text, format_cc_license
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
@@ -40,40 +36,9 @@ from welearn_datastack.utils_.http_client_utils import (
 logger = logging.getLogger(__name__)
 
 
-translations = {
-    "eng": "See the full text for more details.",
-    "deu": "Lesen Sie den vollständigen Text für weitere Details.",
-    "spa": "Consulte el texto completo para más detalles.",
-    "fre": "Consultez le texte intégral pour plus de détails.",
-    "jpn": "詳細については全文をご参照ください。",
-    "por": "Consulte o texto completo para mais detalhes.",
-    "ara": "لمزيد من التفاصيل يرجى الرجوع إلى النص الكامل",
-    "ces": "Podrobnosti naleznete v plném znění textu.",
-    "ita": "Consulti il testo completo per maggiori dettagli.",
-    "kor": "자세한 내용은 전체 본문을 확인하세요.",
-    "nld": "Raadpleeg de volledige tekst voor meer details.",
-    "zho": "更多详情请参阅全文。",
-}
-
-lang_iso3_to_lang_iso2 = {
-    "eng": "en",
-    "deu": "de",
-    "spa": "es",
-    "fre": "fr",
-    "jpn": "ja",
-    "por": "pt",
-    "ara": "ar",
-    "ces": "cs",
-    "ita": "it",
-    "kor": "ko",
-    "nld": "nl",
-    "zho": "zh",
-}
-
-
 # Collector
 class IPBESCollector(IPluginRESTCollector):
-    related_corpus = "IPBES"
+    related_corpus = "ipbes"
 
     def __init__(self) -> None:
         self.corpus_name = self.related_corpus
@@ -84,66 +49,31 @@ class IPBESCollector(IPluginRESTCollector):
         self.api_base_url = (
             "https://data.unesco.org/api/explore/v2.1/catalog/datasets/doc001"
         )
-        self.application_base_url = "https://IPBES.unesco.org/ark:/"
+        self.application_base_url = ZENODO_APPLICATION_BASE_URL
+        self.api_base_url = ZENODO_API_BASE_URL
         self.headers = constants.HEADERS
         self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
 
     @staticmethod
-    def _clean_txt_content(content: str) -> str:
-        return clean_text(content)
+    def _extract_authors(metadata: ZenodoRestResponseConverter) -> list[AuthorDetails]:
+        ret: list[AuthorDetails] = [
+            AuthorDetails(name=a, misc="") for a in metadata.creator_names
+        ]
+        return ret
 
     @staticmethod
-    def _extract_licence(IPBES_document: IPBESItem) -> str:
-        rights = IPBES_document.rights
-        if not rights:
-            raise NoLicenseFoundError("No license found in the document metadata.")
-        try:
-            [licence_content] = XMLExtractor(rights).extract_content("a")
-        except ValueError:
-            raise NoLicenseFoundError("No license found in the document metadata.")
-        return licence_content.attributes["href"]
-
-    @staticmethod
-    def _extract_topics(metadata: IPBESItem) -> list[TopicDetails]:
-        ret: list[TopicDetails] = []
-
-        for topic in metadata.subject:
-            ret.append(
-                TopicDetails(
-                    name=topic.lower(),
-                    depth=0,
-                    directly_contained_in=[],
-                    external_id=None,
-                    external_depth_name=None,
-                )
+    def _check_usage_authorization(ipbes_record: ZenodoRestResponseConverter) -> None:
+        if ipbes_record.access_right != "open":
+            raise ClosedAccessContent(
+                f"Document {ipbes_record.external_id} is not open access, access_right={ipbes_record.access_right}"
             )
 
-        return ret
+        license_url = format_cc_license(ipbes_record.licence)
 
-    @staticmethod
-    def _extract_authors(metadata: IPBESItem) -> list[AuthorDetails]:
-        ret: list[AuthorDetails] = [AuthorDetails(name=metadata.creator, misc="")]
-        return ret
+        if license_url not in AUTHORIZED_LICENSES:
+            raise UnauthorizedLicense(f"License '{license_url}' is not authorized.")
 
-    @staticmethod
-    def _check_licence_authorization(_license: str) -> None:
-        if _license not in AUTHORIZED_LICENSES:
-            raise UnauthorizedLicense(f"License '{_license}' is not authorized.")
-
-    def _extract_metadata(self, IPBES_metdata: IPBESItem) -> dict:
-        ret_type = IPBES_metdata.type[0] if IPBES_metdata.type else None
-        topics = self._extract_topics(IPBES_metdata)
-        license_url = self._extract_licence(IPBES_metdata)
-        authors = self._extract_authors(IPBES_metdata)
-
-        return {
-            "type": ret_type,
-            "topics": topics,
-            "licence_url": license_url,
-            "authors": authors,
-        }
-
-    def _get_metadata_json(self, document: WeLearnDocument) -> IPBESItem:
+    def _get_zenodo_rest_json(self, document: WeLearnDocument) -> ZenodoRecord:
         """
         Get the metadata of a document from the IPBES API, using the document external_id as a search query.
          The metadata is returned as a IPBESItem object.
@@ -158,138 +88,67 @@ class IPBESCollector(IPluginRESTCollector):
         :raises NotExpectedMoreThanOneItem: If there is more or less results than expected for the given external_id.
         """
         session = get_new_https_session()
-        param = {
-            "where": f'search(url, "{document.external_id}")',
-            "select": "url, year, language, title, type,description, subject,creator,rights",
-            "limit": 1,
-        }
-        resp = session.get(self.api_base_url + "/records", params=param)
+
+        resp = session.get(f"{self.api_base_url}{document.external_id}")
         resp.raise_for_status()
-        root = IPBESRoot.model_validate(resp.json())
-        results = root.results
-        if not results:
-            raise NotEnoughData(f"No document found for url {document.url}")
-        try:
-            [ret] = results
-        except ValueError as e:
-            raise NotExpectedMoreThanOneItem(
-                f"Expected one document for url {document.url} but got {len(results)}"
-            )
-        return ret
+        record = ZenodoRecord.model_validate(resp.json())
 
-    @staticmethod
-    def _remove_letters(str_to_process):
-        ret = ""
-        for c in str_to_process:
-            if c.isalpha():
-                pass
-            else:
-                ret += c
-        return ret
+        return record
 
-    def _convert_ark_id_to_iid(self, ark_id: str) -> str:
+    def _transform_converter_to_welearn_document(
+        self,
+        welearn_document: WeLearnDocument,
+        lite_record: ZenodoRestResponseConverter,
+    ) -> WeLearnDocument:
         """
-        Convert an ark id like "48223/pf0000389119" to "p::usmarcdef_0000389119" and
-        "48223/pf0000396769/fre" to "p::usmarcdef_0000396769_fre"
-         The ark id is expected to be in the format "12345/abcde" or "12345/abcde/lang", where
-         "12345" is the ark prefix, "abcde" is the document id and "lang" is the language code.
-         :param ark_id: The ark id to convert.
-         :return: The converted iid.
-         :raises WrongExternalIdFormat: If the ark id is not in the expected format.
+        Transform a ZenodoRestResponseConverter object to a WeLearnDocument object.
+        :param lite_record: ZenodoRestResponseConverter object to transform.
+        :return: WeLearnDocument object.
         """
-        # Convert an ark id like "48223/pf0000389119" to "p::usmarcdef_0000389119" and
-        # "48223/pf0000396769/fre" to "p::usmarcdef_0000396769_fre"
-        if "/" in ark_id:
-            parts = ark_id.split("/")
-            if len(parts) == 2:
-                return f"p::usmarcdef_{self._remove_letters(parts[1])}"
-            elif len(parts) == 3:
-                return f"p::usmarcdef_{self._remove_letters(parts[1])}_{parts[2]}"
-        raise WrongExternalIdFormat(
-            msg=f"Invalid ark id format: {ark_id}", external_id_name="ark"
+        welearn_document.external_id = lite_record.external_id
+        welearn_document.doi = lite_record.doi
+        welearn_document.title = lite_record.title
+        welearn_document.description = clean_text(lite_record.description)
+        welearn_document.corpus_name = self.corpus_name
+        details = (
+            {
+                "authors": self._extract_authors(lite_record),
+                "publication_date": lite_record.publication_date,
+                "update_date": lite_record.update_date,
+                "type": lite_record.type,
+                "license": format_cc_license(lite_record.licence),
+                "status": lite_record.status,
+            },
         )
-
-    @staticmethod
-    def _get_pdf_document_name(iid: str) -> list[str]:
-        """
-        Get the name of the PDF document associated with a given iid from the IPBES API.
-         The PDF document name is returned as a list of strings, as there can be multiple PDF documents associated with a given iid.
-         If no PDF document is found, an empty list is returned
-            :param iid: The iid to search for in the IPBES API.
-            :return: A list of strings containing the names of the PDF documents associated with the given iid.
-            :raises requests.exceptions.HTTPError: If there is an error while making the request to the IPBES API.
-        """
-        session = get_new_https_session()
-        param = {"id": iid, "multiple": True, "multilingual": True}
-        resp = session.get(
-            "https://IPBES.unesco.org/in/rest/api/documentPlaylistById", params=param
+        document = WeLearnDocument(
+            external_id=lite_record.external_id,
+            doi=lite_record.doi,
+            title=lite_record.title,
+            description=clean_text(lite_record.description),
+            corpus_name=self.corpus_name,
+            full_content=get_pdf_content(
+                pdf_url=lite_record.pdf_url,
+                pdf_size_file_limit=self.pdf_size_file_limit,
+                tika_address=self.tika_address,
+            ),
+            details=details,
         )
-        resp.raise_for_status()
-        data = resp.json()
-        sources = IPBESSources.model_validate(data)
-        ret = []
-        for s in sources.sources:
-            if s:
-                ret.append(s.Document)
-        return ret
-
-    def _get_description(self, IPBES_metadata: IPBESItem) -> str:
-        description = IPBES_metadata.description
-        if not description:
-            lang = IPBES_metadata.language[0] if IPBES_metadata.language else None
-            if not lang:
-                raise NoDescriptionFoundError(
-                    "No description found in the document metadata."
-                )
-            translated_description = translations.get(lang)
-            if translated_description is None:
-                raise NoDescriptionFoundError(
-                    f"No description found in the document metadata for language '{lang}'."
-                )
-            return translated_description
-        return self._clean_txt_content(description)
+        return document
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         ret: list[WrapperRetrieveDocument] = []
         for document in documents:
             try:
-                metadata = self._get_metadata_json(document=document)
-                _license = self._extract_licence(metadata)
-                self._check_licence_authorization(_license)
-                ark_marker = "ark:/"
-                url = document.url
-                if not isinstance(url, str) or ark_marker not in url:
-                    raise WrongExternalIdFormat(
-                        f"Invalid external id format in URL {url}"
-                    )
-                ark_part = url.split(ark_marker, 1)[1]
-                iid = self._convert_ark_id_to_iid(ark_part)
-                pdf_names = self._get_pdf_document_name(iid=iid)
-                if len(pdf_names) == 0:
-                    raise NoContent(
-                        f"No PDF document found for document {document.url}"
-                    )
-                pdf_url = f"https://IPBES.unesco.org/in/rest/annotationSVC/DownloadWatermarkedAttachment/{pdf_names[0]}"
-                try:
-                    pdf_content = get_pdf_content(
-                        pdf_url=pdf_url,
-                        pdf_size_file_limit=self.pdf_size_file_limit,
-                        tika_address=self.tika_address,
-                    )
-                except Exception as e:
-                    raise NoContent(
-                        f"Cannot retrieve PDF content for document {document.url} : {e}"
-                    )
-                document.full_content = pdf_content
-                document.description = self._get_description(metadata)
-                document.title = metadata.title
-                document.details = self._extract_metadata(metadata)
-                try:
-                    document.lang = lang_iso3_to_lang_iso2[metadata.language[0]]
-                except (KeyError, IndexError) as e:
-                    raise WrongLangFormat(
-                        f"Invalid language format {str(metadata.language)} for document {document.url}"
-                    ) from e
+
+                record = self._get_zenodo_rest_json(document=document)
+                lite_record = ZenodoRestResponseConverter(record)
+
+                self._check_usage_authorization(lite_record)
+
+                document = self._transform_converter_to_welearn_document(
+                    welearn_document=document, lite_record=lite_record
+                )
+
             except requests.exceptions.RequestException as e:
                 msg = f"Error while retrieving IPBES ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
                 logger.error(msg)
