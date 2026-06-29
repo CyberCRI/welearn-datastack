@@ -86,7 +86,7 @@ class ZenodoCollector(URLCollector):
 
         ret = []
         for hit in second_level_hits:
-            ret.append(self._convert_hit_into_documents(hit, only_sub_documents=False))
+            ret.extend(self._convert_hit_into_documents(hit, only_sub_documents=False))
 
         return ret
 
@@ -100,5 +100,5 @@ class ZenodoCollector(URLCollector):
 
         zenodo_ret.raise_for_status()
 
-        urls = self._convert_hits_to_documents(zenodo_ret)
+        urls = self._convert_hits_to_documents(zenodo_ret.json())
         return urls

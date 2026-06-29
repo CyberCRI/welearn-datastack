@@ -32,11 +32,13 @@ if __name__ == "__main__":
     load_dotenv_local()
     session = create_db_session()
 
-    corpus_name = os.getenv("CORPUS_NAME")
+    corpus_name = "ipbes"
+    # corpus_name = os.getenv("CORPUS_NAME")
     if not corpus_name:
         raise ValueError("CORPUS_NAME is not defined")
 
-    document_type = os.getenv("DOCUMENT_TYPE")
+    document_type = "publication"
+    # document_type = os.getenv("DOCUMENT_TYPE")
     if not document_type:
         logger.warning(
             "No document_type defined in env so every documents url will be collected"
