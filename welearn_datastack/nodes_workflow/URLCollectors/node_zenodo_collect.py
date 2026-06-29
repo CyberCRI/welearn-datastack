@@ -4,7 +4,6 @@ import os
 from dotenv import load_dotenv
 from welearn_database.data.models import Corpus
 
-from welearn_datastack.collectors.atom_collector import AtomURLCollector
 from welearn_datastack.collectors.zenodo_collector import ZenodoCollector
 from welearn_datastack.nodes_workflow.URLCollectors.nodes_helpers.collect import (
     insert_urls,
@@ -53,3 +52,12 @@ if __name__ == "__main__":
     zenodo_collector = ZenodoCollector(corpus)
 
     urls = zenodo_collector.collect(doc_type=document_type)
+
+    logger.info("URLs retrieved : '%s'", len(urls))
+
+    insert_urls(
+        session=session,
+        urls=urls,
+    )
+
+    logger.info("Zenodo collector ended")

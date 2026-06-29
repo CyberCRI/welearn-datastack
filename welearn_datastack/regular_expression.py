@@ -1,6 +1,8 @@
 # Regular expressions for data cleaning and preprocessing in the WeLearn Datastack project.
 import re
 
+from welearn_database.regular_expression import DOI_VALIDATION_REGEX
+
 # description: Matches backline characters (newline, tab, carriage return) for removal or replacement.
 # example: "Hello\n\tWorld" -> matches "\n" and "\t"
 # limit: Does not match other whitespace characters like spaces or form feeds.
