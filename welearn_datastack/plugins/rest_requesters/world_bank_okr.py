@@ -10,6 +10,7 @@ import pydantic
 import requests
 from requests import Session
 from welearn_database.data.models import WeLearnDocument
+from welearn_database.exceptions import WeLearnDatabaseException
 
 from welearn_datastack.constants import AUTHORIZED_LICENSES, HEADERS
 from welearn_datastack.data.db_wrapper import WrapperRawData, WrapperRetrieveDocument
@@ -303,6 +304,16 @@ class WorldBankOpenKnowledgeRepository(IPluginRESTCollector):
                 continue
             except FileTypeUnsupported as e:
                 msg = f"FileTypeUnsupported exception for document {ret_doc.document.url}: {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=ret_doc.document,
+                        error_info=msg,
+                    )
+                )
+                continue
+            except WeLearnDatabaseException as e:
+                msg = f"Database exception for document {ret_doc.document.url}: {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
