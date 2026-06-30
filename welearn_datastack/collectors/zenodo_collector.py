@@ -74,7 +74,14 @@ class ZenodoCollector(URLCollector):
             raise NoDOIFoundError(f"Document {doc_id} does not have DOI")
 
         url = f"{self.application_base_url}{doc_id}"
-        return [WeLearnDocument(doi=full_doi, external_id=doc_id, url=url)]
+        return [
+            WeLearnDocument(
+                doi=full_doi,
+                external_id=doc_id,
+                url=url,
+                corpus_id=self.corpus.id,
+            )
+        ]
 
     def _convert_hits_to_documents(
         self, json_from_zenodo: dict
