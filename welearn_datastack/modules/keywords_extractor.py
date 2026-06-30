@@ -32,11 +32,12 @@ def extract_keywords(
         model_name=embedding_model_name_from_db,
         extension="",
     )
-    embedding_model, _ = load_embedding_model(ml_path.as_posix())
+    embedding_model, tokenizer = load_embedding_model(ml_path.as_posix())
     kw_model = KeyBERT(
         model=pipeline(
             "feature-extraction",
             model=embedding_model,
+            tokenizer=tokenizer,
         )
     )
 

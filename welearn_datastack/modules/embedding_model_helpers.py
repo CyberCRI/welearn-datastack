@@ -54,8 +54,13 @@ def _compute_embeddings(model, tokenizer, inputs: list[str]) -> np.ndarray:
         model_output = model(**tokenized_inputs)
         # Perform pooling. granite-embedding-107m-multilingual uses CLS Pooling
         embeddings = model_output[0][:, 0]
+        # NumPy conversion does not support bfloat16 tensors.
         embeddings = (
-            torch.nn.functional.normalize(embeddings, dim=1).detach().cpu().numpy()
+            torch.nn.functional.normalize(embeddings, dim=1)
+            .to(torch.float32)
+            .detach()
+            .cpu()
+            .numpy()
         )
     return embeddings
 
