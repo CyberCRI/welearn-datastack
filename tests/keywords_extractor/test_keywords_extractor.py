@@ -69,5 +69,10 @@ class TestKeywordsExtractor(unittest.TestCase):
         # Assertions
         mock_generate_ml_models_path.assert_called_once()
         mock_load_embedding_model.assert_called_once_with("mock_path")
+        mock_pipeline.assert_called_once_with(
+            "feature-extraction",
+            model="mock_embedding_model",
+            tokenizer="mock_tokenizer",
+        )
         mock_kw_model.extract_keywords.assert_called_once()
         self.assertEqual(keywords, ["keyword1"])
