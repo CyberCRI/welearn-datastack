@@ -40,7 +40,7 @@ class ZenodoCollector(URLCollector):
         for identifier in hit["metadata"].get("related_identifiers", []):
             if identifier["relation"] == "hasPart":
                 doc_id = identifier["identifier"]
-                if identifier["schema"] != "doi":
+                if identifier.get("schema", identifier.get("scheme", None)) != "doi":
                     raise WrongExternalIdFormat(
                         f"We only manage DOI for Zenodo external ID: {doc_id}"
                     )
@@ -93,7 +93,7 @@ class ZenodoCollector(URLCollector):
 
         ret = []
         for hit in second_level_hits:
-            ret.extend(self._convert_hit_into_documents(hit, only_sub_documents=False))
+            ret.extend(self._convert_hit_into_documents(hit, only_sub_documents=True))
 
         return ret
 

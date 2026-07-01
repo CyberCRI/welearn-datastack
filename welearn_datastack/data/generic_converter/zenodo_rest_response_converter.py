@@ -21,15 +21,17 @@ class ZenodoRestResponseConverter:
         self.creator_names = [x.name for x in zenodo_record.metadata.creators]
         self.access_right = zenodo_record.metadata.access_right
 
-        self.publication_date = int(
-            datetime.datetime.strptime(
-                zenodo_record.metadata.publication_date, "%Y-%m-%d"
-            ).timestamp()
-        )
-
+        try:
+            self.publication_date = int(
+                datetime.datetime.strptime(
+                    zenodo_record.metadata.publication_date, "%Y-%m-%d"
+                ).timestamp()
+            )
+        except ValueError:
+            self.publication_date = None
         self.update_date = int(
             datetime.datetime.strptime(
-                zenodo_record.updated, "%Y-%m-%dT%H:%M:%S.%f"
+                zenodo_record.updated.split("+")[0], "%Y-%m-%dT%H:%M:%S.%f"
             ).timestamp()
         )
 

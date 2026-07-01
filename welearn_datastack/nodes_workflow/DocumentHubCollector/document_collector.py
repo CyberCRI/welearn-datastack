@@ -53,7 +53,9 @@ def main() -> None:
         "r"
     ) as artifact_file_input:
         spamreader = csv.reader(artifact_file_input, delimiter=",", quotechar='"')
-        ids_urls: List[UUID] = [uuid.UUID(row[0]) for row in spamreader]
+        ids_urls = []
+        for row in spamreader:
+            ids_urls.append(uuid.UUID(row[0]))
         logger.info("'%s' IDs URLs were retrieved", len(ids_urls))
 
     # Database management

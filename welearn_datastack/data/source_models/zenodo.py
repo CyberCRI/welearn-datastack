@@ -51,7 +51,7 @@ class Metadata(BaseModel):
     description: str
     access_right: str
     creators: List[Creator]
-    related_identifiers: List[RelatedIdentifier]
+    related_identifiers: List[RelatedIdentifier] = Field(default_factory=list)
     resource_type: ResourceType
     license: License
     communities: List[Community]

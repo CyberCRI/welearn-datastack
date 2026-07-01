@@ -120,20 +120,9 @@ class IPBESCollector(IPluginRESTCollector):
                 "status": lite_record.status,
             },
         )
-        document = WeLearnDocument(
-            external_id=lite_record.external_id,
-            doi=lite_record.doi,
-            title=lite_record.title,
-            description=clean_text(lite_record.description),
-            corpus_name=self.corpus_name,
-            full_content=get_pdf_content(
-                pdf_url=lite_record.pdf_url,
-                pdf_size_file_limit=self.pdf_size_file_limit,
-                tika_address=self.tika_address,
-            ),
-            details=details,
-        )
-        return document
+        welearn_document.details = details
+
+        return welearn_document
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         ret: list[WrapperRetrieveDocument] = []
