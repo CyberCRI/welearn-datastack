@@ -110,16 +110,21 @@ class IPBESCollector(IPluginRESTCollector):
         welearn_document.title = lite_record.title
         welearn_document.description = clean_text(lite_record.description)
         welearn_document.corpus_name = self.corpus_name
-        details = (
-            {
-                "authors": self._extract_authors(lite_record),
-                "publication_date": lite_record.publication_date,
-                "update_date": lite_record.update_date,
-                "type": lite_record.type,
-                "license": format_cc_license(lite_record.licence),
-                "status": lite_record.status,
-            },
+        welearn_document.full_content = get_pdf_content(
+            pdf_url=lite_record.pdf_url,
+            tika_address=self.tika_address,
+            pdf_size_file_limit=self.pdf_size_file_limit,
         )
+
+        details = {
+            "authors": self._extract_authors(lite_record),
+            "publication_date": lite_record.publication_date,
+            "update_date": lite_record.update_date,
+            "type": lite_record.type,
+            "license": format_cc_license(lite_record.licence),
+            "status": lite_record.status,
+        }
+
         welearn_document.details = details
 
         return welearn_document
