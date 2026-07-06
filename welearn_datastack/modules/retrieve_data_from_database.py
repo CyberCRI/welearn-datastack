@@ -256,7 +256,7 @@ def compute_total_size(
 ) -> int:
     ret = 0
     for x in db_data:
-        if x:
+        if x[2]:
             ret += x[2]
     return ret
 
