@@ -252,7 +252,7 @@ def retrieve_documents_ids_according_process_title(
 
 
 def compute_total_size(
-    db_data: list[tuple[UUID, str, int]] | list[tuple[UUID, str, int, int]]
+    db_data: list[tuple[UUID, str, int]] | list[tuple[UUID, str, int, int]],
 ) -> int:
     ret = 0
     for x in db_data:
