@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Collection, Dict, List, Type, TypedDict
+from typing import Collection, Dict, List, Literal, Type, TypedDict
 from uuid import UUID
 
 from sqlalchemy import Column, desc
@@ -209,7 +209,7 @@ def retrieve_documents_ids_according_process_title(
             logger.info(
                 "Filtering on document size, every values are in bytes an concern the full_content field"
             )
-            total_size = sum([x[2] for x in db_data])  # type: ignore
+            total_size = compute_total_size(db_data)
         elif weighed_scope == WeighedScope.SLICE:
             # Sum of body and embedding
             logger.info(
@@ -249,6 +249,16 @@ def retrieve_documents_ids_according_process_title(
     logger.info("Found %s results", len(db_data))
 
     return [str(x[0]) for x in db_data]
+
+
+def compute_total_size(
+    db_data: list[tuple[UUID, str, int]] | list[tuple[UUID, str, int, int]],
+) -> int:
+    ret = 0
+    for x in db_data:
+        if x:
+            ret += x[2]
+    return ret
 
 
 def retrieve_random_documents_ids_according_process_title(
