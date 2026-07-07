@@ -3,7 +3,6 @@ import logging
 import os
 import uuid
 from typing import Dict, List, Tuple
-from uuid import UUID
 
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified

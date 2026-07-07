@@ -22,6 +22,7 @@ from welearn_datastack.exceptions import (
     LegalException,
     NotEnoughData,
     NotExpectedAmountOfItems,
+    PDFFileSizeExceedLimit,
     UnauthorizedLicense,
     WrongFormat,
 )
@@ -45,14 +46,10 @@ class IPBESCollector(IPluginRESTCollector):
         self.corpus_fix = True
         self.pdf_size_page_limit: int = int(os.getenv("PDF_SIZE_PAGE_LIMIT", 100000))
         self.tika_address = os.getenv("TIKA_ADDRESS", "http://localhost:9998")
-
-        self.api_base_url = (
-            "https://data.unesco.org/api/explore/v2.1/catalog/datasets/doc001"
-        )
         self.application_base_url = ZENODO_APPLICATION_BASE_URL
         self.api_base_url = ZENODO_API_BASE_URL
         self.headers = constants.HEADERS
-        self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 2000000))
+        self.pdf_size_file_limit: int = int(os.getenv("PDF_SIZE_FILE_LIMIT", 200000000))
 
     @staticmethod
     def _extract_authors(metadata: ZenodoRestResponseConverter) -> list[AuthorDetails]:
@@ -196,6 +193,16 @@ class IPBESCollector(IPluginRESTCollector):
                 continue
             except WrongFormat as e:
                 msg = f"Formatting error in {document.url} from IPBES : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+            except PDFFileSizeExceedLimit as e:
+                msg = f"PDF is too large for beign processed {document.url} from IPBES : {e}"
                 logger.error(msg)
                 ret.append(
                     WrapperRetrieveDocument(
