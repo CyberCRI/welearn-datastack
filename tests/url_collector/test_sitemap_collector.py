@@ -91,7 +91,7 @@ class TestSitemapURLCollector(TestCase):
 
     def test__exxtract_url_from_sitemap_index(self):
         awaited_ret = [
-            "httpss://www.example.org/post-sitemap.xml",
+            "https://www.example.org/post-sitemap.xml",
             "https://www.example.org/post-sitemap2.xml",
             "https://www.example.org/post-sitemap3.xml",
             "https://www.example.org/page-sitemap.xml",
@@ -144,10 +144,10 @@ class TestSitemapURLCollector(TestCase):
         sitemap_resp.raise_for_status.assert_called_once()
         pages_resp.raise_for_status.assert_called_once()
 
-        mock_is_index.assert_called_once_with(sitemap_resp.content)
+        mock_is_index.assert_called_once_with(sitemap_resp.content.decode("utf-8"))
 
         self.assertEqual(mock_extract_urls.call_count, 1)
-        mock_extract_urls.assert_called_once_with(pages_resp.content)
+        mock_extract_urls.assert_called_once_with(pages_resp.content.decode("utf-8"))
 
         mock_extract_datastore.assert_called_once_with(
             urls=["https://example.com/page1"], corpus=self.corpus
@@ -166,12 +166,11 @@ class TestSitemapURLCollector(TestCase):
 
         root_resp = MagicMock(content=b"<sitemapindex></sitemapindex>")
         sub_resp = MagicMock(content=b"<urlset>sub</urlset>")
-        pages_resp = MagicMock(content=b"<urlset>pages</urlset>")
 
-        for resp in (root_resp, sub_resp, pages_resp):
+        for resp in (root_resp, sub_resp):
             resp.raise_for_status = MagicMock()
 
-        mock_session.get.side_effect = [root_resp, sub_resp, pages_resp]
+        mock_session.get.side_effect = [root_resp, sub_resp]
 
         with (
             patch.object(self.collector, "_is_sitemap_index", return_value=True),
@@ -182,9 +181,6 @@ class TestSitemapURLCollector(TestCase):
                     [
                         "https://example.com/sub-sitemap.xml"
                     ],  # extraction depuis root (sous-sitemaps)
-                    [
-                        "https://example.com/sub-sitemap.xml"
-                    ],  # extraction depuis sub_resp -> sitemaps_urls
                     [
                         "https://example.com/page1",
                         "https://example.com/page2",
@@ -197,18 +193,17 @@ class TestSitemapURLCollector(TestCase):
 
             result = self.collector.collect()
 
-        self.assertEqual(mock_session.get.call_count, 3)
+        self.assertEqual(mock_session.get.call_count, 2)
         mock_session.get.assert_has_calls(
             [
                 call("https://example.org/sitemap.xml"),
                 call("https://example.com/sub-sitemap.xml"),
-                call("https://example.com/sub-sitemap.xml"),
             ]
         )
-        for resp in (root_resp, sub_resp, pages_resp):
+        for resp in (root_resp, sub_resp):
             resp.raise_for_status.assert_called_once()
 
-        self.assertEqual(mock_extract_urls.call_count, 3)
+        self.assertEqual(mock_extract_urls.call_count, 2)
         mock_extract_datastore.assert_called_once_with(
             urls=["https://example.com/page1", "https://example.com/page2"],
             corpus=self.corpus,

@@ -48,12 +48,12 @@ if __name__ == "__main__":
     if corpus is None:
         raise ValueError(f"Corpus {corpus_name} not found")
 
-    atom_collector = SiteMapURLCollector(
+    sitemap_collector = SiteMapURLCollector(
         sitemap_url=sitemap_url,
         corpus=corpus,
     )
 
-    urls = atom_collector.collect()
+    urls = sitemap_collector.collect()
 
     logger.info("URLs retrieved : '%s'", len(urls))
 

@@ -58,7 +58,7 @@ class SiteMapURLCollector(URLCollector):
 
         sitemap_resp = http_client.get(self.sitemap_url)
         sitemap_resp.raise_for_status()
-        sitemap_content = sitemap_resp.content
+        sitemap_content = sitemap_resp.content.decode("utf-8")
 
         is_index = self._is_sitemap_index(sitemap_content)
         logger.info("Sitemap is index ? : %s", is_index)
@@ -66,11 +66,7 @@ class SiteMapURLCollector(URLCollector):
         sitemaps_urls = []
         if is_index:
             logger.info("Sitemap %s is index", self.sitemap_url)
-            for subsitemap_url in self._extract_urls(sitemap_content):
-                subsitemap_resp = http_client.get(subsitemap_url)
-                subsitemap_resp.raise_for_status()
-                subsitemap_content = subsitemap_resp.content
-                sitemaps_urls.extend(self._extract_urls(subsitemap_content))
+            sitemaps_urls.extend(self._extract_urls(sitemap_content))
         else:
             logger.info("Sitemap %s is not index", self.sitemap_url)
             sitemaps_urls.append(self.sitemap_url)
@@ -78,9 +74,10 @@ class SiteMapURLCollector(URLCollector):
         page_urls = []
 
         for sm_url in sitemaps_urls:
+            logger.info("Get URLs from %s", sm_url)
             pages_container = http_client.get(sm_url)
             pages_container.raise_for_status()
-            pages_container_content = pages_container.content
+            pages_container_content = pages_container.content.decode("utf-8")
             page_urls.extend(self._extract_urls(pages_container_content))
 
         logger.info("We found %s urls", len(page_urls))
