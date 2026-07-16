@@ -370,5 +370,16 @@ spec:
                 name: {{ .name }}
                 template: collect-world-bank-okr
 
+            - name: notre-environnement
+              templateRef:
+                name: {{ .name }}
+                template: collect-sitemap
+              arguments:
+                parameters:
+                  - name: sitemap_url
+                    value: https://www.notre-environnement.gouv.fr/sitemap.xml
+                  - name: corpus_name
+                    value: notre-environnement
+
 {{- end }}
 {{- end }}
