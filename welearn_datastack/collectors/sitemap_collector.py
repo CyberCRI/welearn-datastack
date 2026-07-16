@@ -40,9 +40,7 @@ class SiteMapURLCollector(URLCollector):
         extractor = XMLExtractor(sitemap_to_test)
         index = extractor.extract_content("sitemapindex")
 
-        if index:
-            return True
-        return False
+        return bool(index)
 
     @staticmethod
     def _extract_urls(sitemap_to_test: str) -> list[str]:
