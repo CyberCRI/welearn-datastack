@@ -62,4 +62,4 @@ if __name__ == "__main__":
         urls=urls,
     )
 
-    logger.info("Atom collector ended")
+    logger.info("Sitemap collector ended")
