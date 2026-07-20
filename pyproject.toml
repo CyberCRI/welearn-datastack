@@ -46,6 +46,8 @@ azure-storage-blob = "^12.28.0"
 welearn-database = "^1.5.1"
 pydantic = "^2.13.4"
 transformers = "^5.12.1"
+trafilatura = "^2.1.0"
+extruct = "^0.18.0"
 
 [tool.poetry.group.metrics.dependencies]
 locust = "^2.43.2"
