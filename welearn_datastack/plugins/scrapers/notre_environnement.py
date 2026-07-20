@@ -1,6 +1,7 @@
 import logging
 import os
 from datetime import datetime
+from time import sleep
 from typing import List
 
 import extruct
@@ -33,6 +34,7 @@ class NotreEnvironnementCollector(IPluginScrapeCollector):
         logger.info(
             f"Waiting for {self.page_delay} seconds before scraping the next page to avoid being blocked by the server",
         )
+        sleep(self.page_delay)
         resp = client.get(url)
         resp.raise_for_status()
         return resp.text
@@ -54,7 +56,7 @@ class NotreEnvironnementCollector(IPluginScrapeCollector):
         )
 
         for metadata_category in ["elements", "terms"]:
-            for element in data.get("dublincore", {}).get(metadata_category, []):
+            for element in data.get("dublincore", {})[0].get(metadata_category, []):
                 element: dict[str, str]
                 content = element.get("content", "")
                 name = element.get("name", "")
@@ -79,8 +81,8 @@ class NotreEnvironnementCollector(IPluginScrapeCollector):
         t_format = "%Y-%m-%d"
 
         for md_name in dublin_core_metadata:
-            if md_name.lower() == "descritpion":
-                document.desc = dublin_core_metadata[md_name]
+            if md_name.lower() == "description":
+                document.description = dublin_core_metadata[md_name]
             if md_name.lower() == "dc.title":
                 document.title = dublin_core_metadata[md_name]
             if md_name.lower() == "dc.date":
