@@ -37,14 +37,16 @@ class NotreEnvironnementCollector(IPluginScrapeCollector):
         resp.raise_for_status()
         return resp.text
 
-    def _get_full_content(self, html_text: str) -> str:
+    @staticmethod
+    def _get_full_content(html_text: str) -> str:
         content = extract(filecontent=html_text)
         if not content:
             raise NoContent
         return clean_text(clean_return_to_line(content))
 
+    @staticmethod
     def _get_dublin_core_metadata(
-        self, html_text: str, base_url: str
+        html_text: str, base_url: str
     ) -> dict[str, str | list[str]]:
         ret: dict[str, str | list[str]] = {}
         data: dict = extruct.extract(
