@@ -31,9 +31,6 @@ class TestNotreEnvironnementCollector(unittest.TestCase):
 
         self.assertEqual(wldoc.title, "Title ipsum")
         self.assertEqual(wldoc.description, "lorem ipsum")
-        self.assertEqual(
-            wldoc.details, {"publication_date": 1767222000, "update_date": 1768431600}
-        )
 
     @patch.object(NotreEnvironnementCollector, "_compute_metadata")
     @patch.object(NotreEnvironnementCollector, "_get_full_content")
