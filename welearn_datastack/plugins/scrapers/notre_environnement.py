@@ -96,7 +96,7 @@ class NotreEnvironnementCollector(IPluginScrapeCollector):
                 ).timestamp()
                 details["update_date"] = int(dt)
         document.details = details
-        document.title = document.title.replace("~", "")
+        document.title = document.title.replace("~", " ")
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running NotreEnvironnementCollector plugin")
