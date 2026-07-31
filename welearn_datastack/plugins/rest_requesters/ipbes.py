@@ -3,6 +3,7 @@ import os
 
 import pydantic
 import requests
+from welearn_database.data.enumeration import ExternalIdType
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack import constants
@@ -103,6 +104,7 @@ class IPBESCollector(IPluginRESTCollector):
         :return: WeLearnDocument object.
         """
         welearn_document.external_id = lite_record.external_id
+        welearn_document.external_id_type = ExternalIdType.API_ID.value
         welearn_document.doi = lite_record.doi
         welearn_document.title = lite_record.title
         welearn_document.description = clean_text(lite_record.description)
