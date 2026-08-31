@@ -557,7 +557,7 @@ spec:
         args:
           - python
           - "-m"
-          - welearn_datastack.nodes_workflow.URLCollectors.node_atom_collect
+          - welearn_datastack.nodes_workflow.URLCollectors.node_zenodo_collect
         envFrom:
           - configMapRef:
               name: {{ .name }}
