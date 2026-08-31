@@ -11,6 +11,7 @@ from welearn_database.data.models import (
     Base,
     Category,
     Corpus,
+    ErrorRetrieval,
     ProcessState,
     WeLearnDocument,
 )
@@ -143,11 +144,16 @@ class Test(TestCase):
             self.doc_test_id1,
             self.doc_test_id2,
         ]
-        mock_check_url.side_effect = [
-            (URLStatus.VALID, 200),
-            (URLStatus.UPDATE, 314),
-            (URLStatus.DELETE, 404),
-        ]
+
+        def _status_by_url(url: str):
+            status_map = {
+                "https://example.org": (URLStatus.VALID, 200),
+                "https://example1.org": (URLStatus.UPDATE, 314),
+                "https://example2.org": (URLStatus.DELETE, 404),
+            }
+            return status_map[url]
+
+        mock_check_url.side_effect = _status_by_url
 
         main()
 
@@ -167,12 +173,84 @@ class Test(TestCase):
             .all()
         )
 
+        ps_doc0.sort(key=lambda x: x.operation_order)
         ps_doc1.sort(key=lambda x: x.operation_order)
         ps_doc2.sort(key=lambda x: x.operation_order)
 
-        self.assertEqual(len(ps_doc0), 2)
-        self.assertEqual(len(ps_doc1), 1)
+        self.assertEqual(len(ps_doc0), 1)
+        self.assertEqual(len(ps_doc1), 2)
         self.assertEqual(len(ps_doc2), 2)
 
-        self.assertEqual(ps_doc0[-1].title.lower(), "url_retrieved")
+        self.assertEqual(ps_doc1[-1].title.lower(), "url_retrieved")
         self.assertEqual(ps_doc2[-1].title.lower(), "document_is_irretrievable")
+
+        err_doc1 = (
+            self.test_session.query(ErrorRetrieval)
+            .filter(ErrorRetrieval.document_id == self.doc_test_id1)
+            .all()
+        )
+        err_doc2 = (
+            self.test_session.query(ErrorRetrieval)
+            .filter(ErrorRetrieval.document_id == self.doc_test_id2)
+            .all()
+        )
+        self.assertEqual(len(err_doc1), 1)
+        self.assertEqual(err_doc1[0].http_error_code, 314)
+        self.assertEqual(len(err_doc2), 1)
+        self.assertEqual(err_doc2[0].http_error_code, 404)
+
+    @patch(
+        "welearn_datastack.nodes_workflow.URLSanitaryCrawler.url_sanitary_crawler.create_db_session"
+    )
+    @patch(
+        "welearn_datastack.nodes_workflow.URLSanitaryCrawler.url_sanitary_crawler.retrieve_ids_from_csv"
+    )
+    @patch(
+        "welearn_datastack.nodes_workflow.URLSanitaryCrawler.url_sanitary_crawler.check_url"
+    )
+    def test_main_ignore_unknown_status(
+        self, mock_check_url, mock_reyrieve_ids_from_csv, mock_create_db_session
+    ):
+        mock_create_db_session.return_value = self.test_session
+        mock_reyrieve_ids_from_csv.return_value = [self.doc_test_id0]
+        mock_check_url.return_value = (URLStatus.UNKNOWN, 599)
+
+        main()
+
+        ps_doc0 = (
+            self.test_session.query(ProcessState)
+            .filter(ProcessState.document_id == self.doc_test_id0)
+            .all()
+        )
+        err_doc0 = (
+            self.test_session.query(ErrorRetrieval)
+            .filter(ErrorRetrieval.document_id == self.doc_test_id0)
+            .all()
+        )
+
+        self.assertEqual(len(ps_doc0), 1)
+        self.assertEqual(len(err_doc0), 0)
+
+    @patch(
+        "welearn_datastack.nodes_workflow.URLSanitaryCrawler.url_sanitary_crawler.create_db_session"
+    )
+    @patch(
+        "welearn_datastack.nodes_workflow.URLSanitaryCrawler.url_sanitary_crawler.retrieve_ids_from_csv"
+    )
+    @patch(
+        "welearn_datastack.nodes_workflow.URLSanitaryCrawler.url_sanitary_crawler.check_url"
+    )
+    def test_main_no_documents(
+        self, mock_check_url, mock_reyrieve_ids_from_csv, mock_create_db_session
+    ):
+        mock_create_db_session.return_value = self.test_session
+        mock_reyrieve_ids_from_csv.return_value = []
+
+        main()
+
+        self.assertEqual(
+            self.test_session.query(ProcessState).count(),
+            3,
+        )
+        self.assertEqual(self.test_session.query(ErrorRetrieval).count(), 0)
+        mock_check_url.assert_not_called()
