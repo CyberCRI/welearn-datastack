@@ -5,6 +5,7 @@ from welearn_datastack.plugins.rest_requesters.fao_open_knowledge import (
     FAOOpenKnowledgeCollector,
 )
 from welearn_datastack.plugins.rest_requesters.hal import HALCollector
+from welearn_datastack.plugins.rest_requesters.ipbes import IPBESCollector
 from welearn_datastack.plugins.rest_requesters.oapen import OAPenCollector
 from welearn_datastack.plugins.rest_requesters.open_alex import OpenAlexCollector
 from welearn_datastack.plugins.rest_requesters.pressbooks import PressBooksCollector
@@ -27,4 +28,5 @@ plugins_rest_list: List[Type[IPluginRESTCollector]] = [
     FAOOpenKnowledgeCollector,
     UNESDOCCollector,
     WorldBankOpenKnowledgeRepository,
+    IPBESCollector,
 ]

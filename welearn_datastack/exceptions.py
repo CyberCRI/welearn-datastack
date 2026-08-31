@@ -253,5 +253,9 @@ class NoDOIFoundError(NotEnoughData):
     """Raised when there is no DOI found"""
 
 
+class NoExternalID(NotEnoughData):
+    """Raised when there is no external id found"""
+
+
 class FileTypeUnsupported(WrongFormat):
     """Raised when the file type is not supported"""
