@@ -398,5 +398,17 @@ spec:
                 name: {{ .name }}
                 template: collect-world-bank-okr
 
+            - name: zenodo-ipbes
+              templateRef:
+                name: {{ .name }}
+                template: collect-zenodo
+              arguments:
+                parameters:
+                  - name: document_type
+                    value: publication
+                  - name: corpus_name
+                    value: ipbes
+
+
 {{- end }}
 {{- end }}
