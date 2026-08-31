@@ -49,9 +49,7 @@ class TestUNCCeLearnCollector(TestCase):
                 <a id="overview_syllabus_download" href="https://example.org/syllabus.pdf">Download syllabus</a>
               </body>
             </html>
-        """.encode(
-            "utf-8"
-        )
+        """.encode("utf-8")
 
         # Métadonnées renvoyées par Tika pour la page HTML (PUT /meta)
         self.tika_html_meta = {

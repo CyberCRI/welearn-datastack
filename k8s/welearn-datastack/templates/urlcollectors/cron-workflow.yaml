@@ -68,11 +68,6 @@ spec:
                   - name: corpus_fix
                     value: "true"
 
-            - name: collect-ted-step
-              templateRef:
-                name: {{ .name }}
-                template: collect-ted
-
             - name: open-edition-books
               templateRef:
                 name: {{ .name }}
@@ -360,11 +355,6 @@ spec:
                   - name: corpus_fix
                     value: "true"
 
-            - name: unccelearn
-              templateRef:
-                name: {{ .name }}
-                template: collect-unccelearn
-
             - name: uved
               templateRef:
                 name: {{ .name }}
@@ -375,28 +365,21 @@ spec:
                 name: {{ .name }}
                 template: collect-fao-open-knowledge
 
-            - name: collect-unesdoc
-              templateRef:
-                name: {{ .name }}
-                template: collect-unesdoc
-
-            - name: ird-le-mag
-              templateRef:
-                name: {{ .name }}
-                template: collect-rss
-              arguments:
-                parameters:
-                  - name: rss_url
-                    value: https://politepaul.com/fd/sAwe7MlKNr2j.xml
-                  - name: corpus_name
-                    value: ird-le-mag
-                  - name: corpus_fix
-                    value: "true"
-
             - name: collect-world-bank-okr
               templateRef:
                 name: {{ .name }}
                 template: collect-world-bank-okr
+
+            - name: notre-environnement
+              templateRef:
+                name: {{ .name }}
+                template: collect-sitemap
+              arguments:
+                parameters:
+                  - name: sitemap_url
+                    value: https://www.notre-environnement.gouv.fr/sitemap.xml
+                  - name: corpus_name
+                    value: notre-environnement
 
             - name: zenodo-ipbes
               templateRef:

@@ -175,11 +175,17 @@ class TestWorldBankOpenKnowledgeRepository(TestCase):
         ret = self.collector._update_welearn_document(wrapper)
 
         self.assertEqual(ret.title, self.example_record.title)
-        self.assertEqual(ret.full_content, full_content)
+        # self.assertEqual(ret.full_content, full_content) # We use description as full content
+        self.assertEqual(
+            ret.full_content, ret.description
+        )  # We use description as full content
+
         self.assertTrue(
             ret.description.startswith("International river basins will likely")
         )
-        self.assertTrue(ret.details["content_from_txt"])
+        self.assertFalse(ret.details["content_from_txt"])
+        # self.assertTrue(ret.details["content_from_txt"])
+        self.assertTrue(ret.details["content_from_description"])
         self.assertFalse(ret.details["content_from_pdf"])
 
     @patch.object(WorldBankOpenKnowledgeRepository, "_extract_licence")

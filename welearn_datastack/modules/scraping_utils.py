@@ -181,3 +181,15 @@ def clean_doi(input_str: str) -> str:
     if input_str.startswith("https://doi.org/"):
         return input_str.replace("https://doi.org/", "")
     return input_str
+
+
+def normalize_text(value: str | None) -> str | None:
+    if not value:
+        return None
+
+    value = unescape(value)
+    value = unicodedata.normalize("NFC", value)
+    value = value.replace("\u00a0", " ")
+    value = re.sub(r"\s+", " ", value).strip()
+
+    return value or None
