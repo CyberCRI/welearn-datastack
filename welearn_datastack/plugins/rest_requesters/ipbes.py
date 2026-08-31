@@ -72,18 +72,13 @@ class IPBESCollector(IPluginRESTCollector):
             raise UnauthorizedLicense(f"License '{license_url}' is not authorized.")
 
     def _get_zenodo_rest_json(self, document: WeLearnDocument) -> ZenodoRecord:
-        """
-        Get the metadata of a document from the IPBES API, using the document external_id as a search query.
-         The metadata is returned as a IPBESItem object.
-         If no document is found, a ValueError is raised.
-         If more than one document is found, only the first one is returned and a warning is logged.
-         The search query is made on the url field of the IPBES API, which contains the external_id of the document in the format "ark:/12345/abcde" or "ark:/12345/abcde/lang".
-         :param document: WeLearnDocument object containing the external_id to search for in the IPBES API.
-         :return: IPBESItem object containing the metadata of the document.
-         :raises NotEnoughData: If no document is found for the given external_id.
-         :raises requests.exceptions.RequestException: If there is an error while making the HTTP request to the IPBES API.
-         :raises pydantic.ValidationError: If there is an error while validating the response from the IPBES API against the IPBESRoot model.
-        :raises NotExpectedMoreThanOneItem: If there is more or less results than expected for the given external_id.
+        """Retrieve a Zenodo record by record id and validate it.
+
+        The request is performed against `ZENODO_API_BASE_URL` (e.g. `/api/records/<id>`)
+        using `document.external_id` as the `<id>`.
+
+        :raises requests.exceptions.RequestException: On HTTP/connection errors.
+        :raises pydantic.ValidationError: If the response does not match `ZenodoRecord`.
         """
         session = get_new_https_session()
 
@@ -109,6 +104,10 @@ class IPBESCollector(IPluginRESTCollector):
         welearn_document.title = lite_record.title
         welearn_document.description = clean_text(lite_record.description)
         welearn_document.corpus_name = self.corpus_name
+        if not lite_record.pdf_url:
+            raise NotEnoughData(
+                f"No PDF file found for Zenodo record {lite_record.external_id}"
+            )
         welearn_document.full_content = get_pdf_content(
             pdf_url=lite_record.pdf_url,
             tika_address=self.tika_address,
@@ -143,8 +142,7 @@ class IPBESCollector(IPluginRESTCollector):
                 )
 
             except requests.exceptions.RequestException as e:
-                msg = f"Error while retrieving IPBES ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id}: {e}"
-                logger.error(msg)
+                msg = f"Error while retrieving IPBES ({document.url}) document from {self.api_base_url}{document.external_id}: {e}"
                 ret.append(
                     WrapperRetrieveDocument(
                         document=document,
@@ -154,8 +152,7 @@ class IPBESCollector(IPluginRESTCollector):
                 )
                 continue
             except pydantic.ValidationError as e:
-                msg = f"Error while validating IPBES ({document.url}) document from this url {self.api_base_url}/resources/{document.external_id} : {e}"
-                logger.error(msg)
+                msg = f"Error while validating IPBES ({document.url}) document from {self.api_base_url}{document.external_id} : {e}"
                 ret.append(
                     WrapperRetrieveDocument(
                         document=document,

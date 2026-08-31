@@ -17,7 +17,7 @@ log_format: str = os.getenv(
 )
 
 if not isinstance(log_level, int):
-    raise ValueError("Log level is not recognized : '%s'", log_level)
+    raise ValueError(f"Log level is not recognized : '{log_level}'")
 
 logging.basicConfig(
     level=logging.getLevelName(log_level),

@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from welearn_datastack.data.source_models.zenodo import ZenodoRecord
 
 
-@dataclass
 class ZenodoRestResponseConverter:
     def __init__(self, zenodo_record: ZenodoRecord):
         self.title = zenodo_record.title
@@ -29,11 +28,13 @@ class ZenodoRestResponseConverter:
             )
         except ValueError:
             self.publication_date = None
-        self.update_date = int(
-            datetime.datetime.strptime(
-                zenodo_record.updated.split("+")[0], "%Y-%m-%dT%H:%M:%S.%f"
-            ).timestamp()
-        )
+        updated_str = zenodo_record.updated.replace("Z", "+00:00")
+        try:
+            self.update_date = int(
+                datetime.datetime.fromisoformat(updated_str).timestamp()
+            )
+        except ValueError:
+            self.update_date = None
 
         self.type = zenodo_record.metadata.resource_type.type
         self.licence = zenodo_record.metadata.license.id
