@@ -381,5 +381,17 @@ spec:
                   - name: corpus_name
                     value: notre-environnement
 
+            - name: zenodo-ipbes
+              templateRef:
+                name: {{ .name }}
+                template: collect-zenodo
+              arguments:
+                parameters:
+                  - name: document_type
+                    value: publication
+                  - name: corpus_name
+                    value: ipbes
+
+
 {{- end }}
 {{- end }}
