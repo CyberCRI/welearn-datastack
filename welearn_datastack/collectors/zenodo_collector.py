@@ -24,16 +24,16 @@ class ZenodoCollector(URLCollector):
     @staticmethod
     def _compute_search_parameters(
         community_name: str, doc_type: str | None = None, ascending: bool = True
-    ):
+    ) -> dict[str, str]:
         sort_value = "mostrecent" if ascending else "-mostrecent"
-        querystring = {
+        queryparams = {
             "communities": community_name,
             "sort": sort_value,
         }
         if doc_type:
-            querystring["type"] = doc_type
+            queryparams["type"] = doc_type
 
-        return querystring
+        return queryparams
 
     def _compute_subdocument(self, hit: dict) -> list[WeLearnDocument]:
         ret = []
