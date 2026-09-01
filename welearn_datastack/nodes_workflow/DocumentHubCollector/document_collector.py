@@ -9,6 +9,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import ErrorRetrieval, ProcessState, WeLearnDocument
 
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import PluginNotFoundError
 from welearn_datastack.modules import collector_selector
 from welearn_datastack.modules.computed_metadata import (
@@ -42,7 +43,7 @@ def main() -> None:
     input_artifact_id_url = os.getenv("ARTIFACT_ID_URL_CSV_NAME", "batch_ids.csv")
     logger.info("Input artifact url csv name: %s", input_artifact_id_url)
 
-    local_artifcat_input, local_artifcat_output = setup_local_path()
+    local_artifcat_input, _ = setup_local_path()
 
     # retrieve url data from files
     logger.info("Retrieve URLs from file")
@@ -98,6 +99,21 @@ def main() -> None:
     db_session.add_all(errors)
     db_session.add_all(batch_documents)
     db_session.commit()
+
+
+def filter_on_trace(welearn_documents: list[WrapperRetrieveDocument]):
+    """
+    Remove duplicate according trace
+    """
+    unique_trace = set()
+    for wl in welearn_documents:
+        set_len_before = len(unique_trace)
+        unique_trace.add(wl.document.trace)
+        set_len_after = len(unique_trace)
+
+        if set_len_after != set_len_before:
+            continue
+        wl.error_info = "This document got the same trace than another one"
 
 
 def extract_data_from_urls(
