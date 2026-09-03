@@ -23,6 +23,41 @@ class WrongFormat(LocalModelsExceptions):
         super().__init__(msg, *args)
 
 
+class DBIntegrityErrorParamKeyNotFound(ManagementExceptions):
+    """
+    Raised when the key searched in the params dict from SQLAlchemy Integrity Error is not found
+    """
+
+    def __init__(
+        self,
+        msg="The key searched in the params dict is not found",
+        key_path: str = None,
+        *args,
+    ):
+        if key_path is None:
+            msg = f"The key searched in the params dict is not found: {key_path}"
+        super().__init__(msg, *args)
+
+
+class DBIntegrityErrorObjectNotFound(ManagementExceptions):
+    """
+    Raised when the object who's raised the integrity error is not found
+    """
+
+    def __init__(
+        self,
+        msg="The object who's raised the integrity error is not found",
+        *args,
+    ):
+        super().__init__(msg, *args)
+
+
+class InvalidIDFormat(WrongFormat):
+    """
+    Raised when the format of the id is not accepted
+    """
+
+
 class WrongLangFormat(WrongFormat):
     """
     Lang must be in ISO-639-1 format and it's not

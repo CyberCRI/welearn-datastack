@@ -18,6 +18,7 @@ from welearn_datastack.modules.computed_metadata import (
     identify_document_language,
 )
 from welearn_datastack.modules.validation import validate_non_null_fields_document
+from welearn_datastack.modules.write_data_safely_in_db import insert_batch_with_retry
 from welearn_datastack.plugins.interface import IPlugin
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
@@ -95,10 +96,39 @@ def main() -> None:
         compute_readability(doc)
         flag_modified(doc, "details")
 
+    failed_inserted_batch_documents = insert_batch_with_retry(
+        key_path="document_related_welearn_document_id",
+        max_retries=100,
+        session=db_session,
+        objects=batch_documents,
+    )
+
+    compute_states_and_errors_for_failed_insertion(
+        failed_inserted_batch_documents=failed_inserted_batch_documents,
+        errors=errors,
+        states=states,
+    )
+
     db_session.add_all(states)
     db_session.add_all(errors)
-    db_session.add_all(batch_documents)
     db_session.commit()
+
+
+def compute_states_and_errors_for_failed_insertion(
+    failed_inserted_batch_documents: list[WeLearnDocument],
+    states: list[ProcessState],
+    errors: list[ErrorRetrieval],
+):
+    doc_ids = [d.id for d in failed_inserted_batch_documents]
+
+    for state in states:
+        if state.document_id in doc_ids:
+            state.title = Step.DOCUMENT_IS_IRRETRIEVABLE.value
+
+    for doc_id in doc_ids:
+        errors.append(
+            ErrorRetrieval(document_id=doc_id, error_info="Document is a duplicate")
+        )
 
 
 def filter_on_trace(welearn_documents: list[WrapperRetrieveDocument]):
@@ -170,6 +200,11 @@ def extract_data_from_urls(
     # Iterate on each corpus
     for corpus_name in batch_docs:
         # Get data
+        logger.info(
+            "Collect %s document(s) for %s corpus",
+            len(batch_docs[corpus_name]),
+            corpus_name,
+        )
         corpus_collector = corpus_plugin[corpus_name]
         documents = corpus_collector.run(documents=batch_docs[corpus_name])  # type: ignore
         filter_on_trace(documents)
