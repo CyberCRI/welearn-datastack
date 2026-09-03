@@ -172,6 +172,7 @@ def extract_data_from_urls(
         # Get data
         corpus_collector = corpus_plugin[corpus_name]
         documents = corpus_collector.run(documents=batch_docs[corpus_name])  # type: ignore
+        filter_on_trace(documents)
 
         for wrapper_document in documents:
             is_none_valid = validate_non_null_fields_document(wrapper_document.document)

@@ -193,6 +193,120 @@ class TestExtractNCollectDocs(TestCase):
         self.assertEqual(len(process_states), 1)
 
     @patch(
+        "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.collector_selector"
+    )
+    def test_extract_data_with_duplicate_traces(self, collector_selector_mock):
+        collector_selector_mock.select_collector.return_value = mock.MagicMock(
+            spec=IPluginRESTCollector
+        )
+
+        duplicate_doc_id = uuid.uuid4()
+        duplicate_doc = WeLearnDocument(
+            id=duplicate_doc_id,
+            url="https://example.org/wiki/Duplicate_trace",
+            lang="en",
+            full_content=random_string(300),
+            description=random_string(100),
+            corpus_id=self.corpus_test.id,
+            trace=777,
+        )
+        self.test_session.add(duplicate_doc)
+        self.test_session.commit()
+        duplicate_doc_db = (
+            self.test_session.query(WeLearnDocument)
+            .filter_by(id=duplicate_doc_id)
+            .one()
+        )
+
+        self.doc_valid.trace = 777
+        collector_selector_mock.select_collector.return_value.run.return_value = [
+            WrapperRetrieveDocument(document=self.doc_valid),
+            WrapperRetrieveDocument(document=duplicate_doc_db),
+        ]
+
+        extracted_docs, error_docs, process_states = (
+            document_collector.extract_data_from_urls(
+                welearn_documents=[self.doc_valid, duplicate_doc_db]
+            )
+        )
+
+        self.assertEqual(len(extracted_docs), 1)
+        self.assertEqual(extracted_docs[0].id, self.doc_valid.id)
+        self.assertEqual(len(error_docs), 1)
+        self.assertEqual(error_docs[0].document_id, duplicate_doc_db.id)
+        self.assertEqual(
+            error_docs[0].error_info,
+            "This document got the same trace than another one",
+        )
+        self.assertEqual(len(process_states), 2)
+        self.assertEqual(process_states[0].title, Step.DOCUMENT_SCRAPED.value)
+        self.assertEqual(process_states[1].title, Step.DOCUMENT_IS_IRRETRIEVABLE.value)
+
+    @patch(
+        "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.collector_selector"
+    )
+    def test_extract_data_duplicate_trace_with_existing_error(
+        self, collector_selector_mock
+    ):
+        collector_selector_mock.select_collector.return_value = mock.MagicMock(
+            spec=IPluginRESTCollector
+        )
+
+        second_doc_id = uuid.uuid4()
+        second_doc = WeLearnDocument(
+            id=second_doc_id,
+            url="https://example.org/wiki/Duplicate_trace_with_error",
+            lang="en",
+            full_content=random_string(300),
+            description=random_string(100),
+            corpus_id=self.corpus_test.id,
+            trace=888,
+        )
+        self.test_session.add(second_doc)
+        self.test_session.commit()
+        second_doc_db = (
+            self.test_session.query(WeLearnDocument).filter_by(id=second_doc_id).one()
+        )
+
+        self.doc_valid.trace = 888
+        collector_selector_mock.select_collector.return_value.run.return_value = [
+            WrapperRetrieveDocument(
+                document=self.doc_valid,
+                error_info="Timeout during extraction",
+                http_error_code=504,
+            ),
+            WrapperRetrieveDocument(document=second_doc_db),
+        ]
+
+        extracted_docs, error_docs, process_states = (
+            document_collector.extract_data_from_urls(
+                welearn_documents=[self.doc_valid, second_doc_db]
+            )
+        )
+
+        self.assertEqual(len(extracted_docs), 0)
+        self.assertEqual(len(error_docs), 2)
+        self.assertTrue(
+            any(
+                e.document_id == self.doc_valid.id
+                and e.error_info == "Timeout during extraction"
+                and e.http_error_code == 504
+                for e in error_docs
+            )
+        )
+        self.assertTrue(
+            any(
+                e.document_id == second_doc_db.id
+                and e.error_info == "This document got the same trace than another one"
+                for e in error_docs
+            )
+        )
+        self.assertEqual(len(process_states), 2)
+        self.assertTrue(
+            all(s.title == Step.DOCUMENT_IS_IRRETRIEVABLE.value for s in process_states)
+        )
+
+    @patch(
         "welearn_datastack.nodes_workflow.DocumentHubCollector.document_collector.create_db_session"
     )
     @patch(
