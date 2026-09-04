@@ -119,9 +119,7 @@ def compute_states_and_errors_for_failed_insertion(
     states: list[ProcessState],
     errors: list[ErrorRetrieval],
 ):
-    doc_ids = []
-    for document_id in failed_inserted_batch_documents_ids:
-        doc_ids.append(document_id)
+    doc_ids = set(failed_inserted_batch_documents_ids)
 
     for state in states:
         if state.document_id in doc_ids:
