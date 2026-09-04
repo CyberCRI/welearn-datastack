@@ -135,7 +135,7 @@ def compute_states_and_errors_for_failed_insertion(
 
 def filter_on_trace(welearn_documents: list[WrapperRetrieveDocument]):
     """
-    Remove duplicate according trace
+    Mark documents as duplicates when they share the same trace (by setting wrapper.error_info).
     """
     unique_trace = set()
     for wl in welearn_documents:
