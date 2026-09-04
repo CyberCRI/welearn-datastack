@@ -5,6 +5,7 @@ import shutil
 import string
 import uuid
 from pathlib import Path
+from typing import cast
 from unittest import TestCase, mock
 from unittest.mock import patch
 
@@ -212,10 +213,11 @@ class TestExtractNCollectDocs(TestCase):
         )
         self.test_session.add(duplicate_doc)
         self.test_session.commit()
-        duplicate_doc_db = (
+        duplicate_doc_db = cast(
+            WeLearnDocument,
             self.test_session.query(WeLearnDocument)
             .filter_by(id=duplicate_doc_id)
-            .one()
+            .one(),
         )
 
         self.doc_valid.trace = 777
@@ -264,8 +266,9 @@ class TestExtractNCollectDocs(TestCase):
         )
         self.test_session.add(second_doc)
         self.test_session.commit()
-        second_doc_db = (
-            self.test_session.query(WeLearnDocument).filter_by(id=second_doc_id).one()
+        second_doc_db = cast(
+            WeLearnDocument,
+            self.test_session.query(WeLearnDocument).filter_by(id=second_doc_id).one(),
         )
 
         self.doc_valid.trace = 888
@@ -366,10 +369,11 @@ class TestExtractNCollectDocs(TestCase):
 
         # Get data from database and check
         for uuid_ in uuids:
-            current_doc = (
+            current_doc = cast(
+                WeLearnDocument,
                 self.test_session.query(WeLearnDocument)
                 .filter(WeLearnDocument.id == uuid_)
-                .one()
+                .one(),
             )
             self.assertEqual(current_doc.corpus_id, self.corpus_test.id)
             self.assertEqual(current_doc.corpus.source_name, corpus_source_name)
@@ -377,9 +381,10 @@ class TestExtractNCollectDocs(TestCase):
             # Check computed metadata
             self.assertIsInstance(current_doc.lang, str)
             self.assertEqual(current_doc.lang, "en")
-            self.assertIn("duration", current_doc.details)
-            self.assertIn("readability", current_doc.details)
-            self.assertIn("content_and_description_lang", current_doc.details)
+            details = current_doc.details or {}
+            self.assertIn("duration", details)
+            self.assertIn("readability", details)
+            self.assertIn("content_and_description_lang", details)
 
         # Cehck existence of ProcessState
         db_states = list(
@@ -390,6 +395,48 @@ class TestExtractNCollectDocs(TestCase):
         self.assertEqual(len(db_states), 2)
         self.assertSetEqual(set([s.document_id for s in db_states]), set(uuids))
         self.assertTrue(all(s.title == Step.DOCUMENT_SCRAPED.value for s in db_states))
+
+    def test_compute_states_and_errors_for_failed_insertion_with_detached_document(
+        self,
+    ):
+        doc_id = uuid.uuid4()
+        document = WeLearnDocument(
+            id=doc_id,
+            url="https://example.org/wiki/Detached_document",
+            full_content="Detached document content",
+            description="Detached document description",
+            corpus_id=self.corpus_test.id,
+            details={},
+        )
+        self.test_session.add(document)
+        self.test_session.commit()
+
+        detached_document = cast(
+            WeLearnDocument,
+            self.test_session.query(WeLearnDocument).filter_by(id=doc_id).one(),
+        )
+        self.test_session.expire(detached_document, ["id"])
+        self.test_session.expunge(detached_document)
+
+        states = [
+            ProcessState(
+                id=uuid.uuid4(),
+                document_id=doc_id,
+                title=Step.DOCUMENT_SCRAPED.value,
+            )
+        ]
+        errors = []
+
+        document_collector.compute_states_and_errors_for_failed_insertion(
+            failed_inserted_batch_documents=[detached_document],
+            states=states,
+            errors=errors,
+        )
+
+        self.assertEqual(states[0].title, Step.DOCUMENT_IS_IRRETRIEVABLE.value)
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].document_id, doc_id)
+        self.assertEqual(errors[0].error_info, "Document is a duplicate")
 
     # ======================== Tests for filter_on_trace ========================
     # Helper method for filter_on_trace tests

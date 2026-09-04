@@ -4,6 +4,7 @@ import os
 import uuid
 from typing import Dict, List, Tuple
 
+from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
 from welearn_database.data.enumeration import Step
@@ -119,7 +120,12 @@ def compute_states_and_errors_for_failed_insertion(
     states: list[ProcessState],
     errors: list[ErrorRetrieval],
 ):
-    doc_ids = [d.id for d in failed_inserted_batch_documents]
+    doc_ids = []
+    for document in failed_inserted_batch_documents:
+        state = inspect(document)
+        document_id = state.identity[0] if state.identity else state.dict.get("id")
+        if document_id is not None:
+            doc_ids.append(document_id)
 
     for state in states:
         if state.document_id in doc_ids:
