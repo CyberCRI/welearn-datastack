@@ -30,11 +30,11 @@ class DBIntegrityErrorParamKeyNotFound(ManagementExceptions):
 
     def __init__(
         self,
-        msg="The key searched in the params dict is not found",
-        key_path: str = None,
+        msg: str = "The key searched in the params dict is not found",
+        key_path: str | None = None,
         *args,
     ):
-        if key_path is None:
+        if key_path is not None:
             msg = f"The key searched in the params dict is not found: {key_path}"
         super().__init__(msg, *args)
 
