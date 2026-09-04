@@ -396,7 +396,7 @@ class TestExtractNCollectDocs(TestCase):
         self.assertSetEqual(set([s.document_id for s in db_states]), set(uuids))
         self.assertTrue(all(s.title == Step.DOCUMENT_SCRAPED.value for s in db_states))
 
-    def test_compute_states_and_errors_for_failed_insertion_with_detached_document(
+    def test_compute_states_and_errors_for_failed_insertion_with_failed_ids(
         self,
     ):
         doc_id = uuid.uuid4()
@@ -411,13 +411,6 @@ class TestExtractNCollectDocs(TestCase):
         self.test_session.add(document)
         self.test_session.commit()
 
-        detached_document = cast(
-            WeLearnDocument,
-            self.test_session.query(WeLearnDocument).filter_by(id=doc_id).one(),
-        )
-        self.test_session.expire(detached_document, ["id"])
-        self.test_session.expunge(detached_document)
-
         states = [
             ProcessState(
                 id=uuid.uuid4(),
@@ -428,7 +421,7 @@ class TestExtractNCollectDocs(TestCase):
         errors = []
 
         document_collector.compute_states_and_errors_for_failed_insertion(
-            failed_inserted_batch_documents=[detached_document],
+            failed_inserted_batch_documents_ids=[doc_id],
             states=states,
             errors=errors,
         )

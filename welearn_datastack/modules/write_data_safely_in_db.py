@@ -1,9 +1,9 @@
 import logging
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from sqlalchemy.orm.attributes import set_committed_value
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from welearn_datastack.exceptions import (
@@ -35,7 +35,7 @@ def insert_batch_with_retry(
     objects: list,
     key_path: str,
     max_retries: int,
-) -> list:
+) -> list[UUID]:
     """
     Try to insert the data batch, if exception raised remove the object who cause it and retry
     :param session: Database session
@@ -71,17 +71,7 @@ def insert_batch_with_retry(
                 conflicting_id,
             )
 
-            culprit = objects_by_id.get(conflicting_id)
-            if culprit is None:
-                logger.error(
-                    "Error object cannot be find, critical error",
-                )
-                raise DBIntegrityErrorObjectNotFound
-
-            # Preserve the primary key value on the ORM instance so callers can
-            # still read it safely after the session rollback/expunge cycle.
-            if hasattr(culprit, "_sa_instance_state"):
-                set_committed_value(culprit, "id", conflicting_id)
+            culprit = _extract_culprit_document(conflicting_id, objects_by_id)
 
             if culprit in remaining:
                 remaining.remove(culprit)
@@ -91,13 +81,28 @@ def insert_batch_with_retry(
                 )
                 raise DBIntegrityErrorObjectNotFound
 
+            failed.append(culprit.id)
             try:
                 session.expunge(culprit)
             except UnmappedInstanceError:
                 pass
-            failed.append(culprit)
 
             if not remaining:
                 return failed
 
     return failed
+
+
+def _extract_culprit_document(
+    conflicting_id: UUID, objects_by_id: dict[Any | None, Any]
+) -> Any | None:
+    """
+    Extract the culprit document from the input document list
+    """
+    culprit = objects_by_id.get(conflicting_id)
+    if culprit is None:
+        logger.error(
+            "Error object cannot be find, critical error",
+        )
+        raise DBIntegrityErrorObjectNotFound
+    return culprit

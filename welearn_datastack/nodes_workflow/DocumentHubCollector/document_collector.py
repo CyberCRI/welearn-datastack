@@ -4,7 +4,6 @@ import os
 import uuid
 from typing import Dict, List, Tuple
 
-from sqlalchemy import inspect
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.attributes import flag_modified
 from welearn_database.data.enumeration import Step
@@ -97,7 +96,7 @@ def main() -> None:
         compute_readability(doc)
         flag_modified(doc, "details")
 
-    failed_inserted_batch_documents = insert_batch_with_retry(
+    failed_inserted_batch_documents_ids = insert_batch_with_retry(
         key_path="document_related_welearn_document_id",
         max_retries=100,
         session=db_session,
@@ -105,7 +104,7 @@ def main() -> None:
     )
 
     compute_states_and_errors_for_failed_insertion(
-        failed_inserted_batch_documents=failed_inserted_batch_documents,
+        failed_inserted_batch_documents_ids=failed_inserted_batch_documents_ids,
         errors=errors,
         states=states,
     )
@@ -116,16 +115,13 @@ def main() -> None:
 
 
 def compute_states_and_errors_for_failed_insertion(
-    failed_inserted_batch_documents: list[WeLearnDocument],
+    failed_inserted_batch_documents_ids: list[uuid.UUID],
     states: list[ProcessState],
     errors: list[ErrorRetrieval],
 ):
     doc_ids = []
-    for document in failed_inserted_batch_documents:
-        state = inspect(document)
-        document_id = state.identity[0] if state.identity else state.dict.get("id")
-        if document_id is not None:
-            doc_ids.append(document_id)
+    for document_id in failed_inserted_batch_documents_ids:
+        doc_ids.append(document_id)
 
     for state in states:
         if state.document_id in doc_ids:
@@ -170,7 +166,7 @@ def extract_data_from_urls(
         except Exception as e:
             nonexistent_corpus_docs.append(doc.url)  # type: ignore
             human_identifiable_couple = str((doc.id, doc.url))
-            logger.error(
+            logger.exception(
                 "%s : Error while processing document, it was ignored: %s",
                 e,
                 human_identifiable_couple,
