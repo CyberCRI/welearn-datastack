@@ -9,6 +9,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import ErrorRetrieval, ProcessState, WeLearnDocument
 
+from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
 from welearn_datastack.exceptions import PluginNotFoundError
 from welearn_datastack.modules import collector_selector
 from welearn_datastack.modules.computed_metadata import (
@@ -17,6 +18,7 @@ from welearn_datastack.modules.computed_metadata import (
     identify_document_language,
 )
 from welearn_datastack.modules.validation import validate_non_null_fields_document
+from welearn_datastack.modules.write_data_safely_in_db import insert_batch_with_retry
 from welearn_datastack.plugins.interface import IPlugin
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
@@ -42,7 +44,7 @@ def main() -> None:
     input_artifact_id_url = os.getenv("ARTIFACT_ID_URL_CSV_NAME", "batch_ids.csv")
     logger.info("Input artifact url csv name: %s", input_artifact_id_url)
 
-    local_artifcat_input, local_artifcat_output = setup_local_path()
+    local_artifcat_input, _ = setup_local_path()
 
     # retrieve url data from files
     logger.info("Retrieve URLs from file")
@@ -94,10 +96,54 @@ def main() -> None:
         compute_readability(doc)
         flag_modified(doc, "details")
 
+    failed_inserted_batch_documents_ids = insert_batch_with_retry(
+        key_path="document_related_welearn_document_id",
+        max_retries=100,
+        session=db_session,
+        objects=batch_documents,
+    )
+
+    compute_states_and_errors_for_failed_insertion(
+        failed_inserted_batch_documents_ids=failed_inserted_batch_documents_ids,
+        errors=errors,
+        states=states,
+    )
+
     db_session.add_all(states)
     db_session.add_all(errors)
-    db_session.add_all(batch_documents)
     db_session.commit()
+
+
+def compute_states_and_errors_for_failed_insertion(
+    failed_inserted_batch_documents_ids: list[uuid.UUID],
+    states: list[ProcessState],
+    errors: list[ErrorRetrieval],
+):
+    doc_ids = set(failed_inserted_batch_documents_ids)
+
+    for state in states:
+        if state.document_id in doc_ids:
+            state.title = Step.DOCUMENT_IS_IRRETRIEVABLE.value
+
+    for doc_id in doc_ids:
+        errors.append(
+            ErrorRetrieval(document_id=doc_id, error_info="Document is a duplicate")
+        )
+
+
+def filter_on_trace(welearn_documents: list[WrapperRetrieveDocument]):
+    """
+    Mark documents as duplicates when they share the same trace (by setting wrapper.error_info).
+    """
+    unique_trace = set()
+    for wl in welearn_documents:
+        set_len_before = len(unique_trace)
+        unique_trace.add(wl.document.trace)
+        set_len_after = len(unique_trace)
+
+        if set_len_after != set_len_before:
+            continue
+        wl.error_info = "This document got the same trace than another one"
 
 
 def extract_data_from_urls(
@@ -118,7 +164,7 @@ def extract_data_from_urls(
         except Exception as e:
             nonexistent_corpus_docs.append(doc.url)  # type: ignore
             human_identifiable_couple = str((doc.id, doc.url))
-            logger.error(
+            logger.exception(
                 "%s : Error while processing document, it was ignored: %s",
                 e,
                 human_identifiable_couple,
@@ -154,8 +200,14 @@ def extract_data_from_urls(
     # Iterate on each corpus
     for corpus_name in batch_docs:
         # Get data
+        logger.info(
+            "Collect %s document(s) for %s corpus",
+            len(batch_docs[corpus_name]),
+            corpus_name,
+        )
         corpus_collector = corpus_plugin[corpus_name]
         documents = corpus_collector.run(documents=batch_docs[corpus_name])  # type: ignore
+        filter_on_trace(documents)
 
         for wrapper_document in documents:
             is_none_valid = validate_non_null_fields_document(wrapper_document.document)
