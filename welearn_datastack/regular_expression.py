@@ -1,8 +1,6 @@
 # Regular expressions for data cleaning and preprocessing in the WeLearn Datastack project.
 import re
 
-from welearn_database.regular_expression import DOI_VALIDATION_REGEX
-
 # description: Matches backline characters (newline, tab, carriage return) for removal or replacement.
 # example: "Hello\n\tWorld" -> matches "\n" and "\t"
 # limit: Does not match other whitespace characters like spaces or form feeds.
@@ -77,6 +75,11 @@ SENTENCE_REGEX = r"\b[^.!?]+[.!?]*"
 # example: "Hello, world!" -> matches "Hello" and "world"
 # limit: Treats underscores as word characters and does not handle hyphenated words or contractions as single tokens.
 WORDS_REGEX = r"\w+"
+
+# description: Matches key name and key values in SQLAlchemy exception message
+# example: "('(psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "welearn_document_trace_unique"\nDETAIL:  Key (trace)=(655384981) already exists.\n',) -> trace & 655384981
+# limit: If the message change, it breaks
+KEY_NAME_VALUE_SQLALCHEMY_ERROR_MESSAGE = r"Key \(([^)]+)\)=\(([^)]+)\)"
 
 
 def simple_xml_tag_format_regex(tag: str) -> str:

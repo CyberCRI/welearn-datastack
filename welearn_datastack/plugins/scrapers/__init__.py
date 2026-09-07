@@ -12,11 +12,11 @@ from welearn_datastack.plugins.scrapers.plos import PlosCollector
 from welearn_datastack.plugins.scrapers.unccelearn import UNCCeLearnCollector
 
 plugins_scrape_list: List[Type[IPluginScrapeCollector]] = [
-    ConversationCollector,
-    PeerJCollector,
-    PlosCollector,
-    OpenEditionBooksCollector,
-    UNCCeLearnCollector,
-    IRDLeMagCollector,
-    NotreEnvironnementCollector,
+    # ConversationCollector,
+    # PeerJCollector,
+    # PlosCollector,
+    # OpenEditionBooksCollector,
+    # UNCCeLearnCollector,
+    # IRDLeMagCollector,
+    # NotreEnvironnementCollector,
 ]

@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any
 from uuid import UUID
 
@@ -15,12 +16,33 @@ from welearn_datastack.exceptions import (
 logger = logging.getLogger(__name__)
 
 
+def extract_faulty_key_name_and_value(
+    integrity_error: IntegrityError,
+) -> tuple[str | Any, str | Any] | None:
+    error_msg = integrity_error.args[0]
+    match = re.search(r"Key \(([^)]+)\)=\(([^)]+)\)", error_msg)
+    if match:
+        key_name, key_value = match.groups()
+        logger.info(f"Key name: {key_name} and key value: {key_value}")
+        return key_name, key_value
+    return None
+
+
 def extract_id_from_exception(integrity_error: IntegrityError, key_path: str) -> UUID:
     params = integrity_error.params
-    if key_path not in params:
+    faulty_key_name, faulty_key_value = extract_faulty_key_name_and_value(
+        integrity_error=integrity_error
+    )
+
+    ret = None
+    for p in params:
+        if p.get(faulty_key_name) == faulty_key_value:
+            ret = params[key_path]
+            break
+
+    if not ret:
         raise DBIntegrityErrorParamKeyNotFound(key_path=key_path)
 
-    ret = params[key_path]
     if isinstance(ret, UUID):
         return ret
     else:
