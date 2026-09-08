@@ -12,6 +12,7 @@ from welearn_datastack.exceptions import (
     DBIntegrityErrorParamKeyNotFound,
     InvalidIDFormat,
 )
+from welearn_datastack.regular_expression import KEY_NAME_VALUE_SQLALCHEMY_ERROR_MESSAGE
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def extract_faulty_key_name_and_value(
         if getattr(integrity_error, "orig", None) is not None
         else str(integrity_error)
     )
-    match = re.search(r"Key \(([^)]+)\)=\(([^)]+)\)", error_msg)
+    match = re.search(KEY_NAME_VALUE_SQLALCHEMY_ERROR_MESSAGE, error_msg)
     if match:
         key_name, key_value = match.groups()
         logger.info(f"Key name: {key_name} and key value: {key_value}")

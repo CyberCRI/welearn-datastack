@@ -18,15 +18,15 @@ from welearn_datastack.plugins.rest_requesters.world_bank_okr import (
 )
 
 plugins_rest_list: List[Type[IPluginRESTCollector]] = [
-    # WikipediaCollector,
-    # HALCollector,
-    # TEDCollector,
-    # OAPenCollector,
+    WikipediaCollector,
+    HALCollector,
+    TEDCollector,
+    OAPenCollector,
     OpenAlexCollector,
-    # PressBooksCollector,
-    # UVEDCollector,
-    # FAOOpenKnowledgeCollector,
-    # UNESDOCCollector,
-    # WorldBankOpenKnowledgeRepository,
-    # IPBESCollector,
+    PressBooksCollector,
+    UVEDCollector,
+    FAOOpenKnowledgeCollector,
+    UNESDOCCollector,
+    WorldBankOpenKnowledgeRepository,
+    IPBESCollector,
 ]
