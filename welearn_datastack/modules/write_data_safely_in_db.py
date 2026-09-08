@@ -36,9 +36,13 @@ def extract_id_from_exception(integrity_error: IntegrityError, key_path: str) ->
 
     ret = None
     for p in params:
-        if p.get(faulty_key_name) == faulty_key_value:
-            ret = params[key_path]
-            break
+        value = p.get(faulty_key_name)
+        try:
+            if value == type(value)(faulty_key_value):
+                ret = p[key_path]
+                break
+        except ValueError:
+            pass
 
     if not ret:
         raise DBIntegrityErrorParamKeyNotFound(key_path=key_path)
