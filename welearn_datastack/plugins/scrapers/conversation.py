@@ -147,7 +147,7 @@ class ConversationCollector(IPluginScrapeCollector):
 
         external_id = self.handle_external_id(document)
 
-        document.external_id = external_id
+        document.external_id = str(external_id)
         document.title = title
         document.description = description
         document.full_content = content
