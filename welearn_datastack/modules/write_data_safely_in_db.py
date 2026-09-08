@@ -19,7 +19,11 @@ logger = logging.getLogger(__name__)
 def extract_faulty_key_name_and_value(
     integrity_error: IntegrityError,
 ) -> tuple[str | Any, str | Any] | None:
-    error_msg = integrity_error.args[0]
+    error_msg = (
+        str(integrity_error.orig)
+        if getattr(integrity_error, "orig", None) is not None
+        else str(integrity_error)
+    )
     match = re.search(r"Key \(([^)]+)\)=\(([^)]+)\)", error_msg)
     if match:
         key_name, key_value = match.groups()
@@ -44,7 +48,7 @@ def extract_id_from_exception(integrity_error: IntegrityError, key_path: str) ->
         except ValueError:
             pass
 
-    if not ret:
+    if ret is None:
         raise DBIntegrityErrorParamKeyNotFound(key_path=key_path)
 
     if isinstance(ret, UUID):
