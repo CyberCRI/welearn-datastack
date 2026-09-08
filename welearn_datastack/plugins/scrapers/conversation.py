@@ -155,13 +155,15 @@ class ConversationCollector(IPluginScrapeCollector):
 
         return document
 
-    def handle_external_id(self, document: WeLearnDocument) -> Any:
-        external_ids = re.findall(document.url, END_STRING_DIGIT)
+    @staticmethod
+    def handle_external_id(document: WeLearnDocument) -> int:
+        external_ids = re.findall(string=document.url, pattern=END_STRING_DIGIT)
         try:
             [external_id] = external_ids
+            ret = int(external_id)
         except ValueError as e:
             raise NotExpectedMoreThanOneItem from e
-        return external_id
+        return ret
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running ConversationCollector plugin")
