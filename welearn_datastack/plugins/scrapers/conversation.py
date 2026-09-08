@@ -8,12 +8,16 @@ from bs4 import BeautifulSoup, ResultSet  # type: ignore
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
+from welearn_datastack.exceptions import NotExpectedMoreThanOneItem
 from welearn_datastack.modules.scraping_utils import (
     clean_return_to_line,
     extract_property_from_html,
 )
 from welearn_datastack.plugins.interface import IPluginScrapeCollector
-from welearn_datastack.regular_expression import SINGLE_QUOTED_WORD_REGEX
+from welearn_datastack.regular_expression import (
+    END_STRING_DIGIT,
+    SINGLE_QUOTED_WORD_REGEX,
+)
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
     get_new_https_session,
@@ -141,12 +145,23 @@ class ConversationCollector(IPluginScrapeCollector):
             error_property_name="content",
         )
 
+        external_id = self.handle_external_id(document)
+
+        document.external_id = external_id
         document.title = title
         document.description = description
         document.full_content = content
         document.details = self._get_document_details(soup)
 
         return document
+
+    def handle_external_id(self, document: WeLearnDocument) -> Any:
+        external_ids = re.findall(document.url, END_STRING_DIGIT)
+        try:
+            [external_id] = external_ids
+        except ValueError as e:
+            raise NotExpectedMoreThanOneItem from e
+        return external_id
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:
         logger.info("Running ConversationCollector plugin")

@@ -1,8 +1,6 @@
 # Regular expressions for data cleaning and preprocessing in the WeLearn Datastack project.
 import re
 
-from welearn_database.regular_expression import DOI_VALIDATION_REGEX
-
 # description: Matches backline characters (newline, tab, carriage return) for removal or replacement.
 # example: "Hello\n\tWorld" -> matches "\n" and "\t"
 # limit: Does not match other whitespace characters like spaces or form feeds.
@@ -77,6 +75,11 @@ SENTENCE_REGEX = r"\b[^.!?]+[.!?]*"
 # example: "Hello, world!" -> matches "Hello" and "world"
 # limit: Treats underscores as word characters and does not handle hyphenated words or contractions as single tokens.
 WORDS_REGEX = r"\w+"
+
+# description: Extract only numeric strings at the end of URL paths or text after certain terms
+# example: https://theconversation.com/souverainete-technologique-ce-que-le-5623-europeen-nous-apprend-de-nos-dependances-291106 -> 291106
+# limit : N/A
+END_STRING_DIGIT = r"\d+$"
 
 
 def simple_xml_tag_format_regex(tag: str) -> str:
