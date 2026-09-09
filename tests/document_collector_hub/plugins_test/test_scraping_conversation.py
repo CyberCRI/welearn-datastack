@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.enumerations import PluginType
-from welearn_datastack.exceptions import NotExpectedMoreThanOneItem
+from welearn_datastack.exceptions import WrongExternalIdFormat
 from welearn_datastack.plugins.scrapers.conversation import (
     ConversationCollector,
     format_news_keywords,
@@ -163,7 +163,7 @@ class TestScrapeConversationPlugin(unittest.TestCase):
         first_doc = result[0].document
         second_doc = result[1].document
 
-        self.assertEqual(first_doc.external_id, 212649)
+        self.assertEqual(first_doc.external_id, "212649")
         self.assertIn("Comment les machines succombent", first_doc.title)
         self.assertIn("Plus il fait chaud", first_doc.description)
         self.assertIn("Les humains ne sont pas les seuls", first_doc.full_content)
@@ -254,7 +254,7 @@ class TestScrapeConversationPlugin(unittest.TestCase):
         doc = WeLearnDocument(
             id=1, url="https://example.org/title-explaining-stuff-123"
         )
-        self.assertEqual(self.conversation_scraper.handle_external_id(doc), 123)
+        self.assertEqual(self.conversation_scraper.handle_external_id(doc), "123")
 
     def test_handle_external_id_invalid_raises(self):
         doc = WeLearnDocument(id=1, url="https://example.org/title-explaining-stuff")

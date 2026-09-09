@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup, ResultSet  # type: ignore
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.exceptions import NotExpectedMoreThanOneItem
+from welearn_datastack.exceptions import WrongExternalIdFormat
 from welearn_datastack.modules.scraping_utils import (
     clean_return_to_line,
     extract_property_from_html,
