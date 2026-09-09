@@ -62,6 +62,14 @@ def main() -> None:
     for i, wld in enumerate(welearn_documents):
         check_ret = check_url(wld.url)
 
+        if check_ret[0] == URLStatus.UNKNOWN:
+            logger.error(
+                "Url ignored. %s, return an unknown status code: %s",
+                wld.url,
+                check_ret[1],
+            )
+            continue
+
         if i % 10 == 0:
             logger.info(f"Checked {i}/{len(welearn_documents)} URLs")
 

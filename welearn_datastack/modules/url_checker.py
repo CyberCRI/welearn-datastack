@@ -37,7 +37,7 @@ def check_url(url: str) -> Tuple[URLStatus, int]:
             return URLStatus.VALID, response.status_code
         case 301 | 302 | 303 | 307 | 308:
             return URLStatus.UPDATE, response.status_code
-        case 400 | 401 | 402 | 404 | 405 | 410 | 419 | 423 | 456:
+        case 400 | 401 | 402 | 404 | 405 | 410 | 419 | 423 | 456 | 403:
             return URLStatus.DELETE, response.status_code
         case _:
             logger.error(
