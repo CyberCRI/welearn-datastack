@@ -162,7 +162,7 @@ class ConversationCollector(IPluginScrapeCollector):
             [external_id] = external_ids
             ret = int(external_id)
         except ValueError as e:
-            raise NotExpectedMoreThanOneItem from e
+            raise WrongExternalIdFormat(external_id_name="mock_external_id_name") from e
         return ret
 
     def run(self, documents: list[WeLearnDocument]) -> list[WrapperRetrieveDocument]:

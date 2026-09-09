@@ -171,7 +171,7 @@ class TestScrapeConversationPlugin(unittest.TestCase):
         self.assertIn("Srinivas Garimella", first_author_names)
         self.assertIn("Matthew T. Hughes", first_author_names)
 
-        self.assertEqual(second_doc.external_id, 209538)
+        self.assertEqual(second_doc.external_id, "209538")
         self.assertIn("Une chasse au", second_doc.title)
         self.assertIn("Des archives font", second_doc.description)
         self.assertIn("Provins", second_doc.description)
@@ -254,9 +254,9 @@ class TestScrapeConversationPlugin(unittest.TestCase):
         doc = WeLearnDocument(
             id=1, url="https://example.org/title-explaining-stuff-123"
         )
-        self.assertEqual(self.conversation_scraper.handle_external_id(doc), "123")
+        self.assertEqual(self.conversation_scraper.handle_external_id(doc), 123)
 
     def test_handle_external_id_invalid_raises(self):
         doc = WeLearnDocument(id=1, url="https://example.org/title-explaining-stuff")
-        with self.assertRaises(NotExpectedMoreThanOneItem):
+        with self.assertRaises(WrongExternalIdFormat):
             self.conversation_scraper.handle_external_id(doc)
