@@ -35,9 +35,12 @@ def extract_faulty_key_name_and_value(
 
 def extract_id_from_exception(integrity_error: IntegrityError, key_path: str) -> UUID:
     params = integrity_error.params
-    faulty_key_name, faulty_key_value = extract_faulty_key_name_and_value(
-        integrity_error=integrity_error
-    )
+    try:
+        faulty_key_name, faulty_key_value = extract_faulty_key_name_and_value(
+            integrity_error=integrity_error
+        )
+    except TypeError as e:
+        raise DBIntegrityErrorParamKeyNotFound from e
 
     ret = None
     for p in params:
@@ -47,6 +50,8 @@ def extract_id_from_exception(integrity_error: IntegrityError, key_path: str) ->
                 ret = p[key_path]
                 break
         except ValueError:
+            pass
+        except KeyError:
             pass
 
     if ret is None:
