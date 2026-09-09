@@ -81,6 +81,11 @@ WORDS_REGEX = r"\w+"
 # limit : N/A
 END_STRING_DIGIT = r"\d+$"
 
+# description: Matches key name and key values in SQLAlchemy exception message
+# example: "('(psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "welearn_document_trace_unique"\nDETAIL:  Key (trace)=(655384981) already exists.\n',) -> trace & 655384981
+# limit: If the message change, it breaks
+KEY_NAME_VALUE_SQLALCHEMY_ERROR_MESSAGE = r"Key \(([^)]+)\)=\(([^)]+)\)"
+
 
 def simple_xml_tag_format_regex(tag: str) -> str:
     """
