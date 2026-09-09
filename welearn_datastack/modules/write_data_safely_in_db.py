@@ -1,4 +1,5 @@
 import logging
+import re
 from typing import Any
 from uuid import UUID
 
@@ -11,16 +12,51 @@ from welearn_datastack.exceptions import (
     DBIntegrityErrorParamKeyNotFound,
     InvalidIDFormat,
 )
+from welearn_datastack.regular_expression import KEY_NAME_VALUE_SQLALCHEMY_ERROR_MESSAGE
 
 logger = logging.getLogger(__name__)
 
 
+def extract_faulty_key_name_and_value(
+    integrity_error: IntegrityError,
+) -> tuple[str | Any, str | Any] | None:
+    error_msg = (
+        str(integrity_error.orig)
+        if getattr(integrity_error, "orig", None) is not None
+        else str(integrity_error)
+    )
+    match = re.search(KEY_NAME_VALUE_SQLALCHEMY_ERROR_MESSAGE, error_msg)
+    if match:
+        key_name, key_value = match.groups()
+        logger.info(f"Key name: {key_name} and key value: {key_value}")
+        return key_name, key_value
+    return None
+
+
 def extract_id_from_exception(integrity_error: IntegrityError, key_path: str) -> UUID:
     params = integrity_error.params
-    if key_path not in params:
+    try:
+        faulty_key_name, faulty_key_value = extract_faulty_key_name_and_value(
+            integrity_error=integrity_error
+        )
+    except TypeError as e:
+        raise DBIntegrityErrorParamKeyNotFound from e
+
+    ret = None
+    for p in params:
+        value = p.get(faulty_key_name)
+        try:
+            if value == type(value)(faulty_key_value):
+                ret = p[key_path]
+                break
+        except ValueError:
+            pass
+        except KeyError:
+            pass
+
+    if ret is None:
         raise DBIntegrityErrorParamKeyNotFound(key_path=key_path)
 
-    ret = params[key_path]
     if isinstance(ret, UUID):
         return ret
     else:
