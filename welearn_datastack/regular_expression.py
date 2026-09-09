@@ -76,6 +76,11 @@ SENTENCE_REGEX = r"\b[^.!?]+[.!?]*"
 # limit: Treats underscores as word characters and does not handle hyphenated words or contractions as single tokens.
 WORDS_REGEX = r"\w+"
 
+# description: Extract only numeric strings at the end of URL paths or text after certain terms
+# example: https://theconversation.com/souverainete-technologique-ce-que-le-5623-europeen-nous-apprend-de-nos-dependances-291106 -> 291106
+# limit : N/A
+END_STRING_DIGIT = r"\d+$"
+
 # description: Matches key name and key values in SQLAlchemy exception message
 # example: "('(psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "welearn_document_trace_unique"\nDETAIL:  Key (trace)=(655384981) already exists.\n',) -> trace & 655384981
 # limit: If the message change, it breaks
