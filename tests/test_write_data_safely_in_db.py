@@ -1,260 +1,136 @@
-from contextlib import nullcontext
-from types import SimpleNamespace
-from unittest import TestCase
-from unittest.mock import MagicMock, patch
-from uuid import uuid4
+import unittest
+import uuid
 
-from sqlalchemy.exc import IntegrityError
-from welearn_database.data.models import WeLearnDocument
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from welearn_database.data.models import Base, Category, Corpus, WeLearnDocument
 
-from welearn_datastack.exceptions import (
-    DBIntegrityErrorObjectNotFound,
-    DBIntegrityErrorParamKeyNotFound,
-    InvalidIDFormat,
-)
-from welearn_datastack.modules.write_data_safely_in_db import (
-    extract_faulty_key_name_and_value,
-    extract_id_from_exception,
-    insert_batch_with_retry,
-)
+from tests.database_test_utils import handle_schema_with_sqlite
+from welearn_datastack.modules.write_data_safely_in_db import insert_batch_safely
 
 
-class TestInsertBatchWithRetry(TestCase):
-    @patch(
-        "welearn_datastack.modules.write_data_safely_in_db.extract_id_from_exception"
-    )
-    def test_retry_removes_conflicting_object_and_rollbacks(
-        self, mock_extract_id_from_exception
-    ):
-        session = MagicMock()
-        session.begin_nested.return_value = nullcontext()
-        recorded_batches = []
-        conflicting_id = uuid4()
-        mock_extract_id_from_exception.return_value = conflicting_id
+class TestInsertBatchSafely(unittest.TestCase):
+    def setUp(self):
+        self.engine = create_engine("sqlite://")
+        handle_schema_with_sqlite(self.engine)
+        self.session = sessionmaker(self.engine)()
+        Base.metadata.create_all(self.session.get_bind())
 
-        def _record_batch(batch):
-            recorded_batches.append(list(batch))
-
-        session.add_all.side_effect = _record_batch
-        integrity_error = IntegrityError(
-            "UPDATE ...",
-            [{"document_related_welearn_document_id": conflicting_id}],
-            Exception("duplicate key"),
+        self.category = Category(id=uuid.uuid4(), title="test-category")
+        self.corpus = Corpus(
+            id=uuid.uuid4(),
+            source_name="test-corpus",
+            is_fix=True,
+            is_active=True,
+            category_id=self.category.id,
         )
-        integrity_error.args = (
-            f"Key (document_related_welearn_document_id)=({conflicting_id}) already exists",
-        )
-        session.flush.side_effect = [
-            integrity_error,
-            None,
-        ]
+        self.session.add_all([self.category, self.corpus])
+        self.session.commit()
 
-        conflicting_object = SimpleNamespace(id=conflicting_id)
-        valid_object = SimpleNamespace(id=uuid4())
+    def tearDown(self):
+        self.session.close()
+        self.engine.dispose()
 
-        failed = insert_batch_with_retry(
-            session=session,
-            objects=[conflicting_object, valid_object],
-            key_path="document_related_welearn_document_id",
-            max_retries=5,
+    def _make_document(self, *, doc_id=None, url: str, title: str):
+        return WeLearnDocument(
+            id=doc_id or uuid.uuid4(),
+            url=url,
+            corpus_id=self.corpus.id,
+            title=title,
+            lang="en",
+            description="description",
+            full_content="content long enough for validation",
+            details={"source": "test"},
         )
 
-        self.assertEqual(failed, [conflicting_id])
-        self.assertEqual(session.rollback.call_count, 1)
+    def test_returns_empty_list_for_empty_batch(self):
+        failed = insert_batch_safely(self.session, [])
 
-        # First attempt with both objects, second attempt without the conflicting one.
-        self.assertEqual(session.add_all.call_count, 2)
-        self.assertEqual(recorded_batches[0], [conflicting_object, valid_object])
-        self.assertEqual(recorded_batches[1], [valid_object])
+        self.assertEqual(failed, [])
 
-    @patch(
-        "welearn_datastack.modules.write_data_safely_in_db.extract_id_from_exception"
-    )
-    def test_retry_with_dict_params(self, mock_extract_id_from_exception):
-        session = MagicMock()
-        session.begin_nested.return_value = nullcontext()
-        recorded_batches = []
-        conflicting_id = uuid4()
-        mock_extract_id_from_exception.return_value = conflicting_id
+    def test_inserts_documents_already_attached_to_session(self):
+        first_doc = self._make_document(url="https://example.org/1", title="doc-1")
+        second_doc = self._make_document(url="https://example.org/2", title="doc-2")
+        self.session.add_all([first_doc, second_doc])
 
-        def _record_batch(batch):
-            recorded_batches.append(list(batch))
+        failed = insert_batch_safely(self.session, [first_doc, second_doc])
+        self.session.commit()
 
-        session.add_all.side_effect = _record_batch
-        integrity_error = IntegrityError(
-            "UPDATE ...",
-            {"document_related_welearn_document_id": conflicting_id},
-            Exception("duplicate key"),
+        persisted_ids = {
+            doc.id
+            for doc in self.session.query(WeLearnDocument)
+            .order_by(WeLearnDocument.url)
+            .all()
+        }
+
+        self.assertEqual(failed, [])
+        self.assertEqual(persisted_ids, {first_doc.id, second_doc.id})
+
+    def test_returns_conflicting_document_id_and_keeps_other_documents(self):
+        existing_doc = self._make_document(
+            doc_id=uuid.uuid4(),
+            url="https://example.org/already-there",
+            title="existing",
         )
-        integrity_error.args = (
-            f"Key (document_related_welearn_document_id)=({conflicting_id}) already exists",
+        self.session.add(existing_doc)
+        self.session.commit()
+
+        conflicting_doc = self._make_document(
+            doc_id=uuid.uuid4(),
+            url="https://example.org/already-there",
+            title="duplicate",
         )
-        session.flush.side_effect = [integrity_error, None]
-
-        conflicting_object = SimpleNamespace(id=conflicting_id)
-        valid_object = SimpleNamespace(id=uuid4())
-
-        failed = insert_batch_with_retry(
-            session=session,
-            objects=[conflicting_object, valid_object],
-            key_path="document_related_welearn_document_id",
-            max_retries=2,
-        )
-
-        self.assertEqual(failed, [conflicting_id])
-        self.assertEqual(session.rollback.call_count, 1)
-        self.assertEqual(recorded_batches[1], [valid_object])
-
-    @patch(
-        "welearn_datastack.modules.write_data_safely_in_db.extract_id_from_exception"
-    )
-    @patch(
-        "welearn_datastack.modules.write_data_safely_in_db._extract_culprit_document"
-    )
-    def test_raise_when_conflicting_object_not_found(
-        self, mock_extract_culprit_document, mock_extract_id_from_exception
-    ):
-        session = MagicMock()
-        session.begin_nested.return_value = nullcontext()
-        conflicting_id = uuid4()
-        integrity_error = IntegrityError(
-            statement="UPDATE ...",
-            params=[{"document_related_welearn_document_id": conflicting_id}],
-            orig=Exception("duplicate key"),
-        )
-        integrity_error.args = (
-            f"Key (document_related_welearn_document_id)=({conflicting_id}) already exists",
-        )
-        session.flush.side_effect = [integrity_error]
-
-        mock_extract_culprit_document.return_value = WeLearnDocument(
-            id=conflicting_id,
+        valid_doc = self._make_document(
+            doc_id=uuid.uuid4(),
+            url="https://example.org/new",
+            title="valid",
         )
 
-        mock_extract_id_from_exception.return_value = conflicting_id
+        failed = insert_batch_safely(self.session, [conflicting_doc, valid_doc])
+        self.session.commit()
 
-        with self.assertRaises(DBIntegrityErrorObjectNotFound):
-            insert_batch_with_retry(
-                session=session,
-                objects=[SimpleNamespace(id=uuid4())],
-                key_path="document_related_welearn_document_id",
-                max_retries=1,
-            )
-
-        self.assertEqual(session.rollback.call_count, 1)
-
-    def test_extract_faulty_key_name_and_value(self):
-        stmt_msg = '(psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "welearn_document_trace_unique"\nDETAIL:  Key (trace)=(655384981) already exists.\n'
-        tested_exception = IntegrityError(
-            statement=stmt_msg,
-            params=[{"trace": 655384981}],
-            orig=Exception(stmt_msg),
+        persisted_docs = (
+            self.session.query(WeLearnDocument).order_by(WeLearnDocument.url).all()
         )
-        awaited_ret = "trace", "655384981"
+        persisted_urls = [doc.url for doc in persisted_docs]
+        persisted_ids = {doc.id for doc in persisted_docs}
 
-        ret = extract_faulty_key_name_and_value(tested_exception)
-        self.assertEqual(awaited_ret, ret)
-
-    def test_extract_faulty_key_name_and_value_error(self):
-        stmt_msg = "(psycopg2.errors.OtherProblem) Other problem"
-        tested_exception = IntegrityError(
-            statement=stmt_msg,
-            params=[],
-            orig=Exception(stmt_msg),
+        self.assertEqual(failed, [conflicting_doc.id])
+        self.assertEqual(
+            persisted_urls,
+            ["https://example.org/already-there", "https://example.org/new"],
         )
+        self.assertIn(valid_doc.id, persisted_ids)
+        self.assertNotIn(conflicting_doc.id, persisted_ids)
 
-        ret = extract_faulty_key_name_and_value(tested_exception)
-        self.assertIsNone(ret)
-
-    def test_extract_id_from_exception(self):
-        doc_id = uuid4()
-        stmt_msg = '(psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "welearn_document_trace_unique"\nDETAIL:  Key (trace)=(655384981) already exists.\n'
-        tested_exception = IntegrityError(
-            statement=stmt_msg,
-            params=[
-                {
-                    "trace": 655384981,
-                    "document_related_welearn_document_id": str(doc_id),
-                },
-                {
-                    "trace": 555381234,
-                    "document_related_welearn_document_id": str(uuid4()),
-                },
-            ],
-            orig=Exception(stmt_msg),
+    def test_handles_duplicates_inside_same_batch(self):
+        first_doc = self._make_document(
+            doc_id=uuid.uuid4(),
+            url="https://example.org/shared",
+            title="first",
         )
-        awaited_ret = doc_id
-        ret = extract_id_from_exception(
-            tested_exception, key_path="document_related_welearn_document_id"
+        duplicate_doc = self._make_document(
+            doc_id=uuid.uuid4(),
+            url="https://example.org/shared",
+            title="duplicate",
+        )
+        valid_doc = self._make_document(
+            doc_id=uuid.uuid4(),
+            url="https://example.org/unique",
+            title="valid",
         )
 
-        self.assertEqual(awaited_ret, ret)
-
-    def test_extract_id_from_exception_exception_DBIntegrityErrorParamKeyNotFound(self):
-        doc_id = uuid4()
-        stmt_msg = "(psycopg2.errors.OtherProblem) Other problem"
-        tested_exception = IntegrityError(
-            statement=stmt_msg,
-            params=[
-                {
-                    "trace": 655384981,
-                    "document_related_welearn_document_id": str(doc_id),
-                },
-                {
-                    "trace": 555381234,
-                    "document_related_welearn_document_id": str(uuid4()),
-                },
-            ],
-            orig=Exception(stmt_msg),
+        failed = insert_batch_safely(
+            self.session, [first_doc, duplicate_doc, valid_doc]
         )
-        with self.assertRaises(DBIntegrityErrorParamKeyNotFound):
-            extract_id_from_exception(
-                tested_exception, key_path="document_related_welearn_document_id"
-            )
+        self.session.commit()
 
-    def test_extract_id_from_exception_exception_DBIntegrityErrorParamKeyNotFound2(
-        self,
-    ):
-        doc_id = uuid4()
-        stmt_msg = '(psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "welearn_document_trace_unique"\nDETAIL:  Key (trace)=(655384981) already exists.\n'
-        tested_exception = IntegrityError(
-            statement=stmt_msg,
-            params=[
-                {
-                    "trace": 655384981,
-                    "no_document_related_welearn_document_id": str(doc_id),
-                },
-                {
-                    "trace": 555381234,
-                    "no_document_related_welearn_document_id": str(uuid4()),
-                },
-            ],
-            orig=Exception(stmt_msg),
+        persisted_docs = (
+            self.session.query(WeLearnDocument).order_by(WeLearnDocument.url).all()
         )
-        with self.assertRaises(DBIntegrityErrorParamKeyNotFound):
-            extract_id_from_exception(
-                tested_exception, key_path="document_related_welearn_document_id"
-            )
+        persisted_ids = {doc.id for doc in persisted_docs}
 
-    def test_extract_id_from_exception_InvalidIDFormat(self):
-        doc_id = 1
-        stmt_msg = '(psycopg2.errors.UniqueViolation) duplicate key value violates unique constraint "welearn_document_trace_unique"\nDETAIL:  Key (trace)=(655384981) already exists.\n'
-        tested_exception = IntegrityError(
-            statement=stmt_msg,
-            params=[
-                {
-                    "trace": 655384981,
-                    "document_related_welearn_document_id": str(doc_id),
-                },
-                {
-                    "trace": 555381234,
-                    "document_related_welearn_document_id": str(2),
-                },
-            ],
-            orig=Exception(stmt_msg),
-        )
-
-        with self.assertRaises(InvalidIDFormat):
-            extract_id_from_exception(
-                tested_exception, key_path="document_related_welearn_document_id"
-            )
+        self.assertEqual(failed, [duplicate_doc.id])
+        self.assertIn(first_doc.id, persisted_ids)
+        self.assertIn(valid_doc.id, persisted_ids)
+        self.assertNotIn(duplicate_doc.id, persisted_ids)

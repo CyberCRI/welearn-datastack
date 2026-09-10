@@ -18,7 +18,7 @@ from welearn_datastack.modules.computed_metadata import (
     identify_document_language,
 )
 from welearn_datastack.modules.validation import validate_non_null_fields_document
-from welearn_datastack.modules.write_data_safely_in_db import insert_batch_with_retry
+from welearn_datastack.modules.write_data_safely_in_db import insert_batch_safely
 from welearn_datastack.plugins.interface import IPlugin
 from welearn_datastack.utils_.database_utils import create_db_session
 from welearn_datastack.utils_.path_utils import setup_local_path
@@ -96,9 +96,7 @@ def main() -> None:
         compute_readability(doc)
         flag_modified(doc, "details")
 
-    failed_inserted_batch_documents_ids = insert_batch_with_retry(
-        key_path="document_related_welearn_document_id",
-        max_retries=100,
+    failed_inserted_batch_documents_ids = insert_batch_safely(
         session=db_session,
         objects=batch_documents,
     )
