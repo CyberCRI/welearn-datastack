@@ -25,7 +25,7 @@ def insert_batch_safely(
 
         except IntegrityError:
             logger.warning(
-                "An error integrity error was raised, retrying without error object :%s",
+                "An error integrity error was raised, object (%s) removed",
                 obj.id,
             )
             failed.append(obj.id)
