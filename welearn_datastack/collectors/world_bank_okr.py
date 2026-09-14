@@ -61,7 +61,9 @@ class WorldBankOpenKnowledgeRepositoryCollector(URLCollector):
             )
             return None
 
-        return doi.content
+        content = doi.content.replace("https://doi.org/", "")
+
+        return content
 
     @staticmethod
     def _extract_external_id(xml_input: XMLData) -> str:
