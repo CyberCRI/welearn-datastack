@@ -191,6 +191,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         wrapper.document.details = document_details
         wrapper.document.external_id = self._get_doi(wrapper)
         wrapper.document.external_id_type = ExternalIdType.DOI
+        wrapper.document.doi = self._get_doi(wrapper)
 
         return wrapper.document
 
