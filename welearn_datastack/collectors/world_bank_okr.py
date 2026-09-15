@@ -10,6 +10,7 @@ from welearn_datastack import constants
 from welearn_datastack.data.url_collector import URLCollector
 from welearn_datastack.data.xml_data import XMLData
 from welearn_datastack.exceptions import NotEnoughData, NoUrl
+from welearn_datastack.modules.scraping_utils import clean_doi
 from welearn_datastack.modules.xml_extractor import XMLExtractor
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
@@ -61,9 +62,9 @@ class WorldBankOpenKnowledgeRepositoryCollector(URLCollector):
             )
             return None
 
-        content = doi.content.replace("https://doi.org/", "")
+        ret = clean_doi(doi.content)
 
-        return content
+        return ret
 
     @staticmethod
     def _extract_external_id(xml_input: XMLData) -> str:
