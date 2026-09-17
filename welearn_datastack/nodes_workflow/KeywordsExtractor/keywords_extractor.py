@@ -3,6 +3,7 @@ import os
 import uuid
 from typing import List
 
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import (
@@ -69,12 +70,17 @@ def main() -> None:
 
     # Extract keywords from descriptions
     logger.info("Starting keywords extraction")
+
+    # Delete previous relations
+    del_stmt = delete(WeLearnDocumentKeyword).where(
+        WeLearnDocumentKeyword.welearn_document_id.in_(docids)
+    )
+    logger.info("Delete all previous relation")
+    db_session.execute(del_stmt)
+    logger.info("All old relations were deleted")
+
     for wld in welearn_documents:
-        # Delete previous relations
-        db_session.query(WeLearnDocumentKeyword).filter(
-            WeLearnDocumentKeyword.welearn_document_id == wld.id
-        ).delete()
-        embedding_model_name_from_db = emb_model_by_docid.get(wld.id, dict()).get(
+        embedding_model_name_from_db = emb_model_by_docid.get(wld.id, {}).get(
             "model_name"
         )
         if not embedding_model_name_from_db:
