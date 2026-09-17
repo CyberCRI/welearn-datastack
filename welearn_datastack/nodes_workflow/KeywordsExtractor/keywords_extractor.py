@@ -73,7 +73,7 @@ def main() -> None:
 
     # Delete previous relations
     del_stmt = delete(WeLearnDocumentKeyword).where(
-        WeLearnDocumentKeyword.welearn_document_id.__in_(docids)
+        WeLearnDocumentKeyword.welearn_document_id.in_(docids)
     )
     logger.info("Delete all previous relation")
     db_session.execute(del_stmt)
