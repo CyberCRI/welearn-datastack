@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Collection, Dict, List, Literal, Type, TypedDict
+from typing import Collection, Dict, List, Type, TypedDict
 from uuid import UUID
 
-from sqlalchemy import Column, desc
+from sqlalchemy import Column, asc, desc, or_
 from sqlalchemy.orm import Query
 from sqlalchemy.sql import and_, func
 from welearn_database.data.enumeration import Step
@@ -322,6 +322,9 @@ def retrieve_models(
     else:
         raise ValueError("ML type not recognized")
 
+    # True if the model is from the parent of the corpus
+    is_parent_model = join_table.corpus_id != WeLearnDocument.corpus_id
+
     # Subquery to get the most recent model for each document based on used_since
     # and partition by document id and corpus id
     # We use row_number to get the most recent model per document
@@ -336,12 +339,19 @@ def retrieve_models(
             model_table.lang,
             func.row_number()
             .over(
-                partition_by=(WeLearnDocument.id, WeLearnDocument.corpus_id),
-                order_by=desc(join_table.used_since),
+                partition_by=WeLearnDocument.id,
+                order_by=(asc(is_parent_model), desc(join_table.used_since)),
             )
             .label("rn"),
         )
-        .join(join_table, join_table.corpus_id == WeLearnDocument.corpus_id)
+        .join(Corpus, Corpus.id == WeLearnDocument.corpus_id)
+        .join(
+            join_table,
+            or_(
+                join_table.corpus_id == Corpus.id,
+                join_table.corpus_id == Corpus.parent_corpus_id,
+            ),
+        )
         .join(model_table, model_table.id == relation_field)
         .filter(
             WeLearnDocument.id.in_(documents_ids),
