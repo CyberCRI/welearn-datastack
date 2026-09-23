@@ -59,6 +59,7 @@ def main() -> None:
         db_session,
         qty_max=qty_max,
         process_titles=[Step.KEPT_FOR_TRACE],
+        threshold_time_window_in_days=30,
     )
     logger.info("'%s' Docsids were retrieved", len(ids_to_batch))
 
