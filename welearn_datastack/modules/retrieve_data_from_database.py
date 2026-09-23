@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Collection, Dict, List, Literal, Type, TypedDict
+from typing import Collection, Dict, List, Type, TypedDict
 from uuid import UUID
 
 from sqlalchemy import Column, desc
@@ -18,6 +18,7 @@ from welearn_database.data.models import (
     NClassifierModel,
     ProcessState,
     Sdg,
+    TrackDocumentLatestState,
     WeLearnDocument,
 )
 
@@ -163,7 +164,7 @@ def retrieve_urls_ids(
     return [x[0] for x in db_data]
 
 
-def retrieve_documents_ids_according_process_title(
+def _retrieve_documents_ids_according_process_title_impl(
     session,
     process_titles: List[Step],
     weighed_scope: WeighedScope,
@@ -201,54 +202,37 @@ def retrieve_documents_ids_according_process_title(
     )
     session.close()
 
-    # Filter on total size
     if size_total_max is not None:
         logger.info("Filtering on total size")
-
-        if weighed_scope == WeighedScope.DOCUMENT:
-            logger.info(
-                "Filtering on document size, every values are in bytes an concern the full_content field"
-            )
-            total_size = compute_total_size(db_data)
-        elif weighed_scope == WeighedScope.SLICE:
-            # Sum of body and embedding
-            logger.info(
-                "Filtering on slice size, evey values are in bytes an concern the body and embedding fields"
-            )
-            total_size = sum([x[2] + x[3] for x in db_data])  # type: ignore
-        else:
-            raise ValueError("Weighed scope not recognized")
-
-        # If total size is bigger than the limit, filter
-        if total_size > size_total_max:
-            logger.info("Total size of the batch is too big, filtering")
-            size_accumulated = 0
-            db_data_filtered = []
-            for doc in db_data:
-                if weighed_scope == WeighedScope.DOCUMENT:
-                    size = doc[2] or 0
-                elif weighed_scope == WeighedScope.SLICE:
-                    # Sum of body and embedding
-                    size = (doc[2] or 0) + (doc[3] or 0)  # type: ignore
-                else:
-                    raise ValueError("Weighed scope not recognized")
-
-                if size_accumulated + size > size_total_max:
-                    break
-
-                size_accumulated += size
-                db_data_filtered.append(doc)
-            logger.info(
-                "Filtered batch size: %s", sum([x[2] for x in db_data_filtered])
-            )
-            logger.info("Batch size: %s Bytes", size_accumulated)
-            db_data = db_data_filtered  # type: ignore
+        db_data = _filter_rows_on_total_size(
+            db_data=db_data,
+            weighed_scope=weighed_scope,
+            size_total_max=size_total_max,
+        )
     else:
         logger.info("No size limit set")
 
     logger.info("Found %s results", len(db_data))
 
     return [str(x[0]) for x in db_data]
+
+
+def retrieve_documents_ids_according_process_title(
+    session,
+    process_titles: List[Step],
+    weighed_scope: WeighedScope,
+    corpus_name="*",
+    qty_max=100,
+    size_total_max: int | None = None,
+) -> List[str]:
+    return _retrieve_documents_ids_according_process_title_impl(
+        session=session,
+        process_titles=process_titles,
+        weighed_scope=weighed_scope,
+        corpus_name=corpus_name,
+        qty_max=qty_max,
+        size_total_max=size_total_max,
+    )
 
 
 def compute_total_size(
@@ -261,11 +245,61 @@ def compute_total_size(
     return ret
 
 
+def _get_row_size(
+    row: tuple[UUID, str, int] | tuple[UUID, str, int, int],
+    weighed_scope: WeighedScope,
+) -> int:
+    if weighed_scope == WeighedScope.DOCUMENT:
+        return row[2] or 0
+    if weighed_scope == WeighedScope.SLICE:
+        return (row[2] or 0) + (row[3] or 0)
+    raise ValueError("Weighed scope not recognized")
+
+
+def _filter_rows_on_total_size(
+    db_data: list[tuple[UUID, str, int]] | list[tuple[UUID, str, int, int]],
+    weighed_scope: WeighedScope,
+    size_total_max: int,
+):
+    if weighed_scope == WeighedScope.DOCUMENT:
+        logger.info(
+            "Filtering on document size, every values are in bytes an concern the full_content field"
+        )
+        total_size = compute_total_size(db_data)
+    elif weighed_scope == WeighedScope.SLICE:
+        logger.info(
+            "Filtering on slice size, evey values are in bytes an concern the body and embedding fields"
+        )
+        total_size = sum(_get_row_size(doc, weighed_scope) for doc in db_data)
+    else:
+        raise ValueError("Weighed scope not recognized")
+
+    if total_size <= size_total_max:
+        return db_data
+
+    logger.info("Total size of the batch is too big, filtering")
+    size_accumulated = 0
+    db_data_filtered = []
+    for doc in db_data:
+        size = _get_row_size(doc, weighed_scope)
+
+        if size_accumulated + size > size_total_max:
+            break
+
+        size_accumulated += size
+        db_data_filtered.append(doc)
+
+    logger.info("Filtered batch size: %s", sum([x[2] for x in db_data_filtered]))
+    logger.info("Batch size: %s Bytes", size_accumulated)
+    return db_data_filtered
+
+
 def retrieve_random_documents_ids_according_process_title(
     session,
     process_titles: List[Step],
     corpus_name="*",
     qty_max=100,
+    threshold_time_window_in_days: int | None = None,
 ) -> List[str]:
     """
     Get random Document IDs from DB according to the last process title
@@ -273,23 +307,26 @@ def retrieve_random_documents_ids_according_process_title(
     :param session: DB session
     :param qty_max: Max number of URL to retrieve
     :param corpus_name: Name of corpus to retrieve
+    :param threshold_time_window_in_days: Number of days you want to be elapsed before this method
     :return: List of url ids
     """
     titles = [step.value for step in process_titles]
 
-    query = _generate_query_size_limit(
-        session=session,
-        corpus_name=corpus_name,
-        generated_query_goal=WeighedScope.DOCUMENT,
-    )
-
-    # Retrieve random data from DB
-    db_data: List[QuerySizeLimitDocument] | List[QuerySizeLimitSlice] = (
-        query.filter(ProcessState.title.in_(titles))
+    query = (
+        session.query(TrackDocumentLatestState)
+        .filter(TrackDocumentLatestState.title.in_(titles))
         .order_by(func.random())
         .limit(qty_max)
-        .all()
     )
+
+    if corpus_name != "*":
+        query = query.join(Corpus).filter(Corpus.source_name == corpus_name)
+
+    if threshold_time_window_in_days is not None:
+        cutoff_date = datetime.now() - timedelta(days=threshold_time_window_in_days)
+        query = query.filter(TrackDocumentLatestState.created_at < cutoff_date)
+
+    db_data = query.all()
 
     logger.info("Found %s results", len(db_data))
 
