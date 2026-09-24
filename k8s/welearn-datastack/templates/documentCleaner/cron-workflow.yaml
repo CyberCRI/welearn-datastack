@@ -1,0 +1,101 @@
+{{- with .Values.documentCleaner }}
+{{- if and (.cronWorkflowTemplate.standard.enabled) ($.Values.cronWorkflows.enabled) }}
+kind: CronWorkflow
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: {{ .name }}
+spec:
+  workflowSpec:
+    {{- if $.Values.common.runOnGpu }}
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+            - key: gpu-node
+              operator: In
+              values:
+              - "true"
+    tolerations:
+    - key: "Gpu"
+      operator: "Equal"
+      value: "true"
+      effect: "NoSchedule"
+    {{- end }}
+    securityContext:
+      {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
+    templates:
+      - name: all
+        inputs:
+          parameters:
+            - name: log_level
+              default: "INFO"
+            - name: parallelism_threshold
+              default: "100000"
+            - name: parallelism_max
+              default: "15"
+            - name: document_ids_directory
+              default: document_ids
+            - name: document_ids_input_filename
+              default: "document_ids.csv"
+            - name: prepare_batches_memory
+              default: {{ .workflowTemplates.prepareBatches.requests.memory }}
+            - name: run_node_memory
+              default: {{ .workflowTemplates.runNode.requests.memory }}
+        steps:
+          - - name: generate-to-clean-batch
+              templateRef:
+                name: {{ .name }}-prepare-batches
+                template: generate-to-clean-batch
+              arguments:
+                parameters:
+                  - name: log_level
+                    value: >-
+                      {{ print "{{inputs.parameters.log_level}}" }}
+                  - name: parallelism_threshold
+                    value: {{ printf "{{inputs.parameters.parallelism_threshold}}" | quote }}
+                  - name: parallelism_max
+                    value: >-
+                      {{ print "{{inputs.parameters.parallelism_max}}" }}
+                  - name: document_ids_directory
+                    value: >-
+                      {{ print "{{inputs.parameters.document_ids_directory}}" }}
+                  - name: output_filename
+                    value: >-
+                      {{ print "{{inputs.parameters.document_ids_input_filename}}" }}
+                  - name: memory
+                    value: >-
+                      {{ print "{{inputs.parameters.prepare_batches_memory}}" }}
+          - - name: document-cleaner
+              templateRef:
+                name: {{ .name }}-run-node
+                template: document-cleaner
+              arguments:
+                parameters:
+                  - name: log_level
+                    value: >-
+                      {{ print "{{inputs.parameters.log_level}}" }}
+                  - name: document_ids_input_filename
+                    value: >-
+                      {{ print "{{item}}_{{inputs.parameters.document_ids_input_filename}}" }}
+                  - name: document_ids_directory
+                    value: >-
+                      {{ print "{{inputs.parameters.document_ids_directory}}" }}
+                  - name: memory
+                    value: >-
+                      {{ print "{{inputs.parameters.run_node_memory}}" }}
+                artifacts:
+                  - name: batch_ids_csv
+                    from: >-
+                      {{ print "{{steps.generate-to-clean-batch.outputs.artifacts.batch_ids_csv}}" }}
+              withSequence:
+                count: >-
+                  {{ print "{{steps.generate-to-clean-batch.outputs.parameters.batch_count}}" }}
+
+    entrypoint: all
+    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  schedules: [{{ .cronWorkflowTemplate.standard.schedule }}]
+{{- end }}
+{{- end }}
+
