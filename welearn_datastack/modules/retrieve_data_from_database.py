@@ -326,6 +326,8 @@ def retrieve_random_documents_ids_according_process_title(
         cutoff_date = datetime.now() - timedelta(days=threshold_time_window_in_days)
         query = query.filter(TrackDocumentLatestState.created_at < cutoff_date)
 
+    query = query.limit(qty_max)
+
     db_data = query.all()
 
     logger.info("Found %s results", len(db_data))
