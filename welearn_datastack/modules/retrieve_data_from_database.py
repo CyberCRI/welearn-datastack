@@ -316,7 +316,6 @@ def retrieve_random_documents_ids_according_process_title(
         session.query(TrackDocumentLatestState)
         .filter(TrackDocumentLatestState.title.in_(titles))
         .order_by(func.random())
-        .limit(qty_max)
     )
 
     if corpus_name != "*":
