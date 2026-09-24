@@ -43,6 +43,10 @@ def main() -> None:
 
     stmt = delete(DocumentSlice).where(DocumentSlice.document_id.in_(docids))
 
+    logger.info("Deletion started")
+    db_session.execute(stmt)
+    logger.info("Deletion finished")
+
     db_session.commit()
     db_session.close()
 
