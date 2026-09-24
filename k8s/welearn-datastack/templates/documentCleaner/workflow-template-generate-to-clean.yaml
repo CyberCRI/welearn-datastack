@@ -37,6 +37,8 @@ spec:
             default: "15"
           - name: document_ids_directory
             default: document_ids
+          - name: pick_qty_max
+            default: 1000
           - name: memory
             default: {{ .workflowTemplates.prepareBatches.requests.memory }}
           - name: batch_ids_count_file_name
@@ -70,6 +72,9 @@ spec:
           - name: PARALLELISM_THRESHOLD
             value: >-
               {{ print "{{inputs.parameters.parallelism_threshold}}" }}
+          - name: PICK_QTY_MAX
+            value: >-
+               {{ print "{{inputs.parameters.pick_qty_max }}" }}
           - name: PARALLELISM_URL_MAX
             value: {{ printf "{{inputs.parameters.parallelism_max}}" | quote }}
           - name: BATCH_URLS_DIRECTORY
