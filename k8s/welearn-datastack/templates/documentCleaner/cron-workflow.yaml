@@ -43,6 +43,8 @@ spec:
               default: {{ .workflowTemplates.prepareBatches.requests.memory }}
             - name: run_node_memory
               default: {{ .workflowTemplates.runNode.requests.memory }}
+            - name: pick_qty_max
+              default: 1000
         steps:
           - - name: generate-to-clean-batch
               templateRef:
@@ -67,6 +69,9 @@ spec:
                   - name: memory
                     value: >-
                       {{ print "{{inputs.parameters.prepare_batches_memory}}" }}
+                  - name: pick_qty_max
+                    value: >-
+                      {{ print "{{inputs.parameters.pick_qty_max}}" }}
           - - name: document-cleaner
               templateRef:
                 name: {{ .name }}-run-node
