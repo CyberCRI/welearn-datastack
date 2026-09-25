@@ -2,9 +2,11 @@ import os
 import unittest
 import uuid
 from datetime import datetime, timedelta
+from types import SimpleNamespace
+from typing import cast
 from unittest.mock import Mock, patch
 
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import (
@@ -18,11 +20,16 @@ from welearn_database.data.models import (
     EmbeddingModel,
     NClassifierModel,
     ProcessState,
+    TrackDocumentLatestState,
     WeLearnDocument,
 )
 
 from tests.database_test_utils import handle_schema_with_sqlite
-from welearn_datastack.data.enumerations import MLModelsType, URLRetrievalType
+from welearn_datastack.data.enumerations import (
+    MLModelsType,
+    URLRetrievalType,
+    WeighedScope,
+)
 from welearn_datastack.modules.retrieve_data_from_database import (
     retrieve_models,
     retrieve_random_documents_ids_according_process_title,
@@ -43,24 +50,64 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
     )
     def test_should_retrieve_new_urls_ids(self, mock_generate_query):
         session = Mock()
-        mock_generate_query.return_value.order_by.return_value.filter.return_value.limit.return_value.all.return_value = [
+        query = mock_generate_query.return_value
+        query.order_by.return_value.filter.return_value.limit.return_value.all.return_value = [
             ("id1",),
             ("id2",),
         ]
+
         result = retrieve_urls_ids(session, URLRetrievalType.NEW_MODE)
+
         self.assertEqual(result, ["id1", "id2"])
+        mock_generate_query.assert_called_once_with(
+            session=session,
+            generated_query_goal=WeighedScope.DOCUMENT,
+            corpus_name="*",
+        )
+        self.assertEqual(
+            str(query.order_by.call_args.args[0]),
+            str(ProcessState.operation_order.desc()),
+        )
+        self.assertEqual(
+            str(query.order_by.return_value.filter.call_args.args[0]),
+            str(ProcessState.title == "url_retrieved"),
+        )
+        query.order_by.return_value.filter.return_value.limit.assert_called_once_with(
+            None
+        )
+        session.close.assert_called_once_with()
 
     @patch(
         "welearn_datastack.modules.retrieve_data_from_database._generate_query_size_limit"
     )
     def test_should_retrieve_updated_urls_ids(self, mock_generate_query):
         session = Mock()
-        mock_generate_query.return_value.order_by.return_value.filter.return_value.limit.return_value.all.return_value = [
+        query = mock_generate_query.return_value
+        query.order_by.return_value.filter.return_value.limit.return_value.all.return_value = [
             ("id1",),
             ("id2",),
         ]
-        result = retrieve_urls_ids(session, URLRetrievalType.UPDATE_MODE)
+
+        fixed_now = datetime(2024, 1, 10, 12, 0, 0)
+        with patch(
+            "welearn_datastack.modules.retrieve_data_from_database.datetime"
+        ) as mock_datetime:
+            mock_datetime.now.return_value = fixed_now
+
+            result = retrieve_urls_ids(session, URLRetrievalType.UPDATE_MODE)
+
         self.assertEqual(result, ["id1", "id2"])
+        self.assertEqual(
+            str(query.order_by.return_value.filter.call_args.args[0]),
+            str(
+                (ProcessState.title == "document_in_qdrant")
+                & (ProcessState.created_at < (fixed_now - timedelta(hours=2)))
+            ),
+        )
+        query.order_by.return_value.filter.return_value.limit.assert_called_once_with(
+            None
+        )
+        session.close.assert_called_once_with()
 
     @patch(
         "welearn_datastack.modules.retrieve_data_from_database._generate_query_size_limit"
@@ -70,129 +117,69 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
     ):
         session = Mock()
         with self.assertRaises(ValueError):
-            retrieve_urls_ids(session, "invalid_mode")
+            retrieve_urls_ids(
+                session, cast(URLRetrievalType, cast(object, "invalid_mode"))
+            )
 
     def test_retrieve_random_documents_ids_according_process_title(self):
-        engine = create_engine("sqlite://")
+        session = Mock()
+        query = Mock()
+        first_id = uuid.uuid4()
+        second_id = uuid.uuid4()
+        session.query.return_value = query
+        query.filter.return_value = query
+        query.order_by.return_value = query
+        query.limit.return_value = query
+        query.all.return_value = [
+            SimpleNamespace(document_id=first_id),
+            SimpleNamespace(document_id=second_id),
+        ]
 
-        @event.listens_for(engine, "connect")
-        def connect(conn, rec):
-            conn.create_function("octet_length", 1, octet_length)
-
-        s_maker = sessionmaker(engine)
-        handle_schema_with_sqlite(engine)
-
-        test_session = s_maker()
-        Base.metadata.create_all(test_session.get_bind())
-        category_id = uuid.uuid4()
-        category_name = "test"
-        category = Category(id=category_id, title=category_name)
-
-        test_session.add(category)
-
-        corpus_source_name0 = "corpus0"
-        corpus_source_name1 = "corpus1"
-        corpus_test = Corpus(
-            id=uuid.uuid4(),
-            source_name=corpus_source_name0,
-            is_fix=True,
-            is_active=True,
-            category_id=category_id,
-        )
-        corpus_test1 = Corpus(
-            id=uuid.uuid4(),
-            source_name=corpus_source_name1,
-            is_fix=True,
-            category_id=category_id,
-            is_active=True,
-        )
-
-        doc_test_id0 = uuid.uuid4()
-        doc_test_id1 = uuid.uuid4()
-        doc_test_id2 = uuid.uuid4()
-        doc_test0 = WeLearnDocument(
-            id=doc_test_id0,
-            url="https://example.org",
-            corpus_id=corpus_test.id,
-            title="test",
-            lang="en",
-            full_content="test content test content test content test content test content test content test content test content ",
-            description="test",
-            details={"test": "test"},
-        )
-        doc_test1 = WeLearnDocument(
-            id=doc_test_id1,
-            url="https://example1.org",
-            corpus_id=corpus_test.id,
-            title="test",
-            lang="en",
-            full_content="test content test content test content test content test content test content test content test content ",
-            description="test",
-            details={"test": "test"},
-        )
-        doc_test2 = WeLearnDocument(
-            id=doc_test_id2,
-            url="https://example2.org",
-            corpus_id=corpus_test1.id,
-            title="test",
-            lang="en",
-            full_content="test content test content test content test content test content test content test content test content ",
-            description="test",
-            details={"test": "test"},
-        )
-
-        process_state0 = ProcessState(
-            document_id=doc_test_id0,
-            title=Step.DOCUMENT_IN_QDRANT.value,
-            id=uuid.uuid4(),
-        )
-        process_state1 = ProcessState(
-            document_id=doc_test_id1,
-            title=Step.DOCUMENT_CLASSIFIED_NON_SDG.value,
-            id=uuid.uuid4(),
-        )
-        process_state2 = ProcessState(
-            document_id=doc_test_id2,
-            title=Step.DOCUMENT_IN_QDRANT.value,
-            id=uuid.uuid4(),
-        )
-        test_session.add(corpus_test)
-        test_session.add(corpus_test1)
-        test_session.add(doc_test0)
-        test_session.add(doc_test1)
-        test_session.add(doc_test2)
-        test_session.add(process_state0)
-        test_session.add(process_state1)
-        test_session.add(process_state2)
-
-        test_session.commit()
-
-        res0 = retrieve_random_documents_ids_according_process_title(
-            session=test_session, process_titles=[Step.DOCUMENT_IN_QDRANT], qty_max=1
-        )
-
-        self.assertEqual(len(res0), 1)
-        self.assertIn(res0[0], [str(doc_test_id0), str(doc_test_id2)])
-
-        res1 = retrieve_random_documents_ids_according_process_title(
-            session=test_session, process_titles=[Step.DOCUMENT_IN_QDRANT], qty_max=2
-        )
-
-        self.assertEqual(len(res1), 2)
-        awaited_resp = [str(doc_test_id0), str(doc_test_id2)]
-        awaited_resp.sort()
-        res1.sort()
-        self.assertListEqual(res1, awaited_resp)
-
-        res2 = retrieve_random_documents_ids_according_process_title(
-            session=test_session,
+        result = retrieve_random_documents_ids_according_process_title(
+            session=session,
             process_titles=[Step.DOCUMENT_IN_QDRANT],
             qty_max=2,
-            corpus_name=corpus_test1.source_name,
         )
-        res2.sort()
-        self.assertEqual(len(res2), 1)
-        self.assertListEqual(res2, [str(doc_test_id2)])
+
+        session.query.assert_called_once_with(TrackDocumentLatestState)
+        self.assertEqual(
+            str(query.filter.call_args_list[0].args[0]),
+            str(TrackDocumentLatestState.title.in_([Step.DOCUMENT_IN_QDRANT.value])),
+        )
+        self.assertEqual(str(query.order_by.call_args.args[0]), str(func.random()))
+        query.limit.assert_called_once_with(2)
+        self.assertEqual(result, [str(first_id), str(second_id)])
+
+    def test_retrieve_random_documents_ids_according_process_title_with_threshold(self):
+        session = Mock()
+        query = Mock()
+        document_id = uuid.uuid4()
+        session.query.return_value = query
+        query.filter.return_value = query
+        query.order_by.return_value = query
+        query.limit.return_value = query
+        query.all.return_value = [SimpleNamespace(document_id=document_id)]
+
+        fixed_now = datetime(2024, 1, 10, 12, 0, 0)
+        with patch(
+            "welearn_datastack.modules.retrieve_data_from_database.datetime"
+        ) as mock_datetime:
+            mock_datetime.now.return_value = fixed_now
+
+            result = retrieve_random_documents_ids_according_process_title(
+                session=session,
+                process_titles=[Step.DOCUMENT_IN_QDRANT],
+                qty_max=1,
+                threshold_time_window_in_days=7,
+            )
+
+        self.assertEqual(result, [str(document_id)])
+        self.assertEqual(query.filter.call_count, 2)
+        self.assertEqual(
+            str(query.filter.call_args_list[1].args[0]),
+            str(TrackDocumentLatestState.created_at < (fixed_now - timedelta(days=7))),
+        )
+        query.limit.assert_called_once_with(1)
 
     def test_retrieve_bi_models(self):
         get_sub_environ_according_prefix.cache_clear()
@@ -293,9 +280,15 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             ml_type=MLModelsType.BI_CLASSIFIER,
         )
 
-        self.assertEqual(doc_test_id, list(res.keys())[0])
-        self.assertEqual(res[doc_test_id]["model_id"], bi_classifier_en_id)
-        self.assertEqual(res[doc_test_id]["model_name"], biclassifier_en_test.title)
+        self.assertEqual(
+            res,
+            {
+                doc_test_id: {
+                    "model_id": bi_classifier_en_id,
+                    "model_name": biclassifier_en_test.title,
+                }
+            },
+        )
 
     def test_retrieve_bi_models_no_models(self):
         get_sub_environ_according_prefix.cache_clear()
@@ -316,7 +309,7 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             ml_type=MLModelsType.BI_CLASSIFIER,
         )
 
-        self.assertEqual(len(res), 0)
+        self.assertEqual(res, {})
 
     def test_retrieve_n_models(self):
         get_sub_environ_according_prefix.cache_clear()
@@ -413,9 +406,15 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             ml_type=MLModelsType.N_CLASSIFIER,
         )
 
-        self.assertEqual(doc_test_id, list(res.keys())[0])
-        self.assertEqual(res[doc_test_id]["model_id"], n_classifier_en_id)
-        self.assertEqual(res[doc_test_id]["model_name"], nclassifier_en_test.title)
+        self.assertEqual(
+            res,
+            {
+                doc_test_id: {
+                    "model_id": n_classifier_en_id,
+                    "model_name": nclassifier_en_test.title,
+                }
+            },
+        )
 
     def test_retrieve_n_models_no_models(self):
         get_sub_environ_according_prefix.cache_clear()
@@ -436,7 +435,7 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             ml_type=MLModelsType.N_CLASSIFIER,
         )
 
-        self.assertEqual(len(res), 0)
+        self.assertEqual(res, {})
 
     def test_retrieve_embedding_models(self):
         get_sub_environ_according_prefix.cache_clear()
@@ -532,9 +531,15 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             ml_type=MLModelsType.EMBEDDING,
         )
 
-        self.assertEqual(doc_test_id, list(res.keys())[0])
-        self.assertEqual(res[doc_test_id]["model_id"], embedding_model_en_id)
-        self.assertEqual(res[doc_test_id]["model_name"], embedding_model_en_test.title)
+        self.assertEqual(
+            res,
+            {
+                doc_test_id: {
+                    "model_id": embedding_model_en_id,
+                    "model_name": embedding_model_en_test.title,
+                }
+            },
+        )
 
     def test_retrieve_embedding_models_no_models(self):
         get_sub_environ_according_prefix.cache_clear()
@@ -555,4 +560,4 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
             ml_type=MLModelsType.EMBEDDING,
         )
 
-        self.assertEqual(len(res), 0)
+        self.assertEqual(res, {})
