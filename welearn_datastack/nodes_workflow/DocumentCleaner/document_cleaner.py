@@ -3,7 +3,8 @@ import os
 
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
-from welearn_database.data.models import DocumentSlice
+from welearn_database.data.enumeration import Step
+from welearn_database.data.models import DocumentSlice, ProcessState
 
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.utils_.database_utils import create_db_session
@@ -46,6 +47,9 @@ def main() -> None:
     logger.info("Deletion started")
     db_session.execute(stmt)
     logger.info("Deletion finished")
+
+    for docid in docids:
+        db_session.add(ProcessState(documnent_id=docid, title=Step.DOCUMENT_CLEANED))
 
     db_session.commit()
     db_session.close()
