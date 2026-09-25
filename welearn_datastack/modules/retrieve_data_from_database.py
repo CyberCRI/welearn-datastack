@@ -331,7 +331,7 @@ def retrieve_random_documents_ids_according_process_title(
 
     logger.info("Found %s results", len(db_data))
 
-    return [str(x.id) for x in db_data]
+    return [str(x.document_id) for x in db_data]
 
 
 def retrieve_models(

@@ -131,8 +131,8 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         query.order_by.return_value = query
         query.limit.return_value = query
         query.all.return_value = [
-            SimpleNamespace(id=first_id),
-            SimpleNamespace(id=second_id),
+            SimpleNamespace(document_id=first_id),
+            SimpleNamespace(document_id=second_id),
         ]
 
         result = retrieve_random_documents_ids_according_process_title(
@@ -158,7 +158,7 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         query.filter.return_value = query
         query.order_by.return_value = query
         query.limit.return_value = query
-        query.all.return_value = [SimpleNamespace(id=document_id)]
+        query.all.return_value = [SimpleNamespace(document_id=document_id)]
 
         fixed_now = datetime(2024, 1, 10, 12, 0, 0)
         with patch(
