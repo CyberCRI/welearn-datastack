@@ -39,6 +39,8 @@ class TestDocumentCleanerUnit(TestCase):
         mock_retrieve_ids_from_csv,
         mock_setup_local_path,
     ):
+        mock_input_directory = "unit_test_input_directory"
+        mock_output_directory = "unit_test_output_directory"
         existing_doc_id_1 = uuid.uuid4()
         existing_doc_id_2 = uuid.uuid4()
         missing_doc_id = uuid.uuid4()
@@ -47,7 +49,10 @@ class TestDocumentCleanerUnit(TestCase):
         query = Mock()
         filtered_query = Mock()
         mock_create_db_session.return_value = db_session
-        mock_setup_local_path.return_value = ("/tmp/input", "/tmp/output")
+        mock_setup_local_path.return_value = (
+            mock_input_directory,
+            mock_output_directory,
+        )
         mock_retrieve_ids_from_csv.return_value = [
             existing_doc_id_1,
             missing_doc_id,
@@ -64,7 +69,7 @@ class TestDocumentCleanerUnit(TestCase):
 
         mock_retrieve_ids_from_csv.assert_called_once_with(
             input_artifact="batch_ids.csv",
-            input_directory="/tmp/input",
+            input_directory=mock_input_directory,
         )
         db_session.execute.assert_called_once()
         self.assertEqual(db_session.add.call_count, 2)
@@ -99,11 +104,16 @@ class TestDocumentCleanerUnit(TestCase):
         mock_retrieve_ids_from_csv,
         mock_setup_local_path,
     ):
+        mock_input_directory = "unit_test_input_directory"
+        mock_output_directory = "unit_test_output_directory"
         db_session = Mock()
         query = Mock()
         filtered_query = Mock()
         mock_create_db_session.return_value = db_session
-        mock_setup_local_path.return_value = ("/tmp/input", "/tmp/output")
+        mock_setup_local_path.return_value = (
+            mock_input_directory,
+            mock_output_directory,
+        )
         mock_retrieve_ids_from_csv.return_value = []
         db_session.query.return_value = query
         query.filter.return_value = filtered_query
