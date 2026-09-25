@@ -1,10 +1,11 @@
 import logging
 import os
+import uuid
 
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 from welearn_database.data.enumeration import Step
-from welearn_database.data.models import DocumentSlice, ProcessState
+from welearn_database.data.models import DocumentSlice, ProcessState, WeLearnDocument
 
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
 from welearn_datastack.utils_.database_utils import create_db_session
@@ -42,6 +43,13 @@ def main() -> None:
     db_session: Session = create_db_session()
     logger.info("DB session created")
 
+    existing_document_ids = {
+        document_id
+        for (document_id,) in db_session.query(WeLearnDocument.id)
+        .filter(WeLearnDocument.id.in_(docids))
+        .all()
+    }
+
     stmt = delete(DocumentSlice).where(DocumentSlice.document_id.in_(docids))
 
     logger.info("Deletion started")
@@ -49,7 +57,16 @@ def main() -> None:
     logger.info("Deletion finished")
 
     for docid in docids:
-        db_session.add(ProcessState(documnent_id=docid, title=Step.DOCUMENT_CLEANED))
+        if docid not in existing_document_ids:
+            continue
+
+        db_session.add(
+            ProcessState(
+                id=uuid.uuid4(),
+                document_id=docid,
+                title=Step.DOCUMENT_CLEANED.value,
+            )
+        )
 
     db_session.commit()
     db_session.close()
