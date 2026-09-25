@@ -327,11 +327,11 @@ def retrieve_random_documents_ids_according_process_title(
 
     query = query.limit(qty_max)
 
-    db_data = query.all()
+    db_data: Collection[TrackDocumentLatestState] = query.all()
 
     logger.info("Found %s results", len(db_data))
 
-    return [str(x[0]) for x in db_data]
+    return [str(x.id) for x in db_data]
 
 
 def retrieve_models(
