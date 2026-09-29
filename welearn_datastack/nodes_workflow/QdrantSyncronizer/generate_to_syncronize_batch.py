@@ -70,6 +70,7 @@ def main() -> None:
                 Step.DOCUMENT_KEYWORDS_EXTRACTED,
                 Step.DOCUMENT_CLASSIFIED_NON_SDG,
                 Step.DOCUMENT_IS_INVALID,
+                Step.DOCUMENT_IS_IRRETRIEVABLE,
             ],
             size_total_max=size_limit,
             weighed_scope=WeighedScope.DOCUMENT,
