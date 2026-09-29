@@ -24,6 +24,7 @@ from welearn_database.data.models import (
 from tests.database_test_utils import handle_schema_with_sqlite
 from welearn_datastack.data.enumerations import MLModelsType, URLRetrievalType
 from welearn_datastack.modules.retrieve_data_from_database import (
+    get_corpus_and_sub_corpus_repartition,
     retrieve_models,
     retrieve_random_documents_ids_according_process_title,
     retrieve_urls_ids,
@@ -769,3 +770,83 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         )
 
         self.assertEqual(len(res), 0)
+
+    def test_get_corpus_and_sub_corpus_repartition(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        main_corpus_id = uuid.uuid4()
+        sub_corpus_id = uuid.uuid4()
+        cat_id = uuid.uuid4()
+
+        cat = Category(id=cat_id, title="cat")
+        test_session.add(cat)
+        test_session.commit()
+
+        main_corpus = Corpus(
+            id=main_corpus_id,
+            source_name="test-corpus",
+            is_fix=True,
+            is_active=True,
+            category_id=cat_id,
+        )
+
+        sub_corpus = Corpus(
+            id=sub_corpus_id,
+            source_name="test-sub-corpus",
+            parent_corpus_id=main_corpus_id,
+            is_fix=True,
+            is_active=True,
+            category_id=cat_id,
+        )
+
+        test_session.add(main_corpus)
+        test_session.commit()
+
+        test_session.add(sub_corpus)
+        test_session.commit()
+
+        res = get_corpus_and_sub_corpus_repartition(test_session, sub_corpus)
+
+        self.assertEqual(res.corpus.id, main_corpus_id)
+        self.assertEqual(res.sub_corpus.id, sub_corpus_id)
+
+    def test_get_corpus_and_sub_corpus_repartition_with_only_main_corpus(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        main_corpus_id = uuid.uuid4()
+        cat_id = uuid.uuid4()
+
+        cat = Category(id=cat_id, title="cat")
+        test_session.add(cat)
+        test_session.commit()
+
+        main_corpus = Corpus(
+            id=main_corpus_id,
+            source_name="test-corpus",
+            is_fix=True,
+            is_active=True,
+            category_id=cat_id,
+        )
+
+        test_session.add(main_corpus)
+        test_session.commit()
+
+        res = get_corpus_and_sub_corpus_repartition(test_session, main_corpus)
+
+        self.assertEqual(res.corpus.id, main_corpus_id)
