@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import DocumentSlice, ProcessState
 
+from welearn_datastack.data.db_wrapper import CorpusRelation
 from welearn_datastack.modules.qdrant_handler import (
     classify_documents_per_collection,
     convert_slice_in_qdrant_point,
@@ -20,6 +21,7 @@ from welearn_datastack.modules.qdrant_handler import (
 )
 from welearn_datastack.modules.retrieve_data_from_database import (
     check_process_state_for_documents,
+    get_corpus_relations_for_document_ids,
     retrieve_slices_sdgs,
 )
 from welearn_datastack.modules.retrieve_data_from_files import retrieve_ids_from_csv
@@ -158,6 +160,11 @@ def main() -> None:
             if len(ids_doc_need_to_insert) > 0:
                 # Generate points if needed
                 points: List[PointStruct] = []
+                c_rel: dict[UUID, CorpusRelation] = (
+                    get_corpus_relations_for_document_ids(
+                        db_session=db_session, document_ids=ids_doc_need_to_insert
+                    )
+                )
                 for docid in ids_doc_need_to_insert:
                     document_slices = slices_per_doc[docid]
                     slices_sdgs = retrieve_slices_sdgs(db_session, document_slices)
@@ -166,6 +173,7 @@ def main() -> None:
                         for s in document_slices
                         if s.id in slices_sdgs
                     ]
+
                     accurate_sdgs = [
                         sdg for sdg, _ in Counter(all_document_sdgs).most_common(2)
                     ]
@@ -177,6 +185,10 @@ def main() -> None:
                                     slice_to_convert=doc_slice,
                                     document_sdgs=accurate_sdgs,
                                     slice_sdg=slices_sdgs[doc_slice.id],  # type: ignore
+                                    document_corpus=c_rel[doc_slice.document_id].corpus,
+                                    document_sub_corpus=c_rel[
+                                        doc_slice.document_id
+                                    ].sub_corpus,
                                 )
                             )
 

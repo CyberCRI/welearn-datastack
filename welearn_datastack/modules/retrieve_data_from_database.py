@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from typing import Collection, Dict, List, TypedDict
 from uuid import UUID
 
-from sqlalchemy import Column, asc, desc, or_
-from sqlalchemy.orm import Query
+from sqlalchemy import Column, Row, asc, desc, or_
+from sqlalchemy.orm import Query, Session
 from sqlalchemy.sql import and_, func
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import (
@@ -40,6 +40,7 @@ class ModelInfo(TypedDict):
 
 
 ModelsDict = Dict[UUID, ModelInfo]
+main_corpus_dict: dict[UUID, Corpus | None] = {}
 
 # logic
 
@@ -478,9 +479,14 @@ def get_model_classification_model_by_id(
 
 
 def get_corpus_and_sub_corpus_repartition(db_session, corpus: Corpus) -> CorpusRelation:
-    main_corpus: Corpus | None = (
-        db_session.query(Corpus).filter(Corpus.id == corpus.parent_corpus_id).first()
-    )
+    if corpus not in main_corpus_dict:
+        req_corpus: Corpus | None = (
+            db_session.query(Corpus)
+            .filter(Corpus.id == corpus.parent_corpus_id)
+            .first()
+        )
+        main_corpus_dict[corpus.id] = req_corpus
+    main_corpus = main_corpus_dict[corpus.id]
 
     if main_corpus:
         return CorpusRelation(sub_corpus=corpus, corpus=main_corpus)
@@ -488,3 +494,26 @@ def get_corpus_and_sub_corpus_repartition(db_session, corpus: Corpus) -> CorpusR
     return CorpusRelation(
         corpus=corpus,
     )
+
+
+def get_corpus_for_document_ids(
+    db_session: Session, ids: list[UUID]
+) -> list[Row[tuple[Corpus, UUID]]]:
+    ret = (
+        db_session.query(Corpus, WeLearnDocument.id)
+        .join(WeLearnDocument, WeLearnDocument.corpus_id == Corpus.id)
+        .where(WeLearnDocument.id.in_(ids))
+        .all()
+    )
+
+    return ret
+
+
+def get_corpus_relations_for_document_ids(
+    db_session: Session, document_ids: list[UUID]
+) -> dict[UUID, CorpusRelation]:
+    ret = {}
+    for corpus, doc_id in get_corpus_for_document_ids(db_session, document_ids):
+        rel = get_corpus_and_sub_corpus_repartition(db_session, corpus)
+        ret[doc_id] = rel
+    return ret
