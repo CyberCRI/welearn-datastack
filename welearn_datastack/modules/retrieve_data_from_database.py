@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Collection, Dict, List, Type, TypedDict
+from typing import Collection, Dict, List, TypedDict
 from uuid import UUID
 
 from sqlalchemy import Column, asc, desc, or_
@@ -21,6 +21,7 @@ from welearn_database.data.models import (
     WeLearnDocument,
 )
 
+from welearn_datastack.data.db_wrapper import CorpusRelation
 from welearn_datastack.data.enumerations import (
     MLModelsType,
     URLRetrievalType,
@@ -414,7 +415,7 @@ def check_process_state_for_documents(
 
 
 def retrieve_slices_sdgs(
-    db_session, slices: Collection[Type[DocumentSlice]]
+    db_session, slices: Collection[DocumentSlice]
 ) -> Dict[UUID | Column["UUID"], int]:
     """
     Retrieve slices sdgs from a list of slices
@@ -473,4 +474,17 @@ def get_model_classification_model_by_id(
 
     raise NoModelFoundError(
         f"Model not found in the database according this id : {model_id}"
+    )
+
+
+def get_corpus_and_sub_corpus_repartition(db_session, corpus: Corpus) -> CorpusRelation:
+    main_corpus: Corpus | None = (
+        db_session.query(Corpus).filter(Corpus.id == corpus.parent_corpus_id).first()
+    )
+
+    if main_corpus:
+        return CorpusRelation(sub_corpus=corpus, corpus=main_corpus)
+
+    return CorpusRelation(
+        corpus=corpus,
     )
