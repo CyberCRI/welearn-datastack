@@ -26,6 +26,8 @@ spec:
             default: {{ $.Values.common.config.qdrant_url }}
           - name: qdrant_http_port
             default: {{ $.Values.common.config.qdrant_http_port }}
+          - name: qdrant_prefers_grpc
+            default: "True"
       outputs:
         artifacts:
           - name: work_db
@@ -51,6 +53,9 @@ spec:
           - name: QDRANT_HTTP_PORT
             value: >-
               {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+          - name: QDRANT_PREFERS_GRPC
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_prefers_grpc}}" }}
         args:
           - bash
           - -lc
@@ -239,6 +244,8 @@ spec:
             default: {{ $.Values.common.config.qdrant_url }}
           - name: qdrant_http_port
             default: {{ $.Values.common.config.qdrant_http_port }}
+          - name: qdrant_prefers_grpc
+            default: "True"
           - name: qdrant_timeout
             default: "60"
         artifacts:
@@ -338,6 +345,9 @@ spec:
                 - name: qdrant_http_port
                   value: >-
                     {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+                - name: qdrant_prefers_grpc
+                  value: >-
+                    {{ print "{{inputs.parameters.qdrant_prefers_grpc}}" }}
 
         - - name: get-journals
             templateRef:

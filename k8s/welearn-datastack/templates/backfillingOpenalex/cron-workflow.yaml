@@ -22,6 +22,8 @@ spec:
               default: {{ $.Values.common.config.qdrant_url }}
             - name: qdrant_http_port
               default: {{ $.Values.common.config.qdrant_http_port }}
+            - name: qdrant_prefers_grpc
+              default: "True"
             - name: qdrant_timeout
               default: "60"
             - name: pg_db
@@ -58,6 +60,9 @@ spec:
                   - name: qdrant_http_port
                     value: >-
                       {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+                  - name: qdrant_prefers_grpc
+                    value: >-
+                      {{ print "{{inputs.parameters.qdrant_prefers_grpc}}" }}
                   - name: qdrant_timeout
                     value: >-
                       {{ print "{{inputs.parameters.qdrant_timeout}}" }}
