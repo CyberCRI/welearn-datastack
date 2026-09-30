@@ -306,6 +306,8 @@ spec:
             default: {{ $.Values.common.config.qdrant_url }}
           - name: qdrant_http_port
             default: {{ $.Values.common.config.qdrant_http_port }}
+          - name: qdrant_prefers_grpc
+            default: "True"
           - name: qdrant_timeout
             default: "60"
           - name: pg_db
