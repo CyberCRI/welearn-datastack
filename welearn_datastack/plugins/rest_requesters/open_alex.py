@@ -191,6 +191,7 @@ class OpenAlexCollector(IPluginRESTCollector):
         wrapper.document.details = document_details
         wrapper.document.external_id = self._get_doi(wrapper)
         wrapper.document.external_id_type = ExternalIdType.DOI
+        wrapper.document.doi = self._get_doi(wrapper)
 
         return wrapper.document
 
@@ -214,7 +215,7 @@ class OpenAlexCollector(IPluginRESTCollector):
             "publication_date": self._build_publication_date(wrapper),
             "type": wrapper.raw_data.type,
             "doi": self._get_doi(wrapper),
-            "publisher": wrapper.raw_data.best_oa_location.source.host_organization_name,
+            "publisher": wrapper.raw_data.best_oa_location.source.display_name,
             "license_url": self._get_licence(document_url, wrapper),
             "issn": wrapper.raw_data.best_oa_location.source.issn_l,
             "content_from_pdf": pdf_flag,
