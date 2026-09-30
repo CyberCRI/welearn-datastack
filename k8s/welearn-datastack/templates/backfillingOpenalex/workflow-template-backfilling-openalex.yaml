@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: WorkflowTemplate
 metadata:
-  name: {{ .name }}
+  name: {{ .name }}-workflow
 spec:
   entrypoint: all
   serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
@@ -316,7 +316,7 @@ spec:
       steps:
         - - name: get-documents-id-from-qdrant
             templateRef:
-              name: {{ .name }}
+              name: {{ .name }}-workflow
               template: get-documents-id-from-qdrant
             arguments:
               parameters:
@@ -341,7 +341,7 @@ spec:
 
         - - name: get-journals
             templateRef:
-              name: {{ .name }}
+              name: {{ .name }}-workflow
               template: get-journals
             arguments:
               parameters:
@@ -361,7 +361,7 @@ spec:
 
         - - name: create-new-corpus
             templateRef:
-              name: {{ .name }}
+              name: {{ .name }}-workflow
               template: create-new-corpus
             arguments:
               parameters:
@@ -384,7 +384,7 @@ spec:
 
         - - name: update-welearn-document
             templateRef:
-              name: {{ .name }}
+              name: {{ .name }}-workflow
               template: update-welearn-document
             arguments:
               parameters:
@@ -407,7 +407,7 @@ spec:
 
         - - name: update-qdrant
             templateRef:
-              name: {{ .name }}
+              name: {{ .name }}-workflow
               template: update-qdrant
             arguments:
               parameters:

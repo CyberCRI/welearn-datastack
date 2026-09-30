@@ -39,7 +39,7 @@ spec:
         steps:
           - - name: backfilling-openalex
               templateRef:
-                name: {{ .name }}
+                name: {{ .name }}-workflow
                 template: all
               arguments:
                 parameters:

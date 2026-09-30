@@ -415,7 +415,7 @@ backfillingOpenalex:
 
   cronWorkflowTemplate:
     standard:
-      enabled: false
+      enabled: true
       schedule: 15 2 * * *
 
 updateMaterializedViews:
