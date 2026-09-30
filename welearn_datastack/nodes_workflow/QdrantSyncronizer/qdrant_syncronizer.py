@@ -262,6 +262,7 @@ def generate_needed_qdrant_points(
     for docid in ids_doc_need_to_insert:
         document_slices = slices_per_doc[docid]
         slices_sdgs = retrieve_slices_sdgs(db_session, document_slices)
+        corpus_relation = c_rel[docid]
         all_document_sdgs = [
             slices_sdgs[s.id]  # type: ignore
             for s in document_slices
@@ -277,8 +278,12 @@ def generate_needed_qdrant_points(
                         slice_to_convert=doc_slice,
                         document_sdgs=accurate_sdgs,
                         slice_sdg=slices_sdgs[doc_slice.id],  # type: ignore
-                        document_corpus=c_rel[doc_slice.document_id].corpus.source_name,
-                        document_sub_corpus=c_rel[doc_slice.document_id].sub_corpus.source_name,  # type: ignore
+                        document_corpus=corpus_relation.corpus.source_name,
+                        document_sub_corpus=(
+                            corpus_relation.sub_corpus.source_name
+                            if corpus_relation.sub_corpus is not None
+                            else None
+                        ),
                     )
                 )
     return points
