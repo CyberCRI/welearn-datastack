@@ -46,7 +46,23 @@ def get_documents_id_from_qdrant(client, quantity: int):
 
 
 def main():
-    client = QdrantClient(url=f"{QDRANT_URL}:{QDRANT_HTTP_PORT}")
+    qdrant_timeout: int = int(os.getenv("QDRANT_TIMEOUT", "60"))
+    qdrant_grpc_port: int = int(os.getenv("QDRANT_GRPC_PORT", "6334"))
+    qdrant_http_port: int = int(os.getenv("QDRANT_HTTP_PORT", "6333"))
+    qdrant_url: str = os.getenv("QDRANT_URL", "localhost")
+    qdrant_prefers_grpc: bool = (
+        os.getenv("QDRANT_PREFERS_GRPC", "False").lower() == "true"
+    )
+
+    client = QdrantClient(
+        url=qdrant_url,
+        port=qdrant_http_port,
+        grpc_port=qdrant_grpc_port,
+        prefer_grpc=qdrant_prefers_grpc,
+        timeout=qdrant_timeout,
+        https=True,
+    )
+
     create_work_db()
     hits = get_documents_id_from_qdrant(client, quantity=int(QTY))
     rows = extract_document_id_from_points(hits)
