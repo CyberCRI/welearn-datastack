@@ -177,7 +177,7 @@ def handle_collection(
 
         if len(ids_doc_need_to_insert) > 0:
             points = generate_needed_qdrant_points(
-                db_session, ids_doc_need_to_insert, slices_per_doc
+                db_session, ids_doc_need_to_insert, slices_per_doc  # type: ignore
             )
 
             # Insert points
@@ -245,7 +245,7 @@ def adding_new_process_state(
 def generate_needed_qdrant_points(
     db_session: Session,
     ids_doc_need_to_insert: list[UUID],
-    slices_per_doc: dict[UUID, list[type[DocumentSlice]]],
+    slices_per_doc: dict[UUID, list[DocumentSlice]],
 ) -> list[PointStruct]:
     """Build Qdrant points for documents ready to be inserted.
 
@@ -277,8 +277,8 @@ def generate_needed_qdrant_points(
                         slice_to_convert=doc_slice,
                         document_sdgs=accurate_sdgs,
                         slice_sdg=slices_sdgs[doc_slice.id],  # type: ignore
-                        document_corpus=c_rel[doc_slice.document_id].corpus,
-                        document_sub_corpus=c_rel[doc_slice.document_id].sub_corpus,
+                        document_corpus=c_rel[doc_slice.document_id].corpus.source_name,
+                        document_sub_corpus=c_rel[doc_slice.document_id].sub_corpus.source_name,  # type: ignore
                     )
                 )
     return points
