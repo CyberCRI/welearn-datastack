@@ -1,0 +1,438 @@
+{{- with .Values.backfillingOpenalex }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}
+spec:
+  entrypoint: all
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  templates:
+    - name: get-documents-id-from-qdrant
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"limits\": {\"memory\": \"{{inputs.parameters.memory}}\"}, \"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: db_directory
+            default: "/tmp/openalex-work"
+          - name: db_file_name
+            default: "work.db"
+          - name: memory
+            default: {{ .workflowTemplates.getDocumentsFromQdrant.requests.memory }}
+          - name: pick_qty_max
+            default: "100000"
+          - name: qdrant_url
+            default: {{ $.Values.common.config.qdrant_url }}
+          - name: qdrant_http_port
+            default: {{ $.Values.common.config.qdrant_http_port }}
+      outputs:
+        artifacts:
+          - name: work_db
+            path: >-
+              {{ print "{{inputs.parameters.db_directory}}" }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: DB_FILE
+            value: >-
+              {{ print "{{inputs.parameters.db_directory}}/{{inputs.parameters.db_file_name}}" }}
+          - name: PICK_QTY_MAX
+            value: >-
+              {{ print "{{inputs.parameters.pick_qty_max}}" }}
+          - name: QDRANT_URL
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_url}}" }}
+          - name: QDRANT_HTTP_PORT
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+        args:
+          - bash
+          - -lc
+          - >-
+            mkdir -p "{{ print "{{inputs.parameters.db_directory}}" }}"
+            && python /app/welearn_datastack/nodes_workflow/BackFiller/backfilling_openalex/1_get_documents_id_from_qdrant.py
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+
+    - name: get-journals
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"limits\": {\"memory\": \"{{inputs.parameters.memory}}\"}, \"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: db_directory
+            default: "/tmp/openalex-work"
+          - name: db_file_name
+            default: "work.db"
+          - name: memory
+            default: {{ .workflowTemplates.getJournals.requests.memory }}
+        artifacts:
+          - name: work_db
+            path: >-
+              {{ print "{{inputs.parameters.db_directory}}" }}
+      outputs:
+        artifacts:
+          - name: work_db
+            path: >-
+              {{ print "{{inputs.parameters.db_directory}}" }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: DB_FILE
+            value: >-
+              {{ print "{{inputs.parameters.db_directory}}/{{inputs.parameters.db_file_name}}" }}
+        args:
+          - bash
+          - -lc
+          - >-
+            mkdir -p "{{ print "{{inputs.parameters.db_directory}}" }}"
+            && python /app/welearn_datastack/nodes_workflow/BackFiller/backfilling_openalex/2_get_journals.py
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+
+    - name: create-new-corpus
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"limits\": {\"memory\": \"{{inputs.parameters.memory}}\"}, \"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: db_directory
+            default: "/tmp/openalex-work"
+          - name: db_file_name
+            default: "work.db"
+          - name: memory
+            default: {{ .workflowTemplates.createNewCorpus.requests.memory }}
+          - name: pg_db
+            default: {{ $.Values.common.config.nonSensitive.PG_DATABASE }}
+        artifacts:
+          - name: work_db
+            path: >-
+              {{ print "{{inputs.parameters.db_directory}}" }}
+      outputs:
+        artifacts:
+          - name: work_db
+            path: >-
+              {{ print "{{inputs.parameters.db_directory}}" }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: DB_FILE
+            value: >-
+              {{ print "{{inputs.parameters.db_directory}}/{{inputs.parameters.db_file_name}}" }}
+          - name: PG_DB
+            value: >-
+              {{ print "{{inputs.parameters.pg_db}}" }}
+          - name: PGDATABASE
+            value: >-
+              {{ print "{{inputs.parameters.pg_db}}" }}
+        args:
+          - bash
+          - -lc
+          - >-
+            mkdir -p "{{ print "{{inputs.parameters.db_directory}}" }}"
+            && python /app/welearn_datastack/nodes_workflow/BackFiller/backfilling_openalex/3_create_new_corpus.py
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+
+    - name: update-welearn-document
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"limits\": {\"memory\": \"{{inputs.parameters.memory}}\"}, \"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: db_directory
+            default: "/tmp/openalex-work"
+          - name: db_file_name
+            default: "work.db"
+          - name: memory
+            default: {{ .workflowTemplates.updateWelearnDocument.requests.memory }}
+          - name: pg_db
+            default: {{ $.Values.common.config.nonSensitive.PG_DATABASE }}
+        artifacts:
+          - name: work_db
+            path: >-
+              {{ print "{{inputs.parameters.db_directory}}" }}
+      outputs:
+        artifacts:
+          - name: work_db
+            path: >-
+              {{ print "{{inputs.parameters.db_directory}}" }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: DB_FILE
+            value: >-
+              {{ print "{{inputs.parameters.db_directory}}/{{inputs.parameters.db_file_name}}" }}
+          - name: PG_DB
+            value: >-
+              {{ print "{{inputs.parameters.pg_db}}" }}
+          - name: PGDATABASE
+            value: >-
+              {{ print "{{inputs.parameters.pg_db}}" }}
+        args:
+          - bash
+          - -lc
+          - >-
+            mkdir -p "{{ print "{{inputs.parameters.db_directory}}" }}"
+            && python /app/welearn_datastack/nodes_workflow/BackFiller/backfilling_openalex/4_update_welearn_document.py
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+
+    - name: update-qdrant
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"limits\": {\"memory\": \"{{inputs.parameters.memory}}\"}, \"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: db_directory
+            default: "/tmp/openalex-work"
+          - name: db_file_name
+            default: "work.db"
+          - name: memory
+            default: {{ .workflowTemplates.updateQdrant.requests.memory }}
+          - name: qdrant_url
+            default: {{ $.Values.common.config.qdrant_url }}
+          - name: qdrant_http_port
+            default: {{ $.Values.common.config.qdrant_http_port }}
+          - name: qdrant_timeout
+            default: "60"
+        artifacts:
+          - name: work_db
+            path: >-
+              {{ print "{{inputs.parameters.db_directory}}" }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: DB_FILE
+            value: >-
+              {{ print "{{inputs.parameters.db_directory}}/{{inputs.parameters.db_file_name}}" }}
+          - name: QDRANT_URL
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_url}}" }}
+          - name: QDRANT_HTTP_PORT
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+          - name: QDRANT_TIMEOUT
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_timeout}}" }}
+        args:
+          - bash
+          - -lc
+          - >-
+            mkdir -p "{{ print "{{inputs.parameters.db_directory}}" }}"
+            && python /app/welearn_datastack/nodes_workflow/BackFiller/backfilling_openalex/5_update_qdrant.py
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+
+    - name: all
+      synchronization:
+        semaphores:
+          - configMapKeyRef:
+              name: {{ .workflowSemaphore.configmapName }}
+              key: {{ .workflowSemaphore.standard.keyName }}
+      inputs:
+        parameters:
+          - name: db_directory
+            default: "/tmp/openalex-work"
+          - name: db_file_name
+            default: "work.db"
+          - name: pick_qty_max
+            default: "100000"
+          - name: qdrant_url
+            default: {{ $.Values.common.config.qdrant_url }}
+          - name: qdrant_http_port
+            default: {{ $.Values.common.config.qdrant_http_port }}
+          - name: qdrant_timeout
+            default: "60"
+          - name: pg_db
+            default: {{ $.Values.common.config.nonSensitive.PG_DATABASE }}
+          - name: memory_get_documents
+            default: {{ .workflowTemplates.getDocumentsFromQdrant.requests.memory }}
+          - name: memory_get_journals
+            default: {{ .workflowTemplates.getJournals.requests.memory }}
+          - name: memory_create_corpus
+            default: {{ .workflowTemplates.createNewCorpus.requests.memory }}
+          - name: memory_update_documents
+            default: {{ .workflowTemplates.updateWelearnDocument.requests.memory }}
+          - name: memory_update_qdrant
+            default: {{ .workflowTemplates.updateQdrant.requests.memory }}
+      steps:
+        - - name: get-documents-id-from-qdrant
+            templateRef:
+              name: {{ .name }}
+              template: get-documents-id-from-qdrant
+            arguments:
+              parameters:
+                - name: db_directory
+                  value: >-
+                    {{ print "{{inputs.parameters.db_directory}}" }}
+                - name: db_file_name
+                  value: >-
+                    {{ print "{{inputs.parameters.db_file_name}}" }}
+                - name: memory
+                  value: >-
+                    {{ print "{{inputs.parameters.memory_get_documents}}" }}
+                - name: pick_qty_max
+                  value: >-
+                    {{ print "{{inputs.parameters.pick_qty_max}}" }}
+                - name: qdrant_url
+                  value: >-
+                    {{ print "{{inputs.parameters.qdrant_url}}" }}
+                - name: qdrant_http_port
+                  value: >-
+                    {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+
+        - - name: get-journals
+            templateRef:
+              name: {{ .name }}
+              template: get-journals
+            arguments:
+              parameters:
+                - name: db_directory
+                  value: >-
+                    {{ print "{{inputs.parameters.db_directory}}" }}
+                - name: db_file_name
+                  value: >-
+                    {{ print "{{inputs.parameters.db_file_name}}" }}
+                - name: memory
+                  value: >-
+                    {{ print "{{inputs.parameters.memory_get_journals}}" }}
+              artifacts:
+                - name: work_db
+                  from: >-
+                    {{ print "{{steps.get-documents-id-from-qdrant.outputs.artifacts.work_db}}" }}
+
+        - - name: create-new-corpus
+            templateRef:
+              name: {{ .name }}
+              template: create-new-corpus
+            arguments:
+              parameters:
+                - name: db_directory
+                  value: >-
+                    {{ print "{{inputs.parameters.db_directory}}" }}
+                - name: db_file_name
+                  value: >-
+                    {{ print "{{inputs.parameters.db_file_name}}" }}
+                - name: memory
+                  value: >-
+                    {{ print "{{inputs.parameters.memory_create_corpus}}" }}
+                - name: pg_db
+                  value: >-
+                    {{ print "{{inputs.parameters.pg_db}}" }}
+              artifacts:
+                - name: work_db
+                  from: >-
+                    {{ print "{{steps.get-journals.outputs.artifacts.work_db}}" }}
+
+        - - name: update-welearn-document
+            templateRef:
+              name: {{ .name }}
+              template: update-welearn-document
+            arguments:
+              parameters:
+                - name: db_directory
+                  value: >-
+                    {{ print "{{inputs.parameters.db_directory}}" }}
+                - name: db_file_name
+                  value: >-
+                    {{ print "{{inputs.parameters.db_file_name}}" }}
+                - name: memory
+                  value: >-
+                    {{ print "{{inputs.parameters.memory_update_documents}}" }}
+                - name: pg_db
+                  value: >-
+                    {{ print "{{inputs.parameters.pg_db}}" }}
+              artifacts:
+                - name: work_db
+                  from: >-
+                    {{ print "{{steps.create-new-corpus.outputs.artifacts.work_db}}" }}
+
+        - - name: update-qdrant
+            templateRef:
+              name: {{ .name }}
+              template: update-qdrant
+            arguments:
+              parameters:
+                - name: db_directory
+                  value: >-
+                    {{ print "{{inputs.parameters.db_directory}}" }}
+                - name: db_file_name
+                  value: >-
+                    {{ print "{{inputs.parameters.db_file_name}}" }}
+                - name: memory
+                  value: >-
+                    {{ print "{{inputs.parameters.memory_update_qdrant}}" }}
+                - name: qdrant_url
+                  value: >-
+                    {{ print "{{inputs.parameters.qdrant_url}}" }}
+                - name: qdrant_http_port
+                  value: >-
+                    {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+                - name: qdrant_timeout
+                  value: >-
+                    {{ print "{{inputs.parameters.qdrant_timeout}}" }}
+              artifacts:
+                - name: work_db
+                  from: >-
+                    {{ print "{{steps.update-welearn-document.outputs.artifacts.work_db}}" }}
+{{- end }}
+
+

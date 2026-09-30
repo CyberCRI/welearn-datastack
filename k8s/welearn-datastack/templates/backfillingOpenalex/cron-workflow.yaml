@@ -1,0 +1,88 @@
+{{- with .Values.backfillingOpenalex }}
+{{- if and (.cronWorkflowTemplate.standard.enabled) ($.Values.cronWorkflows.enabled) }}
+kind: CronWorkflow
+apiVersion: argoproj.io/v1alpha1
+metadata:
+  name: {{ .name }}
+spec:
+  workflowSpec:
+    securityContext:
+      {{- include "common.security.podSecurityContext.restricted" dict | nindent 6 }}
+    templates:
+      - name: all
+        inputs:
+          parameters:
+            - name: db_directory
+              default: "/tmp/openalex-work"
+            - name: db_file_name
+              default: "work.db"
+            - name: pick_qty_max
+              default: "100000"
+            - name: qdrant_url
+              default: {{ $.Values.common.config.qdrant_url }}
+            - name: qdrant_http_port
+              default: {{ $.Values.common.config.qdrant_http_port }}
+            - name: qdrant_timeout
+              default: "60"
+            - name: pg_db
+              default: {{ $.Values.common.config.nonSensitive.PG_DATABASE }}
+            - name: memory_get_documents
+              default: {{ .workflowTemplates.getDocumentsFromQdrant.requests.memory }}
+            - name: memory_get_journals
+              default: {{ .workflowTemplates.getJournals.requests.memory }}
+            - name: memory_create_corpus
+              default: {{ .workflowTemplates.createNewCorpus.requests.memory }}
+            - name: memory_update_documents
+              default: {{ .workflowTemplates.updateWelearnDocument.requests.memory }}
+            - name: memory_update_qdrant
+              default: {{ .workflowTemplates.updateQdrant.requests.memory }}
+        steps:
+          - - name: backfilling-openalex
+              templateRef:
+                name: {{ .name }}
+                template: all
+              arguments:
+                parameters:
+                  - name: db_directory
+                    value: >-
+                      {{ print "{{inputs.parameters.db_directory}}" }}
+                  - name: db_file_name
+                    value: >-
+                      {{ print "{{inputs.parameters.db_file_name}}" }}
+                  - name: pick_qty_max
+                    value: >-
+                      {{ print "{{inputs.parameters.pick_qty_max}}" }}
+                  - name: qdrant_url
+                    value: >-
+                      {{ print "{{inputs.parameters.qdrant_url}}" }}
+                  - name: qdrant_http_port
+                    value: >-
+                      {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+                  - name: qdrant_timeout
+                    value: >-
+                      {{ print "{{inputs.parameters.qdrant_timeout}}" }}
+                  - name: pg_db
+                    value: >-
+                      {{ print "{{inputs.parameters.pg_db}}" }}
+                  - name: memory_get_documents
+                    value: >-
+                      {{ print "{{inputs.parameters.memory_get_documents}}" }}
+                  - name: memory_get_journals
+                    value: >-
+                      {{ print "{{inputs.parameters.memory_get_journals}}" }}
+                  - name: memory_create_corpus
+                    value: >-
+                      {{ print "{{inputs.parameters.memory_create_corpus}}" }}
+                  - name: memory_update_documents
+                    value: >-
+                      {{ print "{{inputs.parameters.memory_update_documents}}" }}
+                  - name: memory_update_qdrant
+                    value: >-
+                      {{ print "{{inputs.parameters.memory_update_qdrant}}" }}
+
+    entrypoint: all
+    serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  schedules: [{{ .cronWorkflowTemplate.standard.schedule }}]
+{{- end }}
+{{- end }}
+
