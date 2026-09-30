@@ -7,7 +7,7 @@ from typing import Dict, List, Sequence, Type
 from uuid import UUID
 
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import PointStruct, UpdateStatus
+from qdrant_client.http.models import PointStruct, UpdateResult, UpdateStatus
 from qdrant_client.qdrant_remote import QdrantRemote
 from sqlalchemy.orm import Session
 from welearn_database.data.enumeration import Step
@@ -45,6 +45,10 @@ logger = logging.getLogger(__name__)
 
 
 def main() -> None:
+    """Run the Qdrant synchronization workflow.
+
+    :return: None.
+    """
     logger.info("QdrantSyncronizer starting...")
 
     logger.info("Load environment variables")
@@ -104,11 +108,7 @@ def main() -> None:
         logger.info("'%s' Slices were retrieved", len(slices))
 
         # Group slices by document id
-        slices_per_doc: Dict[UUID, List[Type[DocumentSlice]]] = {}
-        for s in slices:
-            if s.document_id not in slices_per_doc:
-                slices_per_doc[s.document_id] = []  # type: ignore
-            slices_per_doc[s.document_id].append(s)  # type: ignore
+        slices_per_doc = group_slice_by_document_id(slices)
 
         # Get collections names
         documents_per_collection = classify_documents_per_collection(
@@ -119,128 +119,206 @@ def main() -> None:
         logger.info(
             "Flag documents with no collection: %s", len(documents_per_collection[None])
         )
-        for docid in documents_per_collection[None]:
-            db_session.add(
-                ProcessState(
-                    id=uuid.uuid4(),
-                    document_id=docid,
-                    title=Step.KEPT_FOR_TRACE.value,
-                )
-            )
-        del documents_per_collection[None]
-        db_session.commit()
+        flag_documents_with_no_collection(db_session, documents_per_collection)
 
         # Iterate on each collection
-        for collection_name in documents_per_collection:
-            logger.info(f"We are working on collection : {collection_name}")
-            # We need to delete all points related to the documents in the collection for avoiding duplicates
-            del_res = delete_points_related_to_document(
-                collection_name=collection_name,
-                qdrant_connector=qdrant_client,
-                documents_ids=list(documents_per_collection[collection_name]),
-                qdrant_wait=qdrant_wait,
-            )
-            logger.info("deletion operation result : %s", del_res)
-
-            if not del_res:
-                logger.error(
-                    "Deletion operation failed for collection %s", collection_name
-                )
-                continue
-
-            logger.info("Checking process state for documents")
-            ids_doc_need_to_insert = check_process_state_for_documents(
-                db_session=db_session,
-                documents_ids=list(documents_per_collection[collection_name]),
-                steps=[Step.DOCUMENT_KEYWORDS_EXTRACTED],
-            )
-
-            logger.info("Documents to insert: %s", len(ids_doc_need_to_insert))
-
-            if len(ids_doc_need_to_insert) > 0:
-                # Generate points if needed
-                points: List[PointStruct] = []
-                c_rel: dict[UUID, CorpusRelation] = (
-                    get_corpus_relations_for_document_ids(
-                        db_session=db_session, document_ids=ids_doc_need_to_insert
-                    )
-                )
-                for docid in ids_doc_need_to_insert:
-                    document_slices = slices_per_doc[docid]
-                    slices_sdgs = retrieve_slices_sdgs(db_session, document_slices)
-                    all_document_sdgs = [
-                        slices_sdgs[s.id]  # type: ignore
-                        for s in document_slices
-                        if s.id in slices_sdgs
-                    ]
-
-                    accurate_sdgs = [
-                        sdg for sdg, _ in Counter(all_document_sdgs).most_common(2)
-                    ]
-                    for doc_slice in document_slices:
-                        # Filter slices with no SDG
-                        if doc_slice.id in slices_sdgs:
-                            points.append(
-                                convert_slice_in_qdrant_point(
-                                    slice_to_convert=doc_slice,
-                                    document_sdgs=accurate_sdgs,
-                                    slice_sdg=slices_sdgs[doc_slice.id],  # type: ignore
-                                    document_corpus=c_rel[doc_slice.document_id].corpus,
-                                    document_sub_corpus=c_rel[
-                                        doc_slice.document_id
-                                    ].sub_corpus,
-                                )
-                            )
-
-                # Insert points
-                logger.info("Inserting points")
-                insert_res = qdrant_client.upsert(
-                    collection_name=collection_name,
-                    points=points,
-                    wait=qdrant_wait,
-                )
-
-                logger.info("Insertion operation result : %s", insert_res)
-
-                # Add new process state
-                logger.info("Adding new process state")
-                if insert_res.status in [
-                    UpdateStatus.ACKNOWLEDGED,
-                    UpdateStatus.COMPLETED,
-                ]:
-                    for docid in ids_doc_need_to_insert:
-                        db_session.add(
-                            ProcessState(
-                                id=uuid.uuid4(),
-                                document_id=docid,
-                                title=Step.DOCUMENT_IN_QDRANT.value,
-                            )
-                        )
-                    db_session.commit()
-                else:
-                    logger.error(
-                        "Insertion operation failed for collection %s", collection_name
-                    )
-
-            if del_res.status in [UpdateStatus.ACKNOWLEDGED, UpdateStatus.COMPLETED]:
-                for docid in documents_per_collection[collection_name]:
-                    if docid not in ids_doc_need_to_insert:
-                        db_session.add(
-                            ProcessState(
-                                id=uuid.uuid4(),
-                                document_id=docid,
-                                title=Step.KEPT_FOR_TRACE.value,
-                            )
-                        )
-                db_session.commit()
-            else:
-                logger.error(
-                    "Deletion operation failed for collection %s", collection_name
-                )
+        handle_collection(
+            db_session,
+            documents_per_collection,
+            qdrant_client,
+            qdrant_wait,
+            slices_per_doc,
+        )
 
     logger.info("Closing DB session")
     db_session.close()
     logger.info("QdrantSyncronizer finished")
+
+
+def handle_collection(
+    db_session: Session,
+    documents_per_collection: dict[str | None, set[UUID]],
+    qdrant_client: QdrantClient,
+    qdrant_wait: bool,
+    slices_per_doc: dict[UUID, list[type[DocumentSlice]]],
+):
+    """Synchronize documents for each target Qdrant collection.
+
+    :param db_session: Active database session.
+    :param documents_per_collection: Document ids grouped by collection name.
+    :param qdrant_client: Qdrant client used for deletion and insertion.
+    :param qdrant_wait: Whether to wait for Qdrant operations to finish.
+    :param slices_per_doc: Slices indexed by document id.
+    :return: None.
+    """
+    for collection_name in documents_per_collection:
+        logger.info(f"We are working on collection : {collection_name}")
+        # We need to delete all points related to the documents in the collection for avoiding duplicates
+        del_res = delete_points_related_to_document(
+            collection_name=collection_name,
+            qdrant_connector=qdrant_client,
+            documents_ids=list(documents_per_collection[collection_name]),
+            qdrant_wait=qdrant_wait,
+        )
+        logger.info("deletion operation result : %s", del_res)
+
+        if not del_res:
+            logger.error("Deletion operation failed for collection %s", collection_name)
+            continue
+
+        logger.info("Checking process state for documents")
+        ids_doc_need_to_insert = check_process_state_for_documents(
+            db_session=db_session,
+            documents_ids=list(documents_per_collection[collection_name]),
+            steps=[Step.DOCUMENT_KEYWORDS_EXTRACTED],
+        )
+
+        logger.info("Documents to insert: %s", len(ids_doc_need_to_insert))
+
+        if len(ids_doc_need_to_insert) > 0:
+            points = generate_needed_qdrant_points(
+                db_session, ids_doc_need_to_insert, slices_per_doc
+            )
+
+            # Insert points
+            logger.info("Inserting points")
+            insert_res = qdrant_client.upsert(
+                collection_name=collection_name,
+                points=points,
+                wait=qdrant_wait,
+            )
+
+            logger.info("Insertion operation result : %s", insert_res)
+
+            # Add new process state
+            logger.info("Adding new process state")
+            adding_new_process_state(
+                collection_name, db_session, ids_doc_need_to_insert, insert_res
+            )
+
+        if del_res.status in [UpdateStatus.ACKNOWLEDGED, UpdateStatus.COMPLETED]:
+            for docid in documents_per_collection[collection_name]:
+                if docid not in ids_doc_need_to_insert:
+                    db_session.add(
+                        ProcessState(
+                            id=uuid.uuid4(),
+                            document_id=docid,
+                            title=Step.KEPT_FOR_TRACE.value,
+                        )
+                    )
+            db_session.commit()
+        else:
+            logger.error("Deletion operation failed for collection %s", collection_name)
+
+
+def adding_new_process_state(
+    collection_name: str | None,
+    db_session: Session,
+    ids_doc_need_to_insert: list[UUID],
+    insert_res: UpdateResult,
+):
+    """Persist Qdrant insertion states for processed documents.
+
+    :param collection_name: Name of the target collection.
+    :param db_session: Active database session.
+    :param ids_doc_need_to_insert: Document ids inserted into Qdrant.
+    :param insert_res: Result returned by the Qdrant insertion.
+    :return: None.
+    """
+    if insert_res.status in [
+        UpdateStatus.ACKNOWLEDGED,
+        UpdateStatus.COMPLETED,
+    ]:
+        for docid in ids_doc_need_to_insert:
+            db_session.add(
+                ProcessState(
+                    id=uuid.uuid4(),
+                    document_id=docid,
+                    title=Step.DOCUMENT_IN_QDRANT.value,
+                )
+            )
+        db_session.commit()
+    else:
+        logger.error("Insertion operation failed for collection %s", collection_name)
+
+
+def generate_needed_qdrant_points(
+    db_session: Session,
+    ids_doc_need_to_insert: list[UUID],
+    slices_per_doc: dict[UUID, list[type[DocumentSlice]]],
+) -> list[PointStruct]:
+    """Build Qdrant points for documents ready to be inserted.
+
+    :param db_session: Active database session.
+    :param ids_doc_need_to_insert: Document ids selected for insertion.
+    :param slices_per_doc: Slices indexed by document id.
+    :return: Points to upsert into Qdrant.
+    """
+    # Generate points if needed
+    points: List[PointStruct] = []
+    c_rel: dict[UUID, CorpusRelation] = get_corpus_relations_for_document_ids(
+        db_session=db_session, document_ids=ids_doc_need_to_insert
+    )
+    for docid in ids_doc_need_to_insert:
+        document_slices = slices_per_doc[docid]
+        slices_sdgs = retrieve_slices_sdgs(db_session, document_slices)
+        all_document_sdgs = [
+            slices_sdgs[s.id]  # type: ignore
+            for s in document_slices
+            if s.id in slices_sdgs
+        ]
+
+        accurate_sdgs = [sdg for sdg, _ in Counter(all_document_sdgs).most_common(2)]
+        for doc_slice in document_slices:
+            # Filter slices with no SDG
+            if doc_slice.id in slices_sdgs:
+                points.append(
+                    convert_slice_in_qdrant_point(
+                        slice_to_convert=doc_slice,
+                        document_sdgs=accurate_sdgs,
+                        slice_sdg=slices_sdgs[doc_slice.id],  # type: ignore
+                        document_corpus=c_rel[doc_slice.document_id].corpus,
+                        document_sub_corpus=c_rel[doc_slice.document_id].sub_corpus,
+                    )
+                )
+    return points
+
+
+def flag_documents_with_no_collection(
+    db_session: Session, documents_per_collection: dict[str | None, set[UUID]]
+):
+    """Mark documents that cannot be assigned to any collection.
+
+    :param db_session: Active database session.
+    :param documents_per_collection: Document ids grouped by collection name.
+    :return: None.
+    """
+    for docid in documents_per_collection[None]:
+        db_session.add(
+            ProcessState(
+                id=uuid.uuid4(),
+                document_id=docid,
+                title=Step.KEPT_FOR_TRACE.value,
+            )
+        )
+    del documents_per_collection[None]
+    db_session.commit()
+
+
+def group_slice_by_document_id(
+    slices: Sequence[type[DocumentSlice]],
+) -> dict[UUID, list[type[DocumentSlice]]]:
+    """Group slices by document id.
+
+    :param slices: Slices to group.
+    :return: Slices indexed by document id.
+    """
+    slices_per_doc: Dict[UUID, List[Type[DocumentSlice]]] = {}
+    for s in slices:
+        if s.document_id not in slices_per_doc:
+            slices_per_doc[s.document_id] = []  # type: ignore
+        slices_per_doc[s.document_id].append(s)  # type: ignore
+    return slices_per_doc
 
 
 if __name__ == "__main__":
