@@ -40,7 +40,7 @@ def get_data_from_open_alex(urls: list[str]):
 
     results = response.json()["results"]
 
-    oa_ids = [i["ids"]["openalex"] for i in results]
+    oa_ids = [i["id"] for i in results]
     ret = []
 
     for u in urls:
