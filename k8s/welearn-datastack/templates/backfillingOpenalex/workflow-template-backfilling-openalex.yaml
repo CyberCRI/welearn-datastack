@@ -438,9 +438,9 @@ spec:
                 - name: qdrant_http_port
                   value: >-
                     {{ print "{{inputs.parameters.qdrant_http_port}}" }}
-                - name: qdrant_timeout
+                - name: qdrant_prefers_grpc
                   value: >-
-                    {{ print "{{inputs.parameters.qdrant_timeout}}" }}
+                    {{ print "{{inputs.parameters.qdrant_prefers_grpc}}" }}
               artifacts:
                 - name: work_db
                   from: >-
