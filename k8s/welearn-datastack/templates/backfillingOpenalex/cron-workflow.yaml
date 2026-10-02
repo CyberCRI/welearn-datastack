@@ -20,6 +20,8 @@ spec:
               default: "100"
             - name: qdrant_url
               default: {{ $.Values.common.config.qdrant_url }}
+            - name: qdrant_grpc_port
+              default: {{ $.Values.common.config.qdrant_grpc_port }}
             - name: qdrant_http_port
               default: {{ $.Values.common.config.qdrant_http_port }}
             - name: qdrant_prefers_grpc
