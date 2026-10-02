@@ -54,6 +54,7 @@ def update_documents():
 
     for jid in ids_n_journals:
         client.set_payload(
+            wait=False,
             collection_name=f"{collection_name}",
             payload={
                 "document_sub_corpus": jid[1],

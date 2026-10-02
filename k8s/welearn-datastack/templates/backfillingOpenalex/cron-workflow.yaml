@@ -17,7 +17,7 @@ spec:
             - name: db_file_name
               default: "work.db"
             - name: pick_qty_max
-              default: "100000"
+              default: "100"
             - name: qdrant_url
               default: {{ $.Values.common.config.qdrant_url }}
             - name: qdrant_http_port
