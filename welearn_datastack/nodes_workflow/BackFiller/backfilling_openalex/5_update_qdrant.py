@@ -22,10 +22,19 @@ def get_document_with_new_journals_ids():
 
 
 def get_qdrant_connection():
+    qdrant_timeout: int = int(os.getenv("QDRANT_TIMEOUT", "60"))
+    qdrant_grpc_port: int = int(os.getenv("QDRANT_GRPC_PORT", "6334"))
+    qdrant_http_port: int = int(os.getenv("QDRANT_HTTP_PORT", "6333"))
+    qdrant_url: str = os.getenv("QDRANT_URL", "localhost")
+    qdrant_prefers_grpc: bool = (
+        os.getenv("QDRANT_PREFERS_GRPC", "False").lower() == "true"
+    )
     qdrant_client = QdrantClient(
-        url=os.getenv("QDRANT_URL"),
-        port=os.getenv("QDRANT_HTTP_PORT"),
-        timeout=int(os.getenv("QDRANT_TIMEOUT")),
+        url=qdrant_url,
+        port=qdrant_http_port,
+        grpc_port=qdrant_grpc_port,
+        prefer_grpc=qdrant_prefers_grpc,
+        timeout=qdrant_timeout,
         https=True,
     )
 
