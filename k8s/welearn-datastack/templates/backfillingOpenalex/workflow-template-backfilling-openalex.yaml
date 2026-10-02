@@ -266,9 +266,15 @@ spec:
           - name: QDRANT_URL
             value: >-
               {{ print "{{inputs.parameters.qdrant_url}}" }}
+          - name: QDRANT_GRPC_PORT
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_grpc_port}}" }}
           - name: QDRANT_HTTP_PORT
             value: >-
               {{ print "{{inputs.parameters.qdrant_http_port}}" }}
+          - name: QDRANT_PREFERS_GRPC
+            value: >-
+              {{ print "{{inputs.parameters.qdrant_prefers_grpc}}" }}
           - name: QDRANT_TIMEOUT
             value: >-
               {{ print "{{inputs.parameters.qdrant_timeout}}" }}
@@ -435,12 +441,18 @@ spec:
                 - name: qdrant_url
                   value: >-
                     {{ print "{{inputs.parameters.qdrant_url}}" }}
+                - name: qdrant_grpc_port
+                  value: >-
+                    {{ print "{{inputs.parameters.qdrant_grpc_port}}" }}
                 - name: qdrant_http_port
                   value: >-
                     {{ print "{{inputs.parameters.qdrant_http_port}}" }}
                 - name: qdrant_prefers_grpc
                   value: >-
                     {{ print "{{inputs.parameters.qdrant_prefers_grpc}}" }}
+                - name: qdrant_timeout
+                  value: >-
+                    {{ print "{{inputs.parameters.qdrant_timeout}}" }}
               artifacts:
                 - name: work_db
                   from: >-

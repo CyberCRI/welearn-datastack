@@ -57,6 +57,9 @@ spec:
                   - name: qdrant_url
                     value: >-
                       {{ print "{{inputs.parameters.qdrant_url}}" }}
+                  - name: qdrant_grpc_port
+                    value: >-
+                      {{ print "{{inputs.parameters.qdrant_grpc_port}}" }}
                   - name: qdrant_http_port
                     value: >-
                       {{ print "{{inputs.parameters.qdrant_http_port}}" }}

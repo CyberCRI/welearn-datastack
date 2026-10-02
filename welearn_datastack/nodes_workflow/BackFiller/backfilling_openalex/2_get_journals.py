@@ -1,3 +1,4 @@
+import logging
 import os
 import sqlite3
 import uuid
@@ -5,6 +6,12 @@ from itertools import batched
 
 import requests
 from dotenv import load_dotenv
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 DB_FILE = os.getenv("DB_FILE", "work.db")
@@ -75,25 +82,64 @@ def format_journal_name(name: str):
 
 
 def main():
+    logger.info("=" * 60)
+    logger.info("FETCHING JOURNALS FROM OPENALEX")
+    logger.info("=" * 60)
+
     add_journals_columns()
     docdatas = get_docdata_from_work_db()
+    logger.info(f"Found {len(docdatas)} documents without journal info")
+
+    if not docdatas:
+        logger.info("No documents to process")
+        return
+
     journals = []
+    batch_number = 0
+
     for batch in batched(docdatas, n=100):
-        journals.extend(get_data_from_open_alex([d[0] for d in batch]))
+        batch_number += 1
+        logger.info(
+            f"Processing batch {batch_number} ({len(list(batch))} documents)..."
+        )
+        batch_list = list(batch)
+        batch_result = get_data_from_open_alex([d[0] for d in batch_list])
+        journals.extend(batch_result)
+        logger.info(
+            f"✓ Batch {batch_number} complete: {len(batch_result)} journals fetched"
+        )
+
+    logger.info(f"Total journals extracted: {len(journals)}")
+
+    updated_count = 0
+    error_count = 0
 
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
         for journal in journals:
-            sql = "UPDATE document_id SET journal_name= ?, journal_id = ? WHERE document_url = ?"
-            cursor.execute(
-                sql,
-                (
-                    format_journal_name(journal[1]),
-                    journal[2],
-                    journal[0],
-                ),
-            )
-            conn.commit()
+            try:
+                sql = "UPDATE document_id SET journal_name= ?, journal_id = ? WHERE document_url = ?"
+                cursor.execute(
+                    sql,
+                    (
+                        format_journal_name(journal[1]),
+                        journal[2],
+                        journal[0],
+                    ),
+                )
+                conn.commit()
+                updated_count += 1
+            except Exception as e:
+                error_count += 1
+                logger.error(f"Error updating journal for {journal[0]}: {str(e)}")
+
+    logger.info("=" * 60)
+    logger.info(f"JOURNAL UPDATE COMPLETE")
+    logger.info("=" * 60)
+    logger.info(f"Total processed: {len(journals)}")
+    logger.info(f"Successfully updated: {updated_count} ✓")
+    logger.info(f"Failed: {error_count} ✗")
+    logger.info("=" * 60)
 
 
 if __name__ == "__main__":

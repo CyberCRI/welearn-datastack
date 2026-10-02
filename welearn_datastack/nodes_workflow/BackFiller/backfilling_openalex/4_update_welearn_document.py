@@ -1,8 +1,15 @@
+import logging
 import os
 import sqlite3
 
 import psycopg2
 from dotenv import load_dotenv
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 DB_FILE = os.getenv("DB_FILE", "work.db")
@@ -45,12 +52,21 @@ def get_pg_connection():
 
 
 def update_documents():
+    logger.info("=" * 60)
+    logger.info("UPDATING WELEARN DOCUMENTS")
+    logger.info("=" * 60)
+
     load_dotenv(verbose=True)
+
+    logger.info(f"Reading document-journal mappings from {DB_FILE}...")
     ids_n_journals = get_document_with_new_journals_ids()
+    logger.info(f"Found {len(ids_n_journals)} document-journal pairs")
+
     ids_n_journals = [j for j in ids_n_journals if j[0] != ""]
+    logger.info(f"After filtering empty journal IDs: {len(ids_n_journals)} pairs")
 
     if not ids_n_journals:
-        print("Aucun doc à update.")
+        logger.info("❌ No documents to update.")
         return 0
 
     sql = """
@@ -59,14 +75,44 @@ def update_documents():
     WHERE id = %s; 
     """
 
-    with get_pg_connection() as conn:
-        with conn.cursor() as cursor:
-            cursor.executemany(sql, ids_n_journals)
+    logger.info(f"Connecting to PostgreSQL...")
+    updated_count = 0
+    error_count = 0
 
-    print(
-        f"{len(ids_n_journals)} corpus synchronisés dans document_related.welearn_document."
-    )
-    return len(ids_n_journals)
+    try:
+        with get_pg_connection() as conn:
+            with conn.cursor() as cursor:
+                for idx, (journal_id, doc_id) in enumerate(ids_n_journals, 1):
+                    try:
+                        cursor.execute(sql, (journal_id, doc_id))
+                        updated_count += 1
+
+                        # Log progress every 100 documents
+                        if idx % 100 == 0:
+                            logger.info(
+                                f"Progress: {idx}/{len(ids_n_journals)} documents updated"
+                            )
+
+                    except psycopg2.Error as e:
+                        error_count += 1
+                        logger.error(f"Error updating document {doc_id}: {str(e)}")
+
+                conn.commit()
+                logger.info(f"✓ Commit successful: {updated_count} documents updated")
+
+    except Exception as e:
+        logger.error(f"❌ Error updating documents: {str(e)}")
+        raise
+
+    logger.info("=" * 60)
+    logger.info(f"DOCUMENT UPDATE COMPLETE")
+    logger.info("=" * 60)
+    logger.info(f"Total processed: {len(ids_n_journals)}")
+    logger.info(f"Successfully updated: {updated_count} ✓")
+    logger.info(f"Failed: {error_count} ✗")
+    logger.info("=" * 60)
+
+    return updated_count
 
 
 def main():
