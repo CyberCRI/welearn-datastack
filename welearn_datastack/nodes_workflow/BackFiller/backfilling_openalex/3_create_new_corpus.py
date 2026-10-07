@@ -105,7 +105,7 @@ def write_new_corpus_to_pg():
         raise
 
     logger.info("=" * 60)
-    logger.info(f"CORPUS CREATION COMPLETE")
+    logger.info("CORPUS CREATION COMPLETE")
     logger.info("=" * 60)
     logger.info(f"Total journals: {len(journals)}")
     logger.info(f"Inserted: {inserted_count} ✓")
