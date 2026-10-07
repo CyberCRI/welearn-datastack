@@ -13,3 +13,10 @@ common:
 
 cronWorkflows:
   enabled: true
+
+backfillingOpenalex:
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: "15 2 * * *"
+

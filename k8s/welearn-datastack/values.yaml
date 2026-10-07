@@ -405,6 +405,45 @@ backfilling:
       limits:
         cpu: 1
 
+backfillingOpenalex:
+  name: backfilling-openalex
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  workflowSemaphore:
+    configmapName: backfilling-openalex-semaphore
+    standard:
+      keyName: standard-tokens
+      tokensCount: 1
+
+  resourcesPrefix: backfilling-openalex
+
+  commonLabels:
+    app.kubernetes.io/component: backfilling-openalex
+
+  workflowTemplates:
+    getDocumentsFromQdrant:
+      requests:
+        memory: 256M
+    getJournals:
+      requests:
+        memory: 256M
+    createNewCorpus:
+      requests:
+        memory: 128M
+    updateWelearnDocument:
+      requests:
+        memory: 128M
+    updateQdrant:
+      requests:
+        memory: 256M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 15 2 * * *
+
 updateMaterializedViews:
   enabled: true
   name: update-materialized-views

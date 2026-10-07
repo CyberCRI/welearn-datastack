@@ -1,10 +1,10 @@
 import logging
 from datetime import datetime, timedelta
-from typing import Collection, Dict, List, Type, TypedDict
+from typing import Collection, Dict, List, TypedDict
 from uuid import UUID
 
-from sqlalchemy import Column, desc
-from sqlalchemy.orm import Query
+from sqlalchemy import Column, Row, asc, desc, or_
+from sqlalchemy.orm import Query, Session
 from sqlalchemy.sql import and_, func
 from welearn_database.data.enumeration import Step
 from welearn_database.data.models import (
@@ -22,6 +22,7 @@ from welearn_database.data.models import (
     WeLearnDocument,
 )
 
+from welearn_datastack.data.db_wrapper import CorpusRelation
 from welearn_datastack.data.enumerations import (
     MLModelsType,
     URLRetrievalType,
@@ -40,6 +41,7 @@ class ModelInfo(TypedDict):
 
 
 ModelsDict = Dict[UUID, ModelInfo]
+main_corpus_dict: dict[UUID, Corpus | None] = {}
 
 # logic
 
@@ -202,6 +204,7 @@ def _retrieve_documents_ids_according_process_title_impl(
     )
     session.close()
 
+    # Filter on total size
     if size_total_max is not None:
         logger.info("Filtering on total size")
         db_data = _filter_rows_on_total_size(
@@ -360,6 +363,9 @@ def retrieve_models(
     else:
         raise ValueError("ML type not recognized")
 
+    # True if the model is from the parent of the corpus
+    is_parent_model = join_table.corpus_id != WeLearnDocument.corpus_id
+
     # Subquery to get the most recent model for each document based on used_since
     # and partition by document id and corpus id
     # We use row_number to get the most recent model per document
@@ -374,12 +380,19 @@ def retrieve_models(
             model_table.lang,
             func.row_number()
             .over(
-                partition_by=(WeLearnDocument.id, WeLearnDocument.corpus_id),
-                order_by=desc(join_table.used_since),
+                partition_by=WeLearnDocument.id,
+                order_by=(asc(is_parent_model), desc(join_table.used_since)),
             )
             .label("rn"),
         )
-        .join(join_table, join_table.corpus_id == WeLearnDocument.corpus_id)
+        .join(Corpus, Corpus.id == WeLearnDocument.corpus_id)
+        .join(
+            join_table,
+            or_(
+                join_table.corpus_id == Corpus.id,
+                join_table.corpus_id == Corpus.parent_corpus_id,
+            ),
+        )
         .join(model_table, model_table.id == relation_field)
         .filter(
             WeLearnDocument.id.in_(documents_ids),
@@ -442,7 +455,7 @@ def check_process_state_for_documents(
 
 
 def retrieve_slices_sdgs(
-    db_session, slices: Collection[Type[DocumentSlice]]
+    db_session, slices: Collection[DocumentSlice]
 ) -> Dict[UUID | Column["UUID"], int]:
     """
     Retrieve slices sdgs from a list of slices
@@ -502,3 +515,44 @@ def get_model_classification_model_by_id(
     raise NoModelFoundError(
         f"Model not found in the database according this id : {model_id}"
     )
+
+
+def get_corpus_and_sub_corpus_repartition(db_session, corpus: Corpus) -> CorpusRelation:
+    if corpus not in main_corpus_dict:
+        req_corpus: Corpus | None = (
+            db_session.query(Corpus)
+            .filter(Corpus.id == corpus.parent_corpus_id)
+            .first()
+        )
+        main_corpus_dict[corpus.id] = req_corpus
+    main_corpus = main_corpus_dict[corpus.id]
+
+    if main_corpus:
+        return CorpusRelation(sub_corpus=corpus, corpus=main_corpus)
+
+    return CorpusRelation(
+        corpus=corpus,
+    )
+
+
+def get_corpus_for_document_ids(
+    db_session: Session, ids: list[UUID]
+) -> list[Row[tuple[Corpus, UUID]]]:
+    ret = (
+        db_session.query(Corpus, WeLearnDocument.id)
+        .join(WeLearnDocument, WeLearnDocument.corpus_id == Corpus.id)
+        .where(WeLearnDocument.id.in_(ids))
+        .all()
+    )
+
+    return ret
+
+
+def get_corpus_relations_for_document_ids(
+    db_session: Session, document_ids: list[UUID]
+) -> dict[UUID, CorpusRelation]:
+    ret = {}
+    for corpus, doc_id in get_corpus_for_document_ids(db_session, document_ids):
+        rel = get_corpus_and_sub_corpus_repartition(db_session, corpus)
+        ret[doc_id] = rel
+    return ret

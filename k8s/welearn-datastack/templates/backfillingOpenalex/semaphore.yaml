@@ -1,0 +1,9 @@
+{{- with .Values.backfillingOpenalex.workflowSemaphore }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .configmapName }}
+data:
+  {{ .standard.keyName }}: {{ .standard.tokensCount | quote }}
+{{- end }}
+
