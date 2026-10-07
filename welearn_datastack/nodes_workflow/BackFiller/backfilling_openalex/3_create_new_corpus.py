@@ -20,11 +20,13 @@ CATEGORY = "9cb400f0-ce10-4607-9a2e-abffa1a33eec"
 def get_journals_from_work_db():
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
-        docdatas = cursor.execute("""
+        docdatas = cursor.execute(
+            """
             SELECT DISTINCT journal_id, journal_name
             FROM document_id
             WHERE journal_id IS NOT NULL AND journal_name IS NOT NULL
-            """)
+            """
+        )
     return docdatas.fetchall()
 
 
@@ -73,7 +75,7 @@ def write_new_corpus_to_pg():
         INSERT INTO corpus_related.corpus (id, source_name, parent_corpus_id, is_fix, category_id)
         VALUES (%s, %s, '{OPEN_ALEX_ID}', true, '{CATEGORY}')
         ON CONFLICT DO NOTHING
-    """
+    """  # nosec
 
     inserted_count = 0
     conflict_count = 0

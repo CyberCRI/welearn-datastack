@@ -42,7 +42,7 @@ def get_data_from_open_alex(urls: list[str]):
         "select": "best_oa_location,id",
     }
 
-    response = requests.get(url, params=querystring)
+    response = requests.get(url, params=querystring, timeout=120)
     response.raise_for_status()
 
     results = response.json()["results"]
