@@ -1,0 +1,78 @@
+{{- with .Values.documentCleaner }}
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: {{ .name }}-run-node
+spec:
+  entrypoint: all
+  serviceAccountName: {{ $.Values.common.workflowRbac.serviceAccountName }}
+  securityContext:
+    {{- include "common.security.podSecurityContext.restricted" dict | nindent 4 }}
+  {{- if $.Values.common.runOnGpu }}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: gpu-node
+            operator: In
+            values:
+            - "true"
+  tolerations:
+  - key: "Gpu"
+    operator: "Equal"
+    value: "true"
+    effect: "NoSchedule"
+  {{- end }}
+  templates:
+
+    - name: document-cleaner
+      podSpecPatch: >-
+        {{ print "{\"containers\":[{\"name\":\"main\", \"resources\":{\"requests\": {\"memory\": \"{{inputs.parameters.memory}}\"}}}]}" }}
+      inputs:
+        parameters:
+          - name: log_level
+            default: "INFO"
+          - name: document_ids_input_filename
+          - name: document_ids_directory
+            default: document_ids
+          - name: memory
+            default: {{ .workflowTemplates.runNode.requests.memory }}
+        artifacts:
+          - name: batch_ids_csv
+            path: >-
+              {{ printf "%s/%s/{{inputs.parameters.document_ids_directory}}" $.Values.common.artifactRoot $.Values.common.artifactInputFolder }}
+      container:
+      {{- with $.Values.image }}
+        image: {{ tpl (printf "%s/%s:%s" .repository .path .tag) $ }}
+      {{- end }}
+        envFrom:
+          - configMapRef:
+              name: {{ .name }}
+        env:
+          - name: ARTIFACT_ROOT
+            value: {{ $.Values.common.artifactRoot }}
+          - name: IS_LOCAL
+            value: "0"
+          - name: LOG_LEVEL
+            value: >-
+              {{ print "{{inputs.parameters.log_level}}" }}
+          - name: ARTIFACT_ID_URL_CSV_NAME
+            value: >-
+              {{ print "{{inputs.parameters.document_ids_directory}}/{{inputs.parameters.document_ids_input_filename}}" }}
+
+        args:
+          - python
+          - "-m"
+          - welearn_datastack.nodes_workflow.DocumentCleaner.document_cleaner
+        volumeMounts:
+        - name: secrets
+          mountPath: "/secrets"
+          readOnly: true
+      volumes:
+      - name: secrets
+        secret:
+          secretName: {{ .name }}
+{{- end }}
+

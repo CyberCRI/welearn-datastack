@@ -262,6 +262,32 @@ urlSanitaryCrawler:
       enabled: true
       schedule: 40 */1 * * *
 
+
+documentCleaner:
+  name: document-cleaner
+  config:
+    sensitive: {}
+    nonSensitive: {}
+
+  resourcesPrefix: document-cleaner
+
+  commonLabels:
+    app.kubernetes.io/component: document-cleaner
+
+  workflowTemplates:
+    prepareBatches:
+      requests:
+        memory: 75M
+    runNode:
+      requests:
+        memory: 20M
+
+  cronWorkflowTemplate:
+    standard:
+      enabled: true
+      schedule: 45 */1 * * *
+
+
 qdrantSyncronizer:
   name: qdrant-synchronizer
   config:
