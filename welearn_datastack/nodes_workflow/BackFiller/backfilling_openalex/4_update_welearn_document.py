@@ -20,12 +20,10 @@ CATEGORY = "9cb400f0-ce10-4607-9a2e-abffa1a33eec"
 def get_document_with_new_journals_ids():
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
-        docdatas = cursor.execute(
-            """
+        docdatas = cursor.execute("""
             SELECT DISTINCT journal_id, id
             FROM document_id
-            """
-        )
+            """)
     return docdatas.fetchall()
 
 

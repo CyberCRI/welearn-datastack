@@ -18,13 +18,11 @@ DB_FILE = os.getenv("DB_FILE")
 def get_document_with_new_journals_ids():
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
-        docdatas = cursor.execute(
-            """
+        docdatas = cursor.execute("""
             SELECT DISTINCT id, journal_name
             FROM document_id di
             WHERE length(di.journal_name) > 1
-            """
-        )
+            """)
     return docdatas.fetchall()
 
 
