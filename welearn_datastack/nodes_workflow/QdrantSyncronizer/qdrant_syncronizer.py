@@ -292,7 +292,7 @@ def generate_needed_qdrant_points(
 def flag_documents_with_no_collection(
     db_session: Session, documents_per_collection: dict[str | None, set[UUID]]
 ):
-    """Mark documents that cannot be assigned to any collection.
+    """Mark documents that cannot be assigned to any collection
 
     :param db_session: Active database session.
     :param documents_per_collection: Document ids grouped by collection name.
