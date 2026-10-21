@@ -1,6 +1,6 @@
 from abc import ABC
 
-from welearn_database.data.models import ErrorRetrieval, WeLearnDocument
+from welearn_database.data.models import Corpus, ErrorRetrieval, WeLearnDocument
 
 from welearn_datastack.data.source_models.hal import HALModel
 from welearn_datastack.data.source_models.oapen import OapenModel
@@ -46,3 +46,9 @@ class WrapperRawData(Wrapper):
     ):
         self.raw_data = raw_data
         self.document = document
+
+
+class CorpusRelation(Wrapper):
+    def __init__(self, corpus: Corpus, sub_corpus: Corpus | None = None):
+        self.corpus = corpus
+        self.sub_corpus = sub_corpus

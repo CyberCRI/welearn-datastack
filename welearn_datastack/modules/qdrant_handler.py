@@ -105,18 +105,24 @@ def delete_points_related_to_document(
         logger.debug(f"Deleted points related to {documents_ids} in {collection_name}")
     else:
         raise ErrorWhileDeletingChunks(
-            f"Error while deleting chunk, no answer from server"
+            "Error while deleting chunk, no answer from server"
         )
     logger.info("Deletion finished")
     return op_res
 
 
 def convert_slice_in_qdrant_point(
-    slice_to_convert: Type[DocumentSlice], document_sdgs: List[int], slice_sdg: int
+    slice_to_convert: DocumentSlice,
+    document_sdgs: List[int],
+    slice_sdg: int,
+    document_corpus: str,
+    document_sub_corpus: str | None,
 ) -> models.PointStruct:
-    vector = numpy.frombuffer(
-        bytes(slice_to_convert.embedding), dtype=numpy.float32
-    ).tolist()
+    embedding = slice_to_convert.embedding
+    if embedding is None:
+        raise ValueError(f"Slice {slice_to_convert.id} has no embedding")
+
+    vector = numpy.frombuffer(bytes(embedding), dtype=numpy.float32).tolist()
     ret = models.PointStruct(
         id=str(slice_to_convert.id),
         vector=vector,
@@ -126,7 +132,8 @@ def convert_slice_in_qdrant_point(
             "document_url": slice_to_convert.document.url,
             "document_lang": slice_to_convert.document.lang,
             "slice_content": slice_to_convert.body,
-            "document_corpus": slice_to_convert.document.corpus.source_name,
+            "document_corpus": document_corpus,
+            "document_sub_corpus": document_sub_corpus,
             "document_desc": slice_to_convert.document.description,
             "document_details": slice_to_convert.document.details,
             "document_scrape_date": slice_to_convert.document.created_at,

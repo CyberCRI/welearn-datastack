@@ -31,6 +31,7 @@ from welearn_datastack.data.enumerations import (
     WeighedScope,
 )
 from welearn_datastack.modules.retrieve_data_from_database import (
+    get_corpus_and_sub_corpus_repartition,
     retrieve_models,
     retrieve_random_documents_ids_according_process_title,
     retrieve_urls_ids,
@@ -45,6 +46,80 @@ def octet_length(content):
 
 
 class TestRetrieveDataFromDatabase(unittest.TestCase):
+    def _create_test_session(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+        return test_session
+
+    def _create_corpus_hierarchy(self, test_session):
+        category = Category(id=uuid.uuid4(), title="test")
+
+        parent_corpus = Corpus(
+            id=uuid.uuid4(),
+            source_name=f"parent_corpus_{uuid.uuid4()}",
+            is_fix=True,
+            is_active=True,
+            category_id=category.id,
+        )
+        child_corpus = Corpus(
+            id=uuid.uuid4(),
+            parent_corpus_id=parent_corpus.id,
+            source_name=f"child_corpus_{uuid.uuid4()}",
+            is_fix=True,
+            is_active=True,
+            category_id=category.id,
+        )
+
+        test_session.add(category)
+        test_session.add(parent_corpus)
+        test_session.add(child_corpus)
+        test_session.commit()
+
+        return parent_corpus, child_corpus
+
+    def _create_model(self, model_class, title, model_id, lang, used_since):
+        common_kwargs = {
+            "title": title,
+            "id": model_id,
+            "lang": lang,
+        }
+        if model_class in (BiClassifierModel, NClassifierModel):
+            common_kwargs["used_since"] = used_since
+        return model_class(**common_kwargs)
+
+    def _create_corpus_model_relation(
+        self, relation_class, corpus_id, model_id, used_since
+    ):
+        common_kwargs = {
+            "corpus_id": corpus_id,
+            "used_since": used_since,
+        }
+        if relation_class is CorpusBiClassifierModel:
+            common_kwargs["bi_classifier_model_id"] = model_id
+        elif relation_class is CorpusNClassifierModel:
+            common_kwargs["n_classifier_model_id"] = model_id
+        elif relation_class is CorpusEmbeddingModel:
+            common_kwargs["embedding_model_id"] = model_id
+        else:
+            raise ValueError("Unsupported relation class")
+        return relation_class(**common_kwargs)
+
+    def _get_model_configuration(self, ml_type):
+        if ml_type == MLModelsType.BI_CLASSIFIER:
+            return BiClassifierModel, CorpusBiClassifierModel
+        if ml_type == MLModelsType.N_CLASSIFIER:
+            return NClassifierModel, CorpusNClassifierModel
+        if ml_type == MLModelsType.EMBEDDING:
+            return EmbeddingModel, CorpusEmbeddingModel
+        raise ValueError("Unsupported ML type")
+
     @patch(
         "welearn_datastack.modules.retrieve_data_from_database._generate_query_size_limit"
     )
@@ -311,6 +386,145 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
 
         self.assertEqual(res, {})
 
+    def test_retrieve_models_prioritizes_child_corpus_model_over_newer_parent_model(
+        self,
+    ):
+        for ml_type in (
+            MLModelsType.BI_CLASSIFIER,
+            MLModelsType.N_CLASSIFIER,
+            MLModelsType.EMBEDDING,
+        ):
+            with self.subTest(ml_type=ml_type):
+                test_session = self._create_test_session()
+                model_class, relation_class = self._get_model_configuration(ml_type)
+                parent_corpus, child_corpus = self._create_corpus_hierarchy(
+                    test_session
+                )
+                now = datetime.now()
+
+                child_model_id = uuid.uuid4()
+                child_model = self._create_model(
+                    model_class=model_class,
+                    title="child_model",
+                    model_id=child_model_id,
+                    lang="en",
+                    used_since=now - timedelta(days=10),
+                )
+                child_relation = self._create_corpus_model_relation(
+                    relation_class=relation_class,
+                    corpus_id=child_corpus.id,
+                    model_id=child_model_id,
+                    used_since=now - timedelta(days=10),
+                )
+
+                parent_model_id = uuid.uuid4()
+                parent_model = self._create_model(
+                    model_class=model_class,
+                    title="parent_model_newer",
+                    model_id=parent_model_id,
+                    lang="en",
+                    used_since=now - timedelta(days=1),
+                )
+                parent_relation = self._create_corpus_model_relation(
+                    relation_class=relation_class,
+                    corpus_id=parent_corpus.id,
+                    model_id=parent_model_id,
+                    used_since=now - timedelta(days=1),
+                )
+
+                child_document_id = uuid.uuid4()
+                child_document = WeLearnDocument(
+                    id=child_document_id,
+                    url=f"https://example.org/{child_document_id}",
+                    corpus_id=child_corpus.id,
+                    title="test title",
+                    lang="en",
+                    full_content="test content test content test content",
+                    description="test description",
+                    details={"test key details": "test details"},
+                )
+
+                test_session.add(child_model)
+                test_session.add(child_relation)
+                test_session.add(parent_model)
+                test_session.add(parent_relation)
+                test_session.add(child_document)
+                test_session.commit()
+
+                res = retrieve_models(
+                    documents_ids=[child_document_id],
+                    db_session=test_session,
+                    ml_type=ml_type,
+                )
+
+                self.assertEqual(child_document_id, list(res.keys())[0])
+                self.assertEqual(res[child_document_id]["model_id"], child_model_id)
+                self.assertEqual(
+                    res[child_document_id]["model_name"], child_model.title
+                )
+                test_session.close()
+
+    def test_retrieve_models_falls_back_to_parent_corpus_model_when_child_has_none(
+        self,
+    ):
+        for ml_type in (
+            MLModelsType.BI_CLASSIFIER,
+            MLModelsType.N_CLASSIFIER,
+            MLModelsType.EMBEDDING,
+        ):
+            with self.subTest(ml_type=ml_type):
+                test_session = self._create_test_session()
+                model_class, relation_class = self._get_model_configuration(ml_type)
+                parent_corpus, child_corpus = self._create_corpus_hierarchy(
+                    test_session
+                )
+                now = datetime.now()
+
+                parent_model_id = uuid.uuid4()
+                parent_model = self._create_model(
+                    model_class=model_class,
+                    title="parent_model",
+                    model_id=parent_model_id,
+                    lang="en",
+                    used_since=now - timedelta(days=1),
+                )
+                parent_relation = self._create_corpus_model_relation(
+                    relation_class=relation_class,
+                    corpus_id=parent_corpus.id,
+                    model_id=parent_model_id,
+                    used_since=now - timedelta(days=1),
+                )
+
+                child_document_id = uuid.uuid4()
+                child_document = WeLearnDocument(
+                    id=child_document_id,
+                    url=f"https://example.org/{child_document_id}",
+                    corpus_id=child_corpus.id,
+                    title="test title",
+                    lang="en",
+                    full_content="test content test content test content",
+                    description="test description",
+                    details={"test key details": "test details"},
+                )
+
+                test_session.add(parent_model)
+                test_session.add(parent_relation)
+                test_session.add(child_document)
+                test_session.commit()
+
+                res = retrieve_models(
+                    documents_ids=[child_document_id],
+                    db_session=test_session,
+                    ml_type=ml_type,
+                )
+
+                self.assertEqual(child_document_id, list(res.keys())[0])
+                self.assertEqual(res[child_document_id]["model_id"], parent_model_id)
+                self.assertEqual(
+                    res[child_document_id]["model_name"], parent_model.title
+                )
+                test_session.close()
+
     def test_retrieve_n_models(self):
         get_sub_environ_according_prefix.cache_clear()
         os.environ["MODELS_PATH_ROOT"] = "test"
@@ -561,3 +775,83 @@ class TestRetrieveDataFromDatabase(unittest.TestCase):
         )
 
         self.assertEqual(res, {})
+
+    def test_get_corpus_and_sub_corpus_repartition(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        main_corpus_id = uuid.uuid4()
+        sub_corpus_id = uuid.uuid4()
+        cat_id = uuid.uuid4()
+
+        cat = Category(id=cat_id, title="cat")
+        test_session.add(cat)
+        test_session.commit()
+
+        main_corpus = Corpus(
+            id=main_corpus_id,
+            source_name="test-corpus",
+            is_fix=True,
+            is_active=True,
+            category_id=cat_id,
+        )
+
+        sub_corpus = Corpus(
+            id=sub_corpus_id,
+            source_name="test-sub-corpus",
+            parent_corpus_id=main_corpus_id,
+            is_fix=True,
+            is_active=True,
+            category_id=cat_id,
+        )
+
+        test_session.add(main_corpus)
+        test_session.commit()
+
+        test_session.add(sub_corpus)
+        test_session.commit()
+
+        res = get_corpus_and_sub_corpus_repartition(test_session, sub_corpus)
+
+        self.assertEqual(res.corpus.id, main_corpus_id)
+        self.assertEqual(res.sub_corpus.id, sub_corpus_id)
+
+    def test_get_corpus_and_sub_corpus_repartition_with_only_main_corpus(self):
+        get_sub_environ_according_prefix.cache_clear()
+        os.environ["MODELS_PATH_ROOT"] = "test"
+
+        engine = create_engine("sqlite://")
+        s_maker = sessionmaker(engine)
+        handle_schema_with_sqlite(engine)
+
+        test_session = s_maker()
+        Base.metadata.create_all(test_session.get_bind())
+
+        main_corpus_id = uuid.uuid4()
+        cat_id = uuid.uuid4()
+
+        cat = Category(id=cat_id, title="cat")
+        test_session.add(cat)
+        test_session.commit()
+
+        main_corpus = Corpus(
+            id=main_corpus_id,
+            source_name="test-corpus",
+            is_fix=True,
+            is_active=True,
+            category_id=cat_id,
+        )
+
+        test_session.add(main_corpus)
+        test_session.commit()
+
+        res = get_corpus_and_sub_corpus_repartition(test_session, main_corpus)
+
+        self.assertEqual(res.corpus.id, main_corpus_id)
