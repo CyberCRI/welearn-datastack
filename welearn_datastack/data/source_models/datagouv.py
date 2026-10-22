@@ -19,7 +19,7 @@ class Dataset(BaseModel):
     created_at: str
     description: str
     doi: str | None = None
-    frequency: str = "unknown"
+    frequency: str | None = None
     id: str
     last_modified: str
     license: str = "notspecified"
