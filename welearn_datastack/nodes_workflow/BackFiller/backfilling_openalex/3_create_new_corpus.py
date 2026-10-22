@@ -70,7 +70,7 @@ def write_new_corpus_to_pg():
         logger.info("❌ No journals to insert.")
         return 0
 
-    logger.info(f"Connecting to PostgreSQL...")
+    logger.info("Connecting to PostgreSQL...")
     sql = f"""
         INSERT INTO corpus_related.corpus (id, source_name, parent_corpus_id, is_fix, category_id)
         VALUES (%s, %s, '{OPEN_ALEX_ID}', true, '{CATEGORY}')
@@ -101,7 +101,7 @@ def write_new_corpus_to_pg():
         logger.warning(f"Some journals already exist (conflict): {str(e)}")
         conflict_count += 1
     except Exception as e:
-        logger.error(f"❌ Error inserting corpus: {str(e)}")
+        logger.exception(f"❌ Error inserting corpus: {str(e)}")
         raise
 
     logger.info("=" * 60)
