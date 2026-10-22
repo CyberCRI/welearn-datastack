@@ -20,13 +20,11 @@ CATEGORY = "9cb400f0-ce10-4607-9a2e-abffa1a33eec"
 def get_journals_from_work_db():
     with sqlite3.connect(DB_FILE) as conn:
         cursor = conn.cursor()
-        docdatas = cursor.execute(
-            """
+        docdatas = cursor.execute("""
             SELECT DISTINCT journal_id, journal_name
             FROM document_id
             WHERE journal_id IS NOT NULL AND journal_name IS NOT NULL
-            """
-        )
+            """)
     return docdatas.fetchall()
 
 
