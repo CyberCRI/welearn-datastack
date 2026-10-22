@@ -1,6 +1,7 @@
 from typing import List, Type
 
 from welearn_datastack.plugins.interface import IPluginRESTCollector
+from welearn_datastack.plugins.rest_requesters.datagouv import DataGouvCollector
 from welearn_datastack.plugins.rest_requesters.fao_open_knowledge import (
     FAOOpenKnowledgeCollector,
 )
@@ -29,4 +30,5 @@ plugins_rest_list: List[Type[IPluginRESTCollector]] = [
     UNESDOCCollector,
     WorldBankOpenKnowledgeRepository,
     IPBESCollector,
+    DataGouvCollector,
 ]
