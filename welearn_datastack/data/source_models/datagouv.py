@@ -22,7 +22,7 @@ class Dataset(BaseModel):
     frequency: str | None = None
     id: str
     last_modified: str
-    license: str = "notspecified"
+    license: str | None = None
     organization: DataGouvOrganization | None = None
     page: str | None = None
     slug: str | None = None
