@@ -60,7 +60,7 @@ class DataGouvURLCollector(URLCollector):
             urls.append(document)
         return urls
 
-    def collect(self) -> List[WeLearnDocument]:
+    def collect(self) -> list[WeLearnDocument]:
         client = get_new_https_session()
         datagouv_api_response = self._get_object_datagouv_api(client, page=1)
 
