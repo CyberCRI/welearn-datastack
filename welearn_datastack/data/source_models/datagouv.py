@@ -19,10 +19,10 @@ class Dataset(BaseModel):
     created_at: str
     description: str
     doi: str | None = None
-    frequency: str | None = None
+    frequency: str = "unknown"
     id: str
     last_modified: str
-    license: str | None = None
+    license: str = "notspecified"
     organization: DataGouvOrganization | None = None
     page: str | None = None
     slug: str | None = None

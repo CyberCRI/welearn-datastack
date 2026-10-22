@@ -3,6 +3,7 @@ import math
 from typing import List
 
 import requests
+from pydantic import ValidationError
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack import constants
@@ -26,7 +27,7 @@ class DataGouvURLCollector(URLCollector):
 
     def _get_object_datagouv_api(
         self, client: requests.Session, page: int
-    ) -> RootDataGouvModel:
+    ) -> RootDataGouvModel | None:
         params = {
             "page": page,
             "page_size": DATA_GOUV_PAGE_SIZE,
@@ -39,7 +40,15 @@ class DataGouvURLCollector(URLCollector):
             headers=self.headers,
         )
         response.raise_for_status()
-        return RootDataGouvModel.model_validate(response.json())
+        try:
+            return RootDataGouvModel.model_validate(response.json())
+        except ValidationError as error:
+            logger.warning(
+                "Skipping DataGouv page %s: invalid API response: %s",
+                page,
+                error,
+            )
+            return None
 
     def _extract_datagouv_urls(
         self, datagouv_api_response: RootDataGouvModel
@@ -63,6 +72,8 @@ class DataGouvURLCollector(URLCollector):
     def collect(self) -> list[WeLearnDocument]:
         client = get_new_https_session()
         datagouv_api_response = self._get_object_datagouv_api(client, page=1)
+        if datagouv_api_response is None:
+            return []
 
         page_count = math.ceil(
             datagouv_api_response.total / datagouv_api_response.page_size
@@ -77,6 +88,8 @@ class DataGouvURLCollector(URLCollector):
         for page in range(2, page_count + 1):
             logger.info("Retrieving DataGouv page %s/%s", page, page_count)
             page_response = self._get_object_datagouv_api(client, page=page)
+            if page_response is None:
+                continue
             urls.extend(self._extract_datagouv_urls(page_response))
 
         return urls

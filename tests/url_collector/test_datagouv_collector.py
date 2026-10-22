@@ -159,6 +159,65 @@ class TestDataGouvURLCollector(unittest.TestCase):
     @patch(
         "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
     )
+    def test_collect_returns_empty_for_invalid_first_page(
+        self, mock_get_session
+    ):
+        response = mock_get_session.return_value.get.return_value
+        response.json.return_value = {
+            "data": [{**self.dataset, "doi": 123}],
+            "total": 201,
+            "page_size": 100,
+        }
+
+        with self.assertLogs(
+            "welearn_datastack.collectors.datagouv_collector", level="WARNING"
+        ) as logs:
+            documents = self.collector.collect()
+
+        self.assertEqual(documents, [])
+        mock_get_session.return_value.get.assert_called_once()
+        self.assertIn("Skipping DataGouv page 1", logs.output[0])
+
+    @patch(
+        "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
+    )
+    def test_collect_continues_after_invalid_page(self, mock_get_session):
+        response = mock_get_session.return_value.get.return_value
+        response.json.side_effect = [
+            {"data": [self.dataset], "total": 201, "page_size": 100},
+            {
+                "data": [{**self.dataset, "doi": 123}],
+                "total": 201,
+                "page_size": 100,
+            },
+            {
+                "data": [{**self.dataset, "id": "last-dataset"}],
+                "total": 201,
+                "page_size": 100,
+            },
+        ]
+
+        with self.assertLogs(
+            "welearn_datastack.collectors.datagouv_collector", level="WARNING"
+        ) as logs:
+            documents = self.collector.collect()
+
+        self.assertEqual(
+            [document.external_id for document in documents],
+            [self.dataset["id"], "last-dataset"],
+        )
+        self.assertEqual(
+            [
+                call.kwargs["params"]["page"]
+                for call in mock_get_session.return_value.get.call_args_list
+            ],
+            [1, 2, 3],
+        )
+        self.assertIn("Skipping DataGouv page 2", logs.output[0])
+
+    @patch(
+        "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
+    )
     def test_collect_retrieves_all_pages(self, mock_get_session):
         first_page = [
             {

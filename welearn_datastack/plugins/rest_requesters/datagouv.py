@@ -1,11 +1,9 @@
 import logging
-from dataclasses import asdict
 from datetime import datetime, timezone
 
 import pydantic
 import requests
 from welearn_database.data.models import WeLearnDocument
-from welearn_database.modules.text_cleaning import clean_text
 
 from welearn_datastack import constants
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
@@ -13,6 +11,7 @@ from welearn_datastack.data.source_models.datagouv import Dataset
 from welearn_datastack.exceptions import (
     NoDescriptionFoundError,
 )
+from welearn_datastack.modules.scraping_utils  import clean_text
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
@@ -32,9 +31,6 @@ class DataGouvCollector(IPluginRESTCollector):
 
         self.base_url = "https://www.data.gouv.fr"
         self.headers = constants.HEADERS
-
-    def _clean_txt_content(self, content: str) -> str:
-        return clean_text(content)
 
     @staticmethod
     def _parse_timestamp(value: str) -> float:
@@ -121,7 +117,7 @@ class DataGouvCollector(IPluginRESTCollector):
                 )
                 continue
 
-            description = self._clean_txt_content(datagouv_document.description)
+            description = clean_text(datagouv_document.description)
             full_content = description
 
             document.title = datagouv_document.title
