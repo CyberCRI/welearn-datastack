@@ -44,7 +44,7 @@ class DataGouvURLCollector(URLCollector):
     def _extract_datagouv_urls(
         self, datagouv_api_response: RootDataGouvModel
     ) -> list[WeLearnDocument]:
-        urls: List[WeLearnDocument] = []
+        urls: list[WeLearnDocument] = []
         for item in datagouv_api_response.data:
             if not item.page:
                 logger.warning(
