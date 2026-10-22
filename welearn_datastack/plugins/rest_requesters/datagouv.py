@@ -11,7 +11,7 @@ from welearn_datastack.data.source_models.datagouv import Dataset
 from welearn_datastack.exceptions import (
     NoDescriptionFoundError,
 )
-from welearn_datastack.modules.scraping_utils  import clean_text
+from welearn_datastack.modules.scraping_utils import clean_text
 from welearn_datastack.plugins.interface import IPluginRESTCollector
 from welearn_datastack.utils_.http_client_utils import (
     get_http_code_from_exception,
