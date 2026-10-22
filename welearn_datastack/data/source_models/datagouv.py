@@ -26,5 +26,5 @@ class Dataset(BaseModel):
     organization: DataGouvOrganization | None = None
     page: str | None = None
     slug: str | None = None
-    tags: List[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
     title: str
