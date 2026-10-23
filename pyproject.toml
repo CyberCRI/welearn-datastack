@@ -49,6 +49,8 @@ transformers = "^5.12.1"
 trafilatura = "^2.1.0"
 extruct = "^0.18.0"
 certifi = "^2026.10.19"
+pillow = "^13.0.0"
+urllib3 = "^2.8.0"
 
 [tool.poetry.group.metrics.dependencies]
 locust = "^2.43.2"
