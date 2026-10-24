@@ -58,7 +58,7 @@ locust = "^2.43.2"
 mypy = "^2.1.0"
 bandit = "^1.9.4"
 isort = "^8.0.1"
-black = "^26.5.1"
+black = "^26.10.1"
 
 [build-system]
 requires = ["poetry-core"]
