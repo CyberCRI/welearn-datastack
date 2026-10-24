@@ -40,7 +40,7 @@ xx_sent_ud_sm = {url = "https://github.com/explosion/spacy-models/releases/downl
 
 lingua-language-detector = "^2.2.0"
 psycopg2-binary = "^2.9.12"
-brotli = "^1.2.0"
+brotli = "^1.2.1"
 scikit-learn = "~=1.7.0"
 azure-storage-blob = "^12.28.0"
 welearn-database = "^1.5.3.dev0"
