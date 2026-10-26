@@ -13,6 +13,13 @@ def insert_batch_safely(
 ) -> list[UUID]:
     failed = []
 
+    # Modified objects outside the batch (e.g. documents in error) would be
+    # flushed by begin_nested() below, outside of any try block.
+    batch_ids = {id(obj) for obj in objects}
+    for pending in list(session.dirty) + list(session.new):
+        if id(pending) not in batch_ids:
+            session.expunge(pending)
+
     for obj in objects:
         if obj in session:
             session.expunge(obj)
