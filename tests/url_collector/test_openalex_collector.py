@@ -1,4 +1,5 @@
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -9,10 +10,24 @@ from zoneinfo import ZoneInfo
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.collectors.open_alex_collector import OpenAlexURLCollector
+from welearn_datastack.exceptions import NoAPIKeySet
 
 
 class TestOpenAlexURLCollector(TestCase):
     def setUp(self):
+        self.api_key = "test-open-alex-api-key"
+        self.team_email = "team@openalex.org"
+        self.env_patcher = patch.dict(
+            os.environ,
+            {
+                "OPEN_ALEX_API_KEY": self.api_key,
+                "TEAM_EMAIL": self.team_email,
+            },
+            clear=False,
+        )
+        self.env_patcher.start()
+        self.addCleanup(self.env_patcher.stop)
+
         self.mock_corpus = Corpus(source_name="open-alex", is_fix=True)
         self.date_last_insert = 1136073600
         self.open_alex_collector = OpenAlexURLCollector(
@@ -82,3 +97,88 @@ class TestOpenAlexURLCollector(TestCase):
 
         self.assertListEqual(returned_urls, awaited_urls)
         self.assertEqual(len(returned_urls), 400)
+
+    def test_init_set_api_key_from_env(self):
+        self.assertEqual(self.open_alex_collector.api_key, self.api_key)
+        self.assertEqual(self.open_alex_collector.team_email, self.team_email)
+
+    def test_init_raise_when_no_api_key_set(self):
+        with patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(NoAPIKeySet):
+                OpenAlexURLCollector(
+                    corpus=self.mock_corpus, date_last_insert=self.date_last_insert
+                )
+
+    def test_init_raise_when_api_key_is_empty_string(self):
+        with patch.dict(os.environ, {"OPEN_ALEX_API_KEY": ""}, clear=False):
+            collector = OpenAlexURLCollector(
+                corpus=self.mock_corpus, date_last_insert=self.date_last_insert
+            )
+        self.assertEqual(collector.api_key, "")
+
+    def test__generate_api_query_params_contains_api_key(self):
+        returned_params = self.open_alex_collector._generate_api_query_params()
+        self.assertEqual(returned_params["api_key"], self.api_key)
+        self.assertEqual(returned_params["mailto"], self.team_email)
+
+    def test__get_oa_json_send_api_key(self):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = self.content_json1
+        mock_http_session = MagicMock()
+        mock_http_session.get.return_value = mock_response
+
+        params = self.open_alex_collector._generate_api_query_params()
+        returned = self.open_alex_collector._get_oa_json(mock_http_session, params)
+
+        self.assertEqual(returned, self.content_json1)
+        mock_response.raise_for_status.assert_called_once()
+        mock_http_session.get.assert_called_once()
+        sent_params = mock_http_session.get.call_args.kwargs["params"]
+        self.assertEqual(sent_params["api_key"], self.api_key)
+
+    @patch(
+        "welearn_datastack.collectors.open_alex_collector.get_new_https_session",
+    )
+    def test_collect_send_api_key_on_each_call(self, mock_get_new_https_session):
+        mock_response_1 = Mock()
+        mock_response_1.status_code = 200
+        mock_response_1.json.return_value = self.content_json1
+        mock_response_2 = Mock()
+        mock_response_2.status_code = 200
+        mock_response_2.json.return_value = self.content_json2
+
+        mock_http_session = MagicMock()
+        mock_http_session.get.side_effect = [mock_response_1, mock_response_2]
+        mock_get_new_https_session.return_value = mock_http_session
+
+        returned_wldoc: List[WeLearnDocument] = self.open_alex_collector.collect()
+
+        self.assertEqual(len(returned_wldoc), 400)
+        self.assertEqual(mock_http_session.get.call_count, 2)
+        for call in mock_http_session.get.call_args_list:
+            self.assertEqual(call.kwargs["params"]["api_key"], self.api_key)
+            self.assertEqual(call.kwargs["params"]["mailto"], self.team_email)
+
+
+class TestNoAPIKeySetException(TestCase):
+    def test_is_an_exception_subclass(self):
+        self.assertTrue(issubclass(NoAPIKeySet, Exception))
+
+    def test_can_be_raised_without_message(self):
+        with self.assertRaises(NoAPIKeySet) as ctx:
+            raise NoAPIKeySet()
+        self.assertEqual(str(ctx.exception), "")
+
+    def test_keep_custom_message(self):
+        with self.assertRaises(NoAPIKeySet) as ctx:
+            raise NoAPIKeySet("OPEN_ALEX_API_KEY is missing")
+        self.assertEqual(str(ctx.exception), "OPEN_ALEX_API_KEY is missing")
+
+    def test_is_catchable_as_generic_exception(self):
+        try:
+            raise NoAPIKeySet("boom")
+        except Exception as e:
+            self.assertIsInstance(e, NoAPIKeySet)
+        else:
+            self.fail("NoAPIKeySet was not raised")

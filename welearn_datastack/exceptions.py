@@ -294,3 +294,7 @@ class NoExternalID(NotEnoughData):
 
 class FileTypeUnsupported(WrongFormat):
     """Raised when the file type is not supported"""
+
+
+class NoAPIKeySet(Exception):
+    """Raised when there is no API key set"""
