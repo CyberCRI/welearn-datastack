@@ -3,13 +3,14 @@ import math
 import os
 from abc import ABC
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
 from zoneinfo import ZoneInfo
 
 from welearn_database.data.models import Corpus, WeLearnDocument
 
 from welearn_datastack.constants import OPEN_ALEX_BASE_URL, PUBLISHERS_TO_AVOID
 from welearn_datastack.data.url_collector import URLCollector
+from welearn_datastack.exceptions import NoAPIKeySet
 from welearn_datastack.utils_.http_client_utils import get_new_https_session
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,9 @@ class OpenAlexURLCollector(URLCollector, ABC):
         self.corpus = corpus
         self.date_last_insert = date_last_insert
         self.team_email = os.getenv("TEAM_EMAIL")
+        self.api_key = os.getenv("OPEN_ALEX_API_KEY")
+        if self.api_key is None:
+            raise NoAPIKeySet()
 
     @staticmethod
     def _get_oa_json(http_session, params):
@@ -113,10 +117,11 @@ class OpenAlexURLCollector(URLCollector, ABC):
             "select": "id",
             "cursor": "*",
             "mailto": self.team_email,
+            "api_key": self.api_key,
         }
         return params
 
-    def collect(self) -> List[WeLearnDocument]:
+    def collect(self) -> list[WeLearnDocument]:
         http_session = get_new_https_session()
         params = self._generate_api_query_params()
 
@@ -134,7 +139,7 @@ class OpenAlexURLCollector(URLCollector, ABC):
             f"We need {iteration_quantity} to retrieve all works with these parameters"
         )
 
-        ret: List[WeLearnDocument] = []
+        ret: list[WeLearnDocument] = []
         for i in range(0, iteration_quantity):
             logger.info(f"Iteration {i+1}/{iteration_quantity}")
             for work in json_from_oa["results"]:
