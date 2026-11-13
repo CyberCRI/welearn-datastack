@@ -45,6 +45,7 @@ class DataGouvCollector(IPluginRESTCollector):
         doi = datagouv_document.doi
         frequency = datagouv_document.frequency
         license = datagouv_document.license
+        quality = datagouv_document.quality
         main_institution = (
             datagouv_document.organization.name
             if datagouv_document.organization is not None
@@ -56,8 +57,7 @@ class DataGouvCollector(IPluginRESTCollector):
         publication_date = self._parse_timestamp(datagouv_document.created_at)
         update_date = self._parse_timestamp(datagouv_document.last_modified)
 
-        return {
-            "doi": doi,
+        metadata = {
             "frequency": frequency,
             "main_institution": main_institution,
             "license": license,
@@ -66,6 +66,11 @@ class DataGouvCollector(IPluginRESTCollector):
             "publication_date": publication_date,
             "update_date": update_date,
         }
+        if doi is not None:
+            metadata["doi"] = doi
+        if quality is not None:
+            metadata["quality"] = quality
+        return metadata
 
     def _get_json(
         self, session: requests.Session, document: WeLearnDocument
@@ -118,11 +123,13 @@ class DataGouvCollector(IPluginRESTCollector):
                 )
                 continue
 
-            description = clean_text(datagouv_document.description)
-            full_content = description
+            full_content = clean_text(datagouv_document.description)
 
-            document.title = datagouv_document.title
-            document.description = description
+            if datagouv_document.description_short:
+                description = clean_text(datagouv_document.description_short)
+            else:
+                description = full_content
+
             try:
                 document.full_content = full_content
             except ContentIsTooShort as e:
@@ -135,8 +142,12 @@ class DataGouvCollector(IPluginRESTCollector):
                     )
                 )
                 continue
+
+            document.title = datagouv_document.title
+            document.description = description
             document.doi = datagouv_document.doi
             document.external_id = datagouv_document.id
+            
             try:
                 document.details = self._extract_metadata(datagouv_document)
             except Exception as e:

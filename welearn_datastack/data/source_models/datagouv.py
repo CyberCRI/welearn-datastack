@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import Dict, List
 
 from pydantic import BaseModel, Field
 
@@ -18,13 +18,15 @@ class DataGouvOrganization(BaseModel):
 class Dataset(BaseModel):
     created_at: str
     description: str
+    description_short: str | None = None
     doi: str | None = None
     frequency: str = "unknown"
-    id: str
+    id: str | None = None
     last_modified: str
     license: str = "notspecified"
     organization: DataGouvOrganization | None = None
     page: str | None = None
+    quality: Dict | None = None
     slug: str | None = None
     tags: list[str] = Field(default_factory=list)
     title: str

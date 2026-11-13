@@ -63,7 +63,6 @@ class TestDataGouvCollector(unittest.TestCase):
                 self.assertEqual(
                     self.document.details,
                     {
-                        "doi": None,
                         "frequency": "daily",
                         "main_institution": "Example organization",
                         "license": "lov2",
@@ -146,7 +145,6 @@ class TestDataGouvCollector(unittest.TestCase):
         self.assertEqual(
             self.document.details,
             {
-                "doi": None,
                 "frequency": "unknown",
                 "main_institution": None,
                 "license": "notspecified",
