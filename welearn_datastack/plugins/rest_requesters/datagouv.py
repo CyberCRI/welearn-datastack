@@ -65,7 +65,7 @@ class DataGouvCollector(IPluginRESTCollector):
             "tags": tags,
             "publication_date": publication_date,
             "update_date": update_date,
-"quality": quality.model_dump() if quality is not None else None,
+            "quality": quality,
         }
         if doi is not None:
             metadata["doi"] = doi
