@@ -21,7 +21,7 @@ class Dataset(BaseModel):
     description_short: str | None = None
     doi: str | None = None
     frequency: str = "unknown"
-    id: str | None = None
+id: str
     last_modified: str
     license: str = "notspecified"
     organization: DataGouvOrganization | None = None
