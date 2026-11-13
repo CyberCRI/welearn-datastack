@@ -44,8 +44,8 @@ class DataGouvCollector(IPluginRESTCollector):
         # Simple metadata
         doi = datagouv_document.doi
         frequency = datagouv_document.frequency
-        license = datagouv_document.license
         quality = datagouv_document.quality
+        license = datagouv_document.license
         main_institution = (
             datagouv_document.organization.name
             if datagouv_document.organization is not None
@@ -65,11 +65,10 @@ class DataGouvCollector(IPluginRESTCollector):
             "tags": tags,
             "publication_date": publication_date,
             "update_date": update_date,
+            "quality": quality,
         }
         if doi is not None:
             metadata["doi"] = doi
-        if quality is not None:
-            metadata["quality"] = quality
         return metadata
 
     def _get_json(
@@ -123,30 +122,6 @@ class DataGouvCollector(IPluginRESTCollector):
                 )
                 continue
 
-            full_content = clean_text(datagouv_document.description)
-
-            if datagouv_document.description_short:
-                description = clean_text(datagouv_document.description_short)
-            else:
-                description = full_content
-
-            try:
-                document.full_content = full_content
-            except ContentIsTooShort as e:
-                msg = f"Content too short for datagouv ({document.url}) document : {e}"
-                logger.error(msg)
-                ret.append(
-                    WrapperRetrieveDocument(
-                        document=document,
-                        error_info=msg,
-                    )
-                )
-                continue
-
-            document.title = datagouv_document.title
-            document.description = description
-            document.doi = datagouv_document.doi
-            document.external_id = datagouv_document.id
             try:
                 document.details = self._extract_metadata(datagouv_document)
             except Exception as e:
@@ -159,6 +134,32 @@ class DataGouvCollector(IPluginRESTCollector):
                     )
                 )
                 continue
+
+            quality = datagouv_document.quality
+            if not quality or not quality.dataset_description_quality:
+                msg = f"Dataset description quality is not sufficient for datagouv ({document.url}) document"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+
+            full_content = clean_text(datagouv_document.description)
+
+            if datagouv_document.description_short:
+                description = clean_text(datagouv_document.description_short)
+            else:
+                description = full_content
+
+            document.title = datagouv_document.title
+            document.description = description
+            document.full_content = full_content
+            document.doi = datagouv_document.doi
+            document.external_id = datagouv_document.id
+
             ret.append(WrapperRetrieveDocument(document=document))
 
         return ret
