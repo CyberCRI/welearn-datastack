@@ -147,7 +147,6 @@ class DataGouvCollector(IPluginRESTCollector):
             document.description = description
             document.doi = datagouv_document.doi
             document.external_id = datagouv_document.id
-            
             try:
                 document.details = self._extract_metadata(datagouv_document)
             except Exception as e:
