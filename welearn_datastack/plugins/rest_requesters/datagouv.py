@@ -156,7 +156,18 @@ class DataGouvCollector(IPluginRESTCollector):
 
             document.title = datagouv_document.title
             document.description = description
-            document.full_content = full_content
+            try:
+                document.full_content = full_content
+            except ContentIsTooShort as e:
+                msg = f"Content too short for datagouv ({document.url}) document : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
             document.doi = datagouv_document.doi
             document.external_id = datagouv_document.id
 
