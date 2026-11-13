@@ -44,6 +44,7 @@ class DataGouvCollector(IPluginRESTCollector):
         # Simple metadata
         doi = datagouv_document.doi
         frequency = datagouv_document.frequency
+        quality = datagouv_document.quality
         license = datagouv_document.license
         main_institution = (
             datagouv_document.organization.name
@@ -56,8 +57,7 @@ class DataGouvCollector(IPluginRESTCollector):
         publication_date = self._parse_timestamp(datagouv_document.created_at)
         update_date = self._parse_timestamp(datagouv_document.last_modified)
 
-        return {
-            "doi": doi,
+        metadata = {
             "frequency": frequency,
             "main_institution": main_institution,
             "license": license,
@@ -65,7 +65,11 @@ class DataGouvCollector(IPluginRESTCollector):
             "tags": tags,
             "publication_date": publication_date,
             "update_date": update_date,
+            "quality": quality,
         }
+        if doi is not None:
+            metadata["doi"] = doi
+        return metadata
 
     def _get_json(
         self, session: requests.Session, document: WeLearnDocument
@@ -118,8 +122,37 @@ class DataGouvCollector(IPluginRESTCollector):
                 )
                 continue
 
-            description = clean_text(datagouv_document.description)
-            full_content = description
+            try:
+                document.details = self._extract_metadata(datagouv_document)
+            except Exception as e:
+                msg = f"Error while extracting metadata for datagouv ({document.url}) document : {e}"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+
+            quality = datagouv_document.quality
+            if not quality or not quality.dataset_description_quality:
+                msg = f"Dataset description quality is not sufficient for datagouv ({document.url}) document"
+                logger.error(msg)
+                ret.append(
+                    WrapperRetrieveDocument(
+                        document=document,
+                        error_info=msg,
+                    )
+                )
+                continue
+
+            full_content = clean_text(datagouv_document.description)
+
+            if datagouv_document.description_short:
+                description = clean_text(datagouv_document.description_short)
+            else:
+                description = full_content
 
             document.title = datagouv_document.title
             document.description = description
@@ -137,18 +170,7 @@ class DataGouvCollector(IPluginRESTCollector):
                 continue
             document.doi = datagouv_document.doi
             document.external_id = datagouv_document.id
-            try:
-                document.details = self._extract_metadata(datagouv_document)
-            except Exception as e:
-                msg = f"Error while extracting metadata for datagouv ({document.url}) document : {e}"
-                logger.error(msg)
-                ret.append(
-                    WrapperRetrieveDocument(
-                        document=document,
-                        error_info=msg,
-                    )
-                )
-                continue
+
             ret.append(WrapperRetrieveDocument(document=document))
 
         return ret

@@ -5,6 +5,7 @@ from unittest.mock import patch
 import requests
 from welearn_database.data.models import WeLearnDocument
 
+from welearn_datastack.data.source_models.datagouv import Quality
 from welearn_datastack.plugins.rest_requesters import datagouv
 
 
@@ -21,6 +22,19 @@ class TestDataGouvCollector(unittest.TestCase):
             "license": "lov2",
             "organization": {"name": "Example organization"},
             "page": "https://www.data.gouv.fr/datasets/example-dataset",
+            "quality": {
+                "all_resources_available": True,
+                "dataset_description_quality": True,
+                "has_open_format": True,
+                "has_resources": True,
+                "license": True,
+                "resources_documentation": True,
+                "score": 95,
+                "spatial": True,
+                "temporal_coverage": True,
+                "update_frequency": True,
+                "update_fulfilled_in_time": True,
+            },
             "slug": "example-dataset",
             "tags": ["example"],
             "title": "Example dataset",
@@ -63,7 +77,6 @@ class TestDataGouvCollector(unittest.TestCase):
                 self.assertEqual(
                     self.document.details,
                     {
-                        "doi": None,
                         "frequency": "daily",
                         "main_institution": "Example organization",
                         "license": "lov2",
@@ -71,6 +84,7 @@ class TestDataGouvCollector(unittest.TestCase):
                         "tags": ["example"],
                         "publication_date": parsed_timestamp.timestamp(),
                         "update_date": parsed_timestamp.timestamp(),
+                        "quality": Quality(**self.payload["quality"]),
                     },
                 )
 
@@ -146,7 +160,6 @@ class TestDataGouvCollector(unittest.TestCase):
         self.assertEqual(
             self.document.details,
             {
-                "doi": None,
                 "frequency": "unknown",
                 "main_institution": None,
                 "license": "notspecified",
@@ -158,6 +171,7 @@ class TestDataGouvCollector(unittest.TestCase):
                 "update_date": datetime.fromisoformat(
                     self.payload["last_modified"]
                 ).timestamp(),
+                "quality": Quality(**self.payload["quality"]),
             },
         )
 
