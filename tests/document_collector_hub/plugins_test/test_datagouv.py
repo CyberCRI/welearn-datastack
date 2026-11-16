@@ -29,7 +29,7 @@ class TestDataGouvCollector(unittest.TestCase):
                 "has_resources": True,
                 "license": True,
                 "resources_documentation": True,
-                "score": 95,
+                "score": 0.95,
                 "spatial": True,
                 "temporal_coverage": True,
                 "update_frequency": True,
@@ -84,7 +84,19 @@ class TestDataGouvCollector(unittest.TestCase):
                         "tags": ["example"],
                         "publication_date": parsed_timestamp.timestamp(),
                         "update_date": parsed_timestamp.timestamp(),
-                        "quality": Quality(**self.payload["quality"]),
+                        "quality": {
+                            "all_resources_available": True,
+                            "dataset_description_quality": True,
+                            "has_open_format": True,
+                            "has_resources": True,
+                            "license": True,
+                            "resources_documentation": True,
+                            "score": 0.95,
+                            "spatial": True,
+                            "temporal_coverage": True,
+                            "update_frequency": True,
+                            "update_fulfilled_in_time": True,
+                        },
                     },
                 )
 
@@ -171,7 +183,19 @@ class TestDataGouvCollector(unittest.TestCase):
                 "update_date": datetime.fromisoformat(
                     self.payload["last_modified"]
                 ).timestamp(),
-                "quality": Quality(**self.payload["quality"]),
+                "quality": {
+                    "all_resources_available": True,
+                    "dataset_description_quality": True,
+                    "has_open_format": True,
+                    "has_resources": True,
+                    "license": True,
+                    "resources_documentation": True,
+                    "score": 0.95,
+                    "spatial": True,
+                    "temporal_coverage": True,
+                    "update_frequency": True,
+                    "update_fulfilled_in_time": True,
+                },
             },
         )
 
