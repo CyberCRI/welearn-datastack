@@ -39,7 +39,7 @@ class Quality(BaseModel):
     has_resources: bool
     license: bool
     resources_documentation: bool
-    score: int
+    score: float
     spatial: bool
     temporal_coverage: bool
     update_frequency: bool
