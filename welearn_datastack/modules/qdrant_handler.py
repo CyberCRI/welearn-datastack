@@ -4,8 +4,7 @@ from uuid import UUID
 
 import numpy
 from qdrant_client import QdrantClient
-from qdrant_client.grpc import UpdateResult
-from qdrant_client.http.models import models
+from qdrant_client.http.models import UpdateResult, models
 from welearn_database.data.models import DocumentSlice
 
 from welearn_datastack.exceptions import ErrorWhileDeletingChunks
@@ -70,7 +69,7 @@ def delete_points_related_to_document(
     qdrant_connector: QdrantClient,
     documents_ids: List[UUID],
     qdrant_wait: bool,
-) -> UpdateResult | None:
+) -> UpdateResult:
     """
     Deletes all points related to a document in a collection
     :param qdrant_wait: Flag to wait for the insertion to be done
