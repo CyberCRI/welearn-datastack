@@ -44,7 +44,7 @@ spec:
             - name: run_node_memory
               default: {{ .workflowTemplates.runNode.requests.memory }}
             - name: pick_qty_max
-              default: 1000
+              default: "1000"
         steps:
           - - name: generate-to-clean-batch
               templateRef:
