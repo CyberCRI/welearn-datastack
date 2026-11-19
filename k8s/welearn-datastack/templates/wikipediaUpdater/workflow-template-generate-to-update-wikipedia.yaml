@@ -32,16 +32,16 @@ spec:
       inputs:
         parameters:
           - name: parallelism_treshold
-            default: 100000
+            default: "100000"
           - name: parallelism_max
-            default: 15
+            default: "15"
           - name: batch_urls_directory
             default: batch_urls
           - name: retrieval_mode
             enum: ["NEW_MODE", "UPDATE_MODE"]
             default: "NEW_MODE"
           - name: pick_qty_max
-            default: 100000
+            default: "100000"
           - name: memory
             default: {{ .workflowTemplates.prepareBatches.requests.memory }}
           - name: batch_urls_count_file_name
@@ -51,7 +51,7 @@ spec:
           - name: log_level
             default: "INFO"
           - name: size_limit
-            default: 10000000000
+            default: "10000000000"
       outputs:
         artifacts:
           - name: batch_ids_csv

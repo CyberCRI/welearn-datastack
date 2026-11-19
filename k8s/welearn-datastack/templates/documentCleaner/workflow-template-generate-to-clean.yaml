@@ -38,7 +38,7 @@ spec:
           - name: document_ids_directory
             default: document_ids
           - name: pick_qty_max
-            default: 1000
+            default: "1000"
           - name: memory
             default: {{ .workflowTemplates.prepareBatches.requests.memory }}
           - name: batch_ids_count_file_name

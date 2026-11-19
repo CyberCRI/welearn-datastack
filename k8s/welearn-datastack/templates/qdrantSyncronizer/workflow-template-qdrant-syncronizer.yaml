@@ -32,9 +32,9 @@ spec:
       inputs:
         parameters:
           - name: qdrant_grpc_port
-            default: {{ $.Values.common.config.qdrant_grpc_port }}
+            default: {{ $.Values.common.config.qdrant_grpc_port | quote }}
           - name: qdrant_http_port
-            default: {{ $.Values.common.config.qdrant_http_port }}
+            default: {{ $.Values.common.config.qdrant_http_port | quote }}
           - name: qdrant_url
             default: {{ $.Values.common.config.qdrant_url }}
           - name: qdrant_prefers_grpc
@@ -42,7 +42,7 @@ spec:
           - name: qdrant_wait
             default: "False"
           - name: qdrant_chunk_size
-            default: 1000
+            default: "1000"
           - name: log_level
             default: "INFO"
           - name: urls_input_filename
@@ -51,7 +51,7 @@ spec:
           - name: memory
             default: {{ .workflowTemplates.runNode.requests.memory }}
           - name: qdrant_timeout
-            default: 60
+            default: "60"
           - name: pg_db
 
         artifacts:

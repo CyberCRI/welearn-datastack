@@ -53,7 +53,7 @@ spec:
           - name: memory_collect_docs
             default: {{ .workflowTemplates.runNode.requests.memory }}
           - name: size_limit
-            default: 100000
+            default: "100000"
         steps:
           - - name: generate-to-classify-batch
               templateRef:
