@@ -5,7 +5,6 @@ from unittest.mock import patch
 import requests
 from welearn_database.data.models import WeLearnDocument
 
-from welearn_datastack.data.source_models.datagouv import Quality
 from welearn_datastack.plugins.rest_requesters import datagouv
 
 
@@ -58,9 +57,7 @@ class TestDataGouvCollector(unittest.TestCase):
             with self.subTest(timestamp=timestamp):
                 parsed_timestamp = datetime.fromisoformat(timestamp)
                 if parsed_timestamp.tzinfo is None:
-                    parsed_timestamp = parsed_timestamp.replace(
-                        tzinfo=timezone.utc
-                    )
+                    parsed_timestamp = parsed_timestamp.replace(tzinfo=timezone.utc)
 
                 self.payload["created_at"] = timestamp
                 self.payload["last_modified"] = timestamp
@@ -113,12 +110,8 @@ class TestDataGouvCollector(unittest.TestCase):
         self.assertEqual(len(results), 1)
         self.assertFalse(results[0].is_error, results[0].error_info)
         self.assertIsNone(self.document.details["main_institution"])
-        self.assertEqual(
-            self.document.details["resource_link"], self.payload["page"]
-        )
-        self.assertEqual(
-            self.document.full_content, self.payload["description"]
-        )
+        self.assertEqual(self.document.details["resource_link"], self.payload["page"])
+        self.assertEqual(self.document.full_content, self.payload["description"])
 
     @patch.object(datagouv, "get_new_https_session")
     def test_run_reuses_session_and_sets_timeout(self, mock_get_session):
@@ -150,9 +143,7 @@ class TestDataGouvCollector(unittest.TestCase):
             self.assertEqual(call_args.kwargs, {"timeout": 30})
 
     @patch.object(datagouv, "get_new_https_session")
-    def test_run_accepts_missing_optional_metadata_fields(
-        self, mock_get_session
-    ):
+    def test_run_accepts_missing_optional_metadata_fields(self, mock_get_session):
         for field in (
             "doi",
             "frequency",
