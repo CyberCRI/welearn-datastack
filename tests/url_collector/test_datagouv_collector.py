@@ -75,9 +75,7 @@ class TestDataGouvURLCollector(unittest.TestCase):
         with self.assertRaises(ValidationError) as error:
             RootDataGouvModel.model_validate(payload)
 
-        self.assertEqual(
-            error.exception.errors()[0]["loc"], ("data", 0, "doi")
-        )
+        self.assertEqual(error.exception.errors()[0]["loc"], ("data", 0, "doi"))
         self.assertEqual(error.exception.errors()[0]["type"], "string_type")
 
     def test_validate_invalid_organization(self):
@@ -95,9 +93,7 @@ class TestDataGouvURLCollector(unittest.TestCase):
         )
         self.assertEqual(error.exception.errors()[0]["type"], "model_type")
 
-    @patch(
-        "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
-    )
+    @patch("welearn_datastack.collectors.datagouv_collector.get_new_https_session")
     def test_collect_with_null_organization(self, mock_get_session):
         self.dataset["organization"] = None
         response = mock_get_session.return_value.get.return_value
@@ -115,9 +111,7 @@ class TestDataGouvURLCollector(unittest.TestCase):
         self.assertEqual(documents[0].external_id, self.dataset["id"])
         self.assertIs(documents[0].corpus, self.corpus)
 
-    @patch(
-        "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
-    )
+    @patch("welearn_datastack.collectors.datagouv_collector.get_new_https_session")
     def test_collect_skips_dataset_without_page(self, mock_get_session):
         self.dataset.pop("page")
         response = mock_get_session.return_value.get.return_value
@@ -134,13 +128,9 @@ class TestDataGouvURLCollector(unittest.TestCase):
 
         self.assertEqual(documents, [])
 
-    @patch(
-        "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
-    )
+    @patch("welearn_datastack.collectors.datagouv_collector.get_new_https_session")
     def test_collect_uses_api_page_url(self, mock_get_session):
-        self.dataset["page"] = (
-            "https://www.data.gouv.fr/datasets/canonical-url"
-        )
+        self.dataset["page"] = "https://www.data.gouv.fr/datasets/canonical-url"
         response = mock_get_session.return_value.get.return_value
         response.json.return_value = {
             "data": [self.dataset],
@@ -156,12 +146,8 @@ class TestDataGouvURLCollector(unittest.TestCase):
         self.assertEqual(documents[0].external_id, self.dataset["id"])
         self.assertIs(documents[0].corpus, self.corpus)
 
-    @patch(
-        "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
-    )
-    def test_collect_returns_empty_for_invalid_first_page(
-        self, mock_get_session
-    ):
+    @patch("welearn_datastack.collectors.datagouv_collector.get_new_https_session")
+    def test_collect_returns_empty_for_invalid_first_page(self, mock_get_session):
         response = mock_get_session.return_value.get.return_value
         response.json.return_value = {
             "data": [{**self.dataset, "doi": 123}],
@@ -178,9 +164,7 @@ class TestDataGouvURLCollector(unittest.TestCase):
         mock_get_session.return_value.get.assert_called_once()
         self.assertIn("Skipping DataGouv page 1", logs.output[0])
 
-    @patch(
-        "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
-    )
+    @patch("welearn_datastack.collectors.datagouv_collector.get_new_https_session")
     def test_collect_continues_after_invalid_page(self, mock_get_session):
         response = mock_get_session.return_value.get.return_value
         response.json.side_effect = [
@@ -215,9 +199,7 @@ class TestDataGouvURLCollector(unittest.TestCase):
         )
         self.assertIn("Skipping DataGouv page 2", logs.output[0])
 
-    @patch(
-        "welearn_datastack.collectors.datagouv_collector.get_new_https_session"
-    )
+    @patch("welearn_datastack.collectors.datagouv_collector.get_new_https_session")
     def test_collect_retrieves_all_pages(self, mock_get_session):
         first_page = [
             {

@@ -43,7 +43,10 @@ def get_documents_id_from_qdrant(client, quantity: int):
                 models.FieldCondition(
                     key="document_corpus", match=models.MatchValue(value="openalex")
                 ),
-            ]
+                models.IsNullCondition(
+                    is_null=models.PayloadField(key="document_sub_corpus")
+                ),
+            ],
         ),
         limit=quantity,
         with_payload=["document_id", "document_url"],
