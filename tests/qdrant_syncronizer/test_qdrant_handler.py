@@ -5,10 +5,11 @@ from unittest.mock import Mock
 
 import numpy
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import models
+from qdrant_client.http.models import UpdateResult, models
 
 from welearn_datastack.modules.qdrant_handler import (  # get_collections_names,
     classify_documents_per_collection,
+    delete_points_related_to_document,
 )
 
 
@@ -101,6 +102,29 @@ class TestQdrantHandler(unittest.TestCase):
             "collection_welearn_en_english-embmodel": {fake_slice.document_id},
         }
         self.assertEqual(dict(collections_names), expected)
+
+    def test_delete_points_returns_http_update_result(self):
+        document_id = uuid.uuid4()
+        self.client.upsert(
+            collection_name="collection_welearn_en_english-embmodel",
+            points=[
+                models.PointStruct(
+                    id=str(uuid.uuid4()),
+                    vector=[0.0] * 50,
+                    payload={"document_id": str(document_id)},
+                )
+            ],
+            wait=True,
+        )
+
+        result = delete_points_related_to_document(
+            collection_name="collection_welearn_en_english-embmodel",
+            qdrant_connector=self.client,
+            documents_ids=[document_id],
+            qdrant_wait=True,
+        )
+
+        self.assertIsInstance(result, UpdateResult)
 
     def test_should_handle_multiple_slices_for_same_collection(self):
         doc_id0 = uuid.uuid4()
