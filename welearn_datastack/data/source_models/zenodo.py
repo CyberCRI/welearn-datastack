@@ -54,7 +54,7 @@ class Metadata(BaseModel):
     related_identifiers: List[RelatedIdentifier] = Field(default_factory=list)
     resource_type: ResourceType
     license: License
-    communities: List[Community]
+    communities: List[Community] = Field(default_factory=list)
     relations: Relations
 
 
@@ -84,8 +84,8 @@ class Links(BaseModel):
     files: str
     media_files: str
     thumbnails: Thumbnails
-    archive: str
-    archive_media: str
+    archive: Optional[str] = None
+    archive_media: Optional[str] = None
     latest: str
     latest_html: str
     versions: str

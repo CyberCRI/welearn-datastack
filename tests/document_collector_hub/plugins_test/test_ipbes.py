@@ -1,4 +1,7 @@
+import copy
+import json
 import unittest
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -7,7 +10,7 @@ import requests
 from welearn_database.data.models import WeLearnDocument
 
 from welearn_datastack.data.db_wrapper import WrapperRetrieveDocument
-from welearn_datastack.data.source_models.zenodo import ZenodoRecord
+from welearn_datastack.data.source_models.zenodo import Community, ZenodoRecord
 from welearn_datastack.exceptions import (
     ClosedAccessContent,
     LegalException,
@@ -339,6 +342,100 @@ class TestIPBESCollector(unittest.TestCase):
         self.assertEqual(len(ret), 1)
         self.assertTrue(ret[0].is_error)
         self.assertIn("PDF is too large", ret[0].error_info)
+
+
+class TestZenodoRecordValidation(unittest.TestCase):
+    def setUp(self):
+        fixture_path = (
+            Path(__file__).parents[2]
+            / "url_collector"
+            / "resources"
+            / "zenodo_ipbes_answer.json"
+        )
+        with fixture_path.open() as fixture:
+            self.payload = json.load(fixture)["hits"]["hits"][0]
+        # The search fixture has a null swh, which is outside this regression.
+        self.payload["swh"] = {}
+
+    @staticmethod
+    def _remove_optional_fields(payload):
+        del payload["metadata"]["communities"]
+        del payload["links"]["archive"]
+        del payload["links"]["archive_media"]
+
+    def test_missing_fields_default_independently(self):
+        self._remove_optional_fields(self.payload)
+        first = ZenodoRecord.model_validate(self.payload)
+        second = ZenodoRecord.model_validate(self.payload)
+
+        self.assertEqual(first.metadata.communities, [])
+        self.assertIsNone(first.links.archive)
+        self.assertIsNone(first.links.archive_media)
+        first.metadata.communities.append(Community(id="test"))
+        self.assertEqual(second.metadata.communities, [])
+
+    def test_present_fields_are_preserved(self):
+        record = ZenodoRecord.model_validate(self.payload)
+
+        self.assertEqual(record.metadata.communities[0].id, "ipbes")
+        self.assertEqual(record.links.archive, self.payload["links"]["archive"])
+        self.assertEqual(
+            record.links.archive_media, self.payload["links"]["archive_media"]
+        )
+
+    def test_each_field_can_be_missing(self):
+        for section, field in (
+            ("metadata", "communities"),
+            ("links", "archive"),
+            ("links", "archive_media"),
+        ):
+            with self.subTest(field=field):
+                payload = copy.deepcopy(self.payload)
+                del payload[section][field]
+                record = ZenodoRecord.model_validate(payload)
+                self.assertEqual(
+                    getattr(getattr(record, section), field),
+                    [] if field == "communities" else None,
+                )
+
+    def test_invalid_values_and_other_missing_fields_still_fail(self):
+        for section, field, value in (
+            ("metadata", "communities", "not a list"),
+            ("links", "archive", 42),
+            ("links", "archive_media", 42),
+        ):
+            with self.subTest(field=field):
+                payload = copy.deepcopy(self.payload)
+                payload[section][field] = value
+                with self.assertRaises(pydantic.ValidationError):
+                    ZenodoRecord.model_validate(payload)
+
+        del self.payload["metadata"]["title"]
+        with self.assertRaises(pydantic.ValidationError):
+            ZenodoRecord.model_validate(self.payload)
+
+    @patch("welearn_datastack.plugins.rest_requesters.ipbes.get_pdf_content")
+    @patch("welearn_datastack.plugins.rest_requesters.ipbes.get_new_https_session")
+    def test_collector_processes_record_without_optional_fields(
+        self, mock_get_session, mock_get_pdf_content
+    ):
+        self._remove_optional_fields(self.payload)
+        response = mock_get_session.return_value.get.return_value
+        response.json.return_value = self.payload
+        content = "This is a long enough mocked PDF content to satisfy validation."
+        mock_get_pdf_content.return_value = content
+        document = WeLearnDocument(
+            url="https://zenodo.org/record/15369060", external_id="15369060"
+        )
+
+        result = IPBESCollector().run([document])
+
+        self.assertEqual(len(result), 1)
+        self.assertFalse(result[0].is_error, result[0].error_info)
+        self.assertEqual(result[0].document.title, self.payload["title"])
+        self.assertEqual(result[0].document.full_content, content)
+        response.raise_for_status.assert_called_once()
+        mock_get_pdf_content.assert_called_once()
 
 
 if __name__ == "__main__":
